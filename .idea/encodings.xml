@@ -3,6 +3,30 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/EpicHoppers.java" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Events/LoginListeners.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/ASkyBlockHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/ASkyBlockHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/FactionsHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/FactionsHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/FactionsOldHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/FactionsOldHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/GriefPreventionHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/GriefPreventionHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/HookHandler.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/HookHandler.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/Hooks.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/Hooks.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/KingdomsHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/KingdomsHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/PlotSquaredHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/PlotSquaredHook.java" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/RedProtectHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/RedProtectHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/TownyHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/TownyHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/USkyBlockHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/USkyBlockHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/WorldGuardHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Hooks/WorldGuardHook.java" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/com/songoda/epichoppers/Utils/Debugger.java" charset="UTF-16" />
   </component>
 </project>
