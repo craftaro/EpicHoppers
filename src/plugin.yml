@@ -3,7 +3,7 @@ description: EpicHoppers
 main: com.songoda.epichoppers.EpicHoppers
 depend: [Arconix]
 softdepend: [Towny, RedProtect, Kingdoms, PlotsSquared, GriefPrevention, USkyBlock, ASkyBlock, WorldGuard, Factions, Vault, PlaceholderAPI]
-version: 2.1 R2
+version: 2.2
 author: Songoda
 commands:
   epichoppers:
