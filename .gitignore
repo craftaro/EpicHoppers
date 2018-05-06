@@ -2,3 +2,5 @@
 out/
 
 \.idea/
+/src/main/resources/META-INF/MANIFEST.MF
+/EpicHoppers.iml
