@@ -110,7 +110,7 @@ public class Hopper {
             itemmetaXP.setDisplayName(instance.getLocale().getMessage("interface.hopper.upgradewithxp"));
             ArrayList<String> loreXP = new ArrayList<>();
             if (nextLevel != null)
-                loreXP.add(instance.getLocale().getMessage("interface.hopper.upgradewithxplore", level.getCostExperience()));
+                loreXP.add(instance.getLocale().getMessage("interface.hopper.upgradewithxplore", nextLevel.getCostExperience()));
             else
                 loreXP.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
             itemmetaXP.setLore(loreXP);
@@ -121,7 +121,7 @@ public class Hopper {
             itemmetaECO.setDisplayName(instance.getLocale().getMessage("interface.hopper.upgradewitheconomy"));
             ArrayList<String> loreECO = new ArrayList<>();
             if (nextLevel != null)
-                loreECO.add(instance.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Arconix.pl().getApi().format().formatEconomy(level.getCostEconomy())));
+                loreECO.add(instance.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Arconix.pl().getApi().format().formatEconomy(nextLevel.getCostEconomy())));
             else
                 loreECO.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
             itemmetaECO.setLore(loreECO);
