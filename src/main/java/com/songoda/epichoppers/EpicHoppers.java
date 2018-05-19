@@ -27,6 +27,7 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
     public static CommandSender console = Bukkit.getConsoleSender();
 
     public boolean v1_12 = Bukkit.getServer().getClass().getPackage().getName().contains("1_12");
+    public boolean v1_11 = Bukkit.getServer().getClass().getPackage().getName().contains("1_11");
     public boolean v1_10 = Bukkit.getServer().getClass().getPackage().getName().contains("1_10");
     public boolean v1_9 = Bukkit.getServer().getClass().getPackage().getName().contains("1_9");
     public boolean v1_7 = Bukkit.getServer().getClass().getPackage().getName().contains("1_7");

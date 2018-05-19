@@ -5,10 +5,7 @@ import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.Utils.Debugger;
 import com.songoda.epichoppers.Utils.Methods;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -409,16 +406,17 @@ public class Hopper {
             if (instance.getConfig().getBoolean("Main.Sounds Enabled")) {
                 if (instance.getLevelManager().getHighestLevel() != level) {
                     if (!instance.v1_8 && !instance.v1_7) {
-                        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
+                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
                     } else {
-                        player.playSound(player.getLocation(), org.bukkit.Sound.valueOf("LEVEL_UP"), 2F, 15.0F);
+                        player.playSound(player.getLocation(), Sound.valueOf("LEVEL_UP"), 2F, 15.0F);
                     }
                 } else {
-                    if (!instance.v1_10 && !instance.v1_9 && !instance.v1_8 && !instance.v1_7) {
-                        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
-                        player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_CHIME, 2F, 25.0F);
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_CHIME, 1.2F, 35.0F), 5L);
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_CHIME, 1.8F, 35.0F), 10L);
+                    if (!instance.v1_11 && !instance.v1_10 && !instance.v1_9 && !instance.v1_8 && !instance.v1_7) {
+                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
+
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_CHIME, 2F, 25.0F);
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_CHIME, 1.2F, 35.0F), 5L);
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_CHIME, 1.8F, 35.0F), 10L);
                     } else {
                         player.playSound(player.getLocation(), org.bukkit.Sound.valueOf("LEVEL_UP"), 2F, 25.0F);
                     }
