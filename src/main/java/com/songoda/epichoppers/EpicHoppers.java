@@ -40,7 +40,6 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
     public SettingsManager sm;
 
     public References references = null;
-    private ConfigWrapper langFile = new ConfigWrapper(this, "", "lang.yml");
     public ConfigWrapper dataFile = new ConfigWrapper(this, "", "data.yml");
 
     public Map<Player, Block> sync = new HashMap<>();
@@ -119,8 +118,6 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
             }
         }
 
-
-        langFile.createNewFile("Loading language file", "EpicHoppers language file");
         references = new References();
 
         hooks = new HookHandler();

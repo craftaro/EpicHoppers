@@ -113,9 +113,6 @@ public class HopHandler {
                         }
                     }
                 }
-                for (Entity e : metaItems) {
-                    e.removeMetadata("grabbed", instance);
-                }
                 if (hopper.getLevel().getSuction() != 0) {
                     int suck = hopper.getLevel().getSuction();
                     double radius = suck + .5;

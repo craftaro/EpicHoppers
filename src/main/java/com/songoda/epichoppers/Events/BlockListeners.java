@@ -6,12 +6,16 @@ import com.songoda.epichoppers.Hopper.Filter;
 import com.songoda.epichoppers.Hopper.Hopper;
 import com.songoda.epichoppers.Utils.Debugger;
 import com.songoda.epichoppers.Utils.Methods;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,6 +24,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.Collection;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -92,14 +98,13 @@ public class BlockListeners implements Listener {
 
             Block block = event.getBlock();
 
+            if (event.getPlayer().getItemInHand() == null) return;
+
+            handleSyncTouch(event);
+
             if (event.getBlock().getType() != Material.HOPPER) return;
 
             Hopper hopper = instance.getHopperManager().getHopper(block);
-
-            if (event.getPlayer().getItemInHand() == null) return;
-
-            handlePick(event);
-
 
             int level = hopper.getLevel().getLevel();
 
@@ -137,16 +142,28 @@ public class BlockListeners implements Listener {
         }
     }
 
-    private void handlePick(BlockBreakEvent e) {
+    private void handleSyncTouch(BlockBreakEvent e) {
         if (!Methods.isSync(e.getPlayer())) return;
-        ItemStack item = e.getPlayer().getItemInHand();
-        ItemMeta meta = item.getItemMeta();
-        if (item.getItemMeta().getLore().size() != 2) return;
+
+        ItemStack tool = e.getPlayer().getItemInHand();
+        ItemMeta meta = tool.getItemMeta();
+        if (tool.getItemMeta().getLore().size() != 2) return;
+
         Location location = Arconix.pl().getApi().serialize().unserializeLocation(meta.getLore().get(1).replaceAll("§", ""));
+
         if (location.getBlock().getType() != Material.CHEST) return;
+
+        if (e.getBlock().getType() == Material.MOB_SPAWNER || e.getBlock().getType() == Material.HOPPER || e.getBlock().getType() == Material.DISPENSER) return;
+
+        try {
+            if (e.getBlock().getType().name().contains("SHULKER") && e.getBlock().getType() != Material.SHULKER_SHELL) return;
+        } catch (Exception ee) {
+
+        }
+
         InventoryHolder ih = (InventoryHolder) location.getBlock().getState();
         if (e.getPlayer().getItemInHand().getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
-            ih.getInventory().addItem(new ItemStack(e.getBlock().getType()));
+            ih.getInventory().addItem(new ItemStack(e.getBlock().getType(),1, e.getBlock().getData()));
         } else {
             for (ItemStack is : e.getBlock().getDrops())
                 ih.getInventory().addItem(is);
