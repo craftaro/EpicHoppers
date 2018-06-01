@@ -73,7 +73,7 @@ public class InventoryListeners implements Listener {
                     && (instance.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers") || player.hasPermission("EpicHoppers.Teleport"))) {
                 if (e.isLeftClick()) {
                     if (hopper.getSyncedBlock() != null) {
-                        Methods.tpPlayer(player, hopper);
+                        instance.getTeleportHandler().tpPlayer(player, hopper);
                     }
                 } else {
                     if (!hopper.isWalkOnTeleport()) {

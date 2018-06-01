@@ -56,6 +56,8 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
     private HopperManager hopperManager;
     private LevelManager levelManager;
 
+    private TeleportHandler teleportHandler;
+
     private EpicHoppersAPI api;
 
     public void onEnable() {
@@ -124,7 +126,7 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
         hooks.hook();
 
         new HopHandler(this);
-        new TeleportHandler(this);
+        teleportHandler = new TeleportHandler(this);
 
         new MCUpdate(this, true);
         //new MassiveStats(this, 9000);
@@ -260,6 +262,10 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
 
     public Locale getLocale() {
         return locale;
+    }
+
+    public TeleportHandler getTeleportHandler() {
+        return teleportHandler;
     }
 
     public LevelManager getLevelManager() {

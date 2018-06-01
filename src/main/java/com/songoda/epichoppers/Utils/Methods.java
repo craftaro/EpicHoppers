@@ -80,42 +80,6 @@ public class Methods {
         return null;
     }
 
-
-    public static void tpPlayer(Player player, Hopper hopper) {
-        try {
-            EpicHoppers instance = EpicHoppers.getInstance();
-            Block next = hopper.getLocation().getBlock();
-            int num = 1;
-            while (instance.getHopperManager().isHopper(next.getLocation()) && instance.getHopperManager().getHopper(next.getLocation()).getSyncedBlock() != null && num != 15) {
-                Hopper nextHopper = instance.getHopperManager().getHopper(next);
-                if (nextHopper.getSyncedBlock() != null) {
-                    next = nextHopper.getSyncedBlock();
-                }
-                if (!next.getType().equals(Material.HOPPER)) {
-                    instance.getHopperManager().removeHopper(nextHopper.getLocation());
-                    break;
-                }
-
-                Location location = next.getLocation();
-                location.setX(location.getX() + 0.5);
-                location.setZ(location.getZ() + 0.5);
-                location.setY(location.getY() + 1);
-                location.setPitch(player.getLocation().getPitch());
-                location.setDirection(player.getLocation().getDirection());
-                player.teleport(location);
-                next = player.getLocation().subtract(0, 0.5, 0).getBlock();
-
-                num++;
-            }
-            if (num != 1) {
-                Methods.doParticles(player, hopper.getLocation());
-                Methods.doParticles(player, next.getLocation());
-            }
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-    }
-
     public static void doParticles(Player p, Location location) {
         try {
             EpicHoppers instance = EpicHoppers.getInstance();

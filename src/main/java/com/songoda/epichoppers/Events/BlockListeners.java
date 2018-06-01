@@ -176,6 +176,9 @@ public class BlockListeners implements Listener {
         e.isCancelled();
         short dur = e.getPlayer().getItemInHand().getDurability();
         e.getPlayer().getItemInHand().setDurability((short) (dur + 1));
+        if (e.getPlayer().getItemInHand().getDurability() >= e.getPlayer().getItemInHand().getType().getMaxDurability()) {
+            e.getPlayer().getItemInHand().setType(Material.AIR);
+        }
         if (e.getExpToDrop() > 0)
             e.getPlayer().getWorld().spawn(e.getBlock().getLocation(), ExperienceOrb.class).setExperience(e.getExpToDrop());
         e.getBlock().setType(Material.AIR);
