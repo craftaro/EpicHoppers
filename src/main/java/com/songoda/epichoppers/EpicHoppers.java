@@ -166,8 +166,8 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
          * Dump HopperManager to file.
          */
         for (Hopper hopper : hopperManager.getHoppers().values()) {
+            if (hopper.getLevel() == null || hopper.getLocation() == null || hopper.getLocation().getChunk() == null) continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
-            if (hopper.getLevel() == null) continue;
             dataFile.getConfig().set("data.sync." + locationStr + ".level", hopper.getLevel().getLevel());
             dataFile.getConfig().set("data.sync." + locationStr + ".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
             dataFile.getConfig().set("data.sync." + locationStr + ".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
