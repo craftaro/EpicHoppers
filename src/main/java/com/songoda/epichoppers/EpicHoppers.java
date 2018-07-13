@@ -85,11 +85,14 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
         hopperManager = new HopperManager();
 
         /*
-         * Register furnaces into FurnaceManger from configuration
+         * Register hoppers into HopperManger from configuration
          */
+        Bukkit.getScheduler().runTaskLater(this, () -> {
         if (dataFile.getConfig().contains("data.sync")) {
             for (String locationStr : dataFile.getConfig().getConfigurationSection("data.sync").getKeys(false)) {
                 Location location = Arconix.pl().getApi().serialize().unserializeLocation(locationStr);
+                if (location == null || location.getBlock() == null) return;
+
                 int level = dataFile.getConfig().getInt("data.sync." + locationStr + ".level");
 
                 String blockLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".block");
@@ -119,6 +122,8 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
                 hopperManager.addHopper(location, hopper);
             }
         }
+
+        }, 10);
 
         references = new References();
 
