@@ -3,12 +3,10 @@ package com.songoda.epichoppers.Utils;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.Hopper.Hopper;
-import net.minecraft.server.v1_7_R4.AxisAlignedBB;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -86,33 +84,9 @@ public class Methods {
             location.setX(location.getX() + .5);
             location.setY(location.getY() + .5);
             location.setZ(location.getZ() + .5);
-            if (!instance.v1_8 && !instance.v1_7) {
                 p.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
-            } else {
-                p.getWorld().playEffect(location, org.bukkit.Effect.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), 1, 0);
-                //Does not resolve --Nova
-                //p.getWorld().spigot().playEffect(location, org.bukkit.Effect.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), 1, 0, (float) 1, (float) 1, (float) 1, 1, 200, 10);
-            }
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
-
-    @SuppressWarnings("unchecked")
-    public static Collection<Entity> getNearbyEntities(Location location, double x, double y, double z) {
-        if (location == null) return Collections.emptyList();
-
-        World world = location.getWorld();
-        AxisAlignedBB aabb = AxisAlignedBB.a(location.getX() - x, location.getY() - y, location.getZ() - z, location.getX() + x, location.getY() + y, location.getZ() + z);
-        List<net.minecraft.server.v1_7_R4.Entity> entityList = ((CraftWorld) world).getHandle().getEntities(null, aabb, null);
-        List<Entity> bukkitEntityList = new ArrayList<>();
-
-        for (Object entity : entityList) {
-            bukkitEntityList.add(((net.minecraft.server.v1_7_R4.Entity) entity).getBukkitEntity());
-        }
-
-        return bukkitEntityList;
-    }
-
-
 }

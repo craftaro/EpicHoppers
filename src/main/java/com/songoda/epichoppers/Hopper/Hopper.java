@@ -65,7 +65,7 @@ public class Hopper {
             perlmeta.setLore(loreperl);
             perl.setItemMeta(perlmeta);
 
-            ItemStack filter = new ItemStack(Material.REDSTONE_COMPARATOR, 1);
+            ItemStack filter = new ItemStack(Material.COMPARATOR, 1);
             ItemMeta filtermeta = filter.getItemMeta();
             filtermeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.filtertitle"));
             ArrayList<String> lorefilter = new ArrayList<>();
@@ -217,7 +217,7 @@ public class Hopper {
             i.setItem(39, Methods.getGlass());
             i.setItem(41, Methods.getGlass());
 
-            ItemStack it = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 0);
+            ItemStack it = new ItemStack(Material.WHITE_STAINED_GLASS_PANE, 1);
             ItemMeta itm = it.getItemMeta();
             itm.setDisplayName(instance.getLocale().getMessage("interface.filter.whitelist"));
             it.setItemMeta(itm);
@@ -234,7 +234,7 @@ public class Hopper {
                 }
             }
 
-            it = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15);
+            it = new ItemStack(Material.BLACK_STAINED_GLASS_PANE, 1);
             itm = it.getItemMeta();
             itm.setDisplayName(instance.getLocale().getMessage("interface.filter.blacklist"));
             it.setItemMeta(itm);
@@ -318,13 +318,13 @@ public class Hopper {
             for (ItemStack item : items2) {
                 for (int aa : awhite) {
                     if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().equals(Material.STAINED_GLASS_PANE))
+                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS"))
                             owhite.add(items2[num]);
                     }
                 }
                 for (int aa : ablack) {
                     if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().equals(Material.STAINED_GLASS_PANE))
+                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS"))
                             oblack.add(items2[num]);
                     }
                 }
@@ -396,30 +396,17 @@ public class Hopper {
                 player.sendMessage(instance.getLocale().getMessage("event.upgrade.maxed", level.getLevel()));
             }
             Location loc = location.clone().add(.5, .5, .5);
-            if (!instance.v1_8 && !instance.v1_7) {
-                player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
-            } else {
-                player.getWorld().playEffect(loc, org.bukkit.Effect.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), 1, 0);
-                //Doesn't resolve --Nova
-                //player.getWorld().spigot().playEffect(loc, org.bukkit.Effect.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), 1, 0, (float) 1, (float) 1, (float) 1, 1, 200, 10);
-            }
+            player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
+
             if (instance.getConfig().getBoolean("Main.Sounds Enabled")) {
                 if (instance.getLevelManager().getHighestLevel() != level) {
-                    if (!instance.v1_8 && !instance.v1_7) {
-                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
-                    } else {
-                        player.playSound(player.getLocation(), Sound.valueOf("LEVEL_UP"), 2F, 15.0F);
-                    }
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
                 } else {
-                    if (!instance.v1_11 && !instance.v1_10 && !instance.v1_9 && !instance.v1_8 && !instance.v1_7) {
-                        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
 
-                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_CHIME, 2F, 25.0F);
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_CHIME, 1.2F, 35.0F), 5L);
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_CHIME, 1.8F, 35.0F), 10L);
-                    } else {
-                        player.playSound(player.getLocation(), org.bukkit.Sound.valueOf("LEVEL_UP"), 2F, 25.0F);
-                    }
+                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2F, 25.0F);
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
                 }
             }
         } catch (Exception ex) {

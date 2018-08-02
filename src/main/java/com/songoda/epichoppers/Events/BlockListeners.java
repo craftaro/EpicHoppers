@@ -59,11 +59,8 @@ public class BlockListeners implements Listener {
 
             ItemStack item = e.getItemInHand().clone();
 
-            //not sure what this shit does
-            byte b = e.getBlock().getData();
             e.getBlock().setType(Material.AIR);
             e.getBlock().getLocation().getBlock().setType(Material.HOPPER);
-            e.getBlock().getLocation().getBlock().setData(b);
 
             instance.getHopperManager().addHopper(e.getBlock().getLocation(), new Hopper(e.getBlock(), instance.getLevelManager().getLevel(instance.getApi().getILevel(item)), e.getPlayer().getUniqueId(), null, new Filter(), false));
 
@@ -153,7 +150,7 @@ public class BlockListeners implements Listener {
 
         if (location.getBlock().getType() != Material.CHEST) return;
 
-        if (e.getBlock().getType() == Material.MOB_SPAWNER || e.getBlock().getType() == Material.HOPPER || e.getBlock().getType() == Material.DISPENSER) return;
+        if (e.getBlock().getType() == Material.SPAWNER || e.getBlock().getType() == Material.HOPPER || e.getBlock().getType() == Material.DISPENSER) return;
 
         try {
             if (e.getBlock().getType().name().contains("SHULKER") && e.getBlock().getType() != Material.SHULKER_SHELL) return;
@@ -168,18 +165,7 @@ public class BlockListeners implements Listener {
             for (ItemStack is : e.getBlock().getDrops())
                 ih.getInventory().addItem(is);
         }
-        if (instance.v1_12) {
             e.setDropItems(false);
             return;
-        }
-
-        e.isCancelled();
-        e.getPlayer().getItemInHand().setDurability((short) (e.getPlayer().getItemInHand().getDurability() + 1));
-        if (e.getPlayer().getItemInHand().getDurability() >= e.getPlayer().getItemInHand().getType().getMaxDurability()) {
-            e.getPlayer().getItemInHand().setType(null);
-        }
-        if (e.getExpToDrop() > 0)
-            e.getPlayer().getWorld().spawn(e.getBlock().getLocation(), ExperienceOrb.class).setExperience(e.getExpToDrop());
-        e.getBlock().setType(Material.AIR);
     }
 }

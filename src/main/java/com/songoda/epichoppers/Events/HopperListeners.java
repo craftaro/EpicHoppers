@@ -40,8 +40,6 @@ public class HopperListeners implements Listener {
         try {
             Inventory source = e.getSource();
 
-            if (instance.v1_7 || instance.v1_8) return;
-
 
             if (!instance.getHopperManager().isHopper(e.getSource().getLocation())) return;
 
@@ -50,27 +48,6 @@ public class HopperListeners implements Listener {
             if (source.getHolder() instanceof Hopper && hopper.getSyncedBlock() != null) {
                     e.setCancelled(true);
             }
-
-/*
-            //if amt is not 1
-            int amt = hopper.getLevel().getAmount();
-
-            if (amt <= 1) {
-                return;
-            }
-
-            e.setCancelled(true);
-
-            // Set amount of items per hopper transfer
-            ItemStack item = e.getItem();
-            int transferAmount = Math.min(amt, getItemCount(source, item));
-            item.setAmount(transferAmount);
-
-            e.getDestination().addItem(item); //hacky as shit
-
-            source.removeItem(item);
-            //Please work.
-            */
         } catch (Exception ee) {
             Debugger.runReport(ee);
         }

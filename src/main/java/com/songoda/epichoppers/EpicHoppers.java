@@ -26,13 +26,6 @@ import java.util.*;
 public final class EpicHoppers extends JavaPlugin implements Listener {
     public static CommandSender console = Bukkit.getConsoleSender();
 
-    public boolean v1_12 = Bukkit.getServer().getClass().getPackage().getName().contains("1_12");
-    public boolean v1_11 = Bukkit.getServer().getClass().getPackage().getName().contains("1_11");
-    public boolean v1_10 = Bukkit.getServer().getClass().getPackage().getName().contains("1_10");
-    public boolean v1_9 = Bukkit.getServer().getClass().getPackage().getName().contains("1_9");
-    public boolean v1_7 = Bukkit.getServer().getClass().getPackage().getName().contains("1_7");
-    public boolean v1_8 = Bukkit.getServer().getClass().getPackage().getName().contains("1_8");
-
     public Map<UUID, Hopper> inShow = new HashMap<>();
     public Map<UUID, Hopper> inFilter = new HashMap<>();
 
@@ -230,8 +223,7 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
             getConfig().addDefault("settings.levels.Level-4.Amount", 4);
             getConfig().addDefault("settings.levels.Level-4.Suction", 2);
 
-            if (!v1_7 && !v1_8)
-                getConfig().addDefault("settings.levels.Level-4.BlockBreak", 4);
+            getConfig().addDefault("settings.levels.Level-4.BlockBreak", 4);
             getConfig().addDefault("settings.levels.Level-4.Cost-xp", 35);
             getConfig().addDefault("settings.levels.Level-4.Cost-eco", 12000);
 
@@ -239,8 +231,7 @@ public final class EpicHoppers extends JavaPlugin implements Listener {
             getConfig().addDefault("settings.levels.Level-5.Amount", 5);
             getConfig().addDefault("settings.levels.Level-5.Suction", 3);
 
-            if (!v1_7 && !v1_8)
-                getConfig().addDefault("settings.levels.Level-5.BlockBreak", 2);
+            getConfig().addDefault("settings.levels.Level-5.BlockBreak", 2);
             getConfig().addDefault("settings.levels.Level-5.Cost-xp", 40);
             getConfig().addDefault("settings.levels.Level-5.Cost-eco", 15000);
         }

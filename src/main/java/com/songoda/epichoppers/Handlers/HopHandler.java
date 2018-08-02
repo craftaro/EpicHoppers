@@ -117,9 +117,7 @@ public class HopHandler {
                     int suck = hopper.getLevel().getSuction();
                     double radius = suck + .5;
 
-                    Collection<Entity> nearbyEntite = instance.v1_7
-                            ? Methods.getNearbyEntities(block.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
-                            : block.getLocation().getWorld().getNearbyEntities(block.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius);
+                    Collection<Entity> nearbyEntite = block.getLocation().getWorld().getNearbyEntities(block.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius);
 
                     for (Entity e : nearbyEntite) {
                         if (!(e instanceof Item) || e.getTicksLived() < 10 || e.getLocation().getBlock().getType() == Material.HOPPER) {
@@ -280,7 +278,7 @@ public class HopHandler {
                 if (!canHop(ih.getInventory(), newItem, amt) || b2.getType() == Material.BREWING_STAND) {
                     return 4;
                 }
-                if (b2.getType() == Material.FURNACE || b2.getType() == Material.BURNING_FURNACE) {
+                if (b2.getType() == Material.FURNACE) {
                     FurnaceInventory fi = (FurnaceInventory) ih.getInventory();
                     int amtt = 0;
                     boolean dont = false;

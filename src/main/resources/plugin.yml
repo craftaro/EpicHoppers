@@ -5,6 +5,7 @@ depend: [Arconix]
 softdepend: [Towny, RedProtect, Kingdoms, PlotsSquared, GriefPrevention, USkyBlock, ASkyBlock, WorldGuard, Factions, Vault]
 version: 2.3.2
 author: Songoda
+api-version: 1.13
 commands:
   epichoppers:
     description: View information on this plugin.

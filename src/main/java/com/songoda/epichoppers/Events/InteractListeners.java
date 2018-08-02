@@ -38,7 +38,7 @@ public class InteractListeners implements Listener {
             }
 
             if (e.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
-                ItemStack item = e.getPlayer().getItemInHand();
+                ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
                 if (item.getItemMeta().getLore().size() == 2) {
                     player.sendMessage(instance.getLocale().getMessage("event.hopper.desyncchest", item.getType().toString()));
                     instance.enchant.createSyncTouch(item, null);
@@ -56,8 +56,7 @@ public class InteractListeners implements Listener {
                     instance.lastBlock.put(player, e.getClickedBlock());
                     Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
                     if (instance.getConfig().getBoolean("Main.Allow Hopper Upgrading")) {
-                        if (player.getItemInHand().getType() != Material.WOOD_PICKAXE && player.getItemInHand().getType() != Material.STONE_PICKAXE &&
-                                player.getItemInHand().getType() != Material.IRON_PICKAXE && player.getItemInHand().getType() != Material.DIAMOND_PICKAXE) {
+                        if (!player.getInventory().getItemInMainHand().getType().name().contains("PICKAXE")) {
                             hopper.overview(player);
                             e.setCancelled(true);
                         }
