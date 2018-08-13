@@ -31,6 +31,10 @@ interface.filter.whitelist = "&f&lWhite List"
 interface.filter.blacklist = "&8&lBlack List"
 interface.filter.void = "&c&lVoid"
 
+#Command Messages
+
+command.give.success = "&7You have been given a &6level %level% &7Hopper."
+
 #Event Messages
 
 event.general.nopermission = "&cYou do not have permission to do that."

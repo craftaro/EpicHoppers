@@ -14,6 +14,8 @@ public interface EpicHoppers {
 
     Level getLevelFromItem(ItemStack item);
 
+    ItemStack newHopperItem(Level level);
+
     /**
      * Get an instance of the {@link LevelManager}
      *

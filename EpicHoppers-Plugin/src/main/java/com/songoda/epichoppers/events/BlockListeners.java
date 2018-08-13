@@ -3,6 +3,7 @@ package com.songoda.epichoppers.events;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
+import com.songoda.epichoppers.api.hopper.Level;
 import com.songoda.epichoppers.hopper.EFilter;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.utils.Debugger;
@@ -96,14 +97,11 @@ public class BlockListeners implements Listener {
 
             Hopper hopper = instance.getHopperManager().getHopper(block);
 
-            int level = hopper.getLevel().getLevel();
+            Level level = hopper.getLevel();
 
-            if (level != 0) {
+            if (level.getLevel() != 0) {
                 event.setCancelled(true);
-                ItemStack item = new ItemStack(Material.HOPPER, 1);
-                ItemMeta itemmeta = item.getItemMeta();
-                itemmeta.setDisplayName(Arconix.pl().getApi().format().formatText(Methods.formatName(level, true)));
-                item.setItemMeta(itemmeta);
+                ItemStack item = instance.newHopperItem(level);
 
                 event.getBlock().setType(Material.AIR);
                 event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);

@@ -32,6 +32,11 @@ public class ELevelManager implements LevelManager {
     }
 
     @Override
+    public boolean isLevel(int level) {
+        return registeredLevels.containsKey(level);
+    }
+
+    @Override
     public Map<Integer, com.songoda.epichoppers.api.hopper.Level> getLevels() {
         return Collections.unmodifiableMap(registeredLevels);
     }

@@ -16,12 +16,15 @@ import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.hopper.EHopperManager;
 import com.songoda.epichoppers.hopper.ELevelManager;
 import com.songoda.epichoppers.player.PlayerDataManager;
+import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.SettingsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
@@ -261,6 +264,15 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         } else {
             return getLevelManager().getLowestLevel();
         }
+    }
+
+    @Override
+    public ItemStack newHopperItem(Level level) {
+        ItemStack item = new ItemStack(Material.HOPPER, 1);
+        ItemMeta itemmeta = item.getItemMeta();
+        itemmeta.setDisplayName(Arconix.pl().getApi().format().formatText(Methods.formatName(level.getLevel(), true)));
+        item.setItemMeta(itemmeta);
+        return item;
     }
 
     public Locale getLocale() {
