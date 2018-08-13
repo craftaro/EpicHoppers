@@ -329,19 +329,19 @@ public class EHopper implements Hopper {
             for (ItemStack item : items2) {
                 for (int aa : awhite) {
                     if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS"))
+                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS") && items2[num].getType() != Material.AIR)
                             owhite.add(items2[num]);
                     }
                 }
                 for (int aa : ablack) {
                     if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS"))
+                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS") && items2[num].getType() != Material.AIR)
                             oblack.add(items2[num]);
                     }
                 }
                 for (int aa : avoid) {
                     if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().equals(Material.BARRIER))
+                        if (items2[num] != null && !items2[num].getType().equals(Material.BARRIER) && items2[num].getType() != Material.AIR)
                             ovoid.add(items2[num]);
                     }
                 }
