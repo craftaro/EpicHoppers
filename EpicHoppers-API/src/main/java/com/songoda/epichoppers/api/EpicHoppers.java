@@ -3,6 +3,7 @@ package com.songoda.epichoppers.api;
 import com.songoda.epichoppers.api.hopper.HopperManager;
 import com.songoda.epichoppers.api.hopper.Level;
 import com.songoda.epichoppers.api.hopper.LevelManager;
+import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -30,4 +31,13 @@ public interface EpicHoppers {
      * @return the hopper manager
      */
     HopperManager getHopperManager();
+
+    /**
+     * Register a new {@link ProtectionPluginHook} implementation
+     * in order for EpicSpawners to support plugins that protect
+     * blocks from being interacted with
+     *
+     * @param hook the hook to register
+     */
+    void registerProtectionHook(ProtectionPluginHook hook);
 }

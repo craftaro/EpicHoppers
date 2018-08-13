@@ -35,7 +35,7 @@ public class InteractListeners implements Listener {
                     || e.getClickedBlock() == null
                     || player.isSneaking()
                     || !player.hasPermission("EpicHoppers.overview")
-                    || !instance.hooks.canBuild(player, e.getClickedBlock().getLocation())
+                    || !instance.canBuild(player, e.getClickedBlock().getLocation())
                     || !(e.getClickedBlock().getState() instanceof InventoryHolder || e.getClickedBlock().getType().equals(Material.ENDER_CHEST))) {
                 return;
             }
