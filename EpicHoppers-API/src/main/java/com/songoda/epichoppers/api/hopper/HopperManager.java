@@ -2,6 +2,7 @@ package com.songoda.epichoppers.api.hopper;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 import java.util.Map;
 
@@ -18,4 +19,6 @@ public interface HopperManager {
     boolean isHopper(Location location);
 
     Map<Location, Hopper> getHoppers();
+
+    Hopper getHopperFromPlayer(Player player);
 }

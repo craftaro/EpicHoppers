@@ -53,6 +53,10 @@ public class EHopper implements Hopper {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             if (!player.hasPermission("epichoppers.overview")) return;
 
+            if (lastPlayer != null) {
+                Bukkit.getPlayer(lastPlayer).closeInventory();
+            }
+
             instance.getPlayerDataManager().getPlayerData(player).setLastHopper(this);
 
             com.songoda.epichoppers.api.hopper.Level nextLevel = instance.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? instance.getLevelManager().getLevel(level.getLevel() + 1) : null;
@@ -176,6 +180,7 @@ public class EHopper implements Hopper {
 
             player.openInventory(i);
             instance.getPlayerDataManager().getPlayerData(player).setInMenu(MenuType.OVERVIEW);
+            lastPlayer = player.getUniqueId();
         } catch (Exception e) {
             Debugger.runReport(e);
         }
@@ -302,6 +307,7 @@ public class EHopper implements Hopper {
 
             player.openInventory(i);
             instance.getPlayerDataManager().getPlayerData(player).setInMenu(MenuType.FILTER);
+            lastPlayer = player.getUniqueId();
         } catch (Exception e) {
             Debugger.runReport(e);
         }
@@ -488,6 +494,11 @@ public class EHopper implements Hopper {
     @Override
     public UUID getLastPlayer() {
         return lastPlayer;
+    }
+
+    @Override
+    public void setLastPlayer(UUID uuid) {
+        lastPlayer = uuid;
     }
 
     @Override

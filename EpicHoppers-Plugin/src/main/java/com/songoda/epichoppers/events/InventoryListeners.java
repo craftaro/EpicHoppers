@@ -208,10 +208,19 @@ public class InventoryListeners implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent event) {
         try {
-            PlayerData playerData = instance.getPlayerDataManager().getPlayerData((Player)event.getPlayer());
+            Player player = (Player)event.getPlayer();
+            PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
+            if (playerData.getInMenu() != MenuType.NOT_IN) {
+                Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
+                hopper.setLastPlayer(null);
+            }
+            if (playerData.getInMenu() == MenuType.FILTER) {
+                Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
+                ((EHopper)hopper).compile(player);
+            }
             playerData.setInMenu(MenuType.NOT_IN);
             if (playerData.getSyncType() == SyncType.FILTERED) {
-                ((EHopper)playerData.getLastHopper()).compile((Player)event.getPlayer());
+                ((EHopper)playerData.getLastHopper()).compile(player);
             }
         } catch (Exception e) {
             Debugger.runReport(e);

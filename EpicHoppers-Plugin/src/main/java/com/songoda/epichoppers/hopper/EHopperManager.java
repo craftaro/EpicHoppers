@@ -4,8 +4,10 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Filter;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.HopperManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,6 +48,16 @@ public class EHopperManager implements HopperManager {
     @Override
     public Map<Location, Hopper> getHoppers() {
         return Collections.unmodifiableMap(registeredHoppers);
+    }
+
+    @Override
+    public Hopper getHopperFromPlayer(Player player) {
+        for (Hopper hopper : registeredHoppers.values()) {
+            if (hopper.getLastPlayer() == player.getUniqueId()) {
+                return hopper;
+            }
+        }
+        return null;
     }
 
     private Location roundLocation(Location location) {

@@ -21,6 +21,8 @@ public interface Hopper {
 
     UUID getLastPlayer();
 
+    void setLastPlayer(UUID uuid);
+
     boolean isWalkOnTeleport();
 
     void setWalkOnTeleport(boolean walkOnTeleport);
