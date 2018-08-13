@@ -12,8 +12,8 @@ public class ELevelManager implements LevelManager {
     private final NavigableMap<Integer, ELevel> registeredLevels = new TreeMap<>();
 
     @Override
-    public void addLevel(int level, int costExperiance, int costEconomy, int range, int amount, int suction, int blockBreak) {
-        registeredLevels.put(level, new ELevel(level, costExperiance, costEconomy, range, amount, suction, blockBreak));
+    public void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak) {
+        registeredLevels.put(level, new ELevel(level, costExperience, costEconomy, range, amount, suction, blockBreak));
     }
 
     @Override
