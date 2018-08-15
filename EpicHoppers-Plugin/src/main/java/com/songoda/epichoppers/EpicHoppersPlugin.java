@@ -12,7 +12,8 @@ import com.songoda.epichoppers.api.hopper.Level;
 import com.songoda.epichoppers.api.hopper.LevelManager;
 import com.songoda.epichoppers.api.utils.ClaimableProtectionPluginHook;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
-import com.songoda.epichoppers.events.*;
+import com.songoda.epichoppers.command.CommandManager;
+import com.songoda.epichoppers.listeners.*;
 import com.songoda.epichoppers.handlers.*;
 import com.songoda.epichoppers.hooks.*;
 import com.songoda.epichoppers.hopper.EFilter;
@@ -44,7 +45,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private List<ProtectionPluginHook> protectionHooks = new ArrayList<>();
     private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook;
 
-    public SettingsManager settingsManager;
+    private SettingsManager settingsManager;
 
     public References references = null;
     private ConfigWrapper hooksFile = new ConfigWrapper(this, "", "hooks.yml");
@@ -89,40 +90,40 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
          * Register hoppers into HopperManger from configuration
          */
         Bukkit.getScheduler().runTaskLater(this, () -> {
-        if (dataFile.getConfig().contains("data.sync")) {
-            for (String locationStr : dataFile.getConfig().getConfigurationSection("data.sync").getKeys(false)) {
-                Location location = Arconix.pl().getApi().serialize().unserializeLocation(locationStr);
-                if (location == null || location.getBlock() == null) return;
+            if (dataFile.getConfig().contains("data.sync")) {
+                for (String locationStr : dataFile.getConfig().getConfigurationSection("data.sync").getKeys(false)) {
+                    Location location = Arconix.pl().getApi().serialize().unserializeLocation(locationStr);
+                    if (location == null || location.getBlock() == null) return;
 
-                int level = dataFile.getConfig().getInt("data.sync." + locationStr + ".level");
+                    int level = dataFile.getConfig().getInt("data.sync." + locationStr + ".level");
 
-                String blockLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".block");
-                Block block = blockLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".block")).getBlock();
+                    String blockLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".block");
+                    Block block = blockLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".block")).getBlock();
 
-                boolean walkOnTeleport = dataFile.getConfig().getBoolean("data.sync." + locationStr + ".walkOnTeleport");
+                    boolean walkOnTeleport = dataFile.getConfig().getBoolean("data.sync." + locationStr + ".walkOnTeleport");
 
-                String playerStr = dataFile.getConfig().getString("data.sync." + locationStr + ".player");
-                UUID player = playerStr == null ? null : UUID.fromString(playerStr);
+                    String playerStr = dataFile.getConfig().getString("data.sync." + locationStr + ".player");
+                    UUID player = playerStr == null ? null : UUID.fromString(playerStr);
 
-                List<ItemStack> whiteList = (ArrayList<ItemStack>)dataFile.getConfig().getList("data.sync." + locationStr + ".whitelist");
-                List<ItemStack> blackList = (ArrayList<ItemStack>)dataFile.getConfig().getList("data.sync." + locationStr + ".blacklist");
-                List<ItemStack> voidList = (ArrayList<ItemStack>)dataFile.getConfig().getList("data.sync." + locationStr + ".void");
+                    List<ItemStack> whiteList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".whitelist");
+                    List<ItemStack> blackList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".blacklist");
+                    List<ItemStack> voidList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".void");
 
-                String blackLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".black");
-                Block black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".black")).getBlock();
+                    String blackLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".black");
+                    Block black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".black")).getBlock();
 
-                EFilter filter = new EFilter();
+                    EFilter filter = new EFilter();
 
-                filter.setWhiteList(whiteList);
-                filter.setBlackList(blackList);
-                filter.setVoidList(voidList);
-                filter.setEndPoint(black);
+                    filter.setWhiteList(whiteList);
+                    filter.setBlackList(blackList);
+                    filter.setVoidList(voidList);
+                    filter.setEndPoint(black);
 
-                EHopper hopper = new EHopper(location, levelManager.getLevel(level), player, block, filter, walkOnTeleport);
+                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), player, block, filter, walkOnTeleport);
 
-                hopperManager.addHopper(location, hopper);
+                    hopperManager.addHopper(location, hopper);
+                }
             }
-        }
 
         }, 10);
 
@@ -136,12 +137,13 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, this::saveToFile, 6000, 6000);
 
-        this.getCommand("EpicHoppers").setExecutor(new CommandHandler(this));
-
         getServer().getPluginManager().registerEvents(new HopperListeners(this), this);
         getServer().getPluginManager().registerEvents(new BlockListeners(this), this);
         getServer().getPluginManager().registerEvents(new InteractListeners(this), this);
         getServer().getPluginManager().registerEvents(new InventoryListeners(this), this);
+
+        // Command registration
+        this.getCommand("EpicHoppers").setExecutor(new CommandManager(this));
 
 
 
@@ -182,7 +184,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
          * Dump HopperManager to file.
          */
         for (Hopper hopper : hopperManager.getHoppers().values()) {
-            if (hopper.getLevel() == null || hopper.getLocation() == null || hopper.getLocation().getChunk() == null) continue;
+            if (hopper.getLevel() == null || hopper.getLocation() == null || hopper.getLocation().getChunk() == null)
+                continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
             dataFile.getConfig().set("data.sync." + locationStr + ".level", hopper.getLevel().getLevel());
             dataFile.getConfig().set("data.sync." + locationStr + ".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
@@ -204,7 +207,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         /*
          * Register Levels into LevelManager from configuration.
          */
-        ((ELevelManager)levelManager).clear();
+        ((ELevelManager) levelManager).clear();
         for (String levelName : getConfig().getConfigurationSection("settings.levels").getKeys(false)) {
             int level = Integer.valueOf(levelName.split("-")[1]);
             int radius = getConfig().getInt("settings.levels." + levelName + ".Range");
@@ -304,7 +307,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     }
 
 
-
     @Override
     public Level getLevelFromItem(ItemStack item) {
         if (item.getItemMeta().getDisplayName().contains(":")) {
@@ -340,6 +342,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     @Override
     public HopperManager getHopperManager() {
         return hopperManager;
+    }
+
+    public SettingsManager getSettingsManager() {
+        return settingsManager;
     }
 
     public PlayerDataManager getPlayerDataManager() {

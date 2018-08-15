@@ -19,13 +19,42 @@ public interface LevelManager {
      */
     void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak);
 
+    /**
+     * Get {@link Level} by corresponding integer value.
+     *
+     * @param level the integer level
+     * @return level object
+     */
     Level getLevel(int level);
 
+    /**
+     * Get the lowest {@link Level} in the LevelManager.
+     *
+     * @return lowest level
+     */
     Level getLowestLevel();
 
+
+    /**
+     * Get the highest {@link Level} in the LevelManager.
+     *
+     * @return high level
+     */
     Level getHighestLevel();
 
+    /**
+     * Whether or not this level exists.
+     *
+     * @param level the integer level
+     * @return true if a level, false otherwise
+     */
     boolean isLevel(int level);
 
+    /**
+     * Get a unmodifiable map of the current level registered
+     * in the manager.
+     *
+     * @return map of levels.
+     */
     Map<Integer, Level> getLevels();
 }

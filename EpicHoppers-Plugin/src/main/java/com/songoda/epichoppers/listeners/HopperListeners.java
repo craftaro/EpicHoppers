@@ -1,9 +1,8 @@
-package com.songoda.epichoppers.events;
+package com.songoda.epichoppers.listeners;
 
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Location;

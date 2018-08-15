@@ -1,4 +1,4 @@
-package com.songoda.epichoppers.events;
+package com.songoda.epichoppers.listeners;
 
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;

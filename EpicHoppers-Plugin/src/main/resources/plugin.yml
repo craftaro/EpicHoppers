@@ -10,5 +10,5 @@ commands:
   epichoppers:
     description: View information on this plugin.
     default: true
-    aliases: [eh, synccraft]
+    aliases: [eh]
     usage: /eh

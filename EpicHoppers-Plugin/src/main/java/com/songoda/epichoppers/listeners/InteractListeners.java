@@ -1,4 +1,4 @@
-package com.songoda.epichoppers.events;
+package com.songoda.epichoppers.listeners;
 
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
