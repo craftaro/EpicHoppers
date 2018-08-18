@@ -139,8 +139,8 @@ public class EHopper implements Hopper {
                 nu++;
             }
 
-            boolean canFilter = instance.getConfig().getBoolean("Main.Allow Players To use The hopper Filter") && player.hasPermission("EpicHoppers.Filter");
-            boolean canTeleport = instance.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers") && player.hasPermission("EpicHoppers.Teleport");
+            boolean canFilter = level.isFilter() || player.hasPermission("EpicHoppers.Filter");
+            boolean canTeleport = level.isTeleport() || player.hasPermission("EpicHoppers.Teleport");
             if (!canFilter && canTeleport)
                 i.setItem(4, perl);
             else if (!canTeleport && canFilter)

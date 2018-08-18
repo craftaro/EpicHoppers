@@ -13,6 +13,10 @@ public interface Level {
 
     int getBlockBreak();
 
+    boolean isFilter();
+
+    boolean isTeleport();
+
     int getSuction();
 
     int getCostExperience();

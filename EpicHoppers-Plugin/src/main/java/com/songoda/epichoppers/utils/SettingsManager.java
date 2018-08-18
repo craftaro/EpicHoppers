@@ -203,7 +203,6 @@ public class SettingsManager implements Listener {
         o2("Upgrade-with-eco", "Main.Upgrade With Economy", true),
         o3("Upgrade-with-xp", "Main.Upgrade With XP", true),
         o4("Teleport-hoppers", "Main.Allow Players To Teleport Through Hoppers", true),
-        o5("Filter-hoppers", "Main.Allow Players To use The hopper Filter", true),
         o6("EnderChest-support", "Main.Support Enderchests", true),
         o7("Upgrade-particle-type", "Main.Upgrade Particle Type", "SPELL_WITCH"),
         o8("Hop-Tick", "Main.Amount of Ticks Between Hops", 8L),

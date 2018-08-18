@@ -10,9 +10,11 @@ public class ELevel implements Level {
 
     private int level, costExperience, costEconomy, range, amount, blockBreak, suction;
 
+    private boolean filter, teleport;
+
     private List<String> description = new ArrayList<>();
 
-    public ELevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak) {
+    public ELevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
@@ -20,6 +22,8 @@ public class ELevel implements Level {
         this.amount = amount;
         this.blockBreak = blockBreak;
         this.suction = suction;
+        this.filter = filter;
+        this.teleport = teleport;
 
         EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
 
@@ -27,6 +31,8 @@ public class ELevel implements Level {
         description.add(instance.getLocale().getMessage("interface.hopper.amount", amount));
         if (suction != 0) description.add(instance.getLocale().getMessage("interface.hopper.suction", suction));
         if (blockBreak != 0) description.add(instance.getLocale().getMessage("interface.hopper.blockbreak", blockBreak));
+        if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
+        if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
     }
 
     @Override
@@ -52,6 +58,16 @@ public class ELevel implements Level {
     @Override
     public int getBlockBreak() {
         return blockBreak;
+    }
+
+    @Override
+    public boolean isFilter() {
+        return filter;
+    }
+
+    @Override
+    public boolean isTeleport() {
+        return teleport;
     }
 
     @Override

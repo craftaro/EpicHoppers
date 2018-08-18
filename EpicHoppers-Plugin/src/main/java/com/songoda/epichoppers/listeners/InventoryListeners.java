@@ -77,7 +77,7 @@ public class InventoryListeners implements Listener {
             Hopper hopper = playerData.getLastHopper();
             if (event.getCurrentItem().getItemMeta().hasDisplayName()
                     && event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.perltitle"))
-                    && (instance.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers") || player.hasPermission("EpicHoppers.Teleport"))) {
+                    && (hopper.getLevel().isTeleport() || player.hasPermission("EpicHoppers.Teleport"))) {
                 if (event.isLeftClick()) {
                     if (hopper.getSyncedBlock() != null) {
                         instance.getTeleportHandler().tpPlayer(player, hopper);
@@ -94,7 +94,7 @@ public class InventoryListeners implements Listener {
                 player.closeInventory();
 
 
-            } else if (event.getCurrentItem().getItemMeta().hasDisplayName() && event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.filtertitle")) && player.hasPermission("EpicHoppers.Filter")) {
+            } else if (event.getCurrentItem().getItemMeta().hasDisplayName() && event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.filtertitle")) && (hopper.getLevel().isFilter() || player.hasPermission("EpicHoppers.Filter"))) {
                 if (!event.getCurrentItem().getItemMeta().getDisplayName().equals("§l")) {
                     ((EHopper)hopper).filter(player);
                 }

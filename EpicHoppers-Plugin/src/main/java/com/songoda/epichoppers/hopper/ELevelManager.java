@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.hopper;
 
+import com.songoda.epichoppers.api.hopper.Level;
 import com.songoda.epichoppers.api.hopper.LevelManager;
 
 import java.util.Collections;
@@ -12,22 +13,22 @@ public class ELevelManager implements LevelManager {
     private final NavigableMap<Integer, ELevel> registeredLevels = new TreeMap<>();
 
     @Override
-    public void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak) {
-        registeredLevels.put(level, new ELevel(level, costExperience, costEconomy, range, amount, suction, blockBreak));
+    public void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport) {
+        registeredLevels.put(level, new ELevel(level, costExperience, costEconomy, range, amount, suction, blockBreak, filter, teleport));
     }
 
     @Override
-    public com.songoda.epichoppers.api.hopper.Level getLevel(int level) {
+    public Level getLevel(int level) {
         return registeredLevels.get(level);
     }
 
     @Override
-    public com.songoda.epichoppers.api.hopper.Level getLowestLevel() {
+    public Level getLowestLevel() {
         return registeredLevels.firstEntry().getValue();
     }
 
     @Override
-    public com.songoda.epichoppers.api.hopper.Level getHighestLevel() {
+    public Level getHighestLevel() {
         return registeredLevels.lastEntry().getValue();
     }
 
@@ -37,7 +38,7 @@ public class ELevelManager implements LevelManager {
     }
 
     @Override
-    public Map<Integer, com.songoda.epichoppers.api.hopper.Level> getLevels() {
+    public Map<Integer, Level> getLevels() {
         return Collections.unmodifiableMap(registeredLevels);
     }
 

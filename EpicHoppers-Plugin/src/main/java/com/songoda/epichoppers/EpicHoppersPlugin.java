@@ -214,9 +214,11 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             int amount = getConfig().getInt("settings.levels." + levelName + ".Amount");
             int suction = getConfig().getInt("settings.levels." + levelName + ".Suction");
             int blockBreak = getConfig().getInt("settings.levels." + levelName + ".BlockBreak");
+            boolean filter = getConfig().getBoolean("settings.levels." + levelName + ".Filter");
+            boolean teleport = getConfig().getBoolean("settings.levels." + levelName + ".Teleport");
             int costExperiance = getConfig().getInt("settings.levels." + levelName + ".Cost-xp");
             int costEconomy = getConfig().getInt("settings.levels." + levelName + ".Cost-eco");
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, suction, blockBreak);
+            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, suction, blockBreak, filter, teleport);
         }
     }
 
@@ -243,7 +245,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             getConfig().addDefault("settings.levels.Level-4.Range", 40);
             getConfig().addDefault("settings.levels.Level-4.Amount", 4);
             getConfig().addDefault("settings.levels.Level-4.Suction", 2);
-
             getConfig().addDefault("settings.levels.Level-4.BlockBreak", 4);
             getConfig().addDefault("settings.levels.Level-4.Cost-xp", 35);
             getConfig().addDefault("settings.levels.Level-4.Cost-eco", 12000);
@@ -251,10 +252,18 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             getConfig().addDefault("settings.levels.Level-5.Range", 50);
             getConfig().addDefault("settings.levels.Level-5.Amount", 5);
             getConfig().addDefault("settings.levels.Level-5.Suction", 3);
-
             getConfig().addDefault("settings.levels.Level-5.BlockBreak", 2);
             getConfig().addDefault("settings.levels.Level-5.Cost-xp", 40);
             getConfig().addDefault("settings.levels.Level-5.Cost-eco", 15000);
+
+            getConfig().addDefault("settings.levels.Level-6.Range", 60);
+            getConfig().addDefault("settings.levels.Level-6.Amount", 5);
+            getConfig().addDefault("settings.levels.Level-6.Suction", 3);
+            getConfig().addDefault("settings.levels.Level-6.BlockBreak", 2);
+            getConfig().addDefault("settings.levels.Level-6.Filter", true);
+            getConfig().addDefault("settings.levels.Level-6.Teleport", true);
+            getConfig().addDefault("settings.levels.Level-6.Cost-xp", 45);
+            getConfig().addDefault("settings.levels.Level-6.Cost-eco", 20000);
         }
 
         getConfig().options().copyDefaults(true);

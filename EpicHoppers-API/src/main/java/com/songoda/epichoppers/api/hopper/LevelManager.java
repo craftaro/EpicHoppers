@@ -16,8 +16,10 @@ public interface LevelManager {
      * @param amount The amount of items this hopper will transfer at a single time
      * @param suction The distance in which this hopper will suck items into it
      * @param blockBreak The tick frequency in which this hopper will break blocks placed directly above it.
+     * @param filter Whether or not access to the filter is allowed.
+     * @param teleport Whether or not teleporting through hoppers is allowed.
      */
-    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak);
+    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport);
 
     /**
      * Get {@link Level} by corresponding integer value.
