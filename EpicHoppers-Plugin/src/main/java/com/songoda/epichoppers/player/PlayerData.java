@@ -1,7 +1,6 @@
 package com.songoda.epichoppers.player;
 
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.hopper.EHopper;
 
 import java.util.Date;
 import java.util.UUID;

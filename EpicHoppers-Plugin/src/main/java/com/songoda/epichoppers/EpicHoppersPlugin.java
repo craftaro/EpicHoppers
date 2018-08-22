@@ -13,13 +13,18 @@ import com.songoda.epichoppers.api.hopper.LevelManager;
 import com.songoda.epichoppers.api.utils.ClaimableProtectionPluginHook;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import com.songoda.epichoppers.command.CommandManager;
-import com.songoda.epichoppers.listeners.*;
-import com.songoda.epichoppers.handlers.*;
+import com.songoda.epichoppers.handlers.EnchantmentHandler;
+import com.songoda.epichoppers.handlers.HopHandler;
+import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hooks.*;
 import com.songoda.epichoppers.hopper.EFilter;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.hopper.EHopperManager;
 import com.songoda.epichoppers.hopper.ELevelManager;
+import com.songoda.epichoppers.listeners.BlockListeners;
+import com.songoda.epichoppers.listeners.HopperListeners;
+import com.songoda.epichoppers.listeners.InteractListeners;
+import com.songoda.epichoppers.listeners.InventoryListeners;
 import com.songoda.epichoppers.player.PlayerDataManager;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.SettingsManager;
@@ -33,7 +38,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 

@@ -1,8 +1,8 @@
 package com.songoda.epichoppers.command.commands;
 
 import com.songoda.arconix.api.methods.formatting.TextComponent;
-import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
 
 public class CommandReload extends AbstractCommand {
