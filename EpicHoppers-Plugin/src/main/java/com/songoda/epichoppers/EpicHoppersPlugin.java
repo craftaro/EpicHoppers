@@ -12,6 +12,8 @@ import com.songoda.epichoppers.api.hopper.Level;
 import com.songoda.epichoppers.api.hopper.LevelManager;
 import com.songoda.epichoppers.api.utils.ClaimableProtectionPluginHook;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
+import com.songoda.epichoppers.boost.BoostData;
+import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.command.CommandManager;
 import com.songoda.epichoppers.handlers.EnchantmentHandler;
 import com.songoda.epichoppers.handlers.HopHandler;
@@ -33,6 +35,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -64,6 +67,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     private HopperManager hopperManager;
     private LevelManager levelManager;
+    private BoostManager boostManager;
     private PlayerDataManager playerDataManager;
 
     private TeleportHandler teleportHandler;
@@ -79,6 +83,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         console.sendMessage(Arconix.pl().getApi().format().formatText("&7Action: &aEnabling&7..."));
 
         settingsManager = new SettingsManager(this);
+        boostManager = new BoostManager();
         setupConfig();
         loadDataFile();
         enchantmentHandler = new EnchantmentHandler();
@@ -110,7 +115,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     boolean walkOnTeleport = dataFile.getConfig().getBoolean("data.sync." + locationStr + ".walkOnTeleport");
 
                     String playerStr = dataFile.getConfig().getString("data.sync." + locationStr + ".player");
-                    UUID player = playerStr == null ? null : UUID.fromString(playerStr);
+                    String placedByStr = dataFile.getConfig().getString("data.sync." + locationStr + ".placedBy");
+                    UUID lastPlayer = playerStr == null ? null : UUID.fromString(playerStr);
+                    UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
 
                     List<ItemStack> whiteList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".whitelist");
                     List<ItemStack> blackList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".blacklist");
@@ -126,9 +133,22 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     filter.setVoidList(voidList);
                     filter.setEndPoint(black);
 
-                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), player, block, filter, walkOnTeleport);
+                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, block, filter, walkOnTeleport);
 
                     hopperManager.addHopper(location, hopper);
+                }
+            }
+
+            // Adding in Boosts
+            if (dataFile.getConfig().contains("data.boosts")) {
+                for (String key : dataFile.getConfig().getConfigurationSection("data.boosts").getKeys(false)) {
+                    if (!dataFile.getConfig().contains("data.boosts." + key + ".Player")) continue;
+                    BoostData boostData = new BoostData(
+                            dataFile.getConfig().getInt("data.boosts." + key + ".Amount"),
+                            Long.parseLong(key),
+                            UUID.fromString(dataFile.getConfig().getString("data.boosts." + key + ".Player")));
+
+                    this.boostManager.addBoostToPlayer(boostData);
                 }
             }
 
@@ -197,11 +217,21 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             dataFile.getConfig().set("data.sync." + locationStr + ".level", hopper.getLevel().getLevel());
             dataFile.getConfig().set("data.sync." + locationStr + ".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
             dataFile.getConfig().set("data.sync." + locationStr + ".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
+            dataFile.getConfig().set("data.sync." + locationStr + ".placedBy", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString());
             dataFile.getConfig().set("data.sync." + locationStr + ".walkOnTeleport", hopper.isWalkOnTeleport());
             dataFile.getConfig().set("data.sync." + locationStr + ".whitelist", hopper.getFilter().getWhiteList());
             dataFile.getConfig().set("data.sync." + locationStr + ".blacklist", hopper.getFilter().getBlackList());
             dataFile.getConfig().set("data.sync." + locationStr + ".void", hopper.getFilter().getVoidList());
             dataFile.getConfig().set("data.sync." + locationStr + ".black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint().getLocation()));
+        }
+
+        /*
+         * Dump BoostManager to file.
+         */
+        for (BoostData boostData : boostManager.getBoosts()) {
+            String endTime = String.valueOf(boostData.getEndTime());
+            dataFile.getConfig().set("data.boosts." + endTime + ".Player", boostData.getPlayer().toString());
+            dataFile.getConfig().set("data.boosts." + endTime + ".Amount", boostData.getMultiplier());
         }
 
         //Save to file
@@ -348,6 +378,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     public TeleportHandler getTeleportHandler() {
         return teleportHandler;
+    }
+
+    public BoostManager getBoostManager() {
+        return boostManager;
     }
 
     @Override

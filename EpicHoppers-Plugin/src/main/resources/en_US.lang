@@ -7,6 +7,7 @@ general.nametag.nameformat = "&eLevel %level% &fHopper"
 
 #Interface Messages
 
+interface.hopper.boostedstats = "&a&lCurrently boosted!|&7Item transfer rate multiplied by &6%amount%x&7.|&7Expires in &6%time%&7."
 interface.hopper.upgradewithxp = "&aUpgrade with XP"
 interface.hopper.upgradewithxplore = "&7Cost: &a%cost% Levels"
 interface.hopper.upgradewitheconomy = "&aUpgrade with ECO"

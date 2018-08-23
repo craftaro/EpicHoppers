@@ -28,7 +28,7 @@ public class EHopperManager implements HopperManager {
     @Override
     public Hopper getHopper(Location location) {
         if (!registeredHoppers.containsKey(roundLocation(location))) {
-            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, new EFilter(), false));
+            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, null, new EFilter(), false));
         }
         return registeredHoppers.get(roundLocation(location));
     }

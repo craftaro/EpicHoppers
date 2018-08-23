@@ -56,6 +56,13 @@ public interface Hopper {
     Level getLevel();
 
     /**
+     * Get the player that placed this hopper.
+     *
+     * @return the player the placed this hopper.
+     */
+    UUID getPlacedBy();
+
+    /**
      * Get the player that last used this hopper.
      *
      * @return the last player

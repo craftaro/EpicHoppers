@@ -55,7 +55,7 @@ public class BlockListeners implements Listener {
 
             ItemStack item = e.getItemInHand().clone();
 
-            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), e.getPlayer().getUniqueId(), null, new EFilter(), false));
+            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), e.getPlayer().getUniqueId(), e.getPlayer().getUniqueId(),null, new EFilter(), false));
 
         } catch (Exception ee) {
             Debugger.runReport(ee);

@@ -1,10 +1,13 @@
 package com.songoda.epichoppers.hopper;
 
+import com.songoda.arconix.api.methods.formatting.TextComponent;
+import com.songoda.arconix.api.methods.formatting.TimeComponent;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Filter;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.Level;
+import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.player.MenuType;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.utils.Debugger;
@@ -30,22 +33,24 @@ public class EHopper implements Hopper {
     private Location location;
     private com.songoda.epichoppers.api.hopper.Level level;
     private UUID lastPlayer;
+    private UUID placedBy;
     private Block syncedBlock;
     private Filter filter;
     private boolean walkOnTeleport;
 
 
-    public EHopper(Location location, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, Block syncedBlock, Filter filter, boolean walkOnTeleport) {
+    public EHopper(Location location, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, boolean walkOnTeleport) {
         this.location = location;
         this.level = level;
         this.syncedBlock = syncedBlock;
         this.filter = filter;
         this.lastPlayer = lastPlayer;
+        this.placedBy = placedBy;
         this.walkOnTeleport = walkOnTeleport;
     }
 
-    public EHopper(Block block, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, Block syncedBlock, Filter filter, boolean walkOnTeleport) {
-        this(block.getLocation(), level, lastPlayer, syncedBlock, filter, walkOnTeleport);
+    public EHopper(Block block, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, boolean walkOnTeleport) {
+        this(block.getLocation(), level, lastPlayer, placedBy, syncedBlock, filter, walkOnTeleport);
     }
 
     public void overview(Player player) {
@@ -95,6 +100,14 @@ public class EHopper implements Hopper {
             else {
                 lore.add(instance.getLocale().getMessage("interface.hopper.nextlevel", nextLevel.getLevel()));
                 lore.addAll(nextLevel.getDescription());
+            }
+
+            BoostData boostData = instance.getBoostManager().getBoost(placedBy);
+            if (boostData != null) {
+                parts = instance.getLocale().getMessage("interface.hopper.boostedstats", Integer.toString(boostData.getMultiplier()), TimeComponent.makeReadable(boostData.getEndTime() - System.currentTimeMillis())).split("\\|");
+                lore.add("");
+                for (String line : parts)
+                    lore.add(TextComponent.formatText(line));
             }
 
             itemmeta.setLore(lore);
@@ -489,6 +502,11 @@ public class EHopper implements Hopper {
     @Override
     public Level getLevel() {
         return level;
+    }
+
+    @Override
+    public UUID getPlacedBy() {
+        return placedBy;
     }
 
     @Override

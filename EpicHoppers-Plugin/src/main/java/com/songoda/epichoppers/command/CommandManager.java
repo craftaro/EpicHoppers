@@ -2,10 +2,7 @@ package com.songoda.epichoppers.command;
 
 import com.songoda.arconix.api.methods.formatting.TextComponent;
 import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.command.commands.CommandEpicHoppers;
-import com.songoda.epichoppers.command.commands.CommandGive;
-import com.songoda.epichoppers.command.commands.CommandReload;
-import com.songoda.epichoppers.command.commands.CommandSettings;
+import com.songoda.epichoppers.command.commands.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,6 +24,7 @@ public class CommandManager implements CommandExecutor {
         addCommand(new CommandReload(commandEpicHoppers));
         addCommand(new CommandSettings(commandEpicHoppers));
         addCommand(new CommandGive(commandEpicHoppers));
+        addCommand(new CommandBoost(commandEpicHoppers));
     }
 
     private AbstractCommand addCommand(AbstractCommand abstractCommand) {

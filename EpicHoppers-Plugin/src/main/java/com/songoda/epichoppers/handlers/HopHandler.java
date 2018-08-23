@@ -2,6 +2,7 @@ package com.songoda.epichoppers.handlers;
 
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.utils.Debugger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
@@ -166,7 +167,9 @@ public class HopHandler {
                     continue;
                 }
 
-                int amt = hopper.getLevel().getAmount();
+                BoostData boostData = instance.getBoostManager().getBoost(hopper.getPlacedBy());
+
+                int amt = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
                 ItemStack[] is = hopperBlock.getInventory().getContents();
 
