@@ -2,6 +2,7 @@ package com.songoda.epichoppers.listeners;
 
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
+import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.player.MenuType;
 import com.songoda.epichoppers.player.PlayerData;
@@ -36,7 +37,6 @@ public class InventoryListeners implements Listener {
             Player player = (Player) event.getWhoClicked();
             if (inv == null || event.getCurrentItem() == null) return;
 
-
             if (event.getRawSlot() > event.getView().getTopInventory().getSize() - 1) return;
 
             if (event.getCursor() != null && event.getCurrentItem() != null) {
@@ -45,7 +45,7 @@ public class InventoryListeners implements Listener {
                 if (c.hasItemMeta()
                         && c.getItemMeta().hasLore()
                         && c.getType() == Material.ENCHANTED_BOOK
-                        && (item.getType().name().toUpperCase().contains("AXE") || item.getType().name().toUpperCase().contains("SPADE") || item.getType().name().toUpperCase().contains("SWORD"))
+                        && (item.getType().name().toUpperCase().contains("AXE") || item.getType().name().toUpperCase().contains("SHOVEL") || item.getType().name().toUpperCase().contains("SWORD"))
                         && c.getItemMeta().getLore().equals(instance.enchantmentHandler.getbook().getItemMeta().getLore())) {
                     instance.enchantmentHandler.createSyncTouch(item, null);
                     event.setCancelled(true);
@@ -83,13 +83,15 @@ public class InventoryListeners implements Listener {
                         instance.getTeleportHandler().tpPlayer(player, hopper);
                     }
                 } else {
-                    if (!hopper.isWalkOnTeleport()) {
-                        player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.walkteleenabled"));
-                        hopper.setWalkOnTeleport(true);
-                    } else {
-                        player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.walkteledisabled"));
-                        hopper.setWalkOnTeleport(false);
+                    if (hopper.getTeleportTrigger() == TeleportTrigger.DISABLED) {
+                        hopper.setTeleportTrigger(TeleportTrigger.SNEAK);
+                    } else if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK) {
+                        hopper.setTeleportTrigger(TeleportTrigger.WALK_ON);
+                    } else if (hopper.getTeleportTrigger() == TeleportTrigger.WALK_ON) {
+                        hopper.setTeleportTrigger(TeleportTrigger.DISABLED);
                     }
+                    ((EHopper)hopper).overview(player);
+                    return;
                 }
                 player.closeInventory();
 

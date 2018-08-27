@@ -7,6 +7,7 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Filter;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.Level;
+import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.player.MenuType;
 import com.songoda.epichoppers.player.PlayerData;
@@ -36,21 +37,21 @@ public class EHopper implements Hopper {
     private UUID placedBy;
     private Block syncedBlock;
     private Filter filter;
-    private boolean walkOnTeleport;
+    private TeleportTrigger teleportTrigger;
 
 
-    public EHopper(Location location, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, boolean walkOnTeleport) {
+    public EHopper(Location location, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger) {
         this.location = location;
         this.level = level;
         this.syncedBlock = syncedBlock;
         this.filter = filter;
         this.lastPlayer = lastPlayer;
         this.placedBy = placedBy;
-        this.walkOnTeleport = walkOnTeleport;
+        this.teleportTrigger = teleportTrigger;
     }
 
-    public EHopper(Block block, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, boolean walkOnTeleport) {
-        this(block.getLocation(), level, lastPlayer, placedBy, syncedBlock, filter, walkOnTeleport);
+    public EHopper(Block block, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger) {
+        this(block.getLocation(), level, lastPlayer, placedBy, syncedBlock, filter, teleportTrigger);
     }
 
     public void overview(Player player) {
@@ -58,7 +59,7 @@ public class EHopper implements Hopper {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             if (!player.hasPermission("epichoppers.overview")) return;
 
-            if (lastPlayer != null) {
+            if (lastPlayer != null && lastPlayer != player.getUniqueId()) {
                 Bukkit.getPlayer(lastPlayer).closeInventory();
             }
 
@@ -72,7 +73,7 @@ public class EHopper implements Hopper {
             ItemMeta perlmeta = perl.getItemMeta();
             perlmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.perltitle"));
             ArrayList<String> loreperl = new ArrayList<>();
-            String[] parts = instance.getLocale().getMessage("interface.hopper.perllore").split("\\|");
+            String[] parts = instance.getLocale().getMessage("interface.hopper.perllore2", teleportTrigger.name()).split("\\|");
             for (String line : parts) {
                 loreperl.add(Arconix.pl().getApi().format().formatText(line));
             }
@@ -520,13 +521,13 @@ public class EHopper implements Hopper {
     }
 
     @Override
-    public boolean isWalkOnTeleport() {
-        return walkOnTeleport;
+    public TeleportTrigger getTeleportTrigger() {
+        return teleportTrigger;
     }
 
     @Override
-    public void setWalkOnTeleport(boolean walkOnTeleport) {
-        this.walkOnTeleport = walkOnTeleport;
+    public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
+        this.teleportTrigger = teleportTrigger;
     }
 
     @Override

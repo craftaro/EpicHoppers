@@ -2,12 +2,14 @@ package com.songoda.epichoppers.handlers;
 
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
+import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -46,7 +48,7 @@ public class TeleportHandler {
 
             Hopper hopper = instance.getHopperManager().getHopper(location);
 
-            if (!hopper.isWalkOnTeleport()) continue;
+            if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON) continue;
 
             PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
 
@@ -86,6 +88,8 @@ public class TeleportHandler {
                 player.teleport(location);
                 next = player.getLocation().subtract(0, 0.5, 0).getBlock();
 
+                if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
+                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10,10);
                 num++;
             }
             if (num == 1 && teleportFrom.containsKey(hopper.getLocation())) {
@@ -97,6 +101,9 @@ public class TeleportHandler {
                 location.setDirection(player.getLocation().getDirection());
                 player.teleport(location);
                 next = player.getLocation().subtract(0, 0.5, 0).getBlock();
+
+                if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
+                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10,10);
                 num ++;
 
             }

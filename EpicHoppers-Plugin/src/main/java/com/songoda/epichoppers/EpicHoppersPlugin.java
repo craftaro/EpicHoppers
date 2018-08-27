@@ -6,10 +6,7 @@ import com.songoda.arconix.api.utils.ConfigWrapper;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.api.EpicHoppers;
 import com.songoda.epichoppers.api.EpicHoppersAPI;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.HopperManager;
-import com.songoda.epichoppers.api.hopper.Level;
-import com.songoda.epichoppers.api.hopper.LevelManager;
+import com.songoda.epichoppers.api.hopper.*;
 import com.songoda.epichoppers.api.utils.ClaimableProtectionPluginHook;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import com.songoda.epichoppers.boost.BoostData;
@@ -112,7 +109,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     String blockLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".block");
                     Block block = blockLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".block")).getBlock();
 
-                    boolean walkOnTeleport = dataFile.getConfig().getBoolean("data.sync." + locationStr + ".walkOnTeleport");
+                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(dataFile.getConfig().getString("data.sync." + locationStr + ".teleportTrigger"));
 
                     String playerStr = dataFile.getConfig().getString("data.sync." + locationStr + ".player");
                     String placedByStr = dataFile.getConfig().getString("data.sync." + locationStr + ".placedBy");
@@ -133,7 +130,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     filter.setVoidList(voidList);
                     filter.setEndPoint(black);
 
-                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, block, filter, walkOnTeleport);
+                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, block, filter, teleportTrigger);
 
                     hopperManager.addHopper(location, hopper);
                 }
@@ -218,7 +215,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             dataFile.getConfig().set("data.sync." + locationStr + ".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
             dataFile.getConfig().set("data.sync." + locationStr + ".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
             dataFile.getConfig().set("data.sync." + locationStr + ".placedBy", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString());
-            dataFile.getConfig().set("data.sync." + locationStr + ".walkOnTeleport", hopper.isWalkOnTeleport());
+            dataFile.getConfig().set("data.sync." + locationStr + ".teleportTrigger", hopper.getTeleportTrigger().toString());
             dataFile.getConfig().set("data.sync." + locationStr + ".whitelist", hopper.getFilter().getWhiteList());
             dataFile.getConfig().set("data.sync." + locationStr + ".blacklist", hopper.getFilter().getBlackList());
             dataFile.getConfig().set("data.sync." + locationStr + ".void", hopper.getFilter().getVoidList());

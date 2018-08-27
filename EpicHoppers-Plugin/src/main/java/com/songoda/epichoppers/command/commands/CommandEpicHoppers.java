@@ -19,6 +19,7 @@ public class CommandEpicHoppers extends AbstractCommand {
 
         sender.sendMessage(TextComponent.formatText("&6/EpicHoppers&7 - Displays this page."));
         if (sender.hasPermission("epichoppers.admin")) {
+            sender.sendMessage(TextComponent.formatText("&6/eh reload &7Reload the Configuration and Language files."));
             sender.sendMessage(TextComponent.formatText("&6/eh book [player]&7- Gives Sync Touch book to you or a player."));
             sender.sendMessage(TextComponent.formatText("&6/eh give [player] [level]&7 - Give a leveled hopper to a player."));
             sender.sendMessage(TextComponent.formatText("&6/eh settings&7 - Edit the EpicHoppers Settings."));

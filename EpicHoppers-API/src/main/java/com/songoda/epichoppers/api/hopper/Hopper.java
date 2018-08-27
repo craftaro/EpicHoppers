@@ -77,22 +77,18 @@ public interface Hopper {
     void setLastPlayer(UUID uuid);
 
     /**
-     * Whether or not walk on teleporting has been
-     * enabled for this hopper.
+     * Get the teleport trigger is currently enabled.
      *
-     * @return true if walk on teleporting enabled,
-     * false otherwise
+     * @return TeleportTrigger
      */
-    boolean isWalkOnTeleport();
+    TeleportTrigger getTeleportTrigger();
 
     /**
-     * Set the ability to teleport players from this
-     * hopper to a remote hopper.
+     * Set which teleport trigger is currently enabled.
      *
-     * @param walkOnTeleport whether or not to enabled
-     *                       walk on teleporting
+     * @param teleportTrigger TeleportTrigger
      */
-    void setWalkOnTeleport(boolean walkOnTeleport);
+    void setTeleportTrigger(TeleportTrigger teleportTrigger);
 
     /**
      * Get the Block containing the hopper that is

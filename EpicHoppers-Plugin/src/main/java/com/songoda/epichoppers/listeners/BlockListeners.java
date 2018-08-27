@@ -4,6 +4,7 @@ import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.Level;
+import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.hopper.EFilter;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.utils.Debugger;
@@ -55,7 +56,7 @@ public class BlockListeners implements Listener {
 
             ItemStack item = e.getItemInHand().clone();
 
-            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), e.getPlayer().getUniqueId(), e.getPlayer().getUniqueId(),null, new EFilter(), false));
+            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), e.getPlayer().getUniqueId(), e.getPlayer().getUniqueId(),null, new EFilter(), TeleportTrigger.DISABLED));
 
         } catch (Exception ee) {
             Debugger.runReport(ee);

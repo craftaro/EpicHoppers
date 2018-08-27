@@ -2,17 +2,21 @@ package com.songoda.epichoppers.listeners;
 
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
+import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,6 +29,19 @@ public class InteractListeners implements Listener {
 
     public InteractListeners(EpicHoppersPlugin instance) {
         this.instance = instance;
+    }
+
+    @EventHandler
+    public void onPlayerToggleSneakEvent(PlayerToggleSneakEvent event) {
+        Player player = event.getPlayer();
+        if (player.isSneaking()) {
+            Location location = player.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
+            if (instance.getHopperManager().isHopper(location)) {
+                Hopper hopper = instance.getHopperManager().getHopper(location);
+                if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
+                    instance.getTeleportHandler().tpPlayer(player, hopper);
+            }
+        }
     }
 
     @EventHandler

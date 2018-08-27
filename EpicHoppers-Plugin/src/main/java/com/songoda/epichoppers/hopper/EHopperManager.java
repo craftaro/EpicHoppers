@@ -3,6 +3,7 @@ package com.songoda.epichoppers.hopper;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.HopperManager;
+import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -28,7 +29,7 @@ public class EHopperManager implements HopperManager {
     @Override
     public Hopper getHopper(Location location) {
         if (!registeredHoppers.containsKey(roundLocation(location))) {
-            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, null, new EFilter(), false));
+            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, null, new EFilter(), TeleportTrigger.DISABLED));
         }
         return registeredHoppers.get(roundLocation(location));
     }
