@@ -35,8 +35,13 @@ public class InteractListeners implements Listener {
     public void onPlayerToggleSneakEvent(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
         if (player.isSneaking()) {
-            Location location = player.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
-            if (instance.getHopperManager().isHopper(location)) {
+            Location location = player.getLocation().getBlock().getRelative(BlockFace.SELF).getLocation();
+            Location down = location.getBlock().getRelative(BlockFace.DOWN).getLocation();
+            if (instance.getHopperManager().isHopper(down)) {
+                Hopper hopper = instance.getHopperManager().getHopper(down);
+                if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
+                    instance.getTeleportHandler().tpPlayer(player, hopper);
+            } else if (instance.getHopperManager().isHopper(location)) {
                 Hopper hopper = instance.getHopperManager().getHopper(location);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
                     instance.getTeleportHandler().tpPlayer(player, hopper);
