@@ -38,9 +38,10 @@ public class EHopper implements Hopper {
     private Block syncedBlock;
     private Filter filter;
     private TeleportTrigger teleportTrigger;
+    private Material autoCrafting;
 
 
-    public EHopper(Location location, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger) {
+    public EHopper(Location location, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
         this.level = level;
         this.syncedBlock = syncedBlock;
@@ -48,10 +49,11 @@ public class EHopper implements Hopper {
         this.lastPlayer = lastPlayer;
         this.placedBy = placedBy;
         this.teleportTrigger = teleportTrigger;
+        this.autoCrafting = autoCrafting;
     }
 
-    public EHopper(Block block, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger) {
-        this(block.getLocation(), level, lastPlayer, placedBy, syncedBlock, filter, teleportTrigger);
+    public EHopper(Block block, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+        this(block.getLocation(), level, lastPlayer, placedBy, syncedBlock, filter, teleportTrigger, autoCrafting);
     }
 
     public void overview(Player player) {
@@ -90,6 +92,17 @@ public class EHopper implements Hopper {
             }
             filtermeta.setLore(lorefilter);
             filter.setItemMeta(filtermeta);
+
+            ItemStack crafting = new ItemStack(Material.CRAFTING_TABLE, 1);
+            ItemMeta craftingmeta = crafting.getItemMeta();
+            craftingmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.craftingtitle"));
+            ArrayList<String> lorecrafting = new ArrayList<>();
+            parts = instance.getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
+            for (String line : parts) {
+                lorecrafting.add(Arconix.pl().getApi().format().formatText(line));
+            }
+            craftingmeta.setLore(lorecrafting);
+            crafting.setItemMeta(craftingmeta);
 
 
             ItemStack item = new ItemStack(Material.HOPPER, 1);
@@ -164,12 +177,19 @@ public class EHopper implements Hopper {
                 i.setItem(5, filter);
             }
 
+            boolean canCraft = level.isCrafting() || player.hasPermission("EpicHoppers.Crafting");
+            if (!canCraft)
+                i.setItem(22, hook);
+            else if (canFilter) {
+                i.setItem(23, hook);
+                i.setItem(21, crafting);
+            }
+
             if (instance.getConfig().getBoolean("Main.Upgrade With XP") && player.hasPermission("EpicHoppers.Upgrade.XP")) {
                 i.setItem(11, itemXP);
             }
 
             i.setItem(13, item);
-            i.setItem(22, hook);
 
             if (instance.getConfig().getBoolean("Main.Upgrade With Economy") && player.hasPermission("EpicHoppers.Upgrade.ECO")) {
                 i.setItem(15, itemECO);
@@ -194,6 +214,46 @@ public class EHopper implements Hopper {
 
             player.openInventory(i);
             instance.getPlayerDataManager().getPlayerData(player).setInMenu(MenuType.OVERVIEW);
+            lastPlayer = player.getUniqueId();
+        } catch (Exception e) {
+            Debugger.runReport(e);
+        }
+    }
+
+    public void crafting(Player player) {
+        try {
+            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+            instance.getPlayerDataManager().getPlayerData(player).setLastHopper(this);
+
+            Inventory i = Bukkit.createInventory(null, 27, Arconix.pl().getApi().format().formatText(Methods.formatName(level.getLevel(), false) + " &8-&f Crafting"));
+
+            int nu = 0;
+            while (nu != 27) {
+                i.setItem(nu, Methods.getGlass());
+                nu++;
+            }
+
+            i.setItem(0, Methods.getBackgroundGlass(true));
+            i.setItem(1, Methods.getBackgroundGlass(true));
+            i.setItem(2, Methods.getBackgroundGlass(false));
+            i.setItem(6, Methods.getBackgroundGlass(false));
+            i.setItem(7, Methods.getBackgroundGlass(true));
+            i.setItem(8, Methods.getBackgroundGlass(true));
+            i.setItem(9, Methods.getBackgroundGlass(true));
+            i.setItem(10, Methods.getBackgroundGlass(false));
+            i.setItem(16, Methods.getBackgroundGlass(false));
+            i.setItem(17, Methods.getBackgroundGlass(true));
+            i.setItem(18, Methods.getBackgroundGlass(true));
+            i.setItem(19, Methods.getBackgroundGlass(true));
+            i.setItem(20, Methods.getBackgroundGlass(false));
+            i.setItem(24, Methods.getBackgroundGlass(false));
+            i.setItem(25, Methods.getBackgroundGlass(true));
+            i.setItem(26, Methods.getBackgroundGlass(true));
+
+            i.setItem(13, new ItemStack(autoCrafting == null ? Material.AIR : autoCrafting));
+
+            player.openInventory(i);
+            instance.getPlayerDataManager().getPlayerData(player).setInMenu(MenuType.CRAFTING);
             lastPlayer = player.getUniqueId();
         } catch (Exception e) {
             Debugger.runReport(e);
@@ -518,6 +578,16 @@ public class EHopper implements Hopper {
     @Override
     public void setLastPlayer(UUID uuid) {
         lastPlayer = uuid;
+    }
+
+    @Override
+    public Material getAutoCrafting() {
+        return autoCrafting;
+    }
+
+    @Override
+    public void setAutoCrafting(Material autoCrafting) {
+        this.autoCrafting = autoCrafting;
     }
 
     @Override

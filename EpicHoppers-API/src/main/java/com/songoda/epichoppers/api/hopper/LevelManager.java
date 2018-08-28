@@ -18,8 +18,9 @@ public interface LevelManager {
      * @param blockBreak The tick frequency in which this hopper will break blocks placed directly above it.
      * @param filter Whether or not access to the filter is allowed.
      * @param teleport Whether or not teleporting through hoppers is allowed.
+     * @param crafting Whether or not crafting with hoppers is allowed.
      */
-    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport);
+    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport, boolean crafting);
 
     /**
      * Get {@link Level} by corresponding integer value.

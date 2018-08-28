@@ -1,6 +1,7 @@
 package com.songoda.epichoppers.api.hopper;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -75,6 +76,20 @@ public interface Hopper {
      * @param uuid the last player
      */
     void setLastPlayer(UUID uuid);
+
+    /**
+     * Get the item being automatically crafted.
+     *
+     * @return item being crafted
+     */
+    Material getAutoCrafting();
+
+    /**
+     * Set the Item being automatically crafted.
+     *
+     * @param autoCrafting item to craft
+     */
+    void setAutoCrafting(Material autoCrafting);
 
     /**
      * Get the teleport trigger is currently enabled.

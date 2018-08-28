@@ -120,6 +120,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     List<ItemStack> blackList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".blacklist");
                     List<ItemStack> voidList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".void");
 
+                    Material autoCrafting = Material.valueOf(dataFile.getConfig().getString("data.sync." + locationStr + ".autoCrafting", "AIR"));
+
                     String blackLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".black");
                     Block black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".black")).getBlock();
 
@@ -130,7 +132,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     filter.setVoidList(voidList);
                     filter.setEndPoint(black);
 
-                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, block, filter, teleportTrigger);
+                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, block, filter, teleportTrigger, autoCrafting);
 
                     hopperManager.addHopper(location, hopper);
                 }
@@ -216,6 +218,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             dataFile.getConfig().set("data.sync." + locationStr + ".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
             dataFile.getConfig().set("data.sync." + locationStr + ".placedBy", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString());
             dataFile.getConfig().set("data.sync." + locationStr + ".teleportTrigger", hopper.getTeleportTrigger().toString());
+            dataFile.getConfig().set("data.sync." + locationStr + ".autoCrafting", hopper.getAutoCrafting() == Material.AIR ? null : hopper.getAutoCrafting().name());
             dataFile.getConfig().set("data.sync." + locationStr + ".whitelist", hopper.getFilter().getWhiteList());
             dataFile.getConfig().set("data.sync." + locationStr + ".blacklist", hopper.getFilter().getBlackList());
             dataFile.getConfig().set("data.sync." + locationStr + ".void", hopper.getFilter().getVoidList());
@@ -250,9 +253,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             int blockBreak = getConfig().getInt("settings.levels." + levelName + ".BlockBreak");
             boolean filter = getConfig().getBoolean("settings.levels." + levelName + ".Filter");
             boolean teleport = getConfig().getBoolean("settings.levels." + levelName + ".Teleport");
+            boolean crafting = getConfig().getBoolean("settings.levels." + levelName + ".AutoCrafting");
             int costExperiance = getConfig().getInt("settings.levels." + levelName + ".Cost-xp");
             int costEconomy = getConfig().getInt("settings.levels." + levelName + ".Cost-eco");
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, suction, blockBreak, filter, teleport);
+            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, suction, blockBreak, filter, teleport, crafting);
         }
     }
 
@@ -298,6 +302,17 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             getConfig().addDefault("settings.levels.Level-6.Teleport", true);
             getConfig().addDefault("settings.levels.Level-6.Cost-xp", 45);
             getConfig().addDefault("settings.levels.Level-6.Cost-eco", 20000);
+
+            getConfig().addDefault("settings.levels.Level-7.Range", 70);
+            getConfig().addDefault("settings.levels.Level-7.Amount", 5);
+            getConfig().addDefault("settings.levels.Level-7.Suction", 3);
+            getConfig().addDefault("settings.levels.Level-7.BlockBreak", 2);
+            getConfig().addDefault("settings.levels.Level-7.Filter", true);
+            getConfig().addDefault("settings.levels.Level-7.Teleport", true);
+            getConfig().addDefault("settings.levels.Level-7.AutoCrafting", true);
+            getConfig().addDefault("settings.levels.Level-7.Cost-xp", 50);
+            getConfig().addDefault("settings.levels.Level-7.Cost-eco", 30000);
+
         }
 
         getConfig().options().copyDefaults(true);

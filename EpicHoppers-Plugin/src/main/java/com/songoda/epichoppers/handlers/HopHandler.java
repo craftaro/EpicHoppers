@@ -11,10 +11,7 @@ import org.bukkit.block.Hopper;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
-import org.bukkit.inventory.FurnaceInventory;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.*;
@@ -24,6 +21,7 @@ import java.util.*;
  */
 public class HopHandler {
 
+    public Map<Block, Integer> blockTick = new HashMap<>();
     private EpicHoppersPlugin instance;
 
     public HopHandler(EpicHoppersPlugin instance) {
@@ -57,8 +55,6 @@ public class HopHandler {
         }
     }
 
-    public Map<Block, Integer> blockTick = new HashMap<>();
-
     private void hopperRunner() {
         try {
             Set<Entity> metaItems = new HashSet<>();
@@ -86,6 +82,26 @@ public class HopHandler {
                 }
 
                 org.bukkit.block.Hopper hopperBlock = (org.bukkit.block.Hopper) (block != null ? block.getState() : null);
+
+                ItemStack[] is = hopperBlock.getInventory().getContents();
+
+                if (hopper.getAutoCrafting() != null && canMove(hopperBlock.getInventory(), new ItemStack(hopper.getAutoCrafting()))) {
+                    main:
+                    for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
+                        if (!(recipe instanceof ShapedRecipe)) continue;
+                        Map<Character, ItemStack> ingredientMap = ((ShapedRecipe) recipe).getIngredientMap();
+                        if (hopperBlock.getInventory().getSize() == 0) continue;
+                        List<ItemStack> needed = stackItems(new ArrayList<>(ingredientMap.values()));
+
+                        for (ItemStack item : needed) {
+                            if (!hopperBlock.getInventory().contains(item.getType(), item.getAmount())) continue main;
+                        }
+                        for (ItemStack item : needed) {
+                            hopperBlock.getInventory().removeItem(item);
+                        }
+                        hopperBlock.getInventory().addItem(new ItemStack(hopper.getAutoCrafting()));
+                    }
+                }
 
                 if (hopper.getLevel().getBlockBreak() != 0) {
                     int amt = hopper.getLevel().getBlockBreak();
@@ -171,11 +187,21 @@ public class HopHandler {
 
                 int amt = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
-                ItemStack[] is = hopperBlock.getInventory().getContents();
-
                 List<ItemStack> whiteList = hopper.getFilter().getWhiteList();
 
                 List<ItemStack> blackList = hopper.getFilter().getBlackList();
+
+                List<Material> materials = new ArrayList<>();
+                if (hopper.getAutoCrafting() != null) {
+                    for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
+                        if (recipe instanceof ShapedRecipe) {
+                            for (ItemStack itemStack : ((ShapedRecipe) recipe).getIngredientMap().values()) {
+                                if (itemStack == null) continue;
+                                materials.add(itemStack.getType());
+                            }
+                        }
+                    }
+                }
 
                 int num = 0;
                 while (num != 5) {
@@ -184,6 +210,13 @@ public class HopHandler {
                         it = is[num].clone();
                         it.setAmount(1);
                     }
+
+                    if (is[num] != null
+                            && materials.contains(is[num].getType())) {
+                        num++;
+                        continue;
+                    }
+
                     if (is[num] != null
                             && !whiteList.isEmpty()
                             && !whiteList.contains(it)) {
@@ -204,6 +237,23 @@ public class HopHandler {
         } catch (Exception e) {
             Debugger.runReport(e);
         }
+    }
+
+    private List<ItemStack> stackItems(List<ItemStack> items) {
+        Map<Material, Integer> materials = new HashMap<>();
+        for (ItemStack itemStack : items) {
+            if (itemStack == null) continue;
+            if (materials.containsKey(itemStack.getType())) {
+                materials.put(itemStack.getType(), materials.get(itemStack.getType()) + itemStack.getAmount());
+                continue;
+            }
+            materials.put(itemStack.getType(), itemStack.getAmount());
+        }
+        List<ItemStack> stacked = new ArrayList<>();
+        for (Map.Entry<Material, Integer> entry : materials.entrySet()) {
+            stacked.add(new ItemStack(entry.getKey(), entry.getValue()));
+        }
+        return stacked;
     }
 
     private void doBlacklist(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, ItemStack[] isS, int amt, int place) {
@@ -316,6 +366,21 @@ public class HopHandler {
             Debugger.runReport(e);
         }
         return 0;
+    }
+
+    private boolean canMove(Inventory inventory, ItemStack item) {
+        try {
+            if (inventory.firstEmpty() != -1) return true;
+
+            for (ItemStack stack : inventory.getContents()) {
+                if (stack.isSimilar(item) && stack.getAmount() < stack.getMaxStackSize()) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            Debugger.runReport(e);
+        }
+        return false;
     }
 
     public boolean canHop(Inventory i, ItemStack item, int hop) {

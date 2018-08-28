@@ -29,7 +29,7 @@ public class EHopperManager implements HopperManager {
     @Override
     public Hopper getHopper(Location location) {
         if (!registeredHoppers.containsKey(roundLocation(location))) {
-            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, null, new EFilter(), TeleportTrigger.DISABLED));
+            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, null, new EFilter(), TeleportTrigger.DISABLED, null));
         }
         return registeredHoppers.get(roundLocation(location));
     }

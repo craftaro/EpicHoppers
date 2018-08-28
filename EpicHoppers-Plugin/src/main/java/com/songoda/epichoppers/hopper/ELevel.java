@@ -10,11 +10,11 @@ public class ELevel implements Level {
 
     private int level, costExperience, costEconomy, range, amount, blockBreak, suction;
 
-    private boolean filter, teleport;
+    private boolean filter, teleport, crafting;
 
     private List<String> description = new ArrayList<>();
 
-    public ELevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport) {
+    public ELevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport, boolean crafting) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
@@ -24,6 +24,7 @@ public class ELevel implements Level {
         this.suction = suction;
         this.filter = filter;
         this.teleport = teleport;
+        this.crafting = crafting;
 
         EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
 
@@ -32,7 +33,8 @@ public class ELevel implements Level {
         if (suction != 0) description.add(instance.getLocale().getMessage("interface.hopper.suction", suction));
         if (blockBreak != 0) description.add(instance.getLocale().getMessage("interface.hopper.blockbreak", blockBreak));
         if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
-        if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
+        if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.teleport", true));
+        if (crafting) description.add(instance.getLocale().getMessage("interface.hopper.crafting", true));
     }
 
     @Override
@@ -68,6 +70,11 @@ public class ELevel implements Level {
     @Override
     public boolean isTeleport() {
         return teleport;
+    }
+
+    @Override
+    public boolean isCrafting() {
+        return crafting;
     }
 
     @Override

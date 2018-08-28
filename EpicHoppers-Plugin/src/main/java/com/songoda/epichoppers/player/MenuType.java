@@ -4,6 +4,7 @@ public enum MenuType {
 
     NOT_IN,
     OVERVIEW,
-    FILTER
+    FILTER,
+    CRAFTING
 
 }

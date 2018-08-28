@@ -67,6 +67,15 @@ public interface Level {
     boolean isTeleport();
 
     /**
+     * Whether or not hopper crafting is enabled with
+     * this level.
+     *
+     * @return true if crafting is enabled false
+     * otherwise
+     */
+    boolean isCrafting();
+
+    /**
      * Get the distance in which a hopper with this
      * level will suck items into them.
      *
