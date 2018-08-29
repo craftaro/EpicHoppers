@@ -2,18 +2,14 @@ package com.songoda.epichoppers.handlers;
 
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.utils.Debugger;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.*;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.*;
 
@@ -82,7 +78,7 @@ public class HopHandler {
 
                 List<Material> materials = new ArrayList<>();
 
-                for (ModuleAbstract module : hopper.getLevel().getRegisteredModules()) {
+                for (Module module : hopper.getLevel().getRegisteredModules()) {
 
                     // Run Module
                     module.run(hopper);
@@ -90,7 +86,6 @@ public class HopHandler {
                     // Add banned materials to list.
                     if (module.getBlockedItems(hopper) == null) continue;
                     materials.addAll(module.getBlockedItems(hopper));
-
                 }
 
 

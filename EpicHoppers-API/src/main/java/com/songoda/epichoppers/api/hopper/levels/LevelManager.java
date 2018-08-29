@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.api.hopper.levels;
 
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -20,7 +20,7 @@ public interface LevelManager {
      * @param filter Whether or not access to the filter is allowed.
      * @param teleport Whether or not teleporting through hoppers is allowed.
      */
-    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, ArrayList<ModuleAbstract> modules);
+    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, ArrayList<Module> modules);
 
     /**
      * Get {@link Level} by corresponding integer value.

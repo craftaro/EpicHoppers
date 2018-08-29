@@ -2,14 +2,14 @@ package com.songoda.epichoppers.hopper.levels;
 
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.levels.Level;
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ELevel implements Level {
 
-    private final ArrayList<ModuleAbstract> registeredModules;
+    private final ArrayList<Module> registeredModules;
 
     private int level, costExperience, costEconomy, range, amount;
 
@@ -17,7 +17,7 @@ public class ELevel implements Level {
 
     private final List<String> description = new ArrayList<>();
 
-    ELevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, ArrayList<ModuleAbstract> registeredModules) {
+    ELevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, ArrayList<Module> registeredModules) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
@@ -34,7 +34,7 @@ public class ELevel implements Level {
         if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
         if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.teleport", true));
 
-        for (ModuleAbstract module : registeredModules) {
+        for (Module module : registeredModules) {
             description.add(module.getDescription());
         }
 
@@ -81,12 +81,12 @@ public class ELevel implements Level {
     }
 
     @Override
-    public ArrayList<ModuleAbstract> getRegisteredModules() {
+    public ArrayList<Module> getRegisteredModules() {
         return new ArrayList<>(registeredModules);
     }
 
     @Override
-    public void addModule(ModuleAbstract module) {
+    public void addModule(Module module) {
         registeredModules.add(module);
     }
 

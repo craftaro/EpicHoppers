@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.api.hopper.levels;
 
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public interface Level {
 
     List<String> getDescription();
 
-    ArrayList<ModuleAbstract> getRegisteredModules();
+    ArrayList<Module> getRegisteredModules();
 
-    void addModule(ModuleAbstract module);
+    void addModule(Module module);
 }

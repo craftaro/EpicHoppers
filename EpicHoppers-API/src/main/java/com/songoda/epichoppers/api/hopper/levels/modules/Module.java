@@ -5,7 +5,7 @@ import org.bukkit.Material;
 
 import java.util.List;
 
-public interface ModuleAbstract {
+public interface Module {
 
     String getName();
 

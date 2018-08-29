@@ -3,7 +3,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
@@ -16,7 +16,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import java.util.Collection;
 import java.util.List;
 
-public class ModuleSuction implements ModuleAbstract {
+public class ModuleSuction implements Module {
     
     private final int amount;
     

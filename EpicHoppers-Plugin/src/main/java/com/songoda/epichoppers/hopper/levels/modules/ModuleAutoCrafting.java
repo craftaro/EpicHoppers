@@ -2,7 +2,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModuleAutoCrafting implements ModuleAbstract {
+public class ModuleAutoCrafting implements Module {
 
     @Override
     public String getName() {

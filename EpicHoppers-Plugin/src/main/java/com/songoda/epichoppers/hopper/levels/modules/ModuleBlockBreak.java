@@ -3,7 +3,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModuleBlockBreak implements ModuleAbstract {
+public class ModuleBlockBreak implements Module {
 
     private Map<Block, Integer> blockTick = new HashMap<>();
 

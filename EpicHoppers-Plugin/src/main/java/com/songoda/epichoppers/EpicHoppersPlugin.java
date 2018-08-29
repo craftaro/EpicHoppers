@@ -9,7 +9,7 @@ import com.songoda.epichoppers.api.EpicHoppersAPI;
 import com.songoda.epichoppers.api.hopper.*;
 import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.api.hopper.levels.LevelManager;
-import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.api.utils.ClaimableProtectionPluginHook;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import com.songoda.epichoppers.boost.BoostData;
@@ -46,7 +46,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -267,7 +266,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             int costExperiance = levels.getInt("Cost-xp");
             int costEconomy = levels.getInt("Cost-eco");
 
-            ArrayList<ModuleAbstract> modules = new ArrayList<>();
+            ArrayList<Module> modules = new ArrayList<>();
 
             for (String key : levels.getKeys(false)) {
                 if (key.equals("Suction") && levels.getInt("Suction") != 0) {
