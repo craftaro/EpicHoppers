@@ -3,7 +3,7 @@ package com.songoda.epichoppers.listeners;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.Level;
+import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.hopper.EFilter;
 import com.songoda.epichoppers.hopper.EHopper;
@@ -39,7 +39,7 @@ public class BlockListeners implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         try {
             if (e.getBlock().getType().equals(Material.ENDER_CHEST)) {
-                instance.dataFile.getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(e.getBlock()), e.getPlayer().getUniqueId().toString());
+                instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(e.getBlock()), e.getPlayer().getUniqueId().toString());
                 return;
             }
 
@@ -84,7 +84,7 @@ public class BlockListeners implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         try {
             if (event.getBlock().getType().equals(Material.ENDER_CHEST)) {
-                instance.dataFile.getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(event.getBlock()), null);
+                instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(event.getBlock()), null);
             }
 
             Block block = event.getBlock();

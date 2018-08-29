@@ -7,6 +7,9 @@ import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.api.EpicHoppers;
 import com.songoda.epichoppers.api.EpicHoppersAPI;
 import com.songoda.epichoppers.api.hopper.*;
+import com.songoda.epichoppers.api.hopper.levels.Level;
+import com.songoda.epichoppers.api.hopper.levels.LevelManager;
+import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
 import com.songoda.epichoppers.api.utils.ClaimableProtectionPluginHook;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import com.songoda.epichoppers.boost.BoostData;
@@ -19,7 +22,10 @@ import com.songoda.epichoppers.hooks.*;
 import com.songoda.epichoppers.hopper.EFilter;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.hopper.EHopperManager;
-import com.songoda.epichoppers.hopper.ELevelManager;
+import com.songoda.epichoppers.hopper.levels.ELevelManager;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleBlockBreak;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
 import com.songoda.epichoppers.listeners.BlockListeners;
 import com.songoda.epichoppers.listeners.HopperListeners;
 import com.songoda.epichoppers.listeners.InteractListeners;
@@ -40,6 +46,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -82,7 +89,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         settingsManager = new SettingsManager(this);
         boostManager = new BoostManager();
         setupConfig();
-        loadDataFile();
         enchantmentHandler = new EnchantmentHandler();
         playerDataManager = new PlayerDataManager();
 
@@ -214,14 +220,15 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                 continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
 
-            ConfigurationSection sync = dataFile.getConfig().getConfigurationSection("data.sync." + locationStr);
+            ConfigurationSection sync = dataFile.getConfig().createSection("data.sync." + locationStr);
 
             sync.set(".level", hopper.getLevel().getLevel());
             sync.set(".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
             sync.set(".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
             sync.set(".placedBy", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString());
             sync.set(".teleportTrigger", hopper.getTeleportTrigger().toString());
-            sync.set(".autoCrafting", hopper.getAutoCrafting() == Material.AIR ? null : hopper.getAutoCrafting().name());
+
+            sync.set(".autoCrafting", hopper.getAutoCrafting() == null || hopper.getAutoCrafting() == Material.AIR ? null : hopper.getAutoCrafting().name());
             sync.set(".whitelist", hopper.getFilter().getWhiteList());
             sync.set(".blacklist", hopper.getFilter().getBlackList());
             sync.set(".void", hopper.getFilter().getVoidList());
@@ -251,85 +258,89 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         for (String levelName : getConfig().getConfigurationSection("settings.levels").getKeys(false)) {
             int level = Integer.valueOf(levelName.split("-")[1]);
 
-            ConfigurationSection levels = getConfig().getConfigurationSection("settings.levels");
+            ConfigurationSection levels = getConfig().getConfigurationSection("settings.levels." + levelName);
+            
+            int radius = levels.getInt("Range");
+            int amount = levels.getInt("Amount");
+            boolean filter = levels.getBoolean("Filter");
+            boolean teleport = levels.getBoolean("Teleport");
+            int costExperiance = levels.getInt("Cost-xp");
+            int costEconomy = levels.getInt("Cost-eco");
 
-            int radius = levels.getInt(levelName + ".Range");
-            int amount = levels.getInt(levelName + ".Amount");
-            int suction = levels.getInt(levelName + ".Suction");
-            int blockBreak = levels.getInt(levelName + ".BlockBreak");
-            boolean filter = levels.getBoolean(levelName + ".Filter");
-            boolean teleport = levels.getBoolean(levelName + ".Teleport");
-            boolean crafting = levels.getBoolean(levelName + ".AutoCrafting");
-            int costExperiance = levels.getInt(levelName + ".Cost-xp");
-            int costEconomy = levels.getInt(levelName + ".Cost-eco");
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, suction, blockBreak, filter, teleport, crafting);
+            ArrayList<ModuleAbstract> modules = new ArrayList<>();
+
+            for (String key : levels.getKeys(false)) {
+                if (key.equals("Suction") && levels.getInt("Suction") != 0) {
+                    modules.add(new ModuleSuction(levels.getInt("Suction")));
+                } else if (key.equals("BlockBreak") && levels.getInt("BlockBreak") != 0) {
+                    modules.add(new ModuleBlockBreak(levels.getInt("BlockBreak")));
+                } else if (key.equals("AutoCrafting")) {
+                    modules.add(new ModuleAutoCrafting());
+                }
+
+            }
+            
+            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, modules);
         }
     }
 
     private void setupConfig() {
         settingsManager.updateSettings();
 
-        ConfigurationSection levels = getConfig().getConfigurationSection("settings.levels");
+        ConfigurationSection levels = getConfig().createSection("settings.levels");
 
-        if (levels.contains("Level-1")) {
-            levels.addDefault("Level-1.Range", 10);
-            levels.addDefault("Level-1.Amount", 1);
-            levels.addDefault("Level-1.Cost-xp", 20);
-            levels.addDefault("Level-1.Cost-eco", 5000);
+        if (!levels.contains("Level-1")) {
+            levels.set("Level-1.Range", 10);
+            levels.set("Level-1.Amount", 1);
+            levels.set("Level-1.Cost-xp", 20);
+            levels.set("Level-1.Cost-eco", 5000);
 
-            levels.addDefault("Level-2.Range", 20);
-            levels.addDefault("Level-2.Amount", 2);
-            levels.addDefault("Level-2.Cost-xp", 25);
-            levels.addDefault("Level-2.Cost-eco", 7500);
+            levels.set("Level-2.Range", 20);
+            levels.set("Level-2.Amount", 2);
+            levels.set("Level-2.Cost-xp", 25);
+            levels.set("Level-2.Cost-eco", 7500);
 
-            levels.addDefault("Level-3.Range", 30);
-            levels.addDefault("Level-3.Amount", 3);
-            levels.addDefault("Level-3.Suction", 1);
-            levels.addDefault("Level-3.Cost-xp", 30);
-            levels.addDefault("Level-3.Cost-eco", 10000);
+            levels.set("Level-3.Range", 30);
+            levels.set("Level-3.Amount", 3);
+            levels.set("Level-3.Suction", 1);
+            levels.set("Level-3.Cost-xp", 30);
+            levels.set("Level-3.Cost-eco", 10000);
 
-            levels.addDefault("Level-4.Range", 40);
-            levels.addDefault("Level-4.Amount", 4);
-            levels.addDefault("Level-4.Suction", 2);
-            levels.addDefault("Level-4.BlockBreak", 4);
-            levels.addDefault("Level-4.Cost-xp", 35);
-            levels.addDefault("Level-4.Cost-eco", 12000);
+            levels.set("Level-4.Range", 40);
+            levels.set("Level-4.Amount", 4);
+            levels.set("Level-4.Suction", 2);
+            levels.set("Level-4.BlockBreak", 4);
+            levels.set("Level-4.Cost-xp", 35);
+            levels.set("Level-4.Cost-eco", 12000);
 
-            levels.addDefault("Level-5.Range", 50);
-            levels.addDefault("Level-5.Amount", 5);
-            levels.addDefault("Level-5.Suction", 3);
-            levels.addDefault("Level-5.BlockBreak", 2);
-            levels.addDefault("Level-5.Cost-xp", 40);
-            levels.addDefault("Level-5.Cost-eco", 15000);
+            levels.set("Level-5.Range", 50);
+            levels.set("Level-5.Amount", 5);
+            levels.set("Level-5.Suction", 3);
+            levels.set("Level-5.BlockBreak", 2);
+            levels.set("Level-5.Cost-xp", 40);
+            levels.set("Level-5.Cost-eco", 15000);
 
-            levels.addDefault("Level-6.Range", 60);
-            levels.addDefault("Level-6.Amount", 5);
-            levels.addDefault("Level-6.Suction", 3);
-            levels.addDefault("Level-6.BlockBreak", 2);
-            levels.addDefault("Level-6.Filter", true);
-            levels.addDefault("Level-6.Teleport", true);
-            levels.addDefault("Level-6.Cost-xp", 45);
-            levels.addDefault("Level-6.Cost-eco", 20000);
+            levels.set("Level-6.Range", 60);
+            levels.set("Level-6.Amount", 5);
+            levels.set("Level-6.Suction", 3);
+            levels.set("Level-6.BlockBreak", 2);
+            levels.set("Level-6.Filter", true);
+            levels.set("Level-6.Teleport", true);
+            levels.set("Level-6.Cost-xp", 45);
+            levels.set("Level-6.Cost-eco", 20000);
 
-            levels.addDefault("Level-7.Range", 70);
-            levels.addDefault("Level-7.Amount", 5);
-            levels.addDefault("Level-7.Suction", 3);
-            levels.addDefault("Level-7.BlockBreak", 2);
-            levels.addDefault("Level-7.Filter", true);
-            levels.addDefault("Level-7.Teleport", true);
-            levels.addDefault("Level-7.AutoCrafting", true);
-            levels.addDefault("Level-7.Cost-xp", 50);
-            levels.addDefault("Level-7.Cost-eco", 30000);
+            levels.set("Level-7.Range", 70);
+            levels.set("Level-7.Amount", 5);
+            levels.set("Level-7.Suction", 3);
+            levels.set("Level-7.BlockBreak", 2);
+            levels.set("Level-7.Filter", true);
+            levels.set("Level-7.Teleport", true);
+            levels.set("Level-7.AutoCrafting", true);
+            levels.set("Level-7.Cost-xp", 50);
+            levels.set("Level-7.Cost-eco", 30000);
 
         }
-
-        getConfig().options().copyDefaults(true);
         saveConfig();
-    }
-
-    private void loadDataFile() {
-        dataFile.getConfig().options().copyDefaults(true);
-        dataFile.saveConfig();
     }
 
     public void reload() {
@@ -422,6 +433,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     private void register(Supplier<ProtectionPluginHook> hookSupplier) {
         this.registerProtectionHook(hookSupplier.get());
+    }
+
+    public ConfigWrapper getDataFile() {
+        return dataFile;
     }
 
     @Override

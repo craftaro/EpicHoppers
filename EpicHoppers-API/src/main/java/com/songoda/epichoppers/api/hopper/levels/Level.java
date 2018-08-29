@@ -1,17 +1,11 @@
-package com.songoda.epichoppers.api.hopper;
+package com.songoda.epichoppers.api.hopper.levels;
 
+import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public interface Level {
-
-    /**
-     * Get a list of strings describing the various
-     * levels and their details that are currently
-     * unlocked with this level.
-     *
-     * @return list of levels
-     */
-    List<String> getDescription();
 
     /**
      * Get the current level in numerical format.
@@ -39,16 +33,6 @@ public interface Level {
     int getAmount();
 
     /**
-     * Get the tick speed of the BlockBreaking ability
-     * for this level.
-     *
-     * 0 means disabled.
-     *
-     * @return BlockBreak tick speed
-     */
-    int getBlockBreak();
-
-    /**
      * Whether or not the filter is enabled with this
      * level.
      *
@@ -66,22 +50,6 @@ public interface Level {
      */
     boolean isTeleport();
 
-    /**
-     * Whether or not hopper crafting is enabled with
-     * this level.
-     *
-     * @return true if crafting is enabled false
-     * otherwise
-     */
-    boolean isCrafting();
-
-    /**
-     * Get the distance in which a hopper with this
-     * level will suck items into them.
-     *
-     * @return suction amount
-     */
-    int getSuction();
 
     /**
      * Get the cost in experience in order to upgrade
@@ -98,4 +66,10 @@ public interface Level {
      * @return economy upgrade cost
      */
     int getCostEconomy();
+
+    List<String> getDescription();
+
+    ArrayList<ModuleAbstract> getRegisteredModules();
+
+    void addModule(ModuleAbstract module);
 }

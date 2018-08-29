@@ -2,6 +2,7 @@ package com.songoda.epichoppers.handlers;
 
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.utils.Debugger;
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +22,6 @@ import java.util.*;
  */
 public class HopHandler {
 
-    public Map<Block, Integer> blockTick = new HashMap<>();
     private EpicHoppersPlugin instance;
 
     public HopHandler(EpicHoppersPlugin instance) {
@@ -38,17 +38,14 @@ public class HopHandler {
 
     private void hopperCleaner() {
         try {
-            if (instance.dataFile.getConfig().contains("data.sync")) {
-                ConfigurationSection cs = instance.dataFile.getConfig().getConfigurationSection("data.sync");
-                for (String key : cs.getKeys(false)) {
-                    if (Arconix.pl().getApi().serialize().unserializeLocation(key).getWorld() != null) {
-                        Block b = Arconix.pl().getApi().serialize().unserializeLocation(key).getBlock();
-                        if (b == null || !(b.getState() instanceof Hopper)) {
-                            instance.dataFile.getConfig().getConfigurationSection("data.sync").set(key, null);
-                            instance.getLogger().info("EpicHoppers Removing non-hopper entry: " + key);
-                        }
-                    }
-                }
+            ConfigurationSection data = instance.getConfig().createSection("data");
+            if (!data.contains("sync")) return;
+            for (String key : data.getConfigurationSection("sync").getKeys(false)) {
+                if (Arconix.pl().getApi().serialize().unserializeLocation(key).getWorld() == null) continue;
+                Block block = Arconix.pl().getApi().serialize().unserializeLocation(key).getBlock();
+                if (block != null && block.getState() instanceof Hopper) continue;
+                data.getConfigurationSection("sync").set(key, null);
+                instance.getLogger().info("EpicHoppers Removing non-hopper entry: " + key);
             }
         } catch (Exception e) {
             Debugger.runReport(e);
@@ -57,8 +54,6 @@ public class HopHandler {
 
     private void hopperRunner() {
         try {
-            Set<Entity> metaItems = new HashSet<>();
-
             for (com.songoda.epichoppers.api.hopper.Hopper hopper : instance.getHopperManager().getHoppers().values()) {
 
                 Location location = hopper.getLocation();
@@ -81,91 +76,24 @@ public class HopHandler {
                     instance.getLogger().info("EpicHoppers Removing non-hopper entry: " + location.toString());
                 }
 
-                org.bukkit.block.Hopper hopperBlock = (org.bukkit.block.Hopper) (block != null ? block.getState() : null);
+                Hopper hopperBlock = hopper.getHopper();
 
                 ItemStack[] is = hopperBlock.getInventory().getContents();
 
-                if (hopper.getAutoCrafting() != null && canMove(hopperBlock.getInventory(), new ItemStack(hopper.getAutoCrafting()))) {
-                    main:
-                    for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
-                        if (!(recipe instanceof ShapedRecipe)) continue;
-                        Map<Character, ItemStack> ingredientMap = ((ShapedRecipe) recipe).getIngredientMap();
-                        if (hopperBlock.getInventory().getSize() == 0) continue;
-                        List<ItemStack> needed = stackItems(new ArrayList<>(ingredientMap.values()));
+                List<Material> materials = new ArrayList<>();
 
-                        for (ItemStack item : needed) {
-                            if (!hopperBlock.getInventory().contains(item.getType(), item.getAmount())) continue main;
-                        }
-                        for (ItemStack item : needed) {
-                            hopperBlock.getInventory().removeItem(item);
-                        }
-                        hopperBlock.getInventory().addItem(new ItemStack(hopper.getAutoCrafting()));
-                    }
+                for (ModuleAbstract module : hopper.getLevel().getRegisteredModules()) {
+
+                    // Run Module
+                    module.run(hopper);
+
+                    // Add banned materials to list.
+                    if (module.getBlockedItems(hopper) == null) continue;
+                    materials.addAll(module.getBlockedItems(hopper));
+
                 }
 
-                if (hopper.getLevel().getBlockBreak() != 0) {
-                    int amt = hopper.getLevel().getBlockBreak();
-                    if (!blockTick.containsKey(block)) {
-                        blockTick.put(block, 1);
-                    } else {
-                        int tick = blockTick.get(block);
-                        int put = tick + 1;
-                        blockTick.put(block, put);
-                        if (tick >= amt) {
-                            Block above = block.getRelative(0, 1, 0);
-                            if (above.getType() != Material.AIR && !instance.getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
-                                above.getWorld().playSound(above.getLocation(), Sound.BLOCK_STONE_BREAK, 1F, 1F);
-                                Location locationAbove = above.getLocation();
-                                locationAbove.add(.5, .5, .5);
 
-                                float ox = (float) (0 + (Math.random() * .5));
-                                float oy = (float) (0 + (Math.random() * .5));
-                                float oz = (float) (0 + (Math.random() * .5));
-                                Arconix.pl().getApi().packetLibrary.getParticleManager().broadcastParticle(locationAbove, ox, oy, oz, 0, instance.getConfig().getString("Main.BlockBreak Particle Type"), 15);
-
-                                above.breakNaturally();
-                            }
-                            blockTick.remove(block);
-                        }
-                    }
-                }
-                if (hopper.getLevel().getSuction() != 0) {
-                    int suck = hopper.getLevel().getSuction();
-                    double radius = suck + .5;
-
-                    Collection<Entity> nearbyEntite = block.getLocation().getWorld().getNearbyEntities(block.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius);
-
-                    for (Entity e : nearbyEntite) {
-                        if (!(e instanceof Item) || e.getTicksLived() < 10 || e.getLocation().getBlock().getType() == Material.HOPPER) {
-                            continue;
-                        }
-                        ItemStack hopItem = ((Item) e).getItemStack().clone();
-                        if (hopItem.getType().name().contains("SHULKER_BOX"))
-                            continue;
-                        if (hopItem.hasItemMeta() && hopItem.getItemMeta().hasDisplayName() &&
-                                StringUtils.substring(hopItem.getItemMeta().getDisplayName(), 0, 3).equals("***")) {
-                            continue; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
-                        }
-                        if (e.hasMetadata("grabbed"))
-                            continue;
-                        ItemStack item = ((Item) e).getItemStack();
-                        if (!canHop(hopperBlock.getInventory(), item, 1)) {
-                            continue;
-                        }
-                        ((Item) e).setPickupDelay(999);
-                        e.setMetadata("grabbed", new FixedMetadataValue(instance, ""));
-                        metaItems.add(e);
-                        if (!e.isOnGround())
-                            continue;
-                        float xx = (float) (0 + (Math.random() * .3));
-                        float yy = (float) (0 + (Math.random() * .3));
-                        float zz = (float) (0 + (Math.random() * .3));
-                        Arconix.pl().getApi().packetLibrary.getParticleManager().broadcastParticle(e.getLocation(), xx, yy, zz, 0, "FLAME", 5);
-                        e.remove();
-                        hopperBlock.getInventory().addItem(hopItem);
-                        break;
-                    }
-                }
                 if (hopper.getSyncedBlock() == null) continue;
                 Location dest = hopper.getSyncedBlock().getLocation();
                 if (dest == null) {
@@ -190,18 +118,6 @@ public class HopHandler {
                 List<ItemStack> whiteList = hopper.getFilter().getWhiteList();
 
                 List<ItemStack> blackList = hopper.getFilter().getBlackList();
-
-                List<Material> materials = new ArrayList<>();
-                if (hopper.getAutoCrafting() != null) {
-                    for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
-                        if (recipe instanceof ShapedRecipe) {
-                            for (ItemStack itemStack : ((ShapedRecipe) recipe).getIngredientMap().values()) {
-                                if (itemStack == null) continue;
-                                materials.add(itemStack.getType());
-                            }
-                        }
-                    }
-                }
 
                 int num = 0;
                 while (num != 5) {
@@ -230,31 +146,12 @@ public class HopHandler {
                     }
                     num++;
                 }
-
-
             }
-
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    private List<ItemStack> stackItems(List<ItemStack> items) {
-        Map<Material, Integer> materials = new HashMap<>();
-        for (ItemStack itemStack : items) {
-            if (itemStack == null) continue;
-            if (materials.containsKey(itemStack.getType())) {
-                materials.put(itemStack.getType(), materials.get(itemStack.getType()) + itemStack.getAmount());
-                continue;
-            }
-            materials.put(itemStack.getType(), itemStack.getAmount());
-        }
-        List<ItemStack> stacked = new ArrayList<>();
-        for (Map.Entry<Material, Integer> entry : materials.entrySet()) {
-            stacked.add(new ItemStack(entry.getKey(), entry.getValue()));
-        }
-        return stacked;
-    }
 
     private void doBlacklist(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, ItemStack[] isS, int amt, int place) {
         try {
@@ -315,7 +212,7 @@ public class HopHandler {
 
             if (b2.getType().equals(Material.ENDER_CHEST)) {
                 try {
-                    OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(instance.dataFile.getConfig().getString("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(b2))));
+                    OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(instance.getDataFile().getConfig().getString("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(b2))));
                     if (op.isOnline() && canHop(op.getPlayer().getEnderChest(), newItem, amt)) {
                         if (!ovoid.contains(it.getType())) {
                             op.getPlayer().getEnderChest().addItem(newItem);
@@ -366,21 +263,6 @@ public class HopHandler {
             Debugger.runReport(e);
         }
         return 0;
-    }
-
-    private boolean canMove(Inventory inventory, ItemStack item) {
-        try {
-            if (inventory.firstEmpty() != -1) return true;
-
-            for (ItemStack stack : inventory.getContents()) {
-                if (stack.isSimilar(item) && stack.getAmount() < stack.getMaxStackSize()) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-        return false;
     }
 
     public boolean canHop(Inventory i, ItemStack item, int hop) {

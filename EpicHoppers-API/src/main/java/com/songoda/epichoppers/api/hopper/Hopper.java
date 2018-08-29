@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.api.hopper;
 
+import com.songoda.epichoppers.api.hopper.levels.Level;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -8,6 +9,8 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 public interface Hopper {
+
+    org.bukkit.block.Hopper getHopper();
 
     /**
      * This will sync this hopper with another hopper.

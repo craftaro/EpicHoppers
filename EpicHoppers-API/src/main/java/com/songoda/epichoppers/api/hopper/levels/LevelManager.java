@@ -1,5 +1,8 @@
-package com.songoda.epichoppers.api.hopper;
+package com.songoda.epichoppers.api.hopper.levels;
 
+import com.songoda.epichoppers.api.hopper.levels.modules.ModuleAbstract;
+
+import java.util.ArrayList;
 import java.util.Map;
 
 public interface LevelManager {
@@ -14,13 +17,10 @@ public interface LevelManager {
      * @param costEconomy The cost in economy to upgrade the hopper
      * @param range The range in which this hopper will need to be in order to sync with another hopper
      * @param amount The amount of items this hopper will transfer at a single time
-     * @param suction The distance in which this hopper will suck items into it
-     * @param blockBreak The tick frequency in which this hopper will break blocks placed directly above it.
      * @param filter Whether or not access to the filter is allowed.
      * @param teleport Whether or not teleporting through hoppers is allowed.
-     * @param crafting Whether or not crafting with hoppers is allowed.
      */
-    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, int suction, int blockBreak, boolean filter, boolean teleport, boolean crafting);
+    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, ArrayList<ModuleAbstract> modules);
 
     /**
      * Get {@link Level} by corresponding integer value.

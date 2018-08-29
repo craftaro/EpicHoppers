@@ -2,7 +2,7 @@ package com.songoda.epichoppers.command.commands;
 
 import com.songoda.arconix.api.methods.formatting.TextComponent;
 import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Level;
+import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.command.AbstractCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;

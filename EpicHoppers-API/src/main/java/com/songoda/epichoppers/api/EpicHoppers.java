@@ -1,8 +1,8 @@
 package com.songoda.epichoppers.api;
 
 import com.songoda.epichoppers.api.hopper.HopperManager;
-import com.songoda.epichoppers.api.hopper.Level;
-import com.songoda.epichoppers.api.hopper.LevelManager;
+import com.songoda.epichoppers.api.hopper.levels.Level;
+import com.songoda.epichoppers.api.hopper.levels.LevelManager;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import org.bukkit.inventory.ItemStack;
 

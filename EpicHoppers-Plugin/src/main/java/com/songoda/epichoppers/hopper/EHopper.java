@@ -6,9 +6,10 @@ import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Filter;
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.Level;
+import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.boost.BoostData;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.player.MenuType;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.utils.Debugger;
@@ -32,7 +33,7 @@ import java.util.UUID;
 public class EHopper implements Hopper {
 
     private Location location;
-    private com.songoda.epichoppers.api.hopper.Level level;
+    private Level level;
     private UUID lastPlayer;
     private UUID placedBy;
     private Block syncedBlock;
@@ -41,7 +42,7 @@ public class EHopper implements Hopper {
     private Material autoCrafting;
 
 
-    public EHopper(Location location, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+    public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
         this.level = level;
         this.syncedBlock = syncedBlock;
@@ -52,7 +53,7 @@ public class EHopper implements Hopper {
         this.autoCrafting = autoCrafting;
     }
 
-    public EHopper(Block block, com.songoda.epichoppers.api.hopper.Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+    public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this(block.getLocation(), level, lastPlayer, placedBy, syncedBlock, filter, teleportTrigger, autoCrafting);
     }
 
@@ -67,7 +68,7 @@ public class EHopper implements Hopper {
 
             instance.getPlayerDataManager().getPlayerData(player).setLastHopper(this);
 
-            com.songoda.epichoppers.api.hopper.Level nextLevel = instance.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? instance.getLevelManager().getLevel(level.getLevel() + 1) : null;
+            Level nextLevel = instance.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? instance.getLevelManager().getLevel(level.getLevel() + 1) : null;
 
             Inventory i = Bukkit.createInventory(null, 27, Methods.formatName(level.getLevel(), false));
 
@@ -177,7 +178,7 @@ public class EHopper implements Hopper {
                 i.setItem(5, filter);
             }
 
-            boolean canCraft = level.isCrafting() || player.hasPermission("EpicHoppers.Crafting");
+            boolean canCraft = level.getRegisteredModules().removeIf(e -> e.getName().equals("AutoCrafting"));
             if (!canCraft)
                 i.setItem(22, hook);
             else if (canFilter) {
@@ -434,7 +435,7 @@ public class EHopper implements Hopper {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             if (instance.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) {
 
-                com.songoda.epichoppers.api.hopper.Level level = instance.getLevelManager().getLevel(this.level.getLevel() + 1);
+                Level level = instance.getLevelManager().getLevel(this.level.getLevel() + 1);
                 int cost;
                 if (type.equals("XP")) {
                     cost = level.getCostExperience();
@@ -471,7 +472,7 @@ public class EHopper implements Hopper {
         }
     }
 
-    public void upgradeFinal(com.songoda.epichoppers.api.hopper.Level level, Player player) {
+    public void upgradeFinal(Level level, Player player) {
         try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             this.level = level;
@@ -513,6 +514,11 @@ public class EHopper implements Hopper {
         } catch (Exception e) {
             Debugger.runReport(e);
         }
+    }
+
+    @Override
+    public org.bukkit.block.Hopper getHopper() {
+        return (org.bukkit.block.Hopper) (location.getBlock() != null ? location.getBlock().getState() : null);
     }
 
     @Override
