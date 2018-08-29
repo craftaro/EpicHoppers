@@ -36,6 +36,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -45,21 +46,16 @@ import java.util.function.Supplier;
 
 
 public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
-    public static CommandSender console = Bukkit.getConsoleSender();
+    private static CommandSender console = Bukkit.getConsoleSender();
 
     private static EpicHoppersPlugin INSTANCE;
-
+    public References references = null;
+    public EnchantmentHandler enchantmentHandler;
     private List<ProtectionPluginHook> protectionHooks = new ArrayList<>();
     private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook;
-
     private SettingsManager settingsManager;
-
-    public References references = null;
     private ConfigWrapper hooksFile = new ConfigWrapper(this, "", "hooks.yml");
-    public ConfigWrapper dataFile = new ConfigWrapper(this, "", "data.yml");
-
-    public EnchantmentHandler enchantmentHandler;
-
+    private ConfigWrapper dataFile = new ConfigWrapper(this, "", "data.yml");
     private Locale locale;
 
     private HopperManager hopperManager;
@@ -68,6 +64,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private PlayerDataManager playerDataManager;
 
     private TeleportHandler teleportHandler;
+
+    public static EpicHoppersPlugin getInstance() {
+        return INSTANCE;
+    }
 
     public void onEnable() {
         INSTANCE = this;
@@ -163,26 +163,26 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, this::saveToFile, 6000, 6000);
 
-        getServer().getPluginManager().registerEvents(new HopperListeners(this), this);
-        getServer().getPluginManager().registerEvents(new BlockListeners(this), this);
-        getServer().getPluginManager().registerEvents(new InteractListeners(this), this);
-        getServer().getPluginManager().registerEvents(new InventoryListeners(this), this);
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
+        pluginManager.registerEvents(new HopperListeners(this), this);
+        pluginManager.registerEvents(new BlockListeners(this), this);
+        pluginManager.registerEvents(new InteractListeners(this), this);
+        pluginManager.registerEvents(new InventoryListeners(this), this);
 
         // Command registration
         this.getCommand("EpicHoppers").setExecutor(new CommandManager(this));
 
-
-
         // Register default hooks
-        if (Bukkit.getPluginManager().isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("Factions")) this.register(HookFactions::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("GriefPrevention")) this.register(HookGriefPrevention::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("Kingdoms")) this.register(HookKingdoms::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("PlotSquared")) this.register(HookPlotSquared::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("RedProtect")) this.register(HookRedProtect::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("Towny")) this.register(HookTowny::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("USkyBlock")) this.register(HookUSkyBlock::new);
-        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
+        if (pluginManager.isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
+        if (pluginManager.isPluginEnabled("Factions")) this.register(HookFactions::new);
+        if (pluginManager.isPluginEnabled("GriefPrevention")) this.register(HookGriefPrevention::new);
+        if (pluginManager.isPluginEnabled("Kingdoms")) this.register(HookKingdoms::new);
+        if (pluginManager.isPluginEnabled("PlotSquared")) this.register(HookPlotSquared::new);
+        if (pluginManager.isPluginEnabled("RedProtect")) this.register(HookRedProtect::new);
+        if (pluginManager.isPluginEnabled("Towny")) this.register(HookTowny::new);
+        if (pluginManager.isPluginEnabled("USkyBlock")) this.register(HookUSkyBlock::new);
+        if (pluginManager.isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
 
 
         console.sendMessage(Arconix.pl().getApi().format().formatText("&a============================="));
@@ -213,16 +213,19 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             if (hopper.getLevel() == null || hopper.getLocation() == null || hopper.getLocation().getChunk() == null)
                 continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
-            dataFile.getConfig().set("data.sync." + locationStr + ".level", hopper.getLevel().getLevel());
-            dataFile.getConfig().set("data.sync." + locationStr + ".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
-            dataFile.getConfig().set("data.sync." + locationStr + ".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
-            dataFile.getConfig().set("data.sync." + locationStr + ".placedBy", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString());
-            dataFile.getConfig().set("data.sync." + locationStr + ".teleportTrigger", hopper.getTeleportTrigger().toString());
-            dataFile.getConfig().set("data.sync." + locationStr + ".autoCrafting", hopper.getAutoCrafting() == Material.AIR ? null : hopper.getAutoCrafting().name());
-            dataFile.getConfig().set("data.sync." + locationStr + ".whitelist", hopper.getFilter().getWhiteList());
-            dataFile.getConfig().set("data.sync." + locationStr + ".blacklist", hopper.getFilter().getBlackList());
-            dataFile.getConfig().set("data.sync." + locationStr + ".void", hopper.getFilter().getVoidList());
-            dataFile.getConfig().set("data.sync." + locationStr + ".black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint().getLocation()));
+
+            ConfigurationSection sync = dataFile.getConfig().getConfigurationSection("data.sync." + locationStr);
+
+            sync.set(".level", hopper.getLevel().getLevel());
+            sync.set(".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
+            sync.set(".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
+            sync.set(".placedBy", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString());
+            sync.set(".teleportTrigger", hopper.getTeleportTrigger().toString());
+            sync.set(".autoCrafting", hopper.getAutoCrafting() == Material.AIR ? null : hopper.getAutoCrafting().name());
+            sync.set(".whitelist", hopper.getFilter().getWhiteList());
+            sync.set(".blacklist", hopper.getFilter().getBlackList());
+            sync.set(".void", hopper.getFilter().getVoidList());
+            sync.set(".black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint().getLocation()));
         }
 
         /*
@@ -247,15 +250,18 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         ((ELevelManager) levelManager).clear();
         for (String levelName : getConfig().getConfigurationSection("settings.levels").getKeys(false)) {
             int level = Integer.valueOf(levelName.split("-")[1]);
-            int radius = getConfig().getInt("settings.levels." + levelName + ".Range");
-            int amount = getConfig().getInt("settings.levels." + levelName + ".Amount");
-            int suction = getConfig().getInt("settings.levels." + levelName + ".Suction");
-            int blockBreak = getConfig().getInt("settings.levels." + levelName + ".BlockBreak");
-            boolean filter = getConfig().getBoolean("settings.levels." + levelName + ".Filter");
-            boolean teleport = getConfig().getBoolean("settings.levels." + levelName + ".Teleport");
-            boolean crafting = getConfig().getBoolean("settings.levels." + levelName + ".AutoCrafting");
-            int costExperiance = getConfig().getInt("settings.levels." + levelName + ".Cost-xp");
-            int costEconomy = getConfig().getInt("settings.levels." + levelName + ".Cost-eco");
+
+            ConfigurationSection levels = getConfig().getConfigurationSection("settings.levels");
+
+            int radius = levels.getInt(levelName + ".Range");
+            int amount = levels.getInt(levelName + ".Amount");
+            int suction = levels.getInt(levelName + ".Suction");
+            int blockBreak = levels.getInt(levelName + ".BlockBreak");
+            boolean filter = levels.getBoolean(levelName + ".Filter");
+            boolean teleport = levels.getBoolean(levelName + ".Teleport");
+            boolean crafting = levels.getBoolean(levelName + ".AutoCrafting");
+            int costExperiance = levels.getInt(levelName + ".Cost-xp");
+            int costEconomy = levels.getInt(levelName + ".Cost-eco");
             levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, suction, blockBreak, filter, teleport, crafting);
         }
     }
@@ -263,55 +269,57 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private void setupConfig() {
         settingsManager.updateSettings();
 
-        if (!getConfig().contains("settings.levels.Level-1")) {
-            getConfig().addDefault("settings.levels.Level-1.Range", 10);
-            getConfig().addDefault("settings.levels.Level-1.Amount", 1);
-            getConfig().addDefault("settings.levels.Level-1.Cost-xp", 20);
-            getConfig().addDefault("settings.levels.Level-1.Cost-eco", 5000);
+        ConfigurationSection levels = getConfig().getConfigurationSection("settings.levels");
 
-            getConfig().addDefault("settings.levels.Level-2.Range", 20);
-            getConfig().addDefault("settings.levels.Level-2.Amount", 2);
-            getConfig().addDefault("settings.levels.Level-2.Cost-xp", 25);
-            getConfig().addDefault("settings.levels.Level-2.Cost-eco", 7500);
+        if (levels.contains("Level-1")) {
+            levels.addDefault("Level-1.Range", 10);
+            levels.addDefault("Level-1.Amount", 1);
+            levels.addDefault("Level-1.Cost-xp", 20);
+            levels.addDefault("Level-1.Cost-eco", 5000);
 
-            getConfig().addDefault("settings.levels.Level-3.Range", 30);
-            getConfig().addDefault("settings.levels.Level-3.Amount", 3);
-            getConfig().addDefault("settings.levels.Level-3.Suction", 1);
-            getConfig().addDefault("settings.levels.Level-3.Cost-xp", 30);
-            getConfig().addDefault("settings.levels.Level-3.Cost-eco", 10000);
+            levels.addDefault("Level-2.Range", 20);
+            levels.addDefault("Level-2.Amount", 2);
+            levels.addDefault("Level-2.Cost-xp", 25);
+            levels.addDefault("Level-2.Cost-eco", 7500);
 
-            getConfig().addDefault("settings.levels.Level-4.Range", 40);
-            getConfig().addDefault("settings.levels.Level-4.Amount", 4);
-            getConfig().addDefault("settings.levels.Level-4.Suction", 2);
-            getConfig().addDefault("settings.levels.Level-4.BlockBreak", 4);
-            getConfig().addDefault("settings.levels.Level-4.Cost-xp", 35);
-            getConfig().addDefault("settings.levels.Level-4.Cost-eco", 12000);
+            levels.addDefault("Level-3.Range", 30);
+            levels.addDefault("Level-3.Amount", 3);
+            levels.addDefault("Level-3.Suction", 1);
+            levels.addDefault("Level-3.Cost-xp", 30);
+            levels.addDefault("Level-3.Cost-eco", 10000);
 
-            getConfig().addDefault("settings.levels.Level-5.Range", 50);
-            getConfig().addDefault("settings.levels.Level-5.Amount", 5);
-            getConfig().addDefault("settings.levels.Level-5.Suction", 3);
-            getConfig().addDefault("settings.levels.Level-5.BlockBreak", 2);
-            getConfig().addDefault("settings.levels.Level-5.Cost-xp", 40);
-            getConfig().addDefault("settings.levels.Level-5.Cost-eco", 15000);
+            levels.addDefault("Level-4.Range", 40);
+            levels.addDefault("Level-4.Amount", 4);
+            levels.addDefault("Level-4.Suction", 2);
+            levels.addDefault("Level-4.BlockBreak", 4);
+            levels.addDefault("Level-4.Cost-xp", 35);
+            levels.addDefault("Level-4.Cost-eco", 12000);
 
-            getConfig().addDefault("settings.levels.Level-6.Range", 60);
-            getConfig().addDefault("settings.levels.Level-6.Amount", 5);
-            getConfig().addDefault("settings.levels.Level-6.Suction", 3);
-            getConfig().addDefault("settings.levels.Level-6.BlockBreak", 2);
-            getConfig().addDefault("settings.levels.Level-6.Filter", true);
-            getConfig().addDefault("settings.levels.Level-6.Teleport", true);
-            getConfig().addDefault("settings.levels.Level-6.Cost-xp", 45);
-            getConfig().addDefault("settings.levels.Level-6.Cost-eco", 20000);
+            levels.addDefault("Level-5.Range", 50);
+            levels.addDefault("Level-5.Amount", 5);
+            levels.addDefault("Level-5.Suction", 3);
+            levels.addDefault("Level-5.BlockBreak", 2);
+            levels.addDefault("Level-5.Cost-xp", 40);
+            levels.addDefault("Level-5.Cost-eco", 15000);
 
-            getConfig().addDefault("settings.levels.Level-7.Range", 70);
-            getConfig().addDefault("settings.levels.Level-7.Amount", 5);
-            getConfig().addDefault("settings.levels.Level-7.Suction", 3);
-            getConfig().addDefault("settings.levels.Level-7.BlockBreak", 2);
-            getConfig().addDefault("settings.levels.Level-7.Filter", true);
-            getConfig().addDefault("settings.levels.Level-7.Teleport", true);
-            getConfig().addDefault("settings.levels.Level-7.AutoCrafting", true);
-            getConfig().addDefault("settings.levels.Level-7.Cost-xp", 50);
-            getConfig().addDefault("settings.levels.Level-7.Cost-eco", 30000);
+            levels.addDefault("Level-6.Range", 60);
+            levels.addDefault("Level-6.Amount", 5);
+            levels.addDefault("Level-6.Suction", 3);
+            levels.addDefault("Level-6.BlockBreak", 2);
+            levels.addDefault("Level-6.Filter", true);
+            levels.addDefault("Level-6.Teleport", true);
+            levels.addDefault("Level-6.Cost-xp", 45);
+            levels.addDefault("Level-6.Cost-eco", 20000);
+
+            levels.addDefault("Level-7.Range", 70);
+            levels.addDefault("Level-7.Amount", 5);
+            levels.addDefault("Level-7.Suction", 3);
+            levels.addDefault("Level-7.BlockBreak", 2);
+            levels.addDefault("Level-7.Filter", true);
+            levels.addDefault("Level-7.Teleport", true);
+            levels.addDefault("Level-7.AutoCrafting", true);
+            levels.addDefault("Level-7.Cost-xp", 50);
+            levels.addDefault("Level-7.Cost-eco", 30000);
 
         }
 
@@ -331,7 +339,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         saveConfig();
         loadLevelManager();
     }
-
 
     public boolean canBuild(Player player, Location location) {
         if (player.hasPermission(getDescription().getName() + ".bypass")) {
@@ -363,7 +370,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     public String getIslandId(String name) {
         return Bukkit.getOfflinePlayer(name).getUniqueId().toString();
     }
-
 
     @Override
     public Level getLevelFromItem(ItemStack item) {
@@ -412,10 +418,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     public PlayerDataManager getPlayerDataManager() {
         return playerDataManager;
-    }
-
-    public static EpicHoppersPlugin getInstance() {
-        return INSTANCE;
     }
 
     private void register(Supplier<ProtectionPluginHook> hookSupplier) {
