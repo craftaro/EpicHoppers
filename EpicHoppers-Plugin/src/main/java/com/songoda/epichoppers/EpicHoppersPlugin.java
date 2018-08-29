@@ -170,6 +170,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
         PluginManager pluginManager = Bukkit.getPluginManager();
 
+        // Register Listeners
         pluginManager.registerEvents(new HopperListeners(this), this);
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
