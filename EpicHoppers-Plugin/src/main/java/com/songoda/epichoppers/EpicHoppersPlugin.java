@@ -431,7 +431,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         return playerDataManager;
     }
 
-    private void register(Supplier<ProtectionPluginHook> hookSupplier) {
+    @Override
+    public void register(Supplier<ProtectionPluginHook> hookSupplier) {
         this.registerProtectionHook(hookSupplier.get());
     }
 

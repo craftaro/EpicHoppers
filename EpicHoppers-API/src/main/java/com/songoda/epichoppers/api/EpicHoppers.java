@@ -6,6 +6,8 @@ import com.songoda.epichoppers.api.hopper.levels.LevelManager;
 import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.function.Supplier;
+
 /**
  * The main API class for the EpicHoppers plugin. This class will provide various
  * methods to access important features of the plugin's API. For static method
@@ -31,6 +33,8 @@ public interface EpicHoppers {
      * @return the hopper manager
      */
     HopperManager getHopperManager();
+
+    void register(Supplier<ProtectionPluginHook> hookSupplier);
 
     /**
      * Register a new {@link ProtectionPluginHook} implementation
