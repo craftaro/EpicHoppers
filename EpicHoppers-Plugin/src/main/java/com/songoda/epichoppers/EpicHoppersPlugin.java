@@ -34,6 +34,7 @@ import com.songoda.epichoppers.player.PlayerDataManager;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.SettingsManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -75,7 +76,25 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         return INSTANCE;
     }
 
+    private void checkVersion() {
+        int workingVersion = 13;
+        int currentVersion = Integer.parseInt(Bukkit.getServer().getClass()
+                .getPackage().getName().split("\\.")[3].split("_")[1]);
+
+        if (currentVersion < workingVersion) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
+                Bukkit.getConsoleSender().sendMessage("");
+                Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You installed the 1." + workingVersion + "+ only version of " + this.getDescription().getName() + " on a 1." + currentVersion + " server. Since you are on the wrong version we disabled the plugin for you. Please install correct version to continue using " + this.getDescription().getName() + ".");
+                Bukkit.getConsoleSender().sendMessage("");
+            }, 20L);
+        }
+    }
+
+    @Override
     public void onEnable() {
+        // Check to make sure the Bukkit version is compatible.
+        checkVersion();
+
         INSTANCE = this;
         EpicHoppersAPI.setImplementation(this);
 
