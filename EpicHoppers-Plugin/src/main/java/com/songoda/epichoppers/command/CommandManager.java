@@ -25,6 +25,7 @@ public class CommandManager implements CommandExecutor {
         addCommand(new CommandSettings(commandEpicHoppers));
         addCommand(new CommandGive(commandEpicHoppers));
         addCommand(new CommandBoost(commandEpicHoppers));
+        addCommand(new CommandBook(commandEpicHoppers));
     }
 
     private AbstractCommand addCommand(AbstractCommand abstractCommand) {

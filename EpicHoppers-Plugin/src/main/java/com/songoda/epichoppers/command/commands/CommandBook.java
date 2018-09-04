@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 public class CommandBook extends AbstractCommand {
 
     public CommandBook(AbstractCommand parent) {
-        super("reload", "epichoppers.admin", parent);
+        super("book", "epichoppers.admin", parent);
     }
 
     @Override
