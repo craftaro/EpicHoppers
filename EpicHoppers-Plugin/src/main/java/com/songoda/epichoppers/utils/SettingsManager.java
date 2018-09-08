@@ -193,8 +193,6 @@ public class SettingsManager implements Listener {
                 config.addDefault(setting.setting, setting.option);
             }
         }
-
-        config.set("settings", null);
     }
     public enum Setting {
         o1("Upgrading-enabled", "Main.Allow hopper Upgrading", true),
