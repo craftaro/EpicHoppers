@@ -66,6 +66,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private Locale locale;
 
     private HopperManager hopperManager;
+    private CommandManager commandManager;
     private LevelManager levelManager;
     private BoostManager boostManager;
     private PlayerDataManager playerDataManager;
@@ -107,19 +108,20 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         console.sendMessage(Arconix.pl().getApi().format().formatText("&7Action: &aEnabling&7..."));
 
         settingsManager = new SettingsManager(this);
-        boostManager = new BoostManager();
         setupConfig();
         enchantmentHandler = new EnchantmentHandler();
-        playerDataManager = new PlayerDataManager();
 
         // Locales
         Locale.init(this);
         Locale.saveDefaultLocale("en_US");
         this.locale = Locale.getLocale(this.getConfig().getString("Locale", "en_US"));
 
-        loadLevelManager();
-
         hopperManager = new EHopperManager();
+        playerDataManager = new PlayerDataManager();
+        boostManager = new BoostManager();
+        this.commandManager = new CommandManager(this);
+
+        loadLevelManager();
 
         /*
          * Register hoppers into HopperManger from configuration
@@ -196,9 +198,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(this), this);
-
-        // Command registration
-        this.getCommand("EpicHoppers").setExecutor(new CommandManager(this));
 
         // Register default hooks
         if (pluginManager.isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
@@ -433,6 +432,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     public BoostManager getBoostManager() {
         return boostManager;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
     }
 
     @Override

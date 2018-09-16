@@ -8,13 +8,28 @@ import org.bukkit.entity.Player;
 public class CommandSettings extends AbstractCommand {
 
     public CommandSettings(AbstractCommand parent) {
-        super("settings", "epichoppers.admin", parent);
+        super("settings", parent, true);
     }
 
     @Override
-    protected boolean runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
         Player p = (Player) sender;
         instance.getSettingsManager().openSettingsManager(p);
-        return false;
+        return ReturnType.SUCCESS;
+    }
+
+    @Override
+    public String getPermissionNode() {
+        return "epichoppers.admin";
+    }
+
+    @Override
+    public String getSyntax() {
+        return "/eh settings";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Edit the EpicHoppers Settings.";
     }
 }

@@ -14,16 +14,20 @@ import java.util.Date;
 public class CommandBoost extends AbstractCommand {
 
     public CommandBoost(AbstractCommand parent) {
-        super("boost", "epichoppers.admin", parent);
+        super("boost", parent, false);
     }
 
     @Override
-    protected boolean runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
-        if (args.length >= 3) {
+    protected ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+        if (args.length < 3) {
+            return ReturnType.SYNTAX_ERROR;
+        }
             if (Bukkit.getPlayer(args[1]) == null) {
                 sender.sendMessage(TextComponent.formatText(instance.references.getPrefix() + "&cThat player does not exist..."));
+                return ReturnType.FAILURE;
             } else if (!AMath.isInt(args[2])) {
                 sender.sendMessage(TextComponent.formatText(instance.references.getPrefix() + "&6" + args[2] + " &7is not a number..."));
+                return ReturnType.FAILURE;
             } else {
                 Calendar c = Calendar.getInstance();
                 Date currentDate = new Date();
@@ -50,7 +54,7 @@ public class CommandBoost extends AbstractCommand {
                         time = " &7for &6" + arr2[1] + " years&7.";
                     } else {
                         sender.sendMessage(TextComponent.formatText(instance.references.getPrefix() + "&7" + args[3] + " &7is invalid."));
-                        return true;
+                        return ReturnType.SUCCESS;
                     }
                 } else {
                     c.add(Calendar.YEAR, 10);
@@ -60,9 +64,21 @@ public class CommandBoost extends AbstractCommand {
                 instance.getBoostManager().addBoostToPlayer(boostData);
                 sender.sendMessage(TextComponent.formatText(instance.references.getPrefix() + "&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName() + "'s &7hoppers transfer rates by &6" + args[2] + "x" + time));
             }
-        } else {
-            sender.sendMessage(instance.references.getPrefix() + TextComponent.formatText("&7Syntax error..."));
-        }
-        return false;
+        return ReturnType.FAILURE;
+    }
+
+    @Override
+    public String getPermissionNode() {
+        return "epichoppers.admin";
+    }
+
+    @Override
+    public String getSyntax() {
+        return "/es boost <player> <multiplier> [m:minute, h:hour, d:day, y:year]";
+    }
+
+    @Override
+    public String getDescription() {
+        return "This allows you to boost a players hoppers be a multiplier (Put 2 for double, 3 for triple and so on).";
     }
 }
