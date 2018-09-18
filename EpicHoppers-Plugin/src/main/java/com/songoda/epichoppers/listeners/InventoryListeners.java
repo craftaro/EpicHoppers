@@ -157,9 +157,7 @@ public class InventoryListeners implements Listener {
         }
 
         Hopper hopper = playerData.getLastHopper();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
-            ((EHopper)hopper).compile(player);
-        }, 1);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> ((EHopper)hopper).compile(player), 1);
         if (e.getSlot() == 40) {
             playerData.setSyncType(SyncType.FILTERED);
             player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncnext"));
@@ -225,14 +223,14 @@ public class InventoryListeners implements Listener {
                 ItemStack item = event.getInventory().getItem(13);
                 hopper.setAutoCrafting(item == null ? Material.AIR : item.getType());
             }
-            if (playerData.getInMenu() != MenuType.NOT_IN) {
-                Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
-                if (hopper != null)
-                hopper.setLastPlayer(null);
-            }
             if (playerData.getInMenu() == MenuType.FILTER) {
                 Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
                 ((EHopper)hopper).compile(player);
+            }
+            if (playerData.getInMenu() != MenuType.NOT_IN) {
+                Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
+                if (hopper != null)
+                    hopper.setLastPlayer(null);
             }
             playerData.setInMenu(MenuType.NOT_IN);
             if (playerData.getSyncType() == SyncType.FILTERED) {
