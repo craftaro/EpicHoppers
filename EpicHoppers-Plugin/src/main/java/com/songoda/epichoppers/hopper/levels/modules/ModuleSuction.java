@@ -6,12 +6,14 @@ import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import xyz.wildseries.wildstacker.api.WildStackerAPI;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,6 +52,10 @@ public class ModuleSuction implements Module {
             }
             if (e.hasMetadata("grabbed"))
                 continue;
+
+            if (Bukkit.getPluginManager().isPluginEnabled("WildStacker")) {
+                hopItem.setAmount(WildStackerAPI.getItemAmount((Item)e));
+            }
             ItemStack item = ((Item) e).getItemStack();
             if (!canMove(hopperBlock.getInventory(), item)) {
                 continue;
