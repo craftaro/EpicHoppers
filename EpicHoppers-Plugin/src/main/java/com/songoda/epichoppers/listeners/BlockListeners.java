@@ -23,6 +23,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+
+import java.util.Map;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -38,16 +41,20 @@ public class BlockListeners implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent e) {
         try {
+            Player player = e.getPlayer();
             if (e.getBlock().getType().equals(Material.ENDER_CHEST)) {
-                instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(e.getBlock()), e.getPlayer().getUniqueId().toString());
+                instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(e.getBlock()), player.getUniqueId().toString());
                 return;
             }
 
             if (e.getBlock().getType() != Material.HOPPER) return;
 
             int amt = count(e.getBlock().getChunk());
-            if (amt >= instance.getConfig().getInt("Main.Max Hoppers Per Chunk") && instance.getConfig().getInt("Main.Max Hoppers Per Chunk") != -1) {
-                e.getPlayer().sendMessage(instance.getLocale().getMessage("event.hopper.toomany"));
+
+            int max = maxHoppers(player);
+
+            if (max != -1 && amt >= max) {
+                player.sendMessage(instance.getLocale().getMessage("event.hopper.toomany", max));
                 e.setCancelled(true);
                 return;
             }
@@ -56,14 +63,24 @@ public class BlockListeners implements Listener {
 
             ItemStack item = e.getItemInHand().clone();
 
-            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), e.getPlayer().getUniqueId(), e.getPlayer().getUniqueId(),null, new EFilter(), TeleportTrigger.DISABLED, null));
+            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), player.getUniqueId(), player.getUniqueId(),null, new EFilter(), TeleportTrigger.DISABLED, null));
 
         } catch (Exception ee) {
             Debugger.runReport(ee);
         }
     }
 
-    public int count(Chunk c) {
+    private int maxHoppers(Player player) {
+        int limit = -1;
+        for (PermissionAttachmentInfo permissionAttachmentInfo : player.getEffectivePermissions()) {
+                if (!permissionAttachmentInfo.getPermission().toLowerCase().startsWith("epichoppers.limit")) continue;
+                limit = Integer.parseInt(permissionAttachmentInfo.getPermission().split("\\.")[2]);
+        }
+        if (limit == -1) limit = instance.getConfig().getInt("Main.Max Hoppers Per Chunk");
+        return limit;
+    }
+
+    private int count(Chunk c) {
         try {
             int count = 0;
             for (int x = 0; x < 16; x++) {
