@@ -307,9 +307,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private void setupConfig() {
         settingsManager.updateSettings();
 
-        ConfigurationSection levels = getConfig().createSection("settings.levels");
+        if (!getConfig().contains("settings.levels.Level-1")) {
+            ConfigurationSection levels =
+                    getConfig().createSection("settings.levels");
 
-        if (!levels.contains("Level-1")) {
             levels.set("Level-1.Range", 10);
             levels.set("Level-1.Amount", 1);
             levels.set("Level-1.Cost-xp", 20);
