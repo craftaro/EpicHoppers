@@ -260,7 +260,7 @@ public class HopHandler {
         return 0;
     }
 
-    public boolean canHop(Inventory i, ItemStack item, int hop) {
+    private boolean canHop(Inventory i, ItemStack item, int hop) {
         try {
             if (i.firstEmpty() != -1) {
                 return true;

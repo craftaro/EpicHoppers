@@ -85,7 +85,7 @@ public class ModuleAutoCrafting implements Module {
             if (inventory.firstEmpty() != -1) return true;
 
             for (ItemStack stack : inventory.getContents()) {
-                if (stack.isSimilar(item) && stack.getAmount() < stack.getMaxStackSize()) {
+                if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()) {
                     return true;
                 }
             }

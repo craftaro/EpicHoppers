@@ -81,7 +81,7 @@ public class ModuleSuction implements Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.suction", true);
+        return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.suction", amount);
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {
@@ -89,7 +89,7 @@ public class ModuleSuction implements Module {
             if (inventory.firstEmpty() != -1) return true;
 
             for (ItemStack stack : inventory.getContents()) {
-                if (stack.isSimilar(item) && stack.getAmount() < stack.getMaxStackSize()) {
+                if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()) {
                     return true;
                 }
             }
