@@ -53,7 +53,7 @@ public class BlockListeners implements Listener {
 
             int max = maxHoppers(player);
 
-            if (max != -1 && amt >= max) {
+            if (max != -1 && amt > max) {
                 player.sendMessage(instance.getLocale().getMessage("event.hopper.toomany", max));
                 e.setCancelled(true);
                 return;
