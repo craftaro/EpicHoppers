@@ -178,7 +178,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             // Adding in Boosts
             if (storage.containsGroup("boosts")) {
                 for (StorageRow row : storage.getRowsByGroup("boosts")) {
-                    if (!row.getItems().containsKey("player") || row.get("player").asString().equals(""))
+                    if (!row.getItems().containsKey("uuid") || row.get("uuid").asString().equals(""))
                         continue;
 
                     BoostData boostData = new BoostData(

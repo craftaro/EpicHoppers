@@ -66,6 +66,8 @@ public class EHopper implements Hopper {
                 Bukkit.getPlayer(lastPlayer).closeInventory();
             }
 
+            if (placedBy == null) placedBy = player.getUniqueId();
+
             instance.getPlayerDataManager().getPlayerData(player).setLastHopper(this);
 
             Level nextLevel = instance.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? instance.getLevelManager().getLevel(level.getLevel() + 1) : null;
