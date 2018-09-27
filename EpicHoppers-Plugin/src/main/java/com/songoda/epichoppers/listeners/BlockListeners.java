@@ -43,7 +43,7 @@ public class BlockListeners implements Listener {
         try {
             Player player = e.getPlayer();
             if (e.getBlock().getType().equals(Material.ENDER_CHEST)) {
-                instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(e.getBlock()), player.getUniqueId().toString());
+                //instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(e.getBlock()), player.getUniqueId().toString());
                 return;
             }
 
@@ -101,7 +101,7 @@ public class BlockListeners implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         try {
             if (event.getBlock().getType().equals(Material.ENDER_CHEST)) {
-                instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(event.getBlock()), null);
+                //instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(event.getBlock()), null);
             }
 
             Block block = event.getBlock();
@@ -125,18 +125,18 @@ public class BlockListeners implements Listener {
                 event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
             }
 
-            for (ItemStack i : hopper.getFilter().getWhiteList()) {
-                if (i != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), i);
+            for (Material m : hopper.getFilter().getWhiteList()) {
+                if (m != null)
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(m));
             }
 
-            for (ItemStack i : hopper.getFilter().getBlackList()) {
-                if (i != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), i);
+            for (Material m : hopper.getFilter().getBlackList()) {
+                if (m != null)
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(m));
             }
-            for (ItemStack i : hopper.getFilter().getVoidList()) {
-                if (i != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), i);
+            for (Material m : hopper.getFilter().getVoidList()) {
+                if (m != null)
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(m));
             }
             instance.getHopperManager().removeHopper(block.getLocation());
 

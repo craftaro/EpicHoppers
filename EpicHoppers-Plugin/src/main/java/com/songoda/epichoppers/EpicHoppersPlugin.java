@@ -2,6 +2,7 @@ package com.songoda.epichoppers;
 
 import com.google.common.base.Preconditions;
 import com.songoda.arconix.api.mcupdate.MCUpdate;
+import com.songoda.arconix.api.methods.serialize.Serialize;
 import com.songoda.arconix.api.utils.ConfigWrapper;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.api.EpicHoppers;
@@ -31,6 +32,11 @@ import com.songoda.epichoppers.listeners.HopperListeners;
 import com.songoda.epichoppers.listeners.InteractListeners;
 import com.songoda.epichoppers.listeners.InventoryListeners;
 import com.songoda.epichoppers.player.PlayerDataManager;
+import com.songoda.epichoppers.storage.Storage;
+import com.songoda.epichoppers.storage.StorageItem;
+import com.songoda.epichoppers.storage.StorageRow;
+import com.songoda.epichoppers.storage.types.StorageMysql;
+import com.songoda.epichoppers.storage.types.StorageYaml;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.SettingsManager;
 import org.bukkit.Bukkit;
@@ -62,7 +68,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook;
     private SettingsManager settingsManager;
     private ConfigWrapper hooksFile = new ConfigWrapper(this, "", "hooks.yml");
-    private ConfigWrapper dataFile = new ConfigWrapper(this, "", "data.yml");
     private Locale locale;
 
     private HopperManager hopperManager;
@@ -72,6 +77,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private PlayerDataManager playerDataManager;
 
     private TeleportHandler teleportHandler;
+
+    private Storage storage;
 
     public static EpicHoppersPlugin getInstance() {
         return INSTANCE;
@@ -123,35 +130,37 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
         loadLevelManager();
 
+        checkStorage();
+
         /*
          * Register hoppers into HopperManger from configuration
          */
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            if (dataFile.getConfig().contains("data.sync")) {
-                for (String locationStr : dataFile.getConfig().getConfigurationSection("data.sync").getKeys(false)) {
-                    Location location = Arconix.pl().getApi().serialize().unserializeLocation(locationStr);
+            if (storage.containsGroup("sync")) {
+                for (StorageRow row : storage.getRowsByGroup("sync")) {
+                    Location location = Serialize.getInstance().unserializeLocation(row.getKey());
                     if (location == null || location.getBlock() == null) return;
 
-                    int level = dataFile.getConfig().getInt("data.sync." + locationStr + ".level");
+                    int level = row.get("level").asInt();
 
-                    String blockLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".block");
-                    Block block = blockLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".block")).getBlock();
+                    String blockLoc = row.get("block").asString();
+                    Block block = blockLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(blockLoc).getBlock();
 
-                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(dataFile.getConfig().getString("data.sync." + locationStr + ".teleportTrigger"));
+                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
 
-                    String playerStr = dataFile.getConfig().getString("data.sync." + locationStr + ".player");
-                    String placedByStr = dataFile.getConfig().getString("data.sync." + locationStr + ".placedBy");
+                    String playerStr = row.get("player").asString();
+                    String placedByStr = row.get("placedby").asString();
                     UUID lastPlayer = playerStr == null ? null : UUID.fromString(playerStr);
                     UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
 
-                    List<ItemStack> whiteList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".whitelist");
-                    List<ItemStack> blackList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".blacklist");
-                    List<ItemStack> voidList = (ArrayList<ItemStack>) dataFile.getConfig().getList("data.sync." + locationStr + ".void");
+                    List<Material> whiteList = row.get("whitelist").asMaterialList();
+                    List<Material> blackList = row.get("blacklist").asMaterialList();
+                    List<Material> voidList = row.get("void").asMaterialList();
 
-                    Material autoCrafting = Material.valueOf(dataFile.getConfig().getString("data.sync." + locationStr + ".autoCrafting", "AIR"));
+                    Material autoCrafting = Material.valueOf(row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString());
 
-                    String blackLoc = dataFile.getConfig().getString("data.sync." + locationStr + ".black");
-                    Block black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(dataFile.getConfig().getString("data.sync." + locationStr + ".black")).getBlock();
+                    String blackLoc = row.get("black").asString();
+                    Block black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(blackLoc).getBlock();
 
                     EFilter filter = new EFilter();
 
@@ -167,13 +176,15 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             }
 
             // Adding in Boosts
-            if (dataFile.getConfig().contains("data.boosts")) {
-                for (String key : dataFile.getConfig().getConfigurationSection("data.boosts").getKeys(false)) {
-                    if (!dataFile.getConfig().contains("data.boosts." + key + ".Player")) continue;
+            if (storage.containsGroup("boosts")) {
+                for (StorageRow row : storage.getRowsByGroup("boosts")) {
+                    if (!row.getItems().containsKey("player") || row.get("player").asString().equals(""))
+                        continue;
+
                     BoostData boostData = new BoostData(
-                            dataFile.getConfig().getInt("data.boosts." + key + ".Amount"),
-                            Long.parseLong(key),
-                            UUID.fromString(dataFile.getConfig().getString("data.boosts." + key + ".Player")));
+                            row.get("amount").asInt(),
+                            Long.parseLong(row.getKey()),
+                            UUID.fromString(row.get("uuid").asString()));
 
                     this.boostManager.addBoostToPlayer(boostData);
                 }
@@ -216,21 +227,32 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     public void onDisable() {
         saveToFile();
+        this.storage.closeConnection();
         this.protectionHooks.clear();
         console.sendMessage(Arconix.pl().getApi().format().formatText("&a============================="));
         console.sendMessage(Arconix.pl().getApi().format().formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3!"));
         console.sendMessage(Arconix.pl().getApi().format().formatText("&7Action: &cDisabling&7..."));
         console.sendMessage(Arconix.pl().getApi().format().formatText("&a============================="));
-        dataFile.saveConfig();
     }
 
+
+    private void checkStorage() {
+        if (getConfig().getBoolean("Database.Activate Mysql Support")) {
+            this.storage = new StorageMysql(this);
+        } else {
+            this.storage = new StorageYaml(this);
+        }
+    }
     /*
      * Saves registered hopper to file.
      */
     private void saveToFile() {
 
+        this.storage.closeConnection();
+        checkStorage();
+
         // Wipe old hopper information
-        dataFile.getConfig().set("data.sync", null);
+        storage.clearFile();
 
         /*
          * Dump HopperManager to file.
@@ -240,32 +262,28 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                 continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
 
-            ConfigurationSection sync = dataFile.getConfig().createSection("data.sync." + locationStr);
+            storage.saveItem("sync", new StorageItem("location", locationStr),
+                    new StorageItem("level", hopper.getLevel().getLevel()),
+                    new StorageItem("block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation())),
+                    new StorageItem("placedby", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString()),
+                    new StorageItem("player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString()),
+                    new StorageItem("teleporttrigger", hopper.getTeleportTrigger().toString()),
 
-            sync.set(".level", hopper.getLevel().getLevel());
-            sync.set(".block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation()));
-            sync.set(".player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString());
-            sync.set(".placedBy", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString());
-            sync.set(".teleportTrigger", hopper.getTeleportTrigger().toString());
-
-            sync.set(".autoCrafting", hopper.getAutoCrafting() == null || hopper.getAutoCrafting() == Material.AIR ? null : hopper.getAutoCrafting().name());
-            sync.set(".whitelist", hopper.getFilter().getWhiteList());
-            sync.set(".blacklist", hopper.getFilter().getBlackList());
-            sync.set(".void", hopper.getFilter().getVoidList());
-            sync.set(".black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint().getLocation()));
+                    new StorageItem("autocrafting", hopper.getAutoCrafting() == null || hopper.getAutoCrafting() == Material.AIR ? null : hopper.getAutoCrafting().name()),
+                    new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
+                    new StorageItem("blacklist", hopper.getFilter().getBlackList()),
+                    new StorageItem("void", hopper.getFilter().getVoidList()),
+                    new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint().getLocation())));
         }
 
         /*
          * Dump BoostManager to file.
          */
         for (BoostData boostData : boostManager.getBoosts()) {
-            String endTime = String.valueOf(boostData.getEndTime());
-            dataFile.getConfig().set("data.boosts." + endTime + ".Player", boostData.getPlayer().toString());
-            dataFile.getConfig().set("data.boosts." + endTime + ".Amount", boostData.getMultiplier());
+            storage.saveItem("boosts", new StorageItem("endtime", String.valueOf(boostData.getEndTime())),
+                    new StorageItem("amount", boostData.getMultiplier()),
+                    new StorageItem("uuid", boostData.getPlayer().toString()));
         }
-
-        //Save to file
-        dataFile.saveConfig();
     }
 
     private void loadLevelManager() {
@@ -460,10 +478,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     @Override
     public void register(Supplier<ProtectionPluginHook> hookSupplier) {
         this.registerProtectionHook(hookSupplier.get());
-    }
-
-    public ConfigWrapper getDataFile() {
-        return dataFile;
     }
 
     @Override

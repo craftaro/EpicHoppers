@@ -110,9 +110,9 @@ public class HopHandler {
 
                 int amt = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
-                List<ItemStack> whiteList = hopper.getFilter().getWhiteList();
+                List<Material> whiteList = hopper.getFilter().getWhiteList();
 
-                List<ItemStack> blackList = hopper.getFilter().getBlackList();
+                List<Material> blackList = hopper.getFilter().getBlackList();
 
                 int num = 0;
                 while (num != 5) {
@@ -130,13 +130,13 @@ public class HopHandler {
 
                     if (is[num] != null
                             && !whiteList.isEmpty()
-                            && !whiteList.contains(it)) {
+                            && !whiteList.contains(it.getType())) {
                         doBlacklist(hopperBlock, hopper, is[num].clone(), is, amt, num);
-                    } else if (is[num] != null && !blackList.contains(it)) {
+                    } else if (is[num] != null && !blackList.contains(it.getType())) {
                         int numm = addItem(hopperBlock, hopper, b2, is[num], is, amt, num);
                         if (numm != 10)
                             num = numm;
-                    } else if (is[num] != null && blackList.contains(it)) {
+                    } else if (is[num] != null && blackList.contains(it.getType())) {
                         doBlacklist(hopperBlock, hopper, is[num].clone(), is, amt, num);
                     }
                     num++;
@@ -179,8 +179,8 @@ public class HopHandler {
 
             List<Material> ovoid = new ArrayList<>();
 
-            for (ItemStack iss : hopper.getFilter().getVoidList()) {
-                ovoid.add(iss.getType());
+            for (Material iss : hopper.getFilter().getVoidList()) {
+                ovoid.add(iss);
             }
 
             if (is.getType() == Material.AIR) {
@@ -205,7 +205,7 @@ public class HopHandler {
                 ih = (InventoryHolder) b2.getState();
             }
 
-            if (b2.getType().equals(Material.ENDER_CHEST)) {
+            if (b2.getType().equals(Material.ENDER_CHEST)) {/*
                 try {
                     OfflinePlayer op = Bukkit.getOfflinePlayer(UUID.fromString(instance.getDataFile().getConfig().getString("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(b2))));
                     if (op.isOnline() && canHop(op.getPlayer().getEnderChest(), newItem, amt)) {
@@ -217,7 +217,7 @@ public class HopHandler {
                     }
 
                 } catch (Exception ignore) {
-                }
+                } */
             } else {
                 if (!canHop(ih.getInventory(), newItem, amt) || b2.getType() == Material.BREWING_STAND) {
                     return 4;

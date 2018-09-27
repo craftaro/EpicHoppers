@@ -1,22 +1,22 @@
 package com.songoda.epichoppers.api.hopper;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
 public interface Filter {
-    List<ItemStack> getWhiteList();
+    List<Material> getWhiteList();
 
-    void setWhiteList(List<ItemStack> whiteList);
+    void setWhiteList(List<Material> whiteList);
 
-    List<ItemStack> getBlackList();
+    List<Material> getBlackList();
 
-    void setBlackList(List<ItemStack> blackList);
+    void setBlackList(List<Material> blackList);
 
-    List<ItemStack> getVoidList();
+    List<Material> getVoidList();
 
-    void setVoidList(List<ItemStack> voidList);
+    void setVoidList(List<Material> voidList);
 
     Block getEndPoint();
 

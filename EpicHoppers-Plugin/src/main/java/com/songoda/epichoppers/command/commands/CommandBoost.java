@@ -74,11 +74,11 @@ public class CommandBoost extends AbstractCommand {
 
     @Override
     public String getSyntax() {
-        return "/es boost <player> <multiplier> [m:minute, h:hour, d:day, y:year]";
+        return "/eh boost <player> <multiplier> [m:minute, h:hour, d:day, y:year]";
     }
 
     @Override
     public String getDescription() {
-        return "This allows you to boost a players hoppers be a multiplier (Put 2 for double, 3 for triple and so on).";
+        return "This allows you to boost a players hoppers transfer speeds by a multiplier (Put 2 for double, 3 for triple and so on).";
     }
 }
