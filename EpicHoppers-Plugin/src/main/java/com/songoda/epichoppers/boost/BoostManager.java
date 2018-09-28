@@ -29,7 +29,7 @@ public class BoostManager {
         for (BoostData boostData : registeredBoosts) {
             if (boostData.getPlayer().toString().equals(player.toString())) {
                 if (System.currentTimeMillis() >= boostData.getEndTime()) {
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(EpicHoppersPlugin.getInstance(), () -> removeBoostFromPlayer(boostData), 1);
+                    removeBoostFromPlayer(boostData);
                 }
                 return boostData;
             }
