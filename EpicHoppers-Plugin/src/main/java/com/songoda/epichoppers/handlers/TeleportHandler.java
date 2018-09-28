@@ -74,6 +74,7 @@ public class TeleportHandler {
                 if (nextHopper.getSyncedBlock() != null) {
                     next = nextHopper.getSyncedBlock();
                 }
+                if (nextHopper == hopper) break;
                 if (!next.getType().equals(Material.HOPPER)) {
                     instance.getHopperManager().removeHopper(nextHopper.getLocation());
                     break;
