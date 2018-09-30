@@ -119,9 +119,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         enchantmentHandler = new EnchantmentHandler();
 
         // Locales
+        String langMode = getConfig().getString("System.Language Mode");
         Locale.init(this);
-        Locale.saveDefaultLocale("en_US");
-        this.locale = Locale.getLocale(this.getConfig().getString("Locale", "en_US"));
+        Locale.saveDefaultLocale(langMode);
+        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
 
         hopperManager = new EHopperManager();
         playerDataManager = new PlayerDataManager();
@@ -384,7 +385,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     }
 
     public void reload() {
-        locale.reloadMessages();
+        String langMode = getConfig().getString("System.Language Mode");
+        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
+        this.locale.reloadMessages();
         references = new References();
         reloadConfig();
         saveConfig();

@@ -1,0 +1,63 @@
+#General Messages
+
+general.nametag.prefix = "&7[&6EpicHoppers&7]"
+general.nametag.next = "&9Suivant"
+general.nametag.back = "&9Next"
+general.nametag.nameformat = "&fHopper &eLevel %level%"
+
+#Interface Messages
+
+interface.hopper.boostedstats = "&a&lActuellement boosté!|&7Taux de transfert d'article multiplié par &6%amount%x&7.|&7Expire dans &6%time%&7."
+interface.hopper.upgradewithxp = "&aAmélioration avec l'exp"
+interface.hopper.upgradewithxplore = "&7Coût: &a%cost% Levels"
+interface.hopper.upgradewitheconomy = "&aAmélioration avec l'économie"
+interface.hopper.upgradewitheconomylore = "&7Coût: &a$%cost%"
+interface.hopper.currentlevel = "&6Hopper Level &7%level%"
+interface.hopper.nextlevel = "&6Level suivant dans &7%level% levels"
+interface.hopper.range = "&7Portée: &6%range%"
+interface.hopper.amount = "&7Montant: &6%amount%"
+interface.hopper.teleport = "&7Teleportation: &6%enabled%"
+interface.hopper.filter = "&7Filtre: &6%enabled%"
+interface.hopper.crafting = "&7CraftAuto: &6%enabled%"
+interface.hopper.suction = "&7Respiration: &6%suction%"
+interface.hopper.blockbreak = "&7Blocs cassés: &6Tout les %ticks% ticks"
+interface.hopper.alreadymaxed = "&7Ce hopper est déjà au maximum!"
+interface.hopper.synclore = "|&7Clic gauche puis cliquez sur un autre|&7hopper ou coffre pour synchro!||&7Clic droit pour désynchro."
+interface.hopper.perltitle = "&6Clic pour téléporter"
+interface.hopper.perllore2 = "|&7Clic gauche pour téléporter à|&7la fin de la chaîne.||&7Clic droit pour changer de|&7mode de téléportation.|&7Actuellement défini sur: &a%type%&7."
+interface.hopper.filtertitle = "&cClic pour filtrer"
+interface.hopper.filterlore = "|&7Cela vous permet de choisir|&7quel item va ici."
+interface.hopper.craftingtitle = "&cClic pour définir l'AutoCraft"
+interface.hopper.craftinglore = "|&7Cela vous permet de choisir|&7quel item ce hopper|&7va craft automatiquement."
+interface.hopper.synchopper = "&6Clic pour synchro ce hopper"
+interface.hopper.rejectsync = "&6Clic synchro les objets rejetés"
+interface.filter.infotitle = "&aGuide de filtrage"
+interface.filter.infolore = "&7Items placés dans l'espace supérieur gauche|&7seront placés dans la liste blanche.||&7Items placés à droit |&7willsont nuls.||&7Items placés dans l'espace inférieur gauche|&7seront sur la liste noire.||&cL'activation de la liste blanche désactivera|&cLa liste noire et les nuls"
+interface.filter.whitelist = "&f&lListe blanche"
+interface.filter.blacklist = "&8&lListe noire"
+interface.filter.void = "&c&lVide"
+
+#Command Messages
+
+command.give.success = "&7Vous avez reçu un Hopper &6level %level%."
+
+#Event Messages
+
+event.general.nopermission = "&cVous n'avez pas la permission."
+event.upgrade.cannotafford = "&cVous ne pouvez pas améliorer."
+event.upgrade.success = "&7Vous avez amélioré ce hopper &6level %level%&7!"
+event.upgrade.maxed = "&7Vous avez maximisé ce hopper au &6level %level%&7."
+event.inventory.noroom = "&7vous n'avez pas assez de place dans votre inventaire."
+event.hopper.syncsuccess = "&aSynchronisation réussie."
+event.hopper.desync = "&7Vous avez déssynchronisé ce hopper."
+event.hopper.syncnext = "&7Clic sur un autre coffre ou hopper pour synchro."
+event.hopper.syncself = "&cVous ne pouvez pas synchro un hopper avec lui même."
+event.hopper.synctimeout = "&cSynchro terminée."
+event.hopper.syncoutofrange = "&cCe bloc est hors portée de votre hopper."
+event.hopper.syncdidnotplace = "&cDésolé! Vous devez avoir placé ce hopper pour synchroniser les choses avec elle."
+event.hopper.toomany = "&cVous pouvez seulement placer %amount% hoppers par chunk..."
+event.hopper.walkteleenabled = "Téléportation activée pour ce hopper."
+event.hopper.walkteledisabled = "La marche sur la téléportation a été désactivée pour ce hopper."
+event.hopper.onlyone = "&cVous ne pouvez placer qu'un seul objet à la fois."
+event.hopper.syncchest = "&7Vous avez synchronisé votre &9%name% &7avec ce coffre."
+event.hopper.desyncchest = "&7Vous avez déssynchronisé votre &9%name% &7avec ce coffre."
