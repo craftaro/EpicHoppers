@@ -121,7 +121,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         // Locales
         String langMode = getConfig().getString("System.Language Mode");
         Locale.init(this);
-        Locale.saveDefaultLocale(langMode);
+        Locale.saveDefaultLocale("en_US");
+        Locale.saveDefaultLocale("fr_FR");
         this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
 
         hopperManager = new EHopperManager();
