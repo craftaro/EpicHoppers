@@ -57,11 +57,11 @@ public class ModuleAutoCrafting implements Module {
                     if (!(recipe instanceof ShapedRecipe)) continue;
                     cachedRecipes.put(material, recipe);
                 }
-            }
-
-            for (ItemStack itemStack : ((ShapedRecipe) cachedRecipes.get(material)).getIngredientMap().values()) {
-                if (itemStack == null) continue;
-                materials.add(itemStack.getType());
+            } else {
+                for (ItemStack itemStack : ((ShapedRecipe) cachedRecipes.get(material)).getIngredientMap().values()) {
+                    if (itemStack == null) continue;
+                    materials.add(itemStack.getType());
+                }
             }
         }
         return materials;
