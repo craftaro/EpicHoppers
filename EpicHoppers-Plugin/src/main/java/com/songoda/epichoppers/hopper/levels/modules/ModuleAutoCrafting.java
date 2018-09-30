@@ -18,6 +18,8 @@ import java.util.Map;
 
 public class ModuleAutoCrafting implements Module {
 
+    private final Map<Material, Recipe> cachedRecipes = new HashMap<>();
+
     @Override
     public String getName() {
         return "AutoCrafting";
@@ -47,12 +49,19 @@ public class ModuleAutoCrafting implements Module {
     public List<Material> getBlockedItems(Hopper hopper) {
         List<Material> materials = new ArrayList<>();
         if (hopper.getAutoCrafting() != null) {
-            for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
-                if (!(recipe instanceof ShapedRecipe)) continue;
-                for (ItemStack itemStack : ((ShapedRecipe) recipe).getIngredientMap().values()) {
-                    if (itemStack == null) continue;
-                    materials.add(itemStack.getType());
+
+            Material material = hopper.getAutoCrafting();
+
+            if (!cachedRecipes.containsKey(material)) {
+                for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(material))) {
+                    if (!(recipe instanceof ShapedRecipe)) continue;
+                    cachedRecipes.put(material, recipe);
                 }
+            }
+
+            for (ItemStack itemStack : ((ShapedRecipe) cachedRecipes.get(material)).getIngredientMap().values()) {
+                if (itemStack == null) continue;
+                materials.add(itemStack.getType());
             }
         }
         return materials;

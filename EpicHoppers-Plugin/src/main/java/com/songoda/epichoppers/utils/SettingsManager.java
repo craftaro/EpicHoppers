@@ -194,6 +194,7 @@ public class SettingsManager implements Listener {
             }
         }
     }
+
     public enum Setting {
         o1("Upgrading-enabled", "Main.Allow hopper Upgrading", true),
         o2("Upgrade-with-eco", "Main.Upgrade With Economy", true),

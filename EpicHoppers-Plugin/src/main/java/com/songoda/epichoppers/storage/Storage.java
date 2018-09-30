@@ -13,7 +13,7 @@ public abstract class Storage {
     public Storage(EpicHoppersPlugin instance) {
         this.instance = instance;
         this.dataFile = new ConfigWrapper(instance, "", "data.yml");
-        this.dataFile.createNewFile("Loading Data File", "EpicHoppers Data File");
+        this.dataFile.createNewFile(null, "EpicHoppers Data File");
         this.dataFile.getConfig().options().copyDefaults(true);
         this.dataFile.saveConfig();
     }
