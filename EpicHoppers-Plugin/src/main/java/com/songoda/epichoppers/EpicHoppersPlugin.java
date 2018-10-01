@@ -124,7 +124,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         Locale.saveDefaultLocale("en_US");
         Locale.saveDefaultLocale("fr_FR");
         Locale.saveDefaultLocale("nl_NL");
-        Locale.saveDefaultLocale("es_Es");
+        Locale.saveDefaultLocale("es_ES");
+        Locale.saveDefaultLocale("pr_FA");
+        Locale.saveDefaultLocale("pt_BR");
         this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
 
         hopperManager = new EHopperManager();
@@ -301,7 +303,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             int level = Integer.valueOf(levelName.split("-")[1]);
 
             ConfigurationSection levels = getConfig().getConfigurationSection("settings.levels." + levelName);
-            
+
             int radius = levels.getInt("Range");
             int amount = levels.getInt("Amount");
             boolean filter = levels.getBoolean("Filter");
@@ -321,7 +323,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                 }
 
             }
-            
+
             levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, modules);
         }
     }
