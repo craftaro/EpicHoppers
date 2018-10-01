@@ -186,12 +186,7 @@ public class SettingsManager implements Listener {
         FileConfiguration config = instance.getConfig();
 
         for (Setting setting : Setting.values()) {
-            if (config.contains("settings." + setting.oldSetting)) {
-                config.addDefault(setting.setting, instance.getConfig().get("settings." + setting.oldSetting));
-                config.set("settings." + setting.oldSetting, null);
-            } else {
-                config.addDefault(setting.setting, setting.option);
-            }
+            config.addDefault(setting.setting, setting.option);
         }
     }
 
@@ -229,11 +224,9 @@ public class SettingsManager implements Listener {
         o22("System.Debugger Enabled", false);
 
         private String setting;
-        private String oldSetting;
         private Object option;
 
-        Setting(String oldSetting, String setting, Object option) {
-            this.oldSetting = oldSetting;
+        Setting(String setting, Object option) {
             this.setting = setting;
             this.option = option;
         }
