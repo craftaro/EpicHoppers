@@ -2,12 +2,15 @@ package com.songoda.epichoppers;
 
 import com.google.common.base.Preconditions;
 import com.songoda.arconix.api.mcupdate.MCUpdate;
+import com.songoda.arconix.api.methods.formatting.TextComponent;
 import com.songoda.arconix.api.methods.serialize.Serialize;
 import com.songoda.arconix.api.utils.ConfigWrapper;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.api.EpicHoppers;
 import com.songoda.epichoppers.api.EpicHoppersAPI;
-import com.songoda.epichoppers.api.hopper.*;
+import com.songoda.epichoppers.api.hopper.Hopper;
+import com.songoda.epichoppers.api.hopper.HopperManager;
+import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.api.hopper.levels.LevelManager;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
@@ -27,10 +30,7 @@ import com.songoda.epichoppers.hopper.levels.ELevelManager;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleBlockBreak;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
-import com.songoda.epichoppers.listeners.BlockListeners;
-import com.songoda.epichoppers.listeners.HopperListeners;
-import com.songoda.epichoppers.listeners.InteractListeners;
-import com.songoda.epichoppers.listeners.InventoryListeners;
+import com.songoda.epichoppers.listeners.*;
 import com.songoda.epichoppers.player.PlayerDataManager;
 import com.songoda.epichoppers.storage.Storage;
 import com.songoda.epichoppers.storage.StorageItem;
@@ -117,9 +117,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
         Arconix.pl().hook(this);
 
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&a============================="));
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3&7!"));
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&7Action: &aEnabling&7..."));
+        console.sendMessage(TextComponent.formatText("&a============================="));
+        console.sendMessage(TextComponent.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3&7!"));
+        console.sendMessage(TextComponent.formatText("&7Action: &aEnabling&7..."));
 
         settingsManager = new SettingsManager(this);
         setupConfig();
@@ -217,6 +217,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
         // Register Listeners
         pluginManager.registerEvents(new HopperListeners(this), this);
+        pluginManager.registerEvents(new EntityListeners(this), this);
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(this), this);
@@ -232,18 +233,17 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         if (pluginManager.isPluginEnabled("USkyBlock")) this.register(HookUSkyBlock::new);
         if (pluginManager.isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
 
-
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&a============================="));
+        console.sendMessage(TextComponent.formatText("&a============================="));
     }
 
     public void onDisable() {
         saveToFile();
         this.storage.closeConnection();
         this.protectionHooks.clear();
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&a============================="));
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3!"));
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&7Action: &cDisabling&7..."));
-        console.sendMessage(Arconix.pl().getApi().format().formatText("&a============================="));
+        console.sendMessage(TextComponent.formatText("&a============================="));
+        console.sendMessage(TextComponent.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3!"));
+        console.sendMessage(TextComponent.formatText("&7Action: &cDisabling&7..."));
+        console.sendMessage(TextComponent.formatText("&a============================="));
     }
 
     private void update() {
@@ -482,7 +482,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     public ItemStack newHopperItem(Level level) {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
-        itemmeta.setDisplayName(Arconix.pl().getApi().format().formatText(Methods.formatName(level.getLevel(), true)));
+        itemmeta.setDisplayName(TextComponent.formatText(Methods.formatName(level.getLevel(), true)));
         item.setItemMeta(itemmeta);
         return item;
     }

@@ -16,16 +16,6 @@ import java.util.ArrayList;
  */
 public class EnchantmentHandler {
 
-    private EpicHoppersPlugin instance;
-
-    public EnchantmentHandler(EpicHoppersPlugin instance) {
-        this.instance = instance;
-    }
-
-
-    public EnchantmentHandler() {
-    }
-
     public ItemStack createSyncTouch(ItemStack item, Block b) {
         try {
             ItemMeta itemmeta = item.getItemMeta();
@@ -43,25 +33,6 @@ public class EnchantmentHandler {
             Debugger.runReport(e);
         }
         return null;
-    }
-
-    public void giveSyncTouchBook(Player p) {
-        try {
-            boolean isEmpty = false;
-            for (ItemStack item : p.getInventory().getContents()) {
-                if (item == null) {
-                    isEmpty = true;
-                }
-            }
-            if (!isEmpty) {
-                p.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.inventory.noroom"));
-            } else {
-                ItemStack book = getbook();
-                p.getInventory().addItem(book);
-            }
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
     }
 
     public ItemStack getbook() {

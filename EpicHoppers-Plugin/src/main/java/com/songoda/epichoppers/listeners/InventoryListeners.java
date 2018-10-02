@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class InventoryListeners implements Listener {
 
-    private EpicHoppersPlugin instance;
+    private final EpicHoppersPlugin instance;
 
     public InventoryListeners(EpicHoppersPlugin instance) {
         this.instance = instance;
@@ -97,26 +97,26 @@ public class InventoryListeners implements Listener {
                     } else if (hopper.getTeleportTrigger() == TeleportTrigger.WALK_ON) {
                         hopper.setTeleportTrigger(TeleportTrigger.DISABLED);
                     }
-                    ((EHopper)hopper).overview(player);
+                    ((EHopper) hopper).overview(player);
                     return;
                 }
                 player.closeInventory();
             } else if (event.getCurrentItem().getItemMeta().hasDisplayName() && event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.filtertitle")) && (hopper.getLevel().isFilter() || player.hasPermission("EpicHoppers.Filter"))) {
                 if (!event.getCurrentItem().getItemMeta().getDisplayName().equals("§l")) {
-                    ((EHopper)hopper).filter(player);
+                    ((EHopper) hopper).filter(player);
                 }
             } else if (event.getSlot() == 11 && player.hasPermission("EpicHoppers.Upgrade.XP")) {
                 if (!event.getCurrentItem().getItemMeta().getDisplayName().equals("§l")) {
-                    ((EHopper)hopper).upgrade("XP", player);
+                    ((EHopper) hopper).upgrade("XP", player);
                     player.closeInventory();
                 }
             } else if (event.getSlot() == 15 && player.hasPermission("EpicHoppers.Upgrade.ECO")) {
                 if (!event.getCurrentItem().getItemMeta().getDisplayName().equals("§l")) {
-                    ((EHopper)hopper).upgrade("ECO", player);
+                    ((EHopper) hopper).upgrade("ECO", player);
                     player.closeInventory();
                 }
             } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.craftingtitle"))) {
-                ((EHopper)hopper).crafting(player);
+                ((EHopper) hopper).crafting(player);
             } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.synchopper"))) {
                 if (event.isRightClick()) {
                     player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.desync"));
@@ -132,7 +132,7 @@ public class InventoryListeners implements Listener {
                     if (can) {
                         playerData.setSyncType(SyncType.REGULAR);
                         player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncnext"));
-                        ((EHopper)hopper).timeout(player);
+                        ((EHopper) hopper).timeout(player);
                     }
                 }
                 player.closeInventory();
@@ -157,11 +157,11 @@ public class InventoryListeners implements Listener {
         }
 
         Hopper hopper = playerData.getLastHopper();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> ((EHopper)hopper).compile(player), 1);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> ((EHopper) hopper).compile(player), 1);
         if (e.getSlot() == 40) {
             playerData.setSyncType(SyncType.FILTERED);
             player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncnext"));
-            ((EHopper)hopper).timeout(player);
+            ((EHopper) hopper).timeout(player);
             player.closeInventory();
             return true;
         }
@@ -216,7 +216,7 @@ public class InventoryListeners implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent event) {
         try {
-            Player player = (Player)event.getPlayer();
+            Player player = (Player) event.getPlayer();
             PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
             if (playerData.getInMenu() == MenuType.CRAFTING) {
                 Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
@@ -225,7 +225,7 @@ public class InventoryListeners implements Listener {
             }
             if (playerData.getInMenu() == MenuType.FILTER) {
                 Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
-                ((EHopper)hopper).compile(player);
+                ((EHopper) hopper).compile(player);
             }
             if (playerData.getInMenu() != MenuType.NOT_IN) {
                 Hopper hopper = instance.getHopperManager().getHopperFromPlayer(player);
@@ -234,7 +234,7 @@ public class InventoryListeners implements Listener {
             }
             playerData.setInMenu(MenuType.NOT_IN);
             if (playerData.getSyncType() == SyncType.FILTERED) {
-                ((EHopper)playerData.getLastHopper()).compile(player);
+                ((EHopper) playerData.getLastHopper()).compile(player);
             }
         } catch (Exception e) {
             Debugger.runReport(e);

@@ -1,8 +1,5 @@
 package com.songoda.epichoppers.boost;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import org.bukkit.Bukkit;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

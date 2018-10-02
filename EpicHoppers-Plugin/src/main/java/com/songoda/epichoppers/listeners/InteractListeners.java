@@ -25,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class InteractListeners implements Listener {
 
-    private EpicHoppersPlugin instance;
+    private final EpicHoppersPlugin instance;
 
     public InteractListeners(EpicHoppersPlugin instance) {
         this.instance = instance;
@@ -83,7 +83,7 @@ public class InteractListeners implements Listener {
                     playerData.setLastHopper(hopper);
                     if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")
                             && !player.getInventory().getItemInMainHand().getType().name().contains("PICKAXE")) {
-                        ((EHopper)hopper).overview(player);
+                        ((EHopper) hopper).overview(player);
                         e.setCancelled(true);
                         return;
                     }
@@ -92,7 +92,7 @@ public class InteractListeners implements Listener {
                     if (player.hasPermission("EpicHoppers.Admin")) {
                         playerData.setLastHopper(hopper);
                         player.sendMessage(instance.getLocale().getMessage("event.hopper.syncnext"));
-                        ((EHopper)hopper).timeout(player);
+                        ((EHopper) hopper).timeout(player);
                         player.closeInventory();
                     }
                     e.setCancelled(true);

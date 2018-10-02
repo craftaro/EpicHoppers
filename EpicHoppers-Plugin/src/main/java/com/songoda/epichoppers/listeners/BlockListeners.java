@@ -3,8 +3,8 @@ package com.songoda.epichoppers.listeners;
 import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
+import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.EFilter;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.utils.Debugger;
@@ -25,14 +25,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-import java.util.Map;
-
 /**
  * Created by songoda on 3/14/2017.
  */
 public class BlockListeners implements Listener {
 
-    private EpicHoppersPlugin instance;
+    private final EpicHoppersPlugin instance;
 
     public BlockListeners(EpicHoppersPlugin instance) {
         this.instance = instance;
@@ -63,7 +61,7 @@ public class BlockListeners implements Listener {
 
             ItemStack item = e.getItemInHand().clone();
 
-            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), player.getUniqueId(), player.getUniqueId(),null, new EFilter(), TeleportTrigger.DISABLED, null));
+            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), player.getUniqueId(), player.getUniqueId(), null, new EFilter(), TeleportTrigger.DISABLED, null));
 
         } catch (Exception ee) {
             Debugger.runReport(ee);
@@ -73,8 +71,8 @@ public class BlockListeners implements Listener {
     private int maxHoppers(Player player) {
         int limit = -1;
         for (PermissionAttachmentInfo permissionAttachmentInfo : player.getEffectivePermissions()) {
-                if (!permissionAttachmentInfo.getPermission().toLowerCase().startsWith("epichoppers.limit")) continue;
-                limit = Integer.parseInt(permissionAttachmentInfo.getPermission().split("\\.")[2]);
+            if (!permissionAttachmentInfo.getPermission().toLowerCase().startsWith("epichoppers.limit")) continue;
+            limit = Integer.parseInt(permissionAttachmentInfo.getPermission().split("\\.")[2]);
         }
         if (limit == -1) limit = instance.getConfig().getInt("Main.Max Hoppers Per Chunk");
         return limit;

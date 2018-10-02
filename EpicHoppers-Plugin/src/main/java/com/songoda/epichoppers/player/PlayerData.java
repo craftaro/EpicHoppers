@@ -17,7 +17,7 @@ public class PlayerData {
 
     private Date lastTeleport = null; // Null means off.
 
-    public PlayerData(UUID playerUUID) {
+    PlayerData(UUID playerUUID) {
         this.playerUUID = playerUUID;
     }
 

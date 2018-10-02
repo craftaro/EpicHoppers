@@ -5,13 +5,19 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.utils.Debugger;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.FurnaceInventory;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by songoda on 3/14/2017.
