@@ -233,9 +233,6 @@ public class InventoryListeners implements Listener {
                     hopper.setLastPlayer(null);
             }
             playerData.setInMenu(MenuType.NOT_IN);
-            if (playerData.getSyncType() == SyncType.FILTERED) {
-                ((EHopper) playerData.getLastHopper()).compile(player);
-            }
         } catch (Exception e) {
             Debugger.runReport(e);
         }

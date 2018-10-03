@@ -4,6 +4,7 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.player.MenuType;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.utils.Debugger;
