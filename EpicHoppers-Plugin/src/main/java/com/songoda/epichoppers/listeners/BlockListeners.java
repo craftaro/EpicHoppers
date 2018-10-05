@@ -115,7 +115,7 @@ public class BlockListeners implements Listener {
 
             Level level = hopper.getLevel();
 
-            if (level.getLevel() != 0) {
+            if (level.getLevel() > 1) {
                 event.setCancelled(true);
                 ItemStack item = instance.newHopperItem(level);
 
