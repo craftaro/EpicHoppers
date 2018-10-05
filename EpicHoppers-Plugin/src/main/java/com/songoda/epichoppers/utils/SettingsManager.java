@@ -216,6 +216,7 @@ public class SettingsManager implements Listener {
         DATABASE_IP("Database.IP", "127.0.0.1"),
         DATABASE_PORT("Database.Port", 3306),
         DATABASE_NAME("Database.Database Name", "EpicHoppers"),
+        DATABASE_PREFIX("Database.Prefix", "EH-"),
         DATABASE_USERNAME("Database.Username", "PUT_USERNAME_HERE"),
         DATABASE_PASSWORD("Database.Password", "PUT_PASSWORD_HERE"),
 

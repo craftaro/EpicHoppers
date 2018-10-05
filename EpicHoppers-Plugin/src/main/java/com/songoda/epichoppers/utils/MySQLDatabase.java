@@ -22,7 +22,7 @@ public class MySQLDatabase {
 
             //ToDo: This is sloppy
             connection.createStatement().execute(
-                    "CREATE TABLE IF NOT EXISTS `sync` (\n" +
+                    "CREATE TABLE IF NOT EXISTS `" + instance.getConfig().getString("Database.Prefix") + "sync` (\n" +
                     "\t`location` TEXT NULL,\n" +
                     "\t`level` INT NULL,\n" +
                     "\t`block` TEXT NULL,\n" +
@@ -36,7 +36,7 @@ public class MySQLDatabase {
                     "\t`black` TEXT NULL\n" +
                     ")");
 
-            connection.createStatement().execute("CREATE TABLE IF NOT EXISTS `boosts` (\n" +
+            connection.createStatement().execute("CREATE TABLE IF NOT EXISTS `" + instance.getConfig().getString("Database.Prefix") + "boosts` (\n" +
                     "\t`endtime` TEXT NULL,\n" +
                     "\t`amount` INT NULL,\n" +
                     "\t`uuid` TEXT NULL\n" +
