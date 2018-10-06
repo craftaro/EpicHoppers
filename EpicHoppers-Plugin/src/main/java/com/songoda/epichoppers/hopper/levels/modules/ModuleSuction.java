@@ -60,10 +60,10 @@ public class ModuleSuction implements Module {
             if (!canMove(hopperBlock.getInventory(), item)) {
                 continue;
             }
-            ((Item) e).setPickupDelay(999);
-            e.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
             if (!e.isOnGround())
                 continue;
+            ((Item) e).setPickupDelay(10);
+            e.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
             float xx = (float) (0 + (Math.random() * .3));
             float yy = (float) (0 + (Math.random() * .3));
             float zz = (float) (0 + (Math.random() * .3));
