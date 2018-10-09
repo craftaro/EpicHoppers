@@ -27,12 +27,13 @@ public class StorageMysql extends Storage {
     public boolean containsGroup(String group) {
         try {
             DatabaseMetaData dbm = database.getConnection().getMetaData();
-            ResultSet rs = dbm.getTables(null, null, group, null);
+            ResultSet rs = dbm.getTables(null, null, instance.getConfig().getString("Database.Prefix")+group, null);
             if (rs.next()) {
                 return true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            instance.getServer().getPluginManager().disablePlugin(instance);
         }
         return false;
 
