@@ -6,10 +6,7 @@ import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,15 +27,16 @@ public class ModuleAutoCrafting implements Module {
             org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
             main:
             for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
-                if (!(recipe instanceof ShapedRecipe)) continue;
-                Map<Character, ItemStack> ingredientMap = ((ShapedRecipe) recipe).getIngredientMap();
+                if (!(recipe instanceof ShapedRecipe)&&!(recipe instanceof ShapelessRecipe)) continue;
+                List<ItemStack> ingredientMap = null;
+                if(recipe instanceof ShapelessRecipe)ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
+                if(recipe instanceof ShapedRecipe)ingredientMap = (List<ItemStack>) ((ShapedRecipe) recipe).getIngredientMap().values();
                 if (hopperBlock.getInventory().getSize() == 0) continue;
-                List<ItemStack> needed = stackItems(new ArrayList<>(ingredientMap.values()));
 
-                for (ItemStack item : needed) {
+                for (ItemStack item : ingredientMap) {
                     if (!hopperBlock.getInventory().contains(item.getType(), item.getAmount())) continue main;
                 }
-                for (ItemStack item : needed) {
+                for (ItemStack item : ingredientMap) {
                     hopperBlock.getInventory().removeItem(item);
                 }
                 hopperBlock.getInventory().addItem(new ItemStack(hopper.getAutoCrafting()));
