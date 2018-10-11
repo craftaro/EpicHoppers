@@ -8,6 +8,7 @@ import com.songoda.epichoppers.utils.Debugger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Beacon;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.configuration.ConfigurationSection;
@@ -107,10 +108,12 @@ public class HopHandler {
                     continue;
                 }
                 Block b2 = dest.getBlock();
-                if (!b2.getType().equals(Material.HOPPER) && !b2.getType().equals(Material.CHEST) && !b2.getType().equals(Material.TRAPPED_CHEST) && !(b2.getType().equals(Material.ENDER_CHEST))) {
+                if (!(b2.getState() instanceof InventoryHolder)) {
                     hopper.setSyncedBlock(null);
                     continue;
                 }
+                InventoryHolder inventoryHolder = (InventoryHolder) b2.getState();
+                //TODO add some restrictions here if needed
 
                 BoostData boostData = instance.getBoostManager().getBoost(hopper.getPlacedBy());
 
