@@ -131,23 +131,24 @@ public class HopHandler {
                         it = is[i].clone();
                         it.setAmount(1);
                     }
+                    if(!hopper.getLocation().getBlock().isBlockPowered()) {
+                        if (is[i] != null
+                                && materials.contains(is[i].getType())) {
+                            i++;
+                            continue;
+                        }
 
-                    if (is[i] != null
-                            && materials.contains(is[i].getType())) {
-                        i++;
-                        continue;
-                    }
-
-                    if (is[i] != null
-                            && !whiteList.isEmpty()
-                            && !whiteList.contains(it.getType())) {
-                        doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
-                    } else if (is[i] != null && !blackList.contains(it.getType())) {
-                        int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
-                        if (im != 10)
-                            i = im;
-                    } else if (is[i] != null && blackList.contains(it.getType())) {
-                        doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                        if (is[i] != null
+                                && !whiteList.isEmpty()
+                                && !whiteList.contains(it.getType())) {
+                            doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                        } else if (is[i] != null && !blackList.contains(it.getType())) {
+                            int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
+                            if (im != 10)
+                                i = im;
+                        } else if (is[i] != null && blackList.contains(it.getType())) {
+                            doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                        }
                     }
                 }
             }
