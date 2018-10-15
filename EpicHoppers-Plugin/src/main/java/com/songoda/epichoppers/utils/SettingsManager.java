@@ -196,7 +196,7 @@ public class SettingsManager implements Listener {
         o3("Main.Upgrade With XP", true),
         o4("Main.Allow Players To Teleport Through Hoppers", true),
         o6("Main.Support Enderchests", true),
-        o7("Main.Upgrade Particle Type", "WITCH_MAGIC"),
+        o7("Main.Upgrade Particle Type", "SPELL_WITCH"),
         o8("Main.Amount of Ticks Between Hops", 8L),
         o9("Main.Amount of Ticks Between Teleport", 10L),
         o10("Main.Timeout When Syncing Hoppers", 300L),
