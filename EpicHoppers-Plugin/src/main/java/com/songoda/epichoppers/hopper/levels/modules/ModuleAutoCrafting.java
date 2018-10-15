@@ -24,16 +24,11 @@ public class ModuleAutoCrafting implements Module {
             org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
             main:
             for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
-                //TODO DEBUG
-                if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) {
-                    List<ItemStack> ingredientMap = null;
-                    if (recipe instanceof ShapelessRecipe) {
-                        ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
-                    } else if (recipe instanceof ShapedRecipe) {
-                        ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
-                    }
-                    ingredientMap = compressItemStack(ingredientMap);
-                    if (hopperBlock.getInventory().getSize() == 0) continue;
+                if (!(recipe instanceof ShapedRecipe)&&!(recipe instanceof ShapelessRecipe)) continue;
+                List<ItemStack> ingredientMap = null;
+                if(recipe instanceof ShapelessRecipe)ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
+                if(recipe instanceof ShapedRecipe)ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
+                if (hopperBlock.getInventory().getSize() == 0) continue;
 
                     for (ItemStack item : ingredientMap) {
                         if(!hopperBlock.getInventory().contains(item)){
