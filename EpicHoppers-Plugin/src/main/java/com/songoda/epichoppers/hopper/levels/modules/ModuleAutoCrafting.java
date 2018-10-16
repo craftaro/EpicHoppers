@@ -8,11 +8,29 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ModuleAutoCrafting implements Module {
 
     private final Map<Material, Recipe> cachedRecipes = new HashMap<>();
+
+    public static List<ItemStack> compressItemStack(List<ItemStack> target) {
+        HashMap<Material, ItemStack> sortingList = new HashMap<>();
+        for (ItemStack item : target) {
+            if (sortingList.containsKey(item.getType())) {
+                ItemStack existing = sortingList.get(item.getType());
+                existing.setAmount(existing.getAmount() + item.getAmount());
+                sortingList.put(existing.getType(), existing);
+            } else {
+                sortingList.put(item.getType(), item);
+            }
+        }
+        List<ItemStack> list = new ArrayList<>(sortingList.values());
+        return list;
+    }
 
     @Override
     public String getName() {
@@ -24,23 +42,34 @@ public class ModuleAutoCrafting implements Module {
             org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
             main:
             for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
-                if (!(recipe instanceof ShapedRecipe)&&!(recipe instanceof ShapelessRecipe)) continue;
+                if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe)) continue;
                 List<ItemStack> ingredientMap = null;
-                if(recipe instanceof ShapelessRecipe)ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
-                if(recipe instanceof ShapedRecipe)ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
+                if (recipe instanceof ShapelessRecipe) ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
+                if (recipe instanceof ShapedRecipe)
+                    ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
                 if (hopperBlock.getInventory().getSize() == 0) continue;
 
-                    for (ItemStack item : ingredientMap) {
-                        if(!hopperBlock.getInventory().contains(item)){
-                            continue main;
-                        }
-                    }
-                    for (ItemStack item : ingredientMap) {
 
-                        hopperBlock.getInventory().removeItem(item);
+                Map<Material, Integer> items = new HashMap<>();
+                for (ItemStack item : ingredientMap) {
+                    if (!items.containsKey(item.getType())) {
+                        items.put(item.getType(), item.getAmount());
+                    } else {
+                        items.put(item.getType(), items.get(item.getType()) + 1);
                     }
-                    hopperBlock.getInventory().addItem(recipe.getResult());
                 }
+
+                for (Material material : items.keySet()) {
+                    ItemStack item = new ItemStack(material, items.get(material));
+                    if (!hopperBlock.getInventory().contains(item)) {
+                        continue main;
+                    }
+                }
+                for (Material material : items.keySet()) {
+                    ItemStack item = new ItemStack(material, items.get(material));
+                    hopperBlock.getInventory().removeItem(item);
+                }
+                hopperBlock.getInventory().addItem(recipe.getResult());
             }
         }
     }
@@ -101,19 +130,5 @@ public class ModuleAutoCrafting implements Module {
             Debugger.runReport(e);
         }
         return false;
-    }
-    public static List<ItemStack> compressItemStack(List<ItemStack> target){
-        HashMap<Material,ItemStack> sortingList = new HashMap<>();
-        for (ItemStack item:target){
-            if (sortingList.containsKey(item.getType())){
-                ItemStack existing = sortingList.get(item.getType());
-                existing.setAmount(existing.getAmount()+item.getAmount());
-                sortingList.put(existing.getType(),existing);
-            }else {
-                sortingList.put(item.getType(),item);
-            }
-        }
-        List<ItemStack> list = new ArrayList<>(sortingList.values());
-        return list;
     }
 }
