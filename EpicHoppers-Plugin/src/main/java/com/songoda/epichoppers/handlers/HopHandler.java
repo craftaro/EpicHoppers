@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Beacon;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.configuration.ConfigurationSection;
@@ -20,7 +19,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -85,16 +83,16 @@ public class HopHandler {
 
                 ItemStack[] is = hopperBlock.getInventory().getContents();
 
-                List<Material> materials = new ArrayList<>();
+                List<Material> blockedMaterials = new ArrayList<>();
 
                 for (Module module : hopper.getLevel().getRegisteredModules()) {
-
                     // Run Module
                     module.run(hopper);
 
                     // Add banned materials to list.
-                    if (module.getBlockedItems(hopper) == null) continue;
-                    materials.addAll(module.getBlockedItems(hopper));
+                    List<Material> materials = module.getBlockedItems(hopper);
+                    if (materials == null || materials.isEmpty()) continue;
+                    blockedMaterials.addAll(materials);
                 }
 
                 if (hopper.getSyncedBlock() == null) continue;
@@ -125,31 +123,30 @@ public class HopHandler {
 
                 List<Material> blackList = hopper.getFilter().getBlackList();
 
-                for (int i = 0; i < 5; i ++) {
+                for (int i = 0; i < 5; i++) {
                     ItemStack it = null;
                     if (is[i] != null) {
                         it = is[i].clone();
                         it.setAmount(1);
                     }
-                    if(!hopper.getLocation().getBlock().isBlockPowered()) {
-                        if (is[i] != null
-                                && materials.contains(is[i].getType())) {
-                            i++;
-                            continue;
-                        }
-
-                        if (is[i] != null
-                                && !whiteList.isEmpty()
-                                && !whiteList.contains(it.getType())) {
-                            doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
-                        } else if (is[i] != null && !blackList.contains(it.getType())) {
-                            int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
-                            if (im != 10)
-                                i = im;
-                        } else if (is[i] != null && blackList.contains(it.getType())) {
-                            doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
-                        }
+                    if (!hopper.getLocation().getBlock().isBlockPowered()
+                            || is[i] != null && blockedMaterials.contains(is[i].getType())) {
+                        i++;
+                        continue;
                     }
+
+                    if (is[i] != null
+                            && !whiteList.isEmpty()
+                            && !whiteList.contains(it.getType())) {
+                        doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                    } else if (is[i] != null && !blackList.contains(it.getType())) {
+                        int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
+                        if (im != 10)
+                            i = im;
+                    } else if (is[i] != null && blackList.contains(it.getType())) {
+                        doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                    }
+
                 }
             }
         } catch (Exception e) {
@@ -212,14 +209,14 @@ public class HopHandler {
             newItem.setAmount(amt);
 
             if (b2.getType().equals(Material.ENDER_CHEST)) {
-                    OfflinePlayer op = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
-                    if (op.isOnline() && canMove(op.getPlayer().getEnderChest(), newItem, amt)) {
-                        if (!ovoid.contains(it.getType())) {
-                            op.getPlayer().getEnderChest().addItem(newItem);
-                        }
-                        isS[place] = is;
-                        hopperBlock.getInventory().setContents(isS);
+                OfflinePlayer op = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
+                if (op.isOnline() && canMove(op.getPlayer().getEnderChest(), newItem, amt)) {
+                    if (!ovoid.contains(it.getType())) {
+                        op.getPlayer().getEnderChest().addItem(newItem);
                     }
+                    isS[place] = is;
+                    hopperBlock.getInventory().setContents(isS);
+                }
             } else {
                 InventoryHolder ih = (InventoryHolder) b2.getState();
                 if (!canMove(ih.getInventory(), newItem, amt) || b2.getType() == Material.BREWING_STAND) {

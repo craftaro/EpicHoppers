@@ -49,7 +49,6 @@ public class ModuleAutoCrafting implements Module {
                     ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
                 if (hopperBlock.getInventory().getSize() == 0) continue;
 
-
                 Map<Material, Integer> items = new HashMap<>();
                 for (ItemStack item : ingredientMap) {
                     if (!items.containsKey(item.getType())) {
@@ -60,14 +59,33 @@ public class ModuleAutoCrafting implements Module {
                 }
 
                 for (Material material : items.keySet()) {
+                    int amt = 0;
                     ItemStack item = new ItemStack(material, items.get(material));
-                    if (!hopperBlock.getInventory().contains(item)) {
+                    for (ItemStack i : hopperBlock.getInventory().getContents()) {
+                        if (i == null) continue;
+                        if (i.getType() != material) continue;
+                        amt += i.getAmount();
+                    }
+
+                    if (amt < item.getAmount()) {
                         continue main;
                     }
                 }
+                main2:
                 for (Material material : items.keySet()) {
-                    ItemStack item = new ItemStack(material, items.get(material));
-                    hopperBlock.getInventory().removeItem(item);
+                    int amtRemoved = 0;
+                    ItemStack toRemove = new ItemStack(material, items.get(material));
+                    for (ItemStack i : hopperBlock.getInventory().getContents()) {
+                        if (i ==  null || i.getType() != material) continue;
+                        if (toRemove.getAmount() - amtRemoved <= i.getAmount()) {
+                            toRemove.setAmount(toRemove.getAmount() - amtRemoved);
+                            hopperBlock.getInventory().removeItem(toRemove);
+                            continue main2;
+                        } else {
+                            amtRemoved += i.getAmount();
+                            hopperBlock.getInventory().removeItem(i);
+                        }
+                    }
                 }
                 hopperBlock.getInventory().addItem(recipe.getResult());
             }
@@ -82,13 +100,20 @@ public class ModuleAutoCrafting implements Module {
 
             if (!cachedRecipes.containsKey(material)) {
                 for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(material))) {
-                    if (!(recipe instanceof ShapedRecipe)) continue;
                     cachedRecipes.put(material, recipe);
                 }
             } else {
-                for (ItemStack itemStack : ((ShapedRecipe) cachedRecipes.get(material)).getIngredientMap().values()) {
-                    if (itemStack == null) continue;
-                    materials.add(itemStack.getType());
+                Recipe recipe = cachedRecipes.get(material);
+                if (recipe instanceof ShapedRecipe) {
+                    for (ItemStack itemStack : ((ShapedRecipe) recipe).getIngredientMap().values()) {
+                        if (itemStack == null) continue;
+                        materials.add(itemStack.getType());
+                    }
+                } else if (recipe instanceof ShapelessRecipe) {
+                    for (ItemStack itemStack : ((ShapelessRecipe) recipe).getIngredientList()) {
+                        if (itemStack == null) continue;
+                        materials.add(itemStack.getType());
+                    }
                 }
             }
         }
@@ -98,23 +123,6 @@ public class ModuleAutoCrafting implements Module {
     @Override
     public String getDescription() {
         return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.crafting", true);
-    }
-
-    private List<ItemStack> stackItems(List<ItemStack> items) {
-        Map<Material, Integer> materials = new HashMap<>();
-        for (ItemStack itemStack : items) {
-            if (itemStack == null) continue;
-            if (materials.containsKey(itemStack.getType())) {
-                materials.put(itemStack.getType(), materials.get(itemStack.getType()) + itemStack.getAmount());
-                continue;
-            }
-            materials.put(itemStack.getType(), itemStack.getAmount());
-        }
-        List<ItemStack> stacked = new ArrayList<>();
-        for (Map.Entry<Material, Integer> entry : materials.entrySet()) {
-            stacked.add(new ItemStack(entry.getKey(), entry.getValue()));
-        }
-        return stacked;
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {
