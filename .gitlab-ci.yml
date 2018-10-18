@@ -9,3 +9,4 @@ build:
     name: "EpicHoppers"
     paths:
     - "/builds/Songoda/EpicHoppers/target/*.jar"
+    - "/builds/Songoda/EpicHoppers/Read_this_before_your_first_use.txt"
