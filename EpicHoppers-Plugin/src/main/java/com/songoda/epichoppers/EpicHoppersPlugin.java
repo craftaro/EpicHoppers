@@ -122,8 +122,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         console.sendMessage(TextComponent.formatText("&7Action: &aEnabling&7..."));
 
         settingsManager = new SettingsManager(this);
-        setupConfig();
-        enchantmentHandler = new EnchantmentHandler();
+        this.setupConfig();
 
         String langMode = getConfig().getString("System.Language Mode");
         Locale.init(this);
@@ -134,14 +133,14 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             this.update();
         }
 
-        hopperManager = new EHopperManager();
-        playerDataManager = new PlayerDataManager();
-        boostManager = new BoostManager();
+        this.enchantmentHandler = new EnchantmentHandler();
+        this.hopperManager = new EHopperManager();
+        this.playerDataManager = new PlayerDataManager();
+        this.boostManager = new BoostManager();
         this.commandManager = new CommandManager(this);
 
-        loadLevelManager();
-
-        checkStorage();
+        this.loadLevelManager();
+        this.checkStorage();
 
         /*
          * Register hoppers into HopperManger from configuration

@@ -1,11 +1,9 @@
 package com.songoda.epichoppers.handlers;
 
 import com.songoda.arconix.plugin.Arconix;
-import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.utils.Debugger;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 

@@ -99,14 +99,13 @@ public class SettingsManager implements Listener {
         event.setCancelled(true);
     }
 
-    public void finishEditing(Player player) {
+    private void finishEditing(Player player) {
         this.current.remove(player);
         this.instance.saveConfig();
         this.openEditor(player);
     }
 
-
-    public void editObject(Player player, String current) {
+    private void editObject(Player player, String current) {
         this.current.put(player, ChatColor.stripColor(current));
 
         player.closeInventory();
@@ -139,7 +138,7 @@ public class SettingsManager implements Listener {
         player.openInventory(inventory);
     }
 
-    public void openEditor(Player player) {
+    private void openEditor(Player player) {
         Inventory inventory = Bukkit.createInventory(null, 54, pluginName + " Settings Editor");
         FileConfiguration config = instance.getConfig();
 
@@ -191,26 +190,26 @@ public class SettingsManager implements Listener {
     }
 
     public enum Setting {
-        o1("Main.Allow hopper Upgrading", true),
-        o2("Main.Upgrade With Economy", true),
-        o3("Main.Upgrade With XP", true),
-        o4("Main.Allow Players To Teleport Through Hoppers", true),
-        o6("Main.Support Enderchests", true),
-        o7("Main.Upgrade Particle Type", "SPELL_WITCH"),
-        o8("Main.Amount of Ticks Between Hops", 8L),
-        o9("Main.Amount of Ticks Between Teleport", 10L),
-        o10("Main.Timeout When Syncing Hoppers", 300L),
-        o11("Main.Max Hoppers Per Chunk", -1),
-        o12("Main.Display Helpful Tips For Operators", true),
-        o13("Main.Sounds Enabled", true),
-        o14("Main.BlockBreak Particle Type", "LAVA"),
-        o15("Main.BlockBreak Blacklisted Blocks", Arrays.asList("BEDROCK")),
-        o16("Interfaces.Replace Glass Type 1 With Rainbow Glass", false),
-        o17("Interfaces.Economy Icon", "SUNFLOWER"),
-        o18("Interfaces.XP Icon", "EXPERIENCE_BOTTLE"),
-        o19("Interfaces.Glass Type 1", 7),
-        o20("Interfaces.Glass Type 2", 11),
-        o21("Interfaces.Glass Type 3", 3),
+        HOPPER_UPGRADING("Main.Allow hopper Upgrading", true),
+        UPGRADE_WITH_ECONOMY("Main.Upgrade With Economy", true),
+        UPGRADE_WITH_XP("Main.Upgrade With XP", true),
+        TELEPORT("Main.Allow Players To Teleport Through Hoppers", true),
+        ENDERCHESTS("Main.Support Enderchests", true),
+        PARTICLE_TYPE("Main.Upgrade Particle Type", "SPELL_WITCH"),
+        HOP_TICKS("Main.Amount of Ticks Between Hops", 8L),
+        TELEPORT_TICKS("Main.Amount of Ticks Between Teleport", 10L),
+        SYNC_TIMEOUT("Main.Timeout When Syncing Hoppers", 300L),
+        MAX_CHUNK("Main.Max Hoppers Per Chunk", -1),
+        TIPS("Main.Display Helpful Tips For Operators", true),
+        SOUNDS("Main.Sounds Enabled", true),
+        BLOCKBREAK_PARTICLE("Main.BlockBreak Particle Type", "LAVA"),
+        BLACKLIST("Main.BlockBreak Blacklisted Blocks", Arrays.asList("BEDROCK")),
+        RAINBOW("Interfaces.Replace Glass Type 1 With Rainbow Glass", false),
+        ECO_ICON("Interfaces.Economy Icon", "SUNFLOWER"),
+        XP_ICON("Interfaces.XP Icon", "EXPERIANCE_BOTTLE"),
+        GLASS_TYPE_1("Interfaces.Glass Type 1", 7),
+        GLASS_TYPE_2("Interfaces.Glass Type 2", 11),
+        GLASS_TYPE_3("Interfaces.Glass Type 3", 3),
 
         DATABASE_SUPPORT("Database.Activate Mysql Support", false),
         DATABASE_IP("Database.IP", "127.0.0.1"),
@@ -222,7 +221,7 @@ public class SettingsManager implements Listener {
 
         DOWNLOAD_FILES("System.Download Needed Data Files", true),
         LANGUGE_MODE("System.Language Mode", "en_US"),
-        o22("System.Debugger Enabled", false);
+        DEBUGGER("System.Debugger Enabled", false);
 
         private String setting;
         private Object option;

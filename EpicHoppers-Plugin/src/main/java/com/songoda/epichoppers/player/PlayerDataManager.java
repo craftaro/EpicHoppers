@@ -8,7 +8,7 @@ public class PlayerDataManager {
 
     private final Map<UUID, PlayerData> registeredPlayers = new HashMap<>();
 
-    public PlayerData getPlayerData(UUID uuid) {
+    private PlayerData getPlayerData(UUID uuid) {
         return (uuid != null) ? registeredPlayers.computeIfAbsent(uuid, PlayerData::new) : null;
     }
 
