@@ -1,7 +1,6 @@
 package com.songoda.epichoppers;
 
 import com.google.common.base.Preconditions;
-import com.songoda.arconix.api.mcupdate.MCUpdate;
 import com.songoda.arconix.api.methods.formatting.TextComponent;
 import com.songoda.arconix.api.methods.serialize.Serialize;
 import com.songoda.arconix.api.utils.ConfigWrapper;
@@ -206,9 +205,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
         new HopHandler(this);
         teleportHandler = new TeleportHandler(this);
-
-        new MCUpdate(this, true);
-        //new MassiveStats(this, 9000);
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, this::saveToFile, 6000, 6000);
 
