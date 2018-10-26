@@ -74,7 +74,7 @@ public class HopHandler {
                 Block block = location.getBlock();
 
 
-                if (block == null || !(block.getState() instanceof Hopper)) {
+                if (block == null || block.getType() != Material.HOPPER) {
                     instance.getHopperManager().removeHopper(location);
                     instance.getLogger().info("EpicHoppers Removing non-hopper entry: " + location.toString());
                 }

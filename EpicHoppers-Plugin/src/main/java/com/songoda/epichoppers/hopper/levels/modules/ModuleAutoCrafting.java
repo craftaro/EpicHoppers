@@ -4,6 +4,7 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
+import jdk.nashorn.internal.ir.Block;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.*;
@@ -16,6 +17,7 @@ import java.util.Map;
 public class ModuleAutoCrafting implements Module {
 
     private final Map<Material, Recipe> cachedRecipes = new HashMap<>();
+    private final Map<Hopper, Material> lastMaterial = new HashMap<>();
 
     public static List<ItemStack> compressItemStack(List<ItemStack> target) {
         HashMap<Material, ItemStack> sortingList = new HashMap<>();
@@ -38,16 +40,16 @@ public class ModuleAutoCrafting implements Module {
     }
 
     public void run(Hopper hopper) {
-        if (hopper.getAutoCrafting() != null && canMove(hopper.getHopper().getInventory(), new ItemStack(hopper.getAutoCrafting()))) {
-            org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
-            main:
-            for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(hopper.getAutoCrafting()))) {
-                if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe)) continue;
+        org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
+        if (hopper.getAutoCrafting() != null && canMove(hopperBlock.getInventory(), new ItemStack(hopper.getAutoCrafting()))) {
+
+            Recipe recipe = cachedRecipes.get(hopper.getAutoCrafting());
+                if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe)) return;
                 List<ItemStack> ingredientMap = null;
                 if (recipe instanceof ShapelessRecipe) ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
                 if (recipe instanceof ShapedRecipe)
                     ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
-                if (hopperBlock.getInventory().getSize() == 0) continue;
+                if (hopperBlock.getInventory().getSize() == 0) return;
 
                 Map<Material, Integer> items = new HashMap<>();
                 for (ItemStack item : ingredientMap) {
@@ -68,7 +70,7 @@ public class ModuleAutoCrafting implements Module {
                     }
 
                     if (amt < item.getAmount()) {
-                        continue main;
+                        return;
                     }
                 }
                 main2:
@@ -89,7 +91,7 @@ public class ModuleAutoCrafting implements Module {
                 }
                 hopperBlock.getInventory().addItem(recipe.getResult());
             }
-        }
+
     }
 
     public List<Material> getBlockedItems(Hopper hopper) {
@@ -97,6 +99,13 @@ public class ModuleAutoCrafting implements Module {
         if (hopper.getAutoCrafting() != null) {
 
             Material material = hopper.getAutoCrafting();
+
+            if (material == Material.AIR) return materials;
+
+            if (lastMaterial.get(hopper) != material) {
+                lastMaterial.put(hopper, material);
+                cachedRecipes.remove(hopper);
+            }
 
             if (!cachedRecipes.containsKey(material)) {
                 for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(material))) {

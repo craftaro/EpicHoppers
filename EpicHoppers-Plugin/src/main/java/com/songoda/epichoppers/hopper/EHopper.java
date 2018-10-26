@@ -39,7 +39,7 @@ public class EHopper implements Hopper {
     private Filter filter;
     private TeleportTrigger teleportTrigger;
     private Material autoCrafting;
-
+    private org.bukkit.block.Hopper hopper;
 
     public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
@@ -50,6 +50,7 @@ public class EHopper implements Hopper {
         this.placedBy = placedBy;
         this.teleportTrigger = teleportTrigger;
         this.autoCrafting = autoCrafting;
+        this.hopper = (org.bukkit.block.Hopper) (location.getBlock() != null && location.getBlock().getType() == Material.HOPPER ? location.getBlock().getState() : null);
     }
 
     public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
@@ -519,7 +520,7 @@ public class EHopper implements Hopper {
 
     @Override
     public org.bukkit.block.Hopper getHopper() {
-        return (org.bukkit.block.Hopper) (location.getBlock() != null ? location.getBlock().getState() : null);
+        return hopper;
     }
 
     @Override
