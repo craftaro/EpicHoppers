@@ -162,9 +162,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     UUID lastPlayer = playerStr == null ? null : UUID.fromString(playerStr);
                     UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
 
-                    List<Material> whiteList = row.get("whitelist").asMaterialList();
-                    List<Material> blackList = row.get("blacklist").asMaterialList();
-                    List<Material> voidList = row.get("void").asMaterialList();
+                    List<ItemStack> whiteList = row.get("whitelist").asItemStackList();
+                    List<ItemStack> blackList = row.get("blacklist").asItemStackList();
+                    List<ItemStack> voidList = row.get("void").asItemStackList();
 
                     Material autoCrafting = Material.valueOf(row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString());
 

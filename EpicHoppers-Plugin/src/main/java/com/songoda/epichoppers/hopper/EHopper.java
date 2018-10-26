@@ -313,7 +313,7 @@ public class EHopper implements Hopper {
             }
 
             int num = 0;
-            for (Material m  : filter.getWhiteList()) {
+            for (ItemStack m  : filter.getWhiteList()) {
                 if (m != null) {
                     i.setItem(whiteSlots[num], new ItemStack(m));
                     num++;
@@ -330,7 +330,7 @@ public class EHopper implements Hopper {
             }
 
             num = 0;
-            for (Material m : filter.getBlackList()) {
+            for (ItemStack m : filter.getBlackList()) {
                 if (m != null) {
                     i.setItem(blackSlots[num], new ItemStack(m));
                     num++;
@@ -347,7 +347,7 @@ public class EHopper implements Hopper {
             }
 
             num = 0;
-            for (Material m : filter.getVoidList()) {
+            for (ItemStack m : filter.getVoidList()) {
                 if (m != null) {
                     i.setItem(avoid[num], new ItemStack(m));
                     num++;
@@ -393,9 +393,9 @@ public class EHopper implements Hopper {
         try {
             ItemStack[] items2 = p.getOpenInventory().getTopInventory().getContents();
 
-            List<Material> owhite = new ArrayList<>();
-            List<Material> oblack = new ArrayList<>();
-            List<Material> ovoid = new ArrayList<>();
+            List<ItemStack> owhite = new ArrayList<>();
+            List<ItemStack> oblack = new ArrayList<>();
+            List<ItemStack> ovoid = new ArrayList<>();
 
             int[] awhite = {0, 1, 9, 10, 18, 19};
             int[] ablack = {27, 28, 36, 37, 45, 46};
@@ -406,19 +406,19 @@ public class EHopper implements Hopper {
                 for (int aa : awhite) {
                     if (aa == num) {
                         if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS") && items2[num].getType() != Material.AIR)
-                            owhite.add(items2[num].getType());
+                            owhite.add(items2[num]);
                     }
                 }
                 for (int aa : ablack) {
                     if (aa == num) {
                         if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS") && items2[num].getType() != Material.AIR)
-                            oblack.add(items2[num].getType());
+                            oblack.add(items2[num]);
                     }
                 }
                 for (int aa : avoid) {
                     if (aa == num) {
                         if (items2[num] != null && !items2[num].getType().equals(Material.BARRIER) && items2[num].getType() != Material.AIR)
-                            ovoid.add(items2[num].getType());
+                            ovoid.add(items2[num]);
                     }
                 }
                 num++;

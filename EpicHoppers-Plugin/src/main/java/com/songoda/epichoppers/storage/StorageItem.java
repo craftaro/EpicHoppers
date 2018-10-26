@@ -1,9 +1,12 @@
 package com.songoda.epichoppers.storage;
 
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StorageItem {
 
@@ -20,10 +23,11 @@ public class StorageItem {
         this.object = object;
     }
 
-    public StorageItem(String key, List<Material> material) {
-        String object = "";
-        for (Material m : material) {
-            object += m.name() + ";";
+    public StorageItem(String key, List<ItemStack> material) {
+        List<Map<String, Object>> object = new ArrayList<>();
+        for (ItemStack m : material) {
+            Map<String, Object> serialized = m.serialize();
+            object.add(serialized);
         }
         this.key = key;
         this.object = object;
@@ -52,13 +56,12 @@ public class StorageItem {
         return object;
     }
 
-    public List<Material> asMaterialList() {
-        List<Material> list = new ArrayList<>();
+    public List<ItemStack> asItemStackList() {
+        List<ItemStack> list = new ArrayList<>();
         if (object == null) return list;
-        String[] stack = ((String)object).split(";");
-        for (String item : stack) {
-            if (item.equals("")) continue;
-            list.add(Material.valueOf(item));
+        List<Map<String,Object>> itemstacks = (List<Map<String, Object>>) object;
+        for (Map<String, Object> serial:itemstacks) {
+            list.add(ItemStack.deserialize(serial));
         }
         return list;
     }

@@ -1,50 +1,50 @@
 package com.songoda.epichoppers.hopper;
 
 import com.songoda.epichoppers.api.hopper.Filter;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EFilter implements Filter {
 
-    private List<Material> whiteList = new ArrayList<>();
-    private List<Material> blackList = new ArrayList<>();
-    private List<Material> voidList = new ArrayList<>();
+    private List<ItemStack> whiteList = new ArrayList<>();
+    private List<ItemStack> blackList = new ArrayList<>();
+    private List<ItemStack> voidList = new ArrayList<>();
 
     private Block endPoint;
 
     @Override
-    public List<Material> getWhiteList() {
+    public List<ItemStack> getWhiteList() {
         if (whiteList == null) return new ArrayList<>();
         return whiteList;
     }
 
     @Override
-    public void setWhiteList(List<Material> whiteList) {
+    public void setWhiteList(List<ItemStack> whiteList) {
         this.whiteList = whiteList;
     }
 
     @Override
-    public List<Material> getBlackList() {
+    public List<ItemStack> getBlackList() {
         if (blackList == null) return new ArrayList<>();
         return blackList;
     }
 
     @Override
-    public void setBlackList(List<Material> blackList) {
+    public void setBlackList(List<ItemStack> blackList) {
         this.blackList = blackList;
     }
 
     @Override
-    public List<Material> getVoidList() {
+    public List<ItemStack> getVoidList() {
         if (voidList == null) return new ArrayList<>();
         return voidList;
     }
 
     @Override
-    public void setVoidList(List<Material> voidList) {
+    public void setVoidList(List<ItemStack> voidList) {
         this.voidList = voidList;
     }
 

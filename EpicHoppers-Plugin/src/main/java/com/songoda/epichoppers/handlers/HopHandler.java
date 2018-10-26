@@ -119,9 +119,9 @@ public class HopHandler {
 
                 int amt = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
-                List<Material> whiteList = hopper.getFilter().getWhiteList();
+                List<ItemStack> whiteList = hopper.getFilter().getWhiteList();
 
-                List<Material> blackList = hopper.getFilter().getBlackList();
+                List<ItemStack> blackList = hopper.getFilter().getBlackList();
 
                 for (int i = 0; i < 5; i++) {
                     ItemStack it = null;
@@ -129,22 +129,27 @@ public class HopHandler {
                         it = is[i].clone();
                         it.setAmount(1);
                     }
-                    if (!hopper.getLocation().getBlock().isBlockPowered()
+                    if (hopper.getLocation().getBlock().isBlockPowered()
                             || is[i] != null && blockedMaterials.contains(is[i].getType())) {
                         i++;
                         continue;
                     }
 
+                    int finalI = i;
                     if (is[i] != null
                             && !whiteList.isEmpty()
-                            && !whiteList.contains(it.getType())) {
+                            && whiteList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
                         doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
-                    } else if (is[i] != null && !blackList.contains(it.getType())) {
-                        int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
-                        if (im != 10)
-                            i = im;
-                    } else if (is[i] != null && blackList.contains(it.getType())) {
-                        doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                    } else {
+                        if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
+                            int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
+                            if (im != 10)
+                                i = im;
+                        } else {
+                            if (is[i] != null && blackList.stream().anyMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
+                                doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                            }
+                        }
                     }
 
                 }
@@ -184,11 +189,7 @@ public class HopHandler {
                 it.setAmount(1);
             }
 
-            List<Material> ovoid = new ArrayList<>();
-
-            for (Material iss : hopper.getFilter().getVoidList()) {
-                ovoid.add(iss);
-            }
+            List<ItemStack> ovoid = new ArrayList<>(hopper.getFilter().getVoidList());
 
             if (is.getType() == Material.AIR) {
                 return 10;
@@ -246,7 +247,8 @@ public class HopHandler {
                         }
                     }
                 } else {
-                    if (!ovoid.contains(it.getType())) {
+                    ItemStack finalIt = it;
+                    if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
                         ih.getInventory().addItem(newItem);
                     }
                     isS[place] = is;

@@ -123,18 +123,18 @@ public class BlockListeners implements Listener {
                 event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
             }
 
-            for (Material m : hopper.getFilter().getWhiteList()) {
+            for (ItemStack m : hopper.getFilter().getWhiteList()) {
                 if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(m));
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(),m);
             }
 
-            for (Material m : hopper.getFilter().getBlackList()) {
+            for (ItemStack m : hopper.getFilter().getBlackList()) {
                 if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(m));
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
             }
-            for (Material m : hopper.getFilter().getVoidList()) {
+            for (ItemStack m : hopper.getFilter().getVoidList()) {
                 if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), new ItemStack(m));
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(),m);
             }
             instance.getHopperManager().removeHopper(block.getLocation());
 
