@@ -1,12 +1,10 @@
 package com.songoda.epichoppers.storage;
 
+import com.songoda.epichoppers.utils.Serializers;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StorageItem {
 
@@ -24,13 +22,13 @@ public class StorageItem {
     }
 
     public StorageItem(String key, List<ItemStack> material) {
-        List<Map<String, Object>> object = new ArrayList<>();
+        StringBuilder object = new StringBuilder();
         for (ItemStack m : material) {
-            Map<String, Object> serialized = m.serialize();
-            object.add(serialized);
+            object.append(Serializers.serialize(m));
+            object.append(";;");
         }
         this.key = key;
-        this.object = object;
+        this.object = object.toString();
     }
 
     public String getKey() {
@@ -59,9 +57,11 @@ public class StorageItem {
     public List<ItemStack> asItemStackList() {
         List<ItemStack> list = new ArrayList<>();
         if (object == null) return list;
-        List<Map<String,Object>> itemstacks = (List<Map<String, Object>>) object;
-        for (Map<String, Object> serial:itemstacks) {
-            list.add(ItemStack.deserialize(serial));
+        String obj = (String) object;
+        if (obj.equals("[]"))return list;
+        List<String> sers = new ArrayList<>(Arrays.asList(obj.split(";;")));
+        for (String ser : sers) {
+            list.add(Serializers.deserialize(ser));
         }
         return list;
     }
