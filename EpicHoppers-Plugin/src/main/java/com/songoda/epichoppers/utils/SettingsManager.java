@@ -206,7 +206,7 @@ public class SettingsManager implements Listener {
         BLACKLIST("Main.BlockBreak Blacklisted Blocks", Arrays.asList("BEDROCK")),
         RAINBOW("Interfaces.Replace Glass Type 1 With Rainbow Glass", false),
         ECO_ICON("Interfaces.Economy Icon", "SUNFLOWER"),
-        XP_ICON("Interfaces.XP Icon", "EXPERIANCE_BOTTLE"),
+        XP_ICON("Interfaces.XP Icon", "EXPERIENCE_BOTTLE"),
         GLASS_TYPE_1("Interfaces.Glass Type 1", 7),
         GLASS_TYPE_2("Interfaces.Glass Type 2", 11),
         GLASS_TYPE_3("Interfaces.Glass Type 3", 3),
