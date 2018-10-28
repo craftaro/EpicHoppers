@@ -36,8 +36,6 @@ public class InventoryListeners implements Listener {
             Player player = (Player) event.getWhoClicked();
             if (inv == null || event.getCurrentItem() == null) return;
 
-            if (event.getRawSlot() > event.getView().getTopInventory().getSize() - 1) return;
-
             if (event.getCursor() != null && event.getCurrentItem() != null) {
                 ItemStack c = event.getCursor();
                 ItemStack item = event.getCurrentItem();
@@ -54,6 +52,8 @@ public class InventoryListeners implements Listener {
 
                 }
             }
+            if (event.getRawSlot() > event.getView().getTopInventory().getSize() - 1) return;
+
             if (!event.getCurrentItem().hasItemMeta()) return;
 
             if (doFilter(event)) return;

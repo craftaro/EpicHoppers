@@ -16,6 +16,7 @@ public class Methods {
         try {
             if (p.getItemInHand().hasItemMeta()
                     && p.getItemInHand().getType() != Material.AIR
+                    && p.getItemInHand().getType() != Material.ENCHANTED_BOOK
                     && p.getItemInHand().getItemMeta().hasLore()) {
                 for (String str : p.getItemInHand().getItemMeta().getLore()) {
                     if (str.equals(Arconix.pl().getApi().format().formatText("&7Sync Touch")) || str.equals(Arconix.pl().getApi().format().formatText("&aSync Touch"))) {
