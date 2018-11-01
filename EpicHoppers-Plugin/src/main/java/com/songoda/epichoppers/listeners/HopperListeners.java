@@ -3,6 +3,8 @@ package com.songoda.epichoppers.listeners;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.utils.Debugger;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
@@ -20,17 +22,17 @@ public class HopperListeners implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onHop(InventoryMoveItemEvent e) {
+    public void onHop(InventoryMoveItemEvent event) {
         try {
-            Inventory source = e.getSource();
+            Inventory source = event.getSource();
 
-            if (!instance.getHopperManager().isHopper(e.getSource().getLocation())) return;
+            if (source.getLocation().getBlock().getType() != Material.HOPPER) return;
 
-            Hopper hopper = instance.getHopperManager().getHopper(e.getSource().getLocation());
-
-            if (source.getHolder() instanceof Hopper && hopper.getSyncedBlock() != null) {
-                e.setCancelled(true);
+            Hopper hopper = instance.getHopperManager().getHopper(source.getLocation());
+            if (hopper.getSyncedBlock() == null) {
+                hopper.setSyncedBlock(event.getDestination().getLocation().getBlock());
             }
+            event.setCancelled(true);
         } catch (Exception ee) {
             Debugger.runReport(ee);
         }
