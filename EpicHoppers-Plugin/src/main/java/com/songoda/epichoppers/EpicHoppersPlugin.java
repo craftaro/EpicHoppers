@@ -290,9 +290,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         this.storage.closeConnection();
         checkStorage();
 
-        // Wipe old hopper information
-        storage.clearFile();
-
         /*
          * Dump HopperManager to file.
          */
@@ -301,7 +298,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                 continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
 
-            storage.saveItem("sync", new StorageItem("location", locationStr),
+            storage.prepareSaveItem("sync", new StorageItem("location", locationStr),
                     new StorageItem("level", hopper.getLevel().getLevel()),
                     new StorageItem("block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation())),
                     new StorageItem("placedby", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString()),
@@ -319,10 +316,12 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
          * Dump BoostManager to file.
          */
         for (BoostData boostData : boostManager.getBoosts()) {
-            storage.saveItem("boosts", new StorageItem("endtime", String.valueOf(boostData.getEndTime())),
+            storage.prepareSaveItem("boosts", new StorageItem("endtime", String.valueOf(boostData.getEndTime())),
                     new StorageItem("amount", boostData.getMultiplier()),
                     new StorageItem("uuid", boostData.getPlayer().toString()));
         }
+
+        storage.doSave();
     }
 
     private void loadLevelManager() {

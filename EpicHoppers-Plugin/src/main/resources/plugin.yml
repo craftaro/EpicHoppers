@@ -3,7 +3,7 @@ description: EpicHoppers
 main: com.songoda.epichoppers.EpicHoppersPlugin
 depend: [Arconix]
 softdepend: [WildStacker, Towny, RedProtect, Kingdoms, PlotsSquared, GriefPrevention, USkyBlock, ASkyBlock, WorldGuard, Factions, Vault]
-version: 3.1.18
+version: 3.1.22
 author: Songoda
 api-version: 1.13
 commands:
