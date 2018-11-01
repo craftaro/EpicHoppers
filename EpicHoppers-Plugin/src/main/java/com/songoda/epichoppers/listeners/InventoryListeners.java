@@ -9,6 +9,7 @@ import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.utils.Debugger;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -48,8 +49,6 @@ public class InventoryListeners implements Listener {
                     event.setCancelled(true);
                     player.setItemOnCursor(new ItemStack(Material.AIR));
                     player.updateInventory();
-
-
                 }
             }
             if (event.getRawSlot() > event.getView().getTopInventory().getSize() - 1) return;
@@ -173,7 +172,8 @@ public class InventoryListeners implements Listener {
             String name = "";
             if (e.getCurrentItem().hasItemMeta() && e.getCurrentItem().getItemMeta().hasDisplayName())
                 name = e.getCurrentItem().getItemMeta().getDisplayName();
-            if (!name.equals(instance.getLocale().getMessage("interface.filter.whitelist")) &&
+
+            if (!ChatColor.stripColor(name).equals(ChatColor.stripColor(instance.getLocale().getMessage("interface.filter.whitelist"))) &&
                     !name.equals(instance.getLocale().getMessage("interface.filter.blacklist")) &&
                     !name.equals(instance.getLocale().getMessage("interface.filter.void"))) {
                 e.setCancelled(false);

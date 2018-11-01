@@ -75,8 +75,7 @@ public class HopHandler {
 
 
                 if (block == null || block.getType() != Material.HOPPER) {
-                    instance.getHopperManager().removeHopper(location);
-                    instance.getLogger().info("EpicHoppers Removing non-hopper entry: " + location.toString());
+                    continue;
                 }
 
                 Hopper hopperBlock = hopper.getHopper();
@@ -109,7 +108,6 @@ public class HopHandler {
                 }
                 Block b2 = dest.getBlock();
                 if (!(b2.getState() instanceof InventoryHolder || b2.getType() == Material.ENDER_CHEST)) {
-                    hopper.setSyncedBlock(null);
                     continue;
                 }
                 //InventoryHolder inventoryHolder = (InventoryHolder) b2.getState();
