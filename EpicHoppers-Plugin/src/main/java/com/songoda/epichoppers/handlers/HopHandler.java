@@ -73,8 +73,8 @@ public class HopHandler {
                 }
                 Block block = location.getBlock();
 
-
                 if (block == null || block.getType() != Material.HOPPER) {
+                    instance.getHopperManager().removeHopper(location);
                     continue;
                 }
 
@@ -96,20 +96,20 @@ public class HopHandler {
 
                 if (hopper.getSyncedBlock() == null) continue;
                 Location dest = hopper.getSyncedBlock().getLocation();
-                if (dest == null) {
-                    hopper.setSyncedBlock(null);
-                    continue;
-                }
+                if (dest == null) continue;
 
                 int destx = location.getBlockX() >> 4;
                 int destz = location.getBlockZ() >> 4;
                 if (!dest.getWorld().isChunkLoaded(destx, destz)) {
                     continue;
                 }
+
                 Block b2 = dest.getBlock();
                 if (!(b2.getState() instanceof InventoryHolder || b2.getType() == Material.ENDER_CHEST)) {
+                    hopper.setSyncedBlock(null);
                     continue;
                 }
+
                 //InventoryHolder inventoryHolder = (InventoryHolder) b2.getState();
                 //TODO add some restrictions here if needed
 
@@ -122,7 +122,7 @@ public class HopHandler {
                 List<ItemStack> blackList = hopper.getFilter().getBlackList();
 
                 for (int i = 0; i < 5; i++) {
-                    ItemStack it = null;
+                    ItemStack it;
                     if (is[i] != null) {
                         it = is[i].clone();
                         it.setAmount(1);
@@ -140,6 +140,7 @@ public class HopHandler {
                         doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
                     } else {
                         if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
+
                             int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
                             if (im != 10)
                                 i = im;

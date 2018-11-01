@@ -8,6 +8,7 @@ import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -16,6 +17,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -45,6 +48,31 @@ public class InteractListeners implements Listener {
                 Hopper hopper = instance.getHopperManager().getHopper(location);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
                     instance.getTeleportHandler().tpPlayer(player, hopper);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onMoveChunk(PlayerMoveEvent e) {
+        updateHopper(e.getFrom().getChunk(), e.getTo().getChunk());
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent e) {
+        updateHopper(e.getFrom().getChunk(), e.getTo().getChunk());
+    }
+
+    private void updateHopper(Chunk from, Chunk to) {
+        if (from == to) return;
+
+        for (Hopper hopper : instance.getHopperManager().getHoppers().values()) {
+            Location location = hopper.getLocation();
+
+            int x = location.getBlockX() >> 4;
+            int z = location.getBlockZ() >> 4;
+
+            if (location.getWorld().getChunkAt(x, z) == to) {
+                ((EHopper)hopper).reloadHopper();
             }
         }
     }
