@@ -51,6 +51,7 @@ public class EHopper implements Hopper {
         this.teleportTrigger = teleportTrigger;
         this.autoCrafting = autoCrafting;
         this.reloadHopper();
+        this.syncName();
     }
 
     public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
@@ -478,6 +479,7 @@ public class EHopper implements Hopper {
         try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             this.level = level;
+            syncName();
             if (instance.getLevelManager().getHighestLevel() != level) {
                 player.sendMessage(instance.getLocale().getMessage("event.upgrade.success", level.getLevel()));
             } else {
@@ -502,6 +504,10 @@ public class EHopper implements Hopper {
         }
     }
 
+    private void syncName() {
+        hopper.setCustomName(Methods.formatName(level.getLevel(), false));
+        hopper.update(true);
+    }
 
     public void timeout(Player player) {
         try {
