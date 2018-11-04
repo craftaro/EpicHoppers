@@ -113,11 +113,13 @@ public class EHopper implements Hopper {
             ItemMeta itemmeta = item.getItemMeta();
             itemmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.currentlevel", level.getLevel()));
             List<String> lore = this.level.getDescription();
-            lore.add("");
-            if (nextLevel == null) lore.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
-            else {
-                lore.add(instance.getLocale().getMessage("interface.hopper.nextlevel", nextLevel.getLevel()));
-                lore.addAll(nextLevel.getDescription());
+            if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")) {
+                lore.add("");
+                if (nextLevel == null) lore.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
+                else {
+                    lore.add(instance.getLocale().getMessage("interface.hopper.nextlevel", nextLevel.getLevel()));
+                    lore.addAll(nextLevel.getDescription());
+                }
             }
 
             BoostData boostData = instance.getBoostManager().getBoost(placedBy);
