@@ -53,6 +53,7 @@ public class ModuleAutoCrafting implements Module {
 
                 Map<Material, Integer> items = new HashMap<>();
                 for (ItemStack item : ingredientMap) {
+                    if (item == null) continue;
                     if (!items.containsKey(item.getType())) {
                         items.put(item.getType(), item.getAmount());
                     } else {
