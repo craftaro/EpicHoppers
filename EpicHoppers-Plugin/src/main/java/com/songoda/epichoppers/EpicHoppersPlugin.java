@@ -465,7 +465,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     @Override
     public Level getLevelFromItem(ItemStack item) {
         if (item.getItemMeta().getDisplayName().contains(":")) {
-            String arr[] = item.getItemMeta().getDisplayName().replace("§", "").split(":");
+            String arr[] = item.getItemMeta().getDisplayName().replace(String.valueOf(ChatColor.COLOR_CHAR), "").split(":");
             return getLevelManager().getLevel(Integer.parseInt(arr[0]));
         } else {
             return getLevelManager().getLowestLevel();
