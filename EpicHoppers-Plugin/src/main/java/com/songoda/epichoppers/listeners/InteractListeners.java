@@ -110,20 +110,11 @@ public class InteractListeners implements Listener {
                     Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
                     playerData.setLastHopper(hopper);
                     if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")
-                            && !player.getInventory().getItemInMainHand().getType().name().contains("PICKAXE")) {
+                            && !player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
                         ((EHopper) hopper).overview(player);
                         e.setCancelled(true);
                         return;
                     }
-
-                    //ToDO: What is this?
-                    if (player.hasPermission("EpicHoppers.Admin")) {
-                        playerData.setLastHopper(hopper);
-                        player.sendMessage(instance.getLocale().getMessage("event.hopper.syncnext"));
-                        ((EHopper) hopper).timeout(player);
-                        player.closeInventory();
-                    }
-                    e.setCancelled(true);
                 }
                 return;
             }
