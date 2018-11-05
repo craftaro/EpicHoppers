@@ -130,7 +130,7 @@ public class HopHandler {
                     if (hopper.getLocation().getBlock().isBlockPowered()
                             || is[i] != null && blockedMaterials.contains(is[i].getType())) {
                         i++;
-                        continue;
+                        if (i >= 5) continue;
                     }
 
                     int finalI = i;
