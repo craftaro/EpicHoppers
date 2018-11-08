@@ -156,7 +156,6 @@ public class InventoryListeners implements Listener {
         }
 
         Hopper hopper = playerData.getLastHopper();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> ((EHopper) hopper).compile(player), 1);
         if (e.getSlot() == 40) {
             playerData.setSyncType(SyncType.FILTERED);
             player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncnext"));
@@ -164,6 +163,7 @@ public class InventoryListeners implements Listener {
             player.closeInventory();
             return true;
         }
+        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> ((EHopper) hopper).compile(player), 1);
 
         int[] a = {0, 1, 9, 10, 18, 19, 27, 28, 36, 37, 45, 46, 7, 8, 16, 17, 25, 26, 34, 35, 43, 44, 52, 53};
         e.setCancelled(true);
