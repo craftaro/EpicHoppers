@@ -426,8 +426,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
         this.locale.reloadMessages();
         references = new References();
-        reloadConfig();
-        saveConfig();
+        this.setupConfig();
         loadLevelManager();
     }
 
