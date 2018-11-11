@@ -4,6 +4,7 @@ general.nametag.prefix = "&7[&6EpicHoppers&7]"
 general.nametag.next = "&9Next"
 general.nametag.back = "&9Back"
 general.nametag.nameformat = "&eLevel %level% &fHopper"
+general.word.disabled = "DISABLED"
 
 #Interface Messages
 

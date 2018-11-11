@@ -79,7 +79,7 @@ public class EHopper implements Hopper {
             ItemMeta perlmeta = perl.getItemMeta();
             perlmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.perltitle"));
             ArrayList<String> loreperl = new ArrayList<>();
-            String[] parts = instance.getLocale().getMessage("interface.hopper.perllore2", teleportTrigger.name()).split("\\|");
+            String[] parts = instance.getLocale().getMessage("interface.hopper.perllore2", teleportTrigger == TeleportTrigger.DISABLED ? instance.getLocale().getMessage("general.word.disabled") : teleportTrigger.name()).split("\\|");
             for (String line : parts) {
                 loreperl.add(Arconix.pl().getApi().format().formatText(line));
             }
