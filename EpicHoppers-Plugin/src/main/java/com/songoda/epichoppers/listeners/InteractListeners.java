@@ -107,6 +107,8 @@ public class InteractListeners implements Listener {
 
             if (playerData.getSyncType() == null) {
                 if (e.getClickedBlock().getType() == Material.HOPPER) {
+                    if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getClickedBlock().getLocation()))
+                        return;
                     Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
                     playerData.setLastHopper(hopper);
                     if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")

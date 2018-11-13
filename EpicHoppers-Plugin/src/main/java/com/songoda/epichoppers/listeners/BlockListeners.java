@@ -47,6 +47,9 @@ public class BlockListeners implements Listener {
 
             if (e.getBlock().getType() != Material.HOPPER) return;
 
+            if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getBlock().getLocation()))
+                return;
+
             int amt = count(e.getBlock().getChunk());
 
             int max = maxHoppers(player);
@@ -110,6 +113,9 @@ public class BlockListeners implements Listener {
             handleSyncTouch(event);
 
             if (event.getBlock().getType() != Material.HOPPER) return;
+
+            if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(block.getLocation()))
+                return;
 
             Hopper hopper = instance.getHopperManager().getHopper(block);
 

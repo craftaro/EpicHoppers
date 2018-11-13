@@ -28,6 +28,9 @@ public class HopperListeners implements Listener {
 
             if (source.getLocation().getBlock().getType() != Material.HOPPER) return;
 
+            if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
+                return;
+
             Hopper hopper = instance.getHopperManager().getHopper(source.getLocation());
             if (hopper.getSyncedBlock() == null) {
                 hopper.setSyncedBlock(event.getDestination().getLocation().getBlock());

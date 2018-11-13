@@ -86,6 +86,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     private Storage storage;
 
+    private boolean liquidtanks = false;
+
     public static EpicHoppersPlugin getInstance() {
         return INSTANCE;
     }
@@ -216,6 +218,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(this), this);
+
+        if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
 
         // Register default hooks
         if (pluginManager.isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
@@ -512,6 +516,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     public PlayerDataManager getPlayerDataManager() {
         return playerDataManager;
+    }
+
+    public boolean isLiquidtanks() {
+        return liquidtanks;
     }
 
     @Override

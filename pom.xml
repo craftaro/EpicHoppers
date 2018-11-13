@@ -2,7 +2,7 @@
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <version>3.1.32</version>
+    <version>3.1.33</version>
     <build>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
@@ -58,6 +58,11 @@
         <dependency>
             <groupId>com.songoda</groupId>
             <artifactId>arconix</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>net.arcaniax</groupId>
+            <artifactId>liquidtanks</artifactId>
             <version>LATEST</version>
         </dependency>
         <dependency>
