@@ -507,6 +507,7 @@ public class EHopper implements Hopper {
     }
 
     private void syncName() {
+        if (hopper == null) return;
         hopper.setCustomName(Methods.formatName(level.getLevel(), false));
         hopper.update(true);
     }
