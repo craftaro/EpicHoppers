@@ -164,7 +164,7 @@
     
     <build>
         <defaultGoal>clean install</defaultGoal>
-        <finalName>EpicSpawners-${project.version}</finalName>
+        <finalName>EpicHoppers-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
