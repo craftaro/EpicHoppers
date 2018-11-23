@@ -73,6 +73,8 @@ public class HopHandler {
                 }
                 Block block = location.getBlock();
 
+                if (block.isBlockPowered()) continue;
+
                 if (block == null || block.getType() != Material.HOPPER) {
                     instance.getHopperManager().removeHopper(location);
                     continue;
