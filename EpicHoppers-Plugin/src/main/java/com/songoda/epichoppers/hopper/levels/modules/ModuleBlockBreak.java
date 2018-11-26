@@ -40,7 +40,7 @@ public class ModuleBlockBreak implements Module {
         blockTick.put(block, put);
         if (tick < amount) return;
         Block above = block.getRelative(0, 1, 0);
-        if (above.getType() != Material.AIR && !EpicHoppersPlugin.getInstance().getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
+        if (above.getType() != Material.AIR && above.getType() != Material.HOPPER && !EpicHoppersPlugin.getInstance().getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
             above.getWorld().playSound(above.getLocation(), Sound.BLOCK_STONE_BREAK, 1F, 1F);
             Location locationAbove = above.getLocation();
             locationAbove.add(.5, .5, .5);
