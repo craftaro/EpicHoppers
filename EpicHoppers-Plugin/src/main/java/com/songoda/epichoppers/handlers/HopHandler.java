@@ -12,13 +12,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.inventory.FurnaceInventory;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -222,9 +221,45 @@ public class HopHandler {
             } else {
                 InventoryHolder outputContainer = (InventoryHolder) b2.getState();
                 if (b2.getType() == Material.BREWING_STAND) {
-                    return 4;
-                }
-                if (b2.getType() == Material.FURNACE) {
+                    BrewerInventory brewerInventory = (BrewerInventory) outputContainer.getInventory();
+
+                    int maxSize = newItem.getMaxStackSize();
+
+                    String typeStr = item.getType().name().toUpperCase();
+                    boolean isBottle = typeStr.contains("POTION") || typeStr.contains("BOTTLE") || item.getType() == Material.DRAGON_BREATH;
+                    boolean isLeft = item.getType() == Material.BLAZE_POWDER;
+
+                    Map<Integer, ItemStack> output = new HashMap<>();
+                    if (isBottle) {
+                        output.put(0, brewerInventory.getItem(0));
+                        output.put(1, brewerInventory.getItem(1));
+                        output.put(2, brewerInventory.getItem(2));
+                    } else if (isLeft) {
+                        output.put(4, brewerInventory.getItem(4));
+                    } else {
+                        output.put(3, brewerInventory.getItem(3));
+                    }
+
+                    for (Map.Entry<Integer, ItemStack> entry : output.entrySet()) {
+                        ItemStack currentOutput = entry.getValue();
+                        int currentOutputAmount = currentOutput == null ? 0 : currentOutput.getAmount();
+                        if (currentOutput != null && (!currentOutput.isSimilar(newItem))
+                                || currentOutputAmount + newItem.getAmount() > maxSize
+                                || ovoid.contains(it.getType())) continue;
+
+                        if (currentOutput != null) {
+                            currentOutput.setAmount(currentOutputAmount + newItem.getAmount());
+                        } else {
+                            currentOutput = newItem.clone();
+                        }
+
+                        brewerInventory.setItem(entry.getKey(), currentOutput);
+
+                        isS[place] = is;
+                        hopperBlock.getInventory().setContents(isS);
+                        return 4;
+                    }
+                } else if (b2.getType() == Material.FURNACE) {
                     FurnaceInventory furnaceInventory = (FurnaceInventory) outputContainer.getInventory();
 
                     boolean isFuel = item.getType().isFuel();
