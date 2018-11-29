@@ -220,37 +220,34 @@ public class HopHandler {
                     hopperBlock.getInventory().setContents(isS);
                 }
             } else {
-                InventoryHolder ih = (InventoryHolder) b2.getState();
-                if (!canMove(ih.getInventory(), newItem, amt) || b2.getType() == Material.BREWING_STAND) {
+                InventoryHolder outputContainer = (InventoryHolder) b2.getState();
+                if (b2.getType() == Material.BREWING_STAND) {
                     return 4;
                 }
                 if (b2.getType() == Material.FURNACE) {
-                    FurnaceInventory fi = (FurnaceInventory) ih.getInventory();
-                    int amtt = 0;
-                    boolean dont = false;
-                    if (fi.getSmelting() != null) {
-                        amtt = fi.getSmelting().getAmount();
-                        if (fi.getSmelting().getType() != newItem.getType()) {
-                            dont = true;
-                        } else {
-                            if (fi.getSmelting().getAmount() == fi.getSmelting().getMaxStackSize()) {
-                                dont = true;
-                            }
-                        }
-                    }
-                    if (!dont) {
-                        if (amtt + newItem.getAmount() <= 64) {
-                            if (!ovoid.contains(it.getType())) {
-                                ih.getInventory().addItem(newItem);
-                            }
+                    FurnaceInventory furnaceInventory = (FurnaceInventory) outputContainer.getInventory();
+
+                    boolean isFuel = item.getType().isFuel();
+                    ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
+                    if (!output.isSimilar(newItem)) return 4;
+                    int maxSize = output.getMaxStackSize();
+                    int currentOutputAmount = output.getAmount();
+
+                    if (currentOutputAmount + newItem.getAmount() <= maxSize) {
+                        if (!ovoid.contains(it.getType())) {
+                            output.setAmount(currentOutputAmount + newItem.getAmount());
+                            furnaceInventory.setFuel(output);
+
                             isS[place] = is;
                             hopperBlock.getInventory().setContents(isS);
                         }
                     }
+                    return 4;
                 } else {
+                    if (!canMove(outputContainer.getInventory(), newItem, amt)) return 4;
                     ItemStack finalIt = it;
                     if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
-                        ih.getInventory().addItem(newItem);
+                        outputContainer.getInventory().addItem(newItem);
                     }
                     isS[place] = is;
                     hopperBlock.getInventory().setContents(isS);
