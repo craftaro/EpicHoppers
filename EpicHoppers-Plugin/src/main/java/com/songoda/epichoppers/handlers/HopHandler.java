@@ -229,15 +229,22 @@ public class HopHandler {
 
                     boolean isFuel = item.getType().isFuel();
                     ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
-                    if (!output.isSimilar(newItem)) return 4;
-                    int maxSize = output.getMaxStackSize();
-                    int currentOutputAmount = output.getAmount();
+                    if (output != null && !output.isSimilar(newItem)) return 4;
+                    int maxSize = newItem.getMaxStackSize();
+                    int currentOutputAmount = output == null ? 0 : output.getAmount();
 
                     if (currentOutputAmount + newItem.getAmount() <= maxSize) {
                         if (!ovoid.contains(it.getType())) {
-                            output.setAmount(currentOutputAmount + newItem.getAmount());
-                            furnaceInventory.setFuel(output);
-
+                            if (output != null) {
+                                output.setAmount(currentOutputAmount + newItem.getAmount());
+                            } else {
+                                output = newItem.clone();
+                            }
+                            if (isFuel) {
+                                furnaceInventory.setFuel(output);
+                            } else {
+                                furnaceInventory.setSmelting(output);
+                            }
                             isS[place] = is;
                             hopperBlock.getInventory().setContents(isS);
                         }
