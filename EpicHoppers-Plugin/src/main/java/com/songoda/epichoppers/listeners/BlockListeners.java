@@ -25,6 +25,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
+import java.util.ArrayList;
+
 /**
  * Created by songoda on 3/14/2017.
  */
@@ -64,7 +66,7 @@ public class BlockListeners implements Listener {
 
             ItemStack item = e.getItemInHand().clone();
 
-            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), player.getUniqueId(), player.getUniqueId(), null, new EFilter(), TeleportTrigger.DISABLED, null));
+            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new EFilter(), TeleportTrigger.DISABLED, null));
 
         } catch (Exception ee) {
             Debugger.runReport(ee);

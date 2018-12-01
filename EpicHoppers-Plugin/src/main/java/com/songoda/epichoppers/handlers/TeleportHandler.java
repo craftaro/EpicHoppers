@@ -69,10 +69,10 @@ public class TeleportHandler {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             Block next = hopper.getLocation().getBlock();
             int num = 1;
-            while (instance.getHopperManager().isHopper(next.getLocation()) && instance.getHopperManager().getHopper(next.getLocation()).getSyncedBlock() != null && num != 15) {
+            while (instance.getHopperManager().isHopper(next.getLocation()) && instance.getHopperManager().getHopper(next.getLocation()).getLinkedBlocks() != null && num != 15) {
                 Hopper nextHopper = instance.getHopperManager().getHopper(next);
-                if (nextHopper.getSyncedBlock() != null) {
-                    next = nextHopper.getSyncedBlock();
+                if (nextHopper.getLinkedBlocks() != null && !nextHopper.getLinkedBlocks().isEmpty()) {
+                    next = nextHopper.getLinkedBlocks().get(0);
                 }
 
                 if (!next.getType().equals(Material.HOPPER)) {

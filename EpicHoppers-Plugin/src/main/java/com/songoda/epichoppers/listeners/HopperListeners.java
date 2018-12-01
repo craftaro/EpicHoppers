@@ -32,8 +32,9 @@ public class HopperListeners implements Listener {
                 return;
 
             Hopper hopper = instance.getHopperManager().getHopper(source.getLocation());
-            if (hopper.getSyncedBlock() == null) {
-                hopper.setSyncedBlock(event.getDestination().getLocation().getBlock());
+            if (hopper.getLinkedBlocks() == null && !hopper.getLinkedBlocks().isEmpty()) {
+                hopper.clearLinkedBlocks();
+                hopper.addLinkedBlock(event.getDestination().getLocation().getBlock());
             }
             event.setCancelled(true);
         } catch (Exception ee) {

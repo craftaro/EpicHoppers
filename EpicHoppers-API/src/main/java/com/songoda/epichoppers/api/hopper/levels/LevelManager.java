@@ -15,12 +15,12 @@ public interface LevelManager {
      * @param level The level of the hopper
      * @param costExperience  The cost in experience to upgrade the hopper
      * @param costEconomy The cost in economy to upgrade the hopper
-     * @param range The range in which this hopper will need to be in order to sync with another hopper
+     * @param range The range in which this hopper will need to be in order to link with another hopper
      * @param amount The amount of items this hopper will transfer at a single time
      * @param filter Whether or not access to the filter is allowed.
      * @param teleport Whether or not teleporting through hoppers is allowed.
      */
-    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, ArrayList<Module> modules);
+    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, ArrayList<Module> modules);
 
     /**
      * Get {@link Level} by corresponding integer value.

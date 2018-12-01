@@ -51,6 +51,8 @@ public interface Level {
     boolean isTeleport();
 
 
+    int getLinkAmount();
+
     /**
      * Get the cost in experience in order to upgrade
      * to this level.

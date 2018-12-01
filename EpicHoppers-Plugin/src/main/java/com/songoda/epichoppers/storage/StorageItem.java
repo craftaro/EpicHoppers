@@ -1,7 +1,9 @@
 package com.songoda.epichoppers.storage;
 
+import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.utils.Serializers;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -25,6 +27,16 @@ public class StorageItem {
         StringBuilder object = new StringBuilder();
         for (ItemStack m : material) {
             object.append(Serializers.serialize(m));
+            object.append(";;");
+        }
+        this.key = key;
+        this.object = object.toString();
+    }
+
+    public StorageItem(String key, boolean type, List<Block> blocks) {
+        StringBuilder object = new StringBuilder();
+        for (Block block : blocks) {
+            object.append(Arconix.pl().getApi().serialize().serializeLocation(block));
             object.append(";;");
         }
         this.key = key;
@@ -64,5 +76,16 @@ public class StorageItem {
             list.add(Serializers.deserialize(ser));
         }
         return list;
+    }
+
+    public List<String> asStringList() {
+        List<String> list = new ArrayList<>();
+        if (object == null) return list;
+        String obj = (String) object;
+        if (!((String) object).contains(";;")) {
+            list.add(obj);
+            return list;
+        }
+        return new ArrayList<>(Arrays.asList(obj.split(";;")));
     }
 }

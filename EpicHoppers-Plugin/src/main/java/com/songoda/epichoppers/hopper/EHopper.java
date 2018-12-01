@@ -23,6 +23,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,16 +36,16 @@ public class EHopper implements Hopper {
     private Level level;
     private UUID lastPlayer;
     private UUID placedBy;
-    private Block syncedBlock;
+    private List<Block> linkedBlocks;
     private Filter filter;
     private TeleportTrigger teleportTrigger;
     private Material autoCrafting;
     private org.bukkit.block.Hopper hopper;
 
-    public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+    public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Block> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
         this.level = level;
-        this.syncedBlock = syncedBlock;
+        this.linkedBlocks = linkedBlocks;
         this.filter = filter;
         this.lastPlayer = lastPlayer;
         this.placedBy = placedBy;
@@ -54,8 +55,8 @@ public class EHopper implements Hopper {
         this.syncName();
     }
 
-    public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, Block syncedBlock, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
-        this(block.getLocation(), level, lastPlayer, placedBy, syncedBlock, filter, teleportTrigger, autoCrafting);
+    public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Block> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+        this(block.getLocation(), level, lastPlayer, placedBy, linkedBlocks, filter, teleportTrigger, autoCrafting);
     }
 
     public void overview(Player player) {
@@ -537,25 +538,39 @@ public class EHopper implements Hopper {
     }
 
     @Override
-    public void sync(Block toSync, boolean filtered, Player player) {
+    public void link(Block toLink, boolean filtered, Player player) {
         try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
 
-
-            if (location.getWorld().equals(toSync.getLocation().getWorld())
+            if (location.getWorld().equals(toLink.getLocation().getWorld())
                     && !player.hasPermission("EpicHoppers.Override")
                     && !player.hasPermission("EpicHoppers.Admin")
-                    && location.distance(toSync.getLocation()) > level.getRange()) {
-                player.sendMessage(instance.getLocale().getMessage("event.hopper.syncoutofrange"));
+                    && location.distance(toLink.getLocation()) > level.getRange()) {
+                player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncoutofrange"));
                 return;
             }
-            player.sendMessage(instance.getLocale().getMessage("event.hopper.syncsuccess"));
+
+            if (linkedBlocks.contains(toLink)) {
+                player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.already"));
+                return;
+            }
 
             if (!filtered)
-                this.syncedBlock = toSync;
+                this.linkedBlocks.add(toLink);
             else
-                this.filter.setEndPoint(toSync);
+                this.filter.setEndPoint(toLink);
             this.lastPlayer = player.getUniqueId();
+
+            if (level.getLinkAmount() > 1) {
+                if (getLinkedBlocks().size() == level.getLinkAmount()) {
+                    player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncdone"));
+                    return;
+                }
+                player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccessmore", level.getLinkAmount() - getLinkedBlocks().size()));
+                return;
+            }
+            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
+
         } catch (Exception e) {
             Debugger.runReport(e);
         }
@@ -622,13 +637,18 @@ public class EHopper implements Hopper {
     }
 
     @Override
-    public Block getSyncedBlock() {
-        return syncedBlock;
+    public List<Block> getLinkedBlocks() {
+        return Collections.unmodifiableList(linkedBlocks);
     }
 
     @Override
-    public void setSyncedBlock(Block syncedBlock) {
-        this.syncedBlock = syncedBlock;
+    public void addLinkedBlock(Block block) {
+        linkedBlocks.add(block);
+    }
+
+    @Override
+    public void clearLinkedBlocks() {
+        this.linkedBlocks.clear();
     }
 
     @Override

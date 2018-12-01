@@ -11,13 +11,13 @@ public class ELevel implements Level {
 
     private final ArrayList<Module> registeredModules;
 
-    private int level, costExperience, costEconomy, range, amount;
+    private int level, costExperience, costEconomy, range, amount, linkAmount;
 
     private boolean filter, teleport;
 
     private final List<String> description = new ArrayList<>();
 
-    ELevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, ArrayList<Module> registeredModules) {
+    ELevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, ArrayList<Module> registeredModules) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
@@ -25,12 +25,14 @@ public class ELevel implements Level {
         this.amount = amount;
         this.filter = filter;
         this.teleport = teleport;
+        this.linkAmount = linkAmount;
         this.registeredModules = registeredModules;
 
         EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
 
         description.add(instance.getLocale().getMessage("interface.hopper.range", range));
         description.add(instance.getLocale().getMessage("interface.hopper.amount", amount));
+        if (linkAmount != 1) description.add(instance.getLocale().getMessage("interface.hopper.linkamount", linkAmount));
         if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
         if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.teleport", true));
 
@@ -63,6 +65,11 @@ public class ELevel implements Level {
     @Override
     public boolean isTeleport() {
         return teleport;
+    }
+
+    @Override
+    public int getLinkAmount() {
+        return linkAmount;
     }
 
     @Override

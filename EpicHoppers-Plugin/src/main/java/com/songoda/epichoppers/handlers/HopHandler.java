@@ -41,12 +41,12 @@ public class HopHandler {
     private void hopperCleaner() {
         try {
             ConfigurationSection data = instance.getConfig().createSection("data");
-            if (!data.contains("sync")) return;
-            for (String key : data.getConfigurationSection("sync").getKeys(false)) {
+            if (!data.contains("link")) return;
+            for (String key : data.getConfigurationSection("link").getKeys(false)) {
                 if (Arconix.pl().getApi().serialize().unserializeLocation(key).getWorld() == null) continue;
                 Block block = Arconix.pl().getApi().serialize().unserializeLocation(key).getBlock();
                 if (block != null && block.getState() instanceof Hopper) continue;
-                data.getConfigurationSection("sync").set(key, null);
+                data.getConfigurationSection("link").set(key, null);
                 instance.getLogger().info("EpicHoppers Removing non-hopper entry: " + key);
             }
         } catch (Exception e) {
@@ -56,6 +56,7 @@ public class HopHandler {
 
     private void hopperRunner() {
         try {
+            main:
             for (com.songoda.epichoppers.api.hopper.Hopper hopper : instance.getHopperManager().getHoppers().values()) {
 
                 Location location = hopper.getLocation();
@@ -95,63 +96,68 @@ public class HopHandler {
                     blockedMaterials.addAll(materials);
                 }
 
-                if (hopper.getSyncedBlock() == null) continue;
-                Location dest = hopper.getSyncedBlock().getLocation();
-                if (dest == null) continue;
+                if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) continue;
 
-                int destx = location.getBlockX() >> 4;
-                int destz = location.getBlockZ() >> 4;
-                if (!dest.getWorld().isChunkLoaded(destx, destz)) {
-                    continue;
-                }
+                for (Block destBlock : hopper.getLinkedBlocks()) {
+                    Location dest = destBlock.getLocation();
+                    if (dest == null) continue;
 
-                Block b2 = dest.getBlock();
-                if (!(b2.getState() instanceof InventoryHolder || b2.getType() == Material.ENDER_CHEST)) {
-                    hopper.setSyncedBlock(null);
-                    continue;
-                }
-
-                //InventoryHolder inventoryHolder = (InventoryHolder) b2.getState();
-                //TODO add some restrictions here if needed
-
-                BoostData boostData = instance.getBoostManager().getBoost(hopper.getPlacedBy());
-
-                int amt = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
-
-                List<ItemStack> whiteList = hopper.getFilter().getWhiteList();
-
-                List<ItemStack> blackList = hopper.getFilter().getBlackList();
-
-                for (int i = 0; i < 5; i++) {
-                    ItemStack it;
-                    if (is[i] != null) {
-                        it = is[i].clone();
-                        it.setAmount(1);
-                    }
-                    if (hopper.getLocation().getBlock().isBlockPowered()
-                            || is[i] != null && blockedMaterials.contains(is[i].getType())) {
-                        i++;
-                        if (i >= 5) continue;
+                    int destx = location.getBlockX() >> 4;
+                    int destz = location.getBlockZ() >> 4;
+                    if (!dest.getWorld().isChunkLoaded(destx, destz)) {
+                        continue;
                     }
 
-                    int finalI = i;
-                    if (is[i] != null
-                            && !whiteList.isEmpty()
-                            && whiteList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
-                        doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
-                    } else {
-                        if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
+                    Block b2 = dest.getBlock();
+                    if (!(b2.getState() instanceof InventoryHolder)) {
+                        hopper.clearLinkedBlocks();
+                        continue;
+                    }
 
-                            int im = addItem(hopperBlock, hopper, b2, is[i], is, amt, i);
-                            if (im != 10)
-                                i = im;
+                    //InventoryHolder inventoryHolder = (InventoryHolder) b2.getState();
+                    //TODO add some restrictions here if needed
+
+                    BoostData boostData = instance.getBoostManager().getBoost(hopper.getPlacedBy());
+
+                    int amt = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
+
+                    List<ItemStack> whiteList = hopper.getFilter().getWhiteList();
+
+                    List<ItemStack> blackList = hopper.getFilter().getBlackList();
+
+                    for (int i = 0; i < 5; i++) {
+                        ItemStack it;
+                        if (is[i] != null) {
+                            it = is[i].clone();
+                            it.setAmount(1);
+                        }
+                        if (hopper.getLocation().getBlock().isBlockPowered()
+                                || is[i] != null && blockedMaterials.contains(is[i].getType())) {
+                            i++;
+                            if (i >= 5) continue;
+                        }
+
+                        int finalI = i;
+                        if (is[i] != null
+                                && !whiteList.isEmpty()
+                                && whiteList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
+                            doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                            continue main;
                         } else {
-                            if (is[i] != null && blackList.stream().anyMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
-                                doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                            if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
+
+                                if (addItem(hopperBlock, hopper, b2, is[i], is, amt, i)) {
+                                    continue main;
+                                }
+                            } else {
+                                if (is[i] != null && blackList.stream().anyMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
+                                    doBlacklist(hopperBlock, hopper, is[i].clone(), is, amt, i);
+                                    continue main;
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
             }
         } catch (Exception e) {
@@ -175,13 +181,14 @@ public class HopHandler {
                 Block b2 = dest.getBlock();
 
                 addItem(hopperBlock, hopper, b2, item, isS, amt, place);
+
             }
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    private int addItem(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, Block b2, ItemStack is, ItemStack[] isS, int amt, int place) {
+    private boolean addItem(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, Block b2, ItemStack is, ItemStack[] isS, int amt, int place) {
         try {
             ItemStack it = null;
             if (is != null) {
@@ -192,7 +199,7 @@ public class HopHandler {
             List<ItemStack> ovoid = new ArrayList<>(hopper.getFilter().getVoidList());
 
             if (is.getType() == Material.AIR) {
-                return 10;
+                return true;
             }
             ItemStack item = is;
             ItemStack newItem = is.clone();
@@ -257,14 +264,14 @@ public class HopHandler {
 
                         isS[place] = is;
                         hopperBlock.getInventory().setContents(isS);
-                        return 4;
+                        return true;
                     }
                 } else if (b2.getType() == Material.FURNACE) {
                     FurnaceInventory furnaceInventory = (FurnaceInventory) outputContainer.getInventory();
 
                     boolean isFuel = item.getType().isFuel();
                     ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
-                    if (output != null && !output.isSimilar(newItem)) return 4;
+                    if (output != null && !output.isSimilar(newItem)) return false;
                     int maxSize = newItem.getMaxStackSize();
                     int currentOutputAmount = output == null ? 0 : output.getAmount();
 
@@ -284,9 +291,9 @@ public class HopHandler {
                             hopperBlock.getInventory().setContents(isS);
                         }
                     }
-                    return 4;
+                    return true;
                 } else {
-                    if (!canMove(outputContainer.getInventory(), newItem, amt)) return 4;
+                    if (!canMove(outputContainer.getInventory(), newItem, amt)) return false;
                     ItemStack finalIt = it;
                     if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
                         outputContainer.getInventory().addItem(newItem);
@@ -295,11 +302,11 @@ public class HopHandler {
                     hopperBlock.getInventory().setContents(isS);
                 }
             }
-            return 4;
+            return true;
         } catch (Exception e) {
             Debugger.runReport(e);
         }
-        return 0;
+        return false;
     }
 
     private boolean canMove(Inventory inventory, ItemStack item, int hop) {

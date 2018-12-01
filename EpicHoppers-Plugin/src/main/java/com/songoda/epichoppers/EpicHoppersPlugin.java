@@ -147,15 +147,20 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
          * Register hoppers into HopperManger from configuration
          */
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            if (storage.containsGroup("sync")) {
-                for (StorageRow row : storage.getRowsByGroup("sync")) {
+            if (storage.containsGroup("link")) {
+                for (StorageRow row : storage.getRowsByGroup("link")) {
                     Location location = Serialize.getInstance().unserializeLocation(row.getKey());
                     if (location == null || location.getBlock() == null) return;
 
                     int level = row.get("level").asInt();
 
-                    String blockLoc = row.get("block").asString();
-                    Block block = blockLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(blockLoc).getBlock();
+                    List<String> blockLoc = row.get("block").asStringList();
+                    List<Block> blocks = new ArrayList<>();
+                    if (blockLoc != null) {
+                        for (String string : blockLoc) {
+                            blocks.add(Arconix.pl().getApi().serialize().unserializeLocation(string).getBlock());
+                        }
+                    }
 
                     TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
 
@@ -180,7 +185,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     filter.setVoidList(voidList);
                     filter.setEndPoint(black);
 
-                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, block, filter, teleportTrigger, autoCrafting);
+                    EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, blocks, filter, teleportTrigger, autoCrafting);
 
                     hopperManager.addHopper(location, hopper);
                 }
@@ -302,9 +307,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                 continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
 
-            storage.prepareSaveItem("sync", new StorageItem("location", locationStr),
+            storage.prepareSaveItem("link", new StorageItem("location", locationStr),
                     new StorageItem("level", hopper.getLevel().getLevel()),
-                    new StorageItem("block", hopper.getSyncedBlock() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getSyncedBlock().getLocation())),
+                    new StorageItem("block", true, hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty() ? new ArrayList<>() : hopper.getLinkedBlocks()),
                     new StorageItem("placedby", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString()),
                     new StorageItem("player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString()),
                     new StorageItem("teleporttrigger", hopper.getTeleportTrigger().toString()),
@@ -342,6 +347,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
             int radius = levels.getInt("Range");
             int amount = levels.getInt("Amount");
+            int linkAmount = levels.getInt("Link-amount", 1);
             boolean filter = levels.getBoolean("Filter");
             boolean teleport = levels.getBoolean("Teleport");
             int costExperiance = levels.getInt("Cost-xp");
@@ -359,8 +365,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                 }
 
             }
-
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, modules);
+            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }
     }
 
@@ -385,11 +390,13 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             levels.set("Level-3.Amount", 3);
             levels.set("Level-3.Suction", 1);
             levels.set("Level-3.Cost-xp", 30);
+            levels.set("Level-3.Link-amount", 2);
             levels.set("Level-3.Cost-eco", 10000);
 
             levels.set("Level-4.Range", 40);
             levels.set("Level-4.Amount", 4);
             levels.set("Level-4.Suction", 2);
+            levels.set("Level-4.Link-amount", 2);
             levels.set("Level-4.BlockBreak", 4);
             levels.set("Level-4.Cost-xp", 35);
             levels.set("Level-4.Cost-eco", 12000);
@@ -398,6 +405,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             levels.set("Level-5.Amount", 5);
             levels.set("Level-5.Suction", 3);
             levels.set("Level-5.BlockBreak", 2);
+            levels.set("Level-5.Link-amount", 3);
             levels.set("Level-5.Cost-xp", 40);
             levels.set("Level-5.Cost-eco", 15000);
 
@@ -407,6 +415,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             levels.set("Level-6.BlockBreak", 2);
             levels.set("Level-6.Filter", true);
             levels.set("Level-6.Teleport", true);
+            levels.set("Level-6.Link-amount", 3);
             levels.set("Level-6.Cost-xp", 45);
             levels.set("Level-6.Cost-eco", 20000);
 
@@ -417,6 +426,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             levels.set("Level-7.Filter", true);
             levels.set("Level-7.Teleport", true);
             levels.set("Level-7.AutoCrafting", true);
+            levels.set("Level-7.Link-amount", 4);
             levels.set("Level-7.Cost-xp", 50);
             levels.set("Level-7.Cost-eco", 30000);
 

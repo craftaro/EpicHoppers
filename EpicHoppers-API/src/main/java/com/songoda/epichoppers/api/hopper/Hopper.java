@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface Hopper {
@@ -13,16 +14,16 @@ public interface Hopper {
     org.bukkit.block.Hopper getHopper();
 
     /**
-     * This will sync this hopper with another hopper.
+     * This will link this hopper with another hopper.
      *
      * @param toSync the block containing the hopper
      *               that this hopper will be synchronized
      *               with
      * @param filtered whether or not this action is for the
-     *                 filtered sync or not
+     *                 filtered link or not
      * @param player the player initializing the synchronization
      */
-    void sync(Block toSync, boolean filtered, Player player);
+    void link(Block toSync, boolean filtered, Player player);
 
     /**
      * Get location of the hopper.
@@ -108,22 +109,11 @@ public interface Hopper {
      */
     void setTeleportTrigger(TeleportTrigger teleportTrigger);
 
-    /**
-     * Get the Block containing the hopper that is
-     * currently synchronised with this hopper.
-     *
-     * @return the Block in which this hopper is
-     * currently synchronized too
-     */
-    Block getSyncedBlock();
+    List<Block> getLinkedBlocks();
 
-    /**
-     * Set the Block containing a hopper in which
-     * to synchronize this hopper with.
-     *
-     * @param syncedBlock block to sync with
-     */
-    void setSyncedBlock(Block syncedBlock);
+    void addLinkedBlock(Block block);
+
+    void clearLinkedBlocks();
 
     /**
      * Get the filter associated with this hopper

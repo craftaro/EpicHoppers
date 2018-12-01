@@ -85,7 +85,7 @@ public class InventoryListeners implements Listener {
                     && event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.perltitle"))
                     && (hopper.getLevel().isTeleport() || player.hasPermission("EpicHoppers.Teleport"))) {
                 if (event.isLeftClick()) {
-                    if (hopper.getSyncedBlock() != null) {
+                    if (hopper.getLinkedBlocks() != null) {
                         instance.getTeleportHandler().tpPlayer(player, hopper);
                     }
                 } else {
@@ -119,7 +119,7 @@ public class InventoryListeners implements Listener {
             } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.synchopper"))) {
                 if (event.isRightClick()) {
                     player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.desync"));
-                    hopper.setSyncedBlock(null);
+                    hopper.clearLinkedBlocks();
                 } else {
                     boolean can = true;
                     if (hopper.getLastPlayer() != null) {
@@ -130,6 +130,7 @@ public class InventoryListeners implements Listener {
                     }
                     if (can) {
                         playerData.setSyncType(SyncType.REGULAR);
+                        hopper.clearLinkedBlocks();
                         player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncnext"));
                         ((EHopper) hopper).timeout(player);
                     }

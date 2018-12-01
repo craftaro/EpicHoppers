@@ -6,7 +6,7 @@ Upgrade-with-xp: 'Setting this to true will allow users to use Experience to upg
 On-upgrade-particles: 'Setting this to true will cause particles to emit when a hopper is upgraded.'
 Teleport-hoppers: 'These are the default levels, the amount of levels can be expanded if you want, just add another level to the bottom of the list while keeping numeric order.  Allows you to enable or disable teleporting with hoppers'
 Hop-Tick: 'This is the tick speed for synced hoppers.'
-Sync-Timeout: 'This is the timeout that if reached will cancel a sync.'
+Sync-Timeout: 'This is the timeout that if reached will cancel a link.'
 Glass-Type: 'This is the id of the glass used for the background in the guis.'
 Rainbow-Glass: 'If this is enabled the glass background will be randomized colors. '
 Limit-Hoppers-Per-Chunk: 'If enabled this will limit the amount hoppers per chunk'

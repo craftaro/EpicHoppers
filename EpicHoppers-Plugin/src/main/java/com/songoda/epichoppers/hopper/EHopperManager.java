@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class EHopperManager implements HopperManager {
     @Override
     public Hopper getHopper(Location location) {
         if (!registeredHoppers.containsKey(roundLocation(location))) {
-            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, null, new EFilter(), TeleportTrigger.DISABLED, null));
+            addHopper(location, new EHopper(location, EpicHoppersPlugin.getInstance().getLevelManager().getLowestLevel(), null, null, new ArrayList<>(), new EFilter(), TeleportTrigger.DISABLED, null));
         }
         return registeredHoppers.get(roundLocation(location));
     }
