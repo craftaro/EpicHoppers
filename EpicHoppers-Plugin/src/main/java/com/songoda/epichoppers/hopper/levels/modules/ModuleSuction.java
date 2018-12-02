@@ -39,36 +39,36 @@ public class ModuleSuction implements Module {
 
         Collection<Entity> nearbyEntite = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius);
 
-        for (Entity e : nearbyEntite) {
-            if (!(e instanceof Item) || e.getTicksLived() < 10 || e.getLocation().getBlock().getType() == Material.HOPPER) {
+        for (Entity entity : nearbyEntite) {
+            if (!(entity instanceof Item) || entity.getTicksLived() < 10 || entity.getLocation().getBlock().getType() == Material.HOPPER) {
                 continue;
             }
-            ItemStack hopItem = ((Item) e).getItemStack().clone();
+
+            ItemStack hopItem = ((Item) entity).getItemStack().clone();
             if (hopItem.getType().name().contains("SHULKER_BOX"))
                 continue;
+
             if (hopItem.hasItemMeta() && hopItem.getItemMeta().hasDisplayName() &&
                     StringUtils.substring(hopItem.getItemMeta().getDisplayName(), 0, 3).equals("***")) {
                 continue; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
             }
-            if (e.hasMetadata("grabbed"))
+            if (entity.hasMetadata("grabbed") || !entity.isOnGround())
                 continue;
 
-            if (Bukkit.getPluginManager().isPluginEnabled("WildStacker")) {
-                hopItem.setAmount(WildStackerAPI.getItemAmount((Item)e));
-            }
-            ItemStack item = ((Item) e).getItemStack();
+            if (Bukkit.getPluginManager().isPluginEnabled("WildStacker"))
+                hopItem.setAmount(WildStackerAPI.getItemAmount((Item)entity));
+
+            ItemStack item = ((Item) entity).getItemStack();
             if (!canMove(hopperBlock.getInventory(), item)) {
                 continue;
             }
-            if (!e.isOnGround())
-                continue;
-            ((Item) e).setPickupDelay(10);
-            e.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
+            ((Item) entity).setPickupDelay(10);
+            entity.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
             float xx = (float) (0 + (Math.random() * .3));
             float yy = (float) (0 + (Math.random() * .3));
             float zz = (float) (0 + (Math.random() * .3));
-            Arconix.pl().getApi().packetLibrary.getParticleManager().broadcastParticle(e.getLocation(), xx, yy, zz, 0, "FLAME", 5);
-            e.remove();
+            Arconix.pl().getApi().packetLibrary.getParticleManager().broadcastParticle(entity.getLocation(), xx, yy, zz, 0, "FLAME", 5);
+            entity.remove();
             hopperBlock.getInventory().addItem(hopItem);
             break;
         }

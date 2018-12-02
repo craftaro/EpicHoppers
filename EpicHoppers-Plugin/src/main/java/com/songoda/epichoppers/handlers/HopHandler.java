@@ -82,8 +82,6 @@ public class HopHandler {
 
                 Hopper hopperBlock = hopper.getHopper();
 
-                ItemStack[] is = hopperBlock.getInventory().getContents();
-
                 List<Material> blockedMaterials = new ArrayList<>();
 
                 for (Module module : hopper.getLevel().getRegisteredModules()) {
@@ -95,6 +93,8 @@ public class HopHandler {
                     if (materials == null || materials.isEmpty()) continue;
                     blockedMaterials.addAll(materials);
                 }
+
+                ItemStack[] is = hopperBlock.getInventory().getContents();
 
                 if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) continue;
 
