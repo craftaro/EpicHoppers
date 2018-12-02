@@ -147,8 +147,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
          * Register hoppers into HopperManger from configuration
          */
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            if (storage.containsGroup("link")) {
-                for (StorageRow row : storage.getRowsByGroup("link")) {
+            if (storage.containsGroup("sync")) {
+                for (StorageRow row : storage.getRowsByGroup("sync")) {
                     Location location = Serialize.getInstance().unserializeLocation(row.getKey());
                     if (location == null || location.getBlock() == null) return;
 
@@ -307,7 +307,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                 continue;
             String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
 
-            storage.prepareSaveItem("link", new StorageItem("location", locationStr),
+            storage.prepareSaveItem("sync", new StorageItem("location", locationStr),
                     new StorageItem("level", hopper.getLevel().getLevel()),
                     new StorageItem("block", true, hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty() ? new ArrayList<>() : hopper.getLinkedBlocks()),
                     new StorageItem("placedby", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString()),

@@ -41,12 +41,12 @@ public class HopHandler {
     private void hopperCleaner() {
         try {
             ConfigurationSection data = instance.getConfig().createSection("data");
-            if (!data.contains("link")) return;
-            for (String key : data.getConfigurationSection("link").getKeys(false)) {
+            if (!data.contains("sync")) return;
+            for (String key : data.getConfigurationSection("sync").getKeys(false)) {
                 if (Arconix.pl().getApi().serialize().unserializeLocation(key).getWorld() == null) continue;
                 Block block = Arconix.pl().getApi().serialize().unserializeLocation(key).getBlock();
                 if (block != null && block.getState() instanceof Hopper) continue;
-                data.getConfigurationSection("link").set(key, null);
+                data.getConfigurationSection("sync").set(key, null);
                 instance.getLogger().info("EpicHoppers Removing non-hopper entry: " + key);
             }
         } catch (Exception e) {
