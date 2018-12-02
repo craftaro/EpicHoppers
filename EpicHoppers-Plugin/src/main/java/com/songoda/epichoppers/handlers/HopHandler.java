@@ -57,7 +57,7 @@ public class HopHandler {
     private void hopperRunner() {
         try {
             main:
-            for (com.songoda.epichoppers.api.hopper.Hopper hopper : instance.getHopperManager().getHoppers().values()) {
+            for (com.songoda.epichoppers.api.hopper.Hopper hopper : new HashMap<>(instance.getHopperManager().getHoppers()).values()) {
 
                 Location location = hopper.getLocation();
 
