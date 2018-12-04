@@ -27,6 +27,10 @@
             <groupId>net.arcaniax</groupId>
             <artifactId>liquidtanks</artifactId>
             <version>LATEST</version>
+            <scope>provided</scope>
+            <!-- TO WHO EVER WROTE THIS BAD SYSTEM ALWAYS ADD PROVIDED
+            ILL HANG YOU NEXT TIME
+            CreeperCow-->
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
