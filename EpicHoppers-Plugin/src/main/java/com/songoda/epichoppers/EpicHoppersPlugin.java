@@ -59,6 +59,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -490,6 +491,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
         itemmeta.setDisplayName(TextComponent.formatText(Methods.formatName(level.getLevel(), true)));
+        String line = getLocale().getMessage("general.nametag.lore");
+        if (!line.equals("")) itemmeta.setLore(Arrays.asList(line));
         item.setItemMeta(itemmeta);
         return item;
     }
