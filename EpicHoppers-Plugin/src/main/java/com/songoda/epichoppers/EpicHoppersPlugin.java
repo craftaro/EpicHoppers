@@ -492,7 +492,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         ItemMeta itemmeta = item.getItemMeta();
         itemmeta.setDisplayName(TextComponent.formatText(Methods.formatName(level.getLevel(), true)));
         String line = getLocale().getMessage("general.nametag.lore");
-        if (!line.equals("")) itemmeta.setLore(Arrays.asList(line));
+        if (!line.equals("")) {
+            itemmeta.setLore(Arrays.asList(line.split("\n")));
+        }
         item.setItemMeta(itemmeta);
         return item;
     }

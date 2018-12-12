@@ -10,3 +10,5 @@ target/
 EpicHoppers-API/EpicHoppers-API\.iml
 
 EpicHoppers-Plugin/EpicHoppers-Plugin\.iml
+
+*.iml
