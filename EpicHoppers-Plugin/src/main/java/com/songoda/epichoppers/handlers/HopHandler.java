@@ -73,7 +73,7 @@ public class HopHandler {
                 }
                 Block block = location.getBlock();
 
-                if (block.getBlockPower() != 0) continue;
+                if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) continue;
 
                 if (block == null || block.getType() != Material.HOPPER) {
                     instance.getHopperManager().removeHopper(location);
@@ -147,6 +147,7 @@ public class HopHandler {
                             if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
 
                                 if (addItem(hopperBlock, hopper, b2, is[i], is, amt, i)) {
+                                    hopperBlock.update();
                                     continue main;
                                 }
                             } else {
@@ -156,7 +157,6 @@ public class HopHandler {
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -181,6 +181,7 @@ public class HopHandler {
                 Block b2 = dest.getBlock();
 
                 addItem(hopperBlock, hopper, b2, item, isS, amt, place);
+                hopperBlock.update();
 
             }
         } catch (Exception e) {
