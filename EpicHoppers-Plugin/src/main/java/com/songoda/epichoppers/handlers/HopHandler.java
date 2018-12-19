@@ -145,9 +145,8 @@ public class HopHandler {
                             continue main;
                         } else {
                             if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalI]))) {
-
                                 if (addItem(hopperBlock, hopper, b2, is[i], is, amt, i)) {
-                                    hopperBlock.update();
+                                    block.getState().update();
                                     continue main;
                                 }
                             } else {
@@ -169,9 +168,9 @@ public class HopHandler {
     private void doBlacklist(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, ItemStack[] isS, int amt, int place) {
         try {
             Location loc = hopperBlock.getLocation();
-            Block b = loc.getBlock();
+            Block block = loc.getBlock();
             if (hopper.getFilter().getEndPoint() != null
-                    && b != null && b.getState() instanceof Hopper) {
+                    && block != null && block.getState() instanceof Hopper) {
                 Location dest = hopper.getFilter().getEndPoint().getLocation();
                 int destx = loc.getBlockX() >> 4;
                 int destz = loc.getBlockZ() >> 4;
@@ -181,7 +180,7 @@ public class HopHandler {
                 Block b2 = dest.getBlock();
 
                 addItem(hopperBlock, hopper, b2, item, isS, amt, place);
-                hopperBlock.update();
+                block.getState().update();
 
             }
         } catch (Exception e) {
