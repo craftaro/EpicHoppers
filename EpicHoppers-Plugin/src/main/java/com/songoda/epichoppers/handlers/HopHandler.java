@@ -179,6 +179,11 @@ public class HopHandler {
                 }
                 Block b2 = dest.getBlock();
 
+                if (!(b2.getState() instanceof InventoryHolder)) {
+                    hopper.getFilter().setEndPoint(null);
+                    return;
+                }
+
                 addItem(hopperBlock, hopper, b2, item, isS, amt, place);
                 block.getState().update();
 
