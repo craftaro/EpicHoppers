@@ -151,15 +151,15 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             if (storage.containsGroup("sync")) {
                 for (StorageRow row : storage.getRowsByGroup("sync")) {
                     Location location = Serialize.getInstance().unserializeLocation(row.getKey());
-                    if (location == null || location.getBlock() == null) return;
+                    if (location == null) return;
 
                     int level = row.get("level").asInt();
 
                     List<String> blockLoc = row.get("block").asStringList();
-                    List<Block> blocks = new ArrayList<>();
+                    List<Location> blocks = new ArrayList<>();
                     if (blockLoc != null) {
                         for (String string : blockLoc) {
-                            blocks.add(Arconix.pl().getApi().serialize().unserializeLocation(string).getBlock());
+                            blocks.add(Arconix.pl().getApi().serialize().unserializeLocation(string));
                         }
                     }
 
@@ -177,7 +177,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     Material autoCrafting = Material.valueOf(row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString());
 
                     String blackLoc = row.get("black").asString();
-                    Block black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(blackLoc).getBlock();
+                    Location black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(blackLoc);
 
                     EFilter filter = new EFilter();
 
@@ -319,7 +319,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
                     new StorageItem("blacklist", hopper.getFilter().getBlackList()),
                     new StorageItem("void", hopper.getFilter().getVoidList()),
-                    new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint().getLocation())));
+                    new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint())));
         }
 
         /*

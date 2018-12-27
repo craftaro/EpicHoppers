@@ -109,9 +109,9 @@ public interface Hopper {
      */
     void setTeleportTrigger(TeleportTrigger teleportTrigger);
 
-    List<Block> getLinkedBlocks();
+    List<Location> getLinkedBlocks();
 
-    void addLinkedBlock(Block block);
+    void addLinkedBlock(Location block);
 
     void clearLinkedBlocks();
 

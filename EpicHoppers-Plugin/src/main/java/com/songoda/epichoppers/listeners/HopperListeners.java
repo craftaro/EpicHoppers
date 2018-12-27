@@ -34,7 +34,7 @@ public class HopperListeners implements Listener {
             Hopper hopper = instance.getHopperManager().getHopper(source.getLocation());
             if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) {
                 hopper.clearLinkedBlocks();
-                hopper.addLinkedBlock(event.getDestination().getLocation().getBlock());
+                hopper.addLinkedBlock(event.getDestination().getLocation());
             }
             event.setCancelled(true);
         } catch (Exception ee) {

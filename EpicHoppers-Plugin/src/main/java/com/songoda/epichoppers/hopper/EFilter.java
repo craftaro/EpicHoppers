@@ -1,6 +1,7 @@
 package com.songoda.epichoppers.hopper;
 
 import com.songoda.epichoppers.api.hopper.Filter;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -13,7 +14,7 @@ public class EFilter implements Filter {
     private List<ItemStack> blackList = new ArrayList<>();
     private List<ItemStack> voidList = new ArrayList<>();
 
-    private Block endPoint;
+    private Location endPoint;
 
     @Override
     public List<ItemStack> getWhiteList() {
@@ -49,12 +50,12 @@ public class EFilter implements Filter {
     }
 
     @Override
-    public Block getEndPoint() {
+    public Location getEndPoint() {
         return endPoint;
     }
 
     @Override
-    public void setEndPoint(Block endPoint) {
+    public void setEndPoint(Location endPoint) {
         this.endPoint = endPoint;
     }
 }

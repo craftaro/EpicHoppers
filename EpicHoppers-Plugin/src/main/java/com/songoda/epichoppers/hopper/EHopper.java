@@ -36,13 +36,13 @@ public class EHopper implements Hopper {
     private Level level;
     private UUID lastPlayer;
     private UUID placedBy;
-    private List<Block> linkedBlocks;
+    private List<Location> linkedBlocks;
     private Filter filter;
     private TeleportTrigger teleportTrigger;
     private Material autoCrafting;
     private org.bukkit.block.Hopper hopper;
 
-    public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Block> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+    public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
         this.level = level;
         this.linkedBlocks = linkedBlocks;
@@ -51,11 +51,18 @@ public class EHopper implements Hopper {
         this.placedBy = placedBy;
         this.teleportTrigger = teleportTrigger;
         this.autoCrafting = autoCrafting;
+
+        int x = location.getBlockX() >> 4;
+        int z = location.getBlockZ() >> 4;
+
+        if (!location.getWorld().isChunkLoaded(x, z))
+            return;
+
         this.reloadHopper();
         this.syncName();
     }
 
-    public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Block> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+    public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this(block.getLocation(), level, lastPlayer, placedBy, linkedBlocks, filter, teleportTrigger, autoCrafting);
     }
 
@@ -556,9 +563,9 @@ public class EHopper implements Hopper {
             }
 
             if (!filtered)
-                this.linkedBlocks.add(toLink);
+                this.linkedBlocks.add(toLink.getLocation());
             else
-                this.filter.setEndPoint(toLink);
+                this.filter.setEndPoint(toLink.getLocation());
             this.lastPlayer = player.getUniqueId();
 
             if (level.getLinkAmount() > 1) {
@@ -637,12 +644,12 @@ public class EHopper implements Hopper {
     }
 
     @Override
-    public List<Block> getLinkedBlocks() {
+    public List<Location> getLinkedBlocks() {
         return Collections.unmodifiableList(linkedBlocks);
     }
 
     @Override
-    public void addLinkedBlock(Block block) {
+    public void addLinkedBlock(Location block) {
         linkedBlocks.add(block);
     }
 

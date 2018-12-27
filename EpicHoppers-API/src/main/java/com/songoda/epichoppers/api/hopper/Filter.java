@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.api.hopper;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,7 +19,7 @@ public interface Filter {
 
     void setVoidList(List<ItemStack> voidList);
 
-    Block getEndPoint();
+    Location getEndPoint();
 
-    void setEndPoint(Block endPoint);
+    void setEndPoint(Location endPoint);
 }

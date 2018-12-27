@@ -42,10 +42,6 @@ public class BlockListeners implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         try {
             Player player = e.getPlayer();
-            if (e.getBlock().getType().equals(Material.ENDER_CHEST)) {
-                //instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(e.getBlock()), player.getUniqueId().toString());
-                return;
-            }
 
             if (e.getBlock().getType() != Material.HOPPER) return;
 
@@ -103,10 +99,6 @@ public class BlockListeners implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         try {
-            if (event.getBlock().getType().equals(Material.ENDER_CHEST)) {
-                //instance.getDataFile().getConfig().set("data.enderTracker." + Arconix.pl().getApi().serialize().serializeLocation(event.getBlock()), null);
-            }
-
             Block block = event.getBlock();
             Player player = event.getPlayer();
 

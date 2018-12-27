@@ -72,7 +72,15 @@ public class TeleportHandler {
             while (instance.getHopperManager().isHopper(next.getLocation()) && instance.getHopperManager().getHopper(next.getLocation()).getLinkedBlocks() != null && num != 15) {
                 Hopper nextHopper = instance.getHopperManager().getHopper(next);
                 if (nextHopper.getLinkedBlocks() != null && !nextHopper.getLinkedBlocks().isEmpty()) {
-                    next = nextHopper.getLinkedBlocks().get(0);
+                    Location location = nextHopper.getLinkedBlocks().get(0);
+
+                    int x = location.getBlockX() >> 4;
+                    int z = location.getBlockZ() >> 4;
+
+                    if (!location.getWorld().isChunkLoaded(x, z))
+                        continue;
+
+                    next = location.getBlock();
                 }
 
                 if (!next.getType().equals(Material.HOPPER)) {
