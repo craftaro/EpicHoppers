@@ -43,10 +43,7 @@ public class HopHandler {
             for (com.songoda.epichoppers.api.hopper.Hopper hopper : new HashMap<>(instance.getHopperManager().getHoppers()).values()) {
                 Location location = hopper.getLocation();
 
-                int x = location.getBlockX() >> 4;
-                int z = location.getBlockZ() >> 4;
-
-                if (!location.getWorld().isChunkLoaded(x, z))
+                if (!location.getWorld().isChunkLoaded(location.getBlockX(), location.getBlockZ()))
                     continue;
 
                 Block block = location.getBlock();
@@ -79,10 +76,8 @@ public class HopHandler {
                 for (Location destinationLocation : hopper.getLinkedBlocks()) {
                     if (destinationLocation == null) continue;
 
-                    int destx = location.getBlockX() >> 4;
-                    int destz = location.getBlockZ() >> 4;
-
-                    if (!destinationLocation.getWorld().isChunkLoaded(destx, destz))
+                    if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX(),
+                            destinationLocation.getBlockZ()))
                         continue;
 
                     Block destinationBlock = destinationLocation.getBlock();
