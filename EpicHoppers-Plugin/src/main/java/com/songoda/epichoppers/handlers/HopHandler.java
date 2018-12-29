@@ -43,10 +43,8 @@ public class HopHandler {
             for (com.songoda.epichoppers.api.hopper.Hopper hopper : new HashMap<>(instance.getHopperManager().getHoppers()).values()) {
                 Location location = hopper.getLocation();
 
-                Bukkit.broadcastMessage("first");
                 if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4))
                     continue;
-                Bukkit.broadcastMessage("first2");
 
                 Block block = location.getBlock();
 
@@ -55,7 +53,6 @@ public class HopHandler {
                     continue;
                 }
 
-                Bukkit.broadcastMessage("first2");
                 if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) continue;
 
                 Hopper hopperBlock = hopper.getHopper();
@@ -79,11 +76,9 @@ public class HopHandler {
                 for (Location destinationLocation : hopper.getLinkedBlocks()) {
                     if (destinationLocation == null) continue;
 
-                    Bukkit.broadcastMessage("before");
                     if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX(),
                             destinationLocation.getBlockZ()))
                         continue;
-                    Bukkit.broadcastMessage("after");
 
                     Block destinationBlock = destinationLocation.getBlock();
                     if (!(destinationBlock.getState() instanceof InventoryHolder)) {
