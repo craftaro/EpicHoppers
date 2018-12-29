@@ -3,6 +3,7 @@ package com.songoda.epichoppers.api.hopper;
 import com.songoda.epichoppers.api.hopper.levels.Level;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -31,6 +32,8 @@ public interface Hopper {
      * @return location of spawner
      */
     Location getLocation();
+
+    World getWorld();
 
     /**
      * Get the X coordinate for the hopper.

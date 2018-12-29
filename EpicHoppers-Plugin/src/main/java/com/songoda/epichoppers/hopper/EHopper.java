@@ -589,6 +589,11 @@ public class EHopper implements Hopper {
     }
 
     @Override
+    public World getWorld() {
+        return location.getWorld();
+    }
+
+    @Override
     public int getX() {
         return location.getBlockX();
     }
