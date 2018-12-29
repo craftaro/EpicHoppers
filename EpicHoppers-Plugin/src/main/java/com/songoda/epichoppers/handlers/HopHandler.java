@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.handlers;
 
-import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.boost.BoostData;
@@ -11,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.*;
 
 import java.util.ArrayList;
@@ -43,7 +41,7 @@ public class HopHandler {
             for (com.songoda.epichoppers.api.hopper.Hopper hopper : new HashMap<>(instance.getHopperManager().getHoppers()).values()) {
                 Location location = hopper.getLocation();
 
-                if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4))
+                if (!location.getWorld().isChunkInUse(location.getBlockX() >> 4, location.getBlockZ() >> 4))
                     continue;
 
                 Block block = location.getBlock();
@@ -69,14 +67,14 @@ public class HopHandler {
                     blockedMaterials.addAll(materials);
                 }
 
-                ItemStack[] is = hopperBlock.getInventory().getContents();
+                ItemStack[] hopperContents = hopperBlock.getInventory().getContents();
 
                 if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) continue;
 
                 for (Location destinationLocation : hopper.getLinkedBlocks()) {
                     if (destinationLocation == null) continue;
 
-                    if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX() >> 4,
+                    if (!destinationLocation.getWorld().isChunkInUse(destinationLocation.getBlockX() >> 4,
                             destinationLocation.getBlockZ() >> 4))
                         continue;
 
@@ -94,34 +92,33 @@ public class HopHandler {
                     List<ItemStack> blackList = hopper.getFilter().getBlackList();
 
                     for (int i = 0; i < 5; i++) {
-                        ItemStack item;
-                        if (is[i] != null) {
-                            item = is[i].clone();
-                            item.setAmount(1);
-                        }
+                        if (hopperContents[i] == null) continue;
+
+                        ItemStack item = hopperContents[i].clone();
+                        item.setAmount(1);
+
                         if (hopper.getLocation().getBlock().isBlockPowered()
-                                || is[i] != null && blockedMaterials.contains(is[i].getType())) {
-                            i++;
-                            if (i >= 5) continue;
+                                || hopperContents[i] != null && blockedMaterials.contains(hopperContents[i].getType())) {
+                            continue;
                         }
 
                         int finalIncrement = i;
-                        if (is[i] != null
-                                && !whiteList.isEmpty()
-                                && whiteList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalIncrement]))) {
-                            doBlacklist(hopperBlock, hopper, is[i].clone(), is, amount, i);
+
+                        if (!whiteList.isEmpty()
+                                && whiteList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
+                            doBlacklist(hopperBlock, hopper, hopperContents[i].clone(), hopperContents, amount, i);
                             continue main;
                         }
 
-                        if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalIncrement]))) {
-                            if (addItem(hopperBlock, hopper, destinationBlock, is[i], is, amount, i)) {
+                        if (blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
+                            if (addItem(hopperBlock, hopper, destinationBlock, hopperContents[i], hopperContents, amount, i)) {
                                 block.getState().update();
                                 continue main;
                             }
                         }
 
-                        if (is[i] != null && blackList.stream().anyMatch(itemStack -> itemStack.isSimilar(is[finalIncrement]))) {
-                            doBlacklist(hopperBlock, hopper, is[i].clone(), is, amount, i);
+                        if (blackList.stream().anyMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
+                            doBlacklist(hopperBlock, hopper, hopperContents[i].clone(), hopperContents, amount, i);
                             continue main;
                         }
                     }
@@ -133,7 +130,7 @@ public class HopHandler {
     }
 
 
-    private void doBlacklist(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, ItemStack[] isS, int amt, int place) {
+    private void doBlacklist(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, ItemStack[] hopperContents, int amt, int place) {
         try {
             Location location = hopperBlock.getLocation();
             Block block = location.getBlock();
@@ -141,7 +138,7 @@ public class HopHandler {
                     && block != null
                     && block.getState() instanceof Hopper) {
                 Location dest = hopper.getFilter().getEndPoint();
-                if (!dest.getWorld().isChunkLoaded(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
+                if (!dest.getWorld().isChunkInUse(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
                     return;
 
                 Block b2 = dest.getBlock();
@@ -151,16 +148,15 @@ public class HopHandler {
                     return;
                 }
 
-                addItem(hopperBlock, hopper, b2, item, isS, amt, place);
-                //block.getState().update();
-
+                addItem(hopperBlock, hopper, b2, item, hopperContents, amt, place);
+                block.getState().update();
             }
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    private boolean addItem(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, Block b2, ItemStack is, ItemStack[] isS, int amt, int place) {
+    private boolean addItem(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, Block b2, ItemStack is, ItemStack[] hopperContents, int amt, int place) {
         try {
             ItemStack it = null;
             if (is != null) {
@@ -194,8 +190,8 @@ public class HopHandler {
                     if (!ovoid.contains(it.getType())) {
                         op.getPlayer().getEnderChest().addItem(newItem);
                     }
-                    isS[place] = is;
-                    hopperBlock.getInventory().setContents(isS);
+                    hopperContents[place] = is;
+                    hopperBlock.getInventory().setContents(hopperContents);
                 }
             } else {
                 InventoryHolder outputContainer = (InventoryHolder) b2.getState();
@@ -234,8 +230,8 @@ public class HopHandler {
 
                         brewerInventory.setItem(entry.getKey(), currentOutput);
 
-                        isS[place] = is;
-                        hopperBlock.getInventory().setContents(isS);
+                        hopperContents[place] = is;
+                        hopperBlock.getInventory().setContents(hopperContents);
                         return true;
                     }
                 } else if (b2.getType() == Material.FURNACE) {
@@ -259,8 +255,8 @@ public class HopHandler {
                             } else {
                                 furnaceInventory.setSmelting(output);
                             }
-                            isS[place] = is;
-                            hopperBlock.getInventory().setContents(isS);
+                            hopperContents[place] = is;
+                            hopperBlock.getInventory().setContents(hopperContents);
                         }
                     }
                     return true;
@@ -270,8 +266,8 @@ public class HopHandler {
                     if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
                         outputContainer.getInventory().addItem(newItem);
                     }
-                    isS[place] = is;
-                    hopperBlock.getInventory().setContents(isS);
+                    hopperContents[place] = is;
+                    hopperBlock.getInventory().setContents(hopperContents);
                 }
             }
             return true;
