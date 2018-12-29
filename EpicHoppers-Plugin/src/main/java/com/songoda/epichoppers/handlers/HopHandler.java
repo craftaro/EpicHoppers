@@ -76,8 +76,8 @@ public class HopHandler {
                 for (Location destinationLocation : hopper.getLinkedBlocks()) {
                     if (destinationLocation == null) continue;
 
-                    if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX(),
-                            destinationLocation.getBlockZ()))
+                    if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX() >> 4,
+                            destinationLocation.getBlockZ() >> 4))
                         continue;
 
                     Block destinationBlock = destinationLocation.getBlock();
