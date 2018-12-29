@@ -115,7 +115,7 @@ public class HopHandler {
 
                         if (is[i] != null && blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(is[finalIncrement]))) {
                             if (addItem(hopperBlock, hopper, destinationBlock, is[i], is, amount, i)) {
-                                //block.getState().update();
+                                block.getState().update();
                                 continue main;
                             }
                         }
@@ -138,7 +138,8 @@ public class HopHandler {
             Location location = hopperBlock.getLocation();
             Block block = location.getBlock();
             if (hopper.getFilter().getEndPoint() != null
-                    && block != null && block.getState() instanceof Hopper) {
+                    && block != null
+                    && block.getState() instanceof Hopper) {
                 Location dest = hopper.getFilter().getEndPoint();
                 if (!dest.getWorld().isChunkLoaded(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
                     return;
