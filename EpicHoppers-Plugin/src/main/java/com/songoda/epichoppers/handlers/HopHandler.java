@@ -140,10 +140,7 @@ public class HopHandler {
             if (hopper.getFilter().getEndPoint() != null
                     && block != null && block.getState() instanceof Hopper) {
                 Location dest = hopper.getFilter().getEndPoint();
-                int destx = location.getBlockX() >> 4;
-                int destz = location.getBlockZ() >> 4;
-
-                if (!dest.getWorld().isChunkLoaded(destx, destz))
+                if (!dest.getWorld().isChunkLoaded(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
                     return;
 
                 Block b2 = dest.getBlock();
