@@ -27,9 +27,9 @@ public class HopHandler {
     public HopHandler(EpicHoppersPlugin instance) {
         try {
             this.instance = instance;
-            Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
-                Bukkit.getScheduler().scheduleSyncRepeatingTask(instance, this::hopperRunner, 0, instance.getConfig().getLong("Main.Amount of Ticks Between Hops"));
-            }, 40L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () ->
+                    Bukkit.getScheduler().scheduleSyncRepeatingTask(instance, this::hopperRunner, 0,
+                            instance.getConfig().getLong("Main.Amount of Ticks Between Hops")), 40L);
         } catch (Exception e) {
             Debugger.runReport(e);
         }
@@ -53,7 +53,7 @@ public class HopHandler {
 
                 if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) continue;
 
-                Hopper hopperBlock = hopper.getHopper();
+                Hopper hopperState = (Hopper) block.getState();
 
                 List<Material> blockedMaterials = new ArrayList<>();
 
@@ -67,7 +67,7 @@ public class HopHandler {
                     blockedMaterials.addAll(materials);
                 }
 
-                ItemStack[] hopperContents = hopperBlock.getInventory().getContents();
+                ItemStack[] hopperContents = hopperState.getInventory().getContents();
 
                 if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) continue;
 
@@ -79,7 +79,7 @@ public class HopHandler {
                         continue;
 
                     Block destinationBlock = destinationLocation.getBlock();
-                    if (!(destinationBlock.getState() instanceof InventoryHolder)) {
+                    if (destinationBlock.getType() != Material.HOPPER) {
                         hopper.clearLinkedBlocks();
                         continue;
                     }
@@ -106,19 +106,18 @@ public class HopHandler {
 
                         if (!whiteList.isEmpty()
                                 && whiteList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
-                            doBlacklist(hopperBlock, hopper, hopperContents[i].clone(), hopperContents, amount, i);
+                            doBlacklist(hopperState, hopper, hopperContents[i].clone(), amount, i);
                             continue main;
                         }
 
                         if (blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
-                            if (addItem(hopperBlock, hopper, destinationBlock, hopperContents[i], hopperContents, amount, i)) {
-                                block.getState().update();
+                            if (addItem(hopperState, hopper, destinationBlock, hopperContents[i], amount, i)) {
                                 continue main;
                             }
                         }
 
                         if (blackList.stream().anyMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
-                            doBlacklist(hopperBlock, hopper, hopperContents[i].clone(), hopperContents, amount, i);
+                            doBlacklist(hopperState, hopper, hopperContents[i].clone(), amount, i);
                             continue main;
                         }
                     }
@@ -130,33 +129,26 @@ public class HopHandler {
     }
 
 
-    private void doBlacklist(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, ItemStack[] hopperContents, int amt, int place) {
+    private void doBlacklist(Hopper hopperState, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, int amt, int place) {
         try {
-            Location location = hopperBlock.getLocation();
-            Block block = location.getBlock();
-            if (hopper.getFilter().getEndPoint() != null
-                    && block != null
-                    && block.getState() instanceof Hopper) {
-                Location dest = hopper.getFilter().getEndPoint();
-                if (!dest.getWorld().isChunkLoaded(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
-                    return;
+            Location dest = hopper.getFilter().getEndPoint();
+            if (!dest.getWorld().isChunkLoaded(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
+                return;
 
-                Block b2 = dest.getBlock();
+            Block destinationBlock = dest.getBlock();
 
-                if (!(b2.getState() instanceof InventoryHolder)) {
-                    hopper.getFilter().setEndPoint(null);
-                    return;
-                }
-
-                addItem(hopperBlock, hopper, b2, item, hopperContents, amt, place);
-                block.getState().update();
+            if (destinationBlock.getType() != Material.HOPPER) {
+                hopper.getFilter().setEndPoint(null);
+                return;
             }
+
+            addItem(hopperState, hopper, destinationBlock, item, amt, place);
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    private boolean addItem(Hopper hopperBlock, com.songoda.epichoppers.api.hopper.Hopper hopper, Block b2, ItemStack is, ItemStack[] hopperContents, int amt, int place) {
+    private boolean addItem(Hopper hopperState, com.songoda.epichoppers.api.hopper.Hopper hopper, Block destinationBlock, ItemStack is, int amt, int place) {
         try {
             ItemStack it = null;
             if (is != null) {
@@ -184,43 +176,48 @@ public class HopHandler {
 
             newItem.setAmount(amt);
 
-            if (b2.getType().equals(Material.ENDER_CHEST)) {
+            if (destinationBlock.getType().equals(Material.ENDER_CHEST)) {
                 OfflinePlayer op = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
-                if (op.isOnline() && canMove(op.getPlayer().getEnderChest(), newItem, amt)) {
-                    if (!ovoid.contains(it.getType())) {
+
+                if (op.isOnline() && canMove(op.getPlayer().getEnderChest(), newItem)) {
+                    ItemStack finalIt = it;
+                    if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
                         op.getPlayer().getEnderChest().addItem(newItem);
                     }
-                    hopperContents[place] = is;
-                    hopperBlock.getInventory().setContents(hopperContents);
+                    hopperState.getInventory().setItem(place, is);
                 }
-            } else {
-                InventoryHolder outputContainer = (InventoryHolder) b2.getState();
-                if (b2.getType() == Material.BREWING_STAND) {
-                    BrewerInventory brewerInventory = (BrewerInventory) outputContainer.getInventory();
+                return true;
+            }
 
-                    int maxSize = newItem.getMaxStackSize();
+            InventoryHolder outputContainer = (InventoryHolder) destinationBlock.getState();
 
-                    String typeStr = item.getType().name().toUpperCase();
-                    boolean isBottle = typeStr.contains("POTION") || typeStr.contains("BOTTLE") || item.getType() == Material.DRAGON_BREATH;
-                    boolean isLeft = item.getType() == Material.BLAZE_POWDER;
+            if (destinationBlock.getType() == Material.BREWING_STAND) {
+                BrewerInventory brewerInventory = (BrewerInventory) outputContainer.getInventory();
 
-                    Map<Integer, ItemStack> output = new HashMap<>();
-                    if (isBottle) {
-                        output.put(0, brewerInventory.getItem(0));
-                        output.put(1, brewerInventory.getItem(1));
-                        output.put(2, brewerInventory.getItem(2));
-                    } else if (isLeft) {
-                        output.put(4, brewerInventory.getItem(4));
-                    } else {
-                        output.put(3, brewerInventory.getItem(3));
-                    }
+                int maxSize = newItem.getMaxStackSize();
 
-                    for (Map.Entry<Integer, ItemStack> entry : output.entrySet()) {
+                String typeStr = item.getType().name().toUpperCase();
+                boolean isBottle = typeStr.contains("POTION") || typeStr.contains("BOTTLE") || item.getType() == Material.DRAGON_BREATH;
+                boolean isLeft = item.getType() == Material.BLAZE_POWDER;
+
+                Map<Integer, ItemStack> output = new HashMap<>();
+                if (isBottle) {
+                    output.put(0, brewerInventory.getItem(0));
+                    output.put(1, brewerInventory.getItem(1));
+                    output.put(2, brewerInventory.getItem(2));
+                } else if (isLeft) {
+                    output.put(4, brewerInventory.getItem(4));
+                } else {
+                    output.put(3, brewerInventory.getItem(3));
+                }
+
+                ItemStack finalIt = it;
+                for (Map.Entry<Integer, ItemStack> entry : output.entrySet()) {
+                    if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
                         ItemStack currentOutput = entry.getValue();
                         int currentOutputAmount = currentOutput == null ? 0 : currentOutput.getAmount();
                         if (currentOutput != null && (!currentOutput.isSimilar(newItem))
-                                || currentOutputAmount + newItem.getAmount() > maxSize
-                                || ovoid.contains(it.getType())) continue;
+                                || currentOutputAmount + newItem.getAmount() > maxSize) continue;
 
                         if (currentOutput != null) {
                             currentOutput.setAmount(currentOutputAmount + newItem.getAmount());
@@ -229,47 +226,43 @@ public class HopHandler {
                         }
 
                         brewerInventory.setItem(entry.getKey(), currentOutput);
-
-                        hopperContents[place] = is;
-                        hopperBlock.getInventory().setContents(hopperContents);
-                        return true;
                     }
-                } else if (b2.getType() == Material.FURNACE) {
-                    FurnaceInventory furnaceInventory = (FurnaceInventory) outputContainer.getInventory();
-
-                    boolean isFuel = item.getType().isFuel();
-                    ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
-                    if (output != null && !output.isSimilar(newItem)) return false;
-                    int maxSize = newItem.getMaxStackSize();
-                    int currentOutputAmount = output == null ? 0 : output.getAmount();
-
-                    if (currentOutputAmount + newItem.getAmount() <= maxSize) {
-                        if (!ovoid.contains(it.getType())) {
-                            if (output != null) {
-                                output.setAmount(currentOutputAmount + newItem.getAmount());
-                            } else {
-                                output = newItem.clone();
-                            }
-                            if (isFuel) {
-                                furnaceInventory.setFuel(output);
-                            } else {
-                                furnaceInventory.setSmelting(output);
-                            }
-                            hopperContents[place] = is;
-                            hopperBlock.getInventory().setContents(hopperContents);
-                        }
-                    }
+                    hopperState.getInventory().setItem(place, is);
                     return true;
-                } else {
-                    if (!canMove(outputContainer.getInventory(), newItem, amt)) return false;
+                }
+            } else if (destinationBlock.getType() == Material.FURNACE || destinationBlock.getType() == Material.BURNING_FURNACE) {
+                FurnaceInventory furnaceInventory = (FurnaceInventory) outputContainer.getInventory();
+
+                boolean isFuel = Methods.isFuel(item.getType());
+                ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
+                if (output != null && !output.isSimilar(newItem)) return false;
+                int maxSize = newItem.getMaxStackSize();
+                int currentOutputAmount = output == null ? 0 : output.getAmount();
+
+                if (currentOutputAmount + newItem.getAmount() <= maxSize) {
                     ItemStack finalIt = it;
                     if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
-                        outputContainer.getInventory().addItem(newItem);
+                        if (output != null) {
+                            output.setAmount(currentOutputAmount + newItem.getAmount());
+                        } else {
+                            output = newItem.clone();
+                        }
+                        if (isFuel) {
+                            furnaceInventory.setFuel(output);
+                        } else {
+                            furnaceInventory.setSmelting(output);
+                        }
+                        hopperState.getInventory().setItem(place, is);
                     }
-                    hopperContents[place] = is;
-                    hopperBlock.getInventory().setContents(hopperContents);
                 }
+                return true;
             }
+            if (!canMove(outputContainer.getInventory(), newItem)) return false;
+            ItemStack finalIt = it;
+            if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
+                outputContainer.getInventory().addItem(newItem);
+            }
+            hopperState.getInventory().setItem(place, is);
             return true;
         } catch (Exception e) {
             Debugger.runReport(e);
@@ -277,12 +270,11 @@ public class HopHandler {
         return false;
     }
 
-    private boolean canMove(Inventory inventory, ItemStack item, int hop) {
+    private boolean canMove(Inventory inventory, ItemStack item) {
         try {
             if (inventory.firstEmpty() != -1) return true;
-
             for (ItemStack stack : inventory.getContents()) {
-                if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount() + hop) < stack.getMaxStackSize()) {
+                if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) - 1 < stack.getMaxStackSize()) {
                     return true;
                 }
             }

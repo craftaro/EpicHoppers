@@ -52,10 +52,7 @@ public class EHopper implements Hopper {
         this.teleportTrigger = teleportTrigger;
         this.autoCrafting = autoCrafting;
 
-        int x = location.getBlockX() >> 4;
-        int z = location.getBlockZ() >> 4;
-
-        if (!location.getWorld().isChunkLoaded(x, z))
+        if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4))
             return;
 
         this.reloadHopper();
