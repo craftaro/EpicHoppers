@@ -230,10 +230,10 @@ public class HopHandler {
                     hopperState.getInventory().setItem(place, is);
                     return true;
                 }
-            } else if (destinationBlock.getType() == Material.FURNACE || destinationBlock.getType() == Material.BURNING_FURNACE) {
+            } else if (destinationBlock.getType() == Material.FURNACE) {
                 FurnaceInventory furnaceInventory = (FurnaceInventory) outputContainer.getInventory();
 
-                boolean isFuel = Methods.isFuel(item.getType());
+                boolean isFuel = item.getType().isFuel();
                 ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
                 if (output != null && !output.isSimilar(newItem)) return false;
                 int maxSize = newItem.getMaxStackSize();
