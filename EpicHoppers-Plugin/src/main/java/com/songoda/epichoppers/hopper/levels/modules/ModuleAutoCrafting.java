@@ -41,6 +41,7 @@ public class ModuleAutoCrafting implements Module {
 
     public void run(Hopper hopper) {
         org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
+        if (hopper.getAutoCrafting() == null || hopperBlock == null || hopperBlock.getInventory() == null) return;
         if (hopper.getAutoCrafting() != null && canMove(hopperBlock.getInventory(), new ItemStack(hopper.getAutoCrafting()))) {
 
             Recipe recipe = cachedRecipes.get(hopper.getAutoCrafting());

@@ -72,7 +72,7 @@ public class HopHandler {
 
                 if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) continue;
 
-                for (Location destinationLocation : hopper.getLinkedBlocks()) {
+                for (Location destinationLocation : new ArrayList<>(hopper.getLinkedBlocks())) {
                     if (destinationLocation == null) continue;
 
                     if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX() >> 4,
