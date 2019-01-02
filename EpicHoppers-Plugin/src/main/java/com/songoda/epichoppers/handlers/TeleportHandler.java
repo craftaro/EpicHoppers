@@ -13,6 +13,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -66,63 +67,40 @@ public class TeleportHandler {
 
     public void tpPlayer(Player player, Hopper hopper) {
         try {
+            if (hopper == null || !instance.getHopperManager().isHopper(hopper.getLocation())) return;
+
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
-            Block next = hopper.getLocation().getBlock();
-            int num = 1;
-            while (instance.getHopperManager().isHopper(next.getLocation()) && instance.getHopperManager().getHopper(next.getLocation()).getLinkedBlocks() != null && num != 15) {
-                Hopper nextHopper = instance.getHopperManager().getHopper(next);
-                if (nextHopper.getLinkedBlocks() != null && !nextHopper.getLinkedBlocks().isEmpty()) {
-                    Location location = nextHopper.getLinkedBlocks().get(0);
-
-                    int x = location.getBlockX() >> 4;
-                    int z = location.getBlockZ() >> 4;
-
-                    if (!location.getWorld().isChunkLoaded(x, z))
-                        continue;
-
-                    next = location.getBlock();
+            Hopper lastHopper = hopper;
+            for (int i = 0; i < 15; i ++) {
+                boolean empty = lastHopper.getLinkedBlocks().isEmpty();
+                if (empty && i == 0) {
+                    if (teleportFrom.containsKey(hopper.getLocation()))
+                        doTeleport(player, teleportFrom.get(hopper.getLocation()));
+                    return;
                 }
 
-                if (!next.getType().equals(Material.HOPPER)) {
-                    instance.getHopperManager().removeHopper(nextHopper.getLocation());
-                    break;
-                }
-
-                Location location = next.getLocation();
-                location.setX(location.getX() + 0.5);
-                location.setZ(location.getZ() + 0.5);
-                location.setY(location.getY() + 1);
-                location.setPitch(player.getLocation().getPitch());
-                location.setDirection(player.getLocation().getDirection());
-                player.teleport(location);
-                next = player.getLocation().subtract(0, 0.5, 0).getBlock();
-
-                if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
-                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10,10);
-                num++;
+                if (empty) break;
+                Location nextHopper = lastHopper.getLinkedBlocks().get(0);
+                if (!(nextHopper.getBlock().getState() instanceof InventoryHolder)) break;
+                lastHopper = instance.getHopperManager().getHopper(nextHopper);
             }
-            if (num == 1 && teleportFrom.containsKey(hopper.getLocation())) {
-                Location location = teleportFrom.get(hopper.getLocation());
-                location.setX(location.getX() + 0.5);
-                location.setZ(location.getZ() + 0.5);
-                location.setY(location.getY() + 1);
-                location.setPitch(player.getLocation().getPitch());
-                location.setDirection(player.getLocation().getDirection());
-                player.teleport(location);
-                next = player.getLocation().subtract(0, 0.5, 0).getBlock();
 
-                if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
-                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10,10);
-                num ++;
-
-            }
-            if (num != 1) {
-                teleportFrom.put(next.getLocation(), hopper.getLocation());
-                Methods.doParticles(player, hopper.getLocation());
-                Methods.doParticles(player, next.getLocation());
-            }
+            teleportFrom.put(lastHopper.getLocation(), hopper.getLocation());
+            doTeleport(player, lastHopper.getLocation());
         } catch (Exception e) {
             Debugger.runReport(e);
         }
+    }
+
+    private void doTeleport(Player player, Location location) {
+        location.add(.0, 1, .0);
+        location.setPitch(player.getLocation().getPitch());
+        location.setDirection(player.getLocation().getDirection());
+        Methods.doParticles(player, location);
+        Methods.doParticles(player, player.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation());
+        player.teleport(location);
+
+        if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10,10);
     }
 }
