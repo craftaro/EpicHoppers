@@ -21,6 +21,8 @@ import java.util.List;
 public class ModuleSuction implements Module {
     
     private final int amount;
+
+    private boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
     
     public ModuleSuction(int amount) {
         this.amount = amount;
@@ -55,7 +57,7 @@ public class ModuleSuction implements Module {
             if (entity.hasMetadata("grabbed") || !entity.isOnGround())
                 continue;
 
-            if (Bukkit.getPluginManager().isPluginEnabled("WildStacker"))
+            if (wildStacker)
                 hopItem.setAmount(WildStackerAPI.getItemAmount((Item)entity));
 
             ItemStack item = ((Item) entity).getItemStack();
@@ -68,8 +70,11 @@ public class ModuleSuction implements Module {
             float yy = (float) (0 + (Math.random() * .3));
             float zz = (float) (0 + (Math.random() * .3));
             Arconix.pl().getApi().packetLibrary.getParticleManager().broadcastParticle(entity.getLocation(), xx, yy, zz, 0, "FLAME", 5);
+
+            for (ItemStack itemStack : hopperBlock.getInventory().addItem(hopItem).values()) {
+                entity.getWorld().dropItemNaturally(entity.getLocation(), itemStack);
+            }
             entity.remove();
-            hopperBlock.getInventory().addItem(hopItem);
             break;
         }
     }
