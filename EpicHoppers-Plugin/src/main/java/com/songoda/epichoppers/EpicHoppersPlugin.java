@@ -214,7 +214,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         new HopHandler(this);
         teleportHandler = new TeleportHandler(this);
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, this::saveToFile, 6000, 6000);
+        int timeout = getConfig().getInt("Main.Auto Save Interval In Seconds")* 60 * 20;
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, timeout, timeout);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
 

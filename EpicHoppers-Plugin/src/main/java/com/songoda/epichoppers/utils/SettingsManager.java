@@ -182,6 +182,7 @@ public class SettingsManager implements Listener {
         ENDERCHESTS("Main.Support Enderchests", true),
         PARTICLE_TYPE("Main.Upgrade Particle Type", "SPELL_WITCH"),
         HOP_TICKS("Main.Amount of Ticks Between Hops", 8L),
+        AUTOSAVE("Main.Auto Save Interval In Seconds", 15),
         TELEPORT_TICKS("Main.Amount of Ticks Between Teleport", 10L),
         SYNC_TIMEOUT("Main.Timeout When Syncing Hoppers", 300L),
         MAX_CHUNK("Main.Max Hoppers Per Chunk", -1),
