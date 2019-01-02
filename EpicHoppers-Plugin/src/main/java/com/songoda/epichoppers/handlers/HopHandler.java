@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Hopper;
 import org.bukkit.inventory.*;
 
@@ -79,10 +80,12 @@ public class HopHandler {
                         continue;
 
                     Block destinationBlock = destinationLocation.getBlock();
-                    if (destinationBlock.getType() != Material.HOPPER) {
+                    BlockState state = destinationBlock.getState();
+                    if (!(state instanceof InventoryHolder)) {
                         hopper.clearLinkedBlocks();
                         continue;
                     }
+                    InventoryHolder destinationState = (InventoryHolder) state;
 
                     BoostData boostData = instance.getBoostManager().getBoost(hopper.getPlacedBy());
 
@@ -111,7 +114,7 @@ public class HopHandler {
                         }
 
                         if (blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
-                            if (addItem(hopperState, hopper, destinationBlock, hopperContents[i], amount, i)) {
+                            if (addItem(hopperState, hopper, destinationState, destinationBlock, hopperContents[i], amount, i)) {
                                 continue main;
                             }
                         }
@@ -136,19 +139,20 @@ public class HopHandler {
                 return;
 
             Block destinationBlock = dest.getBlock();
-
-            if (destinationBlock.getType() != Material.HOPPER) {
+            BlockState state = destinationBlock.getState();
+            if (!(state instanceof InventoryHolder)) {
                 hopper.getFilter().setEndPoint(null);
                 return;
             }
+            InventoryHolder destinationState = (InventoryHolder) state;
 
-            addItem(hopperState, hopper, destinationBlock, item, amt, place);
+            addItem(hopperState, hopper, destinationState, destinationBlock, item, amt, place);
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    private boolean addItem(Hopper hopperState, com.songoda.epichoppers.api.hopper.Hopper hopper, Block destinationBlock, ItemStack is, int amt, int place) {
+    private boolean addItem(Hopper hopperState, com.songoda.epichoppers.api.hopper.Hopper hopper, InventoryHolder destinationState, Block destinationBlock, ItemStack is, int amt, int place) {
         try {
             ItemStack it = null;
             if (is != null) {
@@ -189,10 +193,8 @@ public class HopHandler {
                 return true;
             }
 
-            InventoryHolder outputContainer = (InventoryHolder) destinationBlock.getState();
-
             if (destinationBlock.getType() == Material.BREWING_STAND) {
-                BrewerInventory brewerInventory = (BrewerInventory) outputContainer.getInventory();
+                BrewerInventory brewerInventory = (BrewerInventory) destinationState.getInventory();
 
                 int maxSize = newItem.getMaxStackSize();
 
@@ -231,7 +233,7 @@ public class HopHandler {
                     return true;
                 }
             } else if (destinationBlock.getType() == Material.FURNACE) {
-                FurnaceInventory furnaceInventory = (FurnaceInventory) outputContainer.getInventory();
+                FurnaceInventory furnaceInventory = (FurnaceInventory) destinationState.getInventory();
 
                 boolean isFuel = item.getType().isFuel();
                 ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
@@ -257,10 +259,10 @@ public class HopHandler {
                 }
                 return true;
             }
-            if (!canMove(outputContainer.getInventory(), newItem)) return false;
+            if (!canMove(destinationState.getInventory(), newItem)) return false;
             ItemStack finalIt = it;
             if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
-                outputContainer.getInventory().addItem(newItem);
+                destinationState.getInventory().addItem(newItem);
             }
             hopperState.getInventory().setItem(place, is);
             return true;
