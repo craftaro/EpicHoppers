@@ -58,6 +58,8 @@ public class HopHandler {
 
                 List<Material> blockedMaterials = new ArrayList<>();
 
+                if (hopperState == null || hopperState.getInventory() == null) continue;
+
                 for (Module module : hopper.getLevel().getRegisteredModules()) {
                     // Run Module
                     module.run(hopper);

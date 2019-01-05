@@ -61,6 +61,7 @@ public class ModuleSuction implements Module {
                 hopItem.setAmount(WildStackerAPI.getItemAmount((Item)entity));
 
             ItemStack item = ((Item) entity).getItemStack();
+            if (item == null) continue;
             if (!canMove(hopperBlock.getInventory(), item)) {
                 continue;
             }
