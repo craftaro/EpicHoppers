@@ -11,12 +11,13 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Hopper;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -72,22 +73,45 @@ public class HopHandler {
 
                 ItemStack[] hopperContents = hopperState.getInventory().getContents();
 
-                if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) continue;
+                Inventory override = null;
+                List<Location> linked = hopper.getLinkedBlocks();
 
-                for (Location destinationLocation : new ArrayList<>(hopper.getLinkedBlocks())) {
-                    if (destinationLocation == null) continue;
+                if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) {
+                    HopperDirection hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
+                    Location check = hopperDirection.getLocation(location);
 
-                    if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX() >> 4,
-                            destinationLocation.getBlockZ() >> 4))
-                        continue;
+                    linked.add(check);
 
-                    Block destinationBlock = destinationLocation.getBlock();
-                    BlockState state = destinationBlock.getState();
-                    if (!(state instanceof InventoryHolder)) {
-                        hopper.clearLinkedBlocks();
-                        continue;
+                    Collection<Entity> nearbyEntite = hopper.getLocation().getWorld().getNearbyEntities(check, .5, .5, .5);
+
+                    for (Entity entity : nearbyEntite) {
+                        if (entity.getType() == EntityType.MINECART_HOPPER)
+                            override = ((HopperMinecart)entity).getInventory();
+                        else if (entity.getType() == EntityType.MINECART_CHEST)
+                            override = ((StorageMinecart)entity).getInventory();
                     }
-                    InventoryHolder destinationState = (InventoryHolder) state;
+
+                    if (linked.isEmpty()) continue;
+                }
+
+                for (Location destinationLocation : linked) {
+                    Block destinationBlock = destinationLocation.getBlock();
+                    Inventory destinationInventory = override;
+                    if (override == null) {
+                        if (destinationLocation == null) continue;
+
+                        if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX() >> 4,
+                                destinationLocation.getBlockZ() >> 4))
+                            continue;
+
+                        destinationBlock = destinationLocation.getBlock();
+                        BlockState state = destinationBlock.getState();
+                        if (!(state instanceof InventoryHolder)) {
+                            hopper.clearLinkedBlocks();
+                            continue;
+                        }
+                        destinationInventory = ((InventoryHolder)state).getInventory();
+                    }
 
                     BoostData boostData = instance.getBoostManager().getBoost(hopper.getPlacedBy());
 
@@ -116,7 +140,7 @@ public class HopHandler {
                         }
 
                         if (blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
-                            if (addItem(hopperState, hopper, destinationState, destinationBlock, hopperContents[i], amount, i)) {
+                            if (addItem(hopperState, hopper, destinationInventory, destinationBlock, hopperContents[i], amount, i)) {
                                 continue main;
                             }
                         }
@@ -146,15 +170,15 @@ public class HopHandler {
                 hopper.getFilter().setEndPoint(null);
                 return;
             }
-            InventoryHolder destinationState = (InventoryHolder) state;
+            Inventory destinationInventory = ((InventoryHolder)state).getInventory();
 
-            addItem(hopperState, hopper, destinationState, destinationBlock, item, amt, place);
+            addItem(hopperState, hopper, destinationInventory, destinationBlock, item, amt, place);
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    private boolean addItem(Hopper hopperState, com.songoda.epichoppers.api.hopper.Hopper hopper, InventoryHolder destinationState, Block destinationBlock, ItemStack is, int amt, int place) {
+    private boolean addItem(Hopper hopperState, com.songoda.epichoppers.api.hopper.Hopper hopper, Inventory destinationInventory, Block destinationBlock, ItemStack is, int amt, int place) {
         try {
             ItemStack it = null;
             if (is != null) {
@@ -196,7 +220,7 @@ public class HopHandler {
             }
 
             if (destinationBlock.getType() == Material.BREWING_STAND) {
-                BrewerInventory brewerInventory = (BrewerInventory) destinationState.getInventory();
+                BrewerInventory brewerInventory = (BrewerInventory) destinationInventory;
 
                 int maxSize = newItem.getMaxStackSize();
 
@@ -235,7 +259,7 @@ public class HopHandler {
                     return true;
                 }
             } else if (destinationBlock.getType() == Material.FURNACE) {
-                FurnaceInventory furnaceInventory = (FurnaceInventory) destinationState.getInventory();
+                FurnaceInventory furnaceInventory = (FurnaceInventory) destinationInventory;
 
                 boolean isFuel = item.getType().isFuel();
                 ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
@@ -261,10 +285,10 @@ public class HopHandler {
                 }
                 return true;
             }
-            if (!canMove(destinationState.getInventory(), newItem)) return false;
+            if (!canMove(destinationInventory, newItem)) return false;
             ItemStack finalIt = it;
             if (ovoid.stream().noneMatch(itemStack -> itemStack.isSimilar(finalIt))) {
-                destinationState.getInventory().addItem(newItem);
+                destinationInventory.addItem(newItem);
             }
             hopperState.getInventory().setItem(place, is);
             return true;
@@ -286,5 +310,62 @@ public class HopHandler {
             Debugger.runReport(e);
         }
         return false;
+    }
+
+    public enum HopperDirection {
+
+        DOWN(0, 8, 0, -1, 0),
+        NORTH(2, 10, 0, 0, -1),
+        SOUTH(3, 11, 0, 0, 1),
+        WEST(4, 12, -1, 0, 0),
+        EAST(5, 13, 1, 0, 0);
+
+        private int unpowered;
+        private int powered;
+
+        private int x;
+        private int y;
+        private int z;
+
+        HopperDirection(int unpowered, int powered, int x, int y, int z) {
+            this.unpowered = unpowered;
+            this.powered = powered;
+
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public static HopperDirection getDirection(int value) {
+            for (HopperDirection hopperDirection : HopperDirection.values()) {
+                if (hopperDirection.getPowered() == value
+                        || hopperDirection.getUnpowered() == value) return hopperDirection;
+            }
+            return null;
+        }
+
+        public Location getLocation(Location location) {
+            return location.add(getX(), getY(), getZ());
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public int getZ() {
+            return z;
+        }
+
+        public int getUnpowered() {
+            return unpowered;
+        }
+
+        public int getPowered() {
+            return powered;
+        }
     }
 }

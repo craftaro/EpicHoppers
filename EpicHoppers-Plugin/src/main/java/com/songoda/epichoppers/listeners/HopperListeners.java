@@ -4,11 +4,13 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.utils.Debugger;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
 /**
  * Created by songoda on 4/18/2017.
@@ -32,9 +34,11 @@ public class HopperListeners implements Listener {
                 return;
 
             Hopper hopper = instance.getHopperManager().getHopper(source.getLocation());
-            if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) {
+            if ((hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty())) {
                 hopper.clearLinkedBlocks();
-                hopper.addLinkedBlock(event.getDestination().getLocation());
+                Location location = event.getDestination().getLocation();
+                if (location.getBlock() instanceof InventoryHolder)
+                    hopper.addLinkedBlock(location);
             }
             event.setCancelled(true);
         } catch (Exception ee) {

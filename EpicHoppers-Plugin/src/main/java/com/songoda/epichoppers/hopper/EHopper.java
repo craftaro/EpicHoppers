@@ -647,7 +647,7 @@ public class EHopper implements Hopper {
 
     @Override
     public List<Location> getLinkedBlocks() {
-        return Collections.unmodifiableList(linkedBlocks);
+        return new ArrayList<>(linkedBlocks);
     }
 
     @Override
