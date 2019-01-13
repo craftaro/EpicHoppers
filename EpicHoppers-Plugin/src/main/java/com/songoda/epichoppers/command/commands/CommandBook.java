@@ -1,8 +1,8 @@
 package com.songoda.epichoppers.command.commands;
 
-import com.songoda.arconix.api.methods.formatting.TextComponent;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.command.AbstractCommand;
+import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,7 +21,7 @@ public class CommandBook extends AbstractCommand {
                 return ReturnType.SUCCESS;
             }
         } else if (Bukkit.getPlayerExact(args[1]) == null) {
-            sender.sendMessage(instance.references.getPrefix() + TextComponent.formatText("&cThat username does not exist, or the user is not online!"));
+            sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cThat username does not exist, or the user is not online!"));
             return ReturnType.FAILURE;
         } else {
             Bukkit.getPlayerExact(args[1]).getInventory().addItem(instance.enchantmentHandler.getbook());

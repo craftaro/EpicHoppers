@@ -25,8 +25,9 @@ public class HookTowny implements ClaimableProtectionPluginHook {
 
     @Override
     public boolean canBuild(Player player, Location location) {
-        if (TownyUniverse.isWilderness(location.getBlock()) || !TownyUniverse.getTownBlock(location).hasTown()) return true;
-        
+        if (TownyUniverse.isWilderness(location.getBlock()) || !TownyUniverse.getTownBlock(location).hasTown())
+            return true;
+
         try {
             Resident resident = TownyUniverse.getDataSource().getResident(player.getName());
             return resident.hasTown() && TownyUniverse.getTownName(location).equals(resident.getTown().getName());

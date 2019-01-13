@@ -1,8 +1,5 @@
 package com.songoda.epichoppers.hopper;
 
-import com.songoda.arconix.api.methods.formatting.TextComponent;
-import com.songoda.arconix.api.methods.formatting.TimeComponent;
-import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Filter;
 import com.songoda.epichoppers.api.hopper.Hopper;
@@ -86,7 +83,7 @@ public class EHopper implements Hopper {
             ArrayList<String> loreperl = new ArrayList<>();
             String[] parts = instance.getLocale().getMessage("interface.hopper.perllore2", teleportTrigger == TeleportTrigger.DISABLED ? instance.getLocale().getMessage("general.word.disabled") : teleportTrigger.name()).split("\\|");
             for (String line : parts) {
-                loreperl.add(Arconix.pl().getApi().format().formatText(line));
+                loreperl.add(Methods.formatText(line));
             }
             perlmeta.setLore(loreperl);
             perl.setItemMeta(perlmeta);
@@ -97,7 +94,7 @@ public class EHopper implements Hopper {
             ArrayList<String> lorefilter = new ArrayList<>();
             parts = instance.getLocale().getMessage("interface.hopper.filterlore").split("\\|");
             for (String line : parts) {
-                lorefilter.add(Arconix.pl().getApi().format().formatText(line));
+                lorefilter.add(Methods.formatText(line));
             }
             filtermeta.setLore(lorefilter);
             filter.setItemMeta(filtermeta);
@@ -108,7 +105,7 @@ public class EHopper implements Hopper {
             ArrayList<String> lorecrafting = new ArrayList<>();
             parts = instance.getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
             for (String line : parts) {
-                lorecrafting.add(Arconix.pl().getApi().format().formatText(line));
+                lorecrafting.add(Methods.formatText(line));
             }
             craftingmeta.setLore(lorecrafting);
             crafting.setItemMeta(craftingmeta);
@@ -129,10 +126,10 @@ public class EHopper implements Hopper {
 
             BoostData boostData = instance.getBoostManager().getBoost(placedBy);
             if (boostData != null) {
-                parts = instance.getLocale().getMessage("interface.hopper.boostedstats", Integer.toString(boostData.getMultiplier()), TimeComponent.makeReadable(boostData.getEndTime() - System.currentTimeMillis())).split("\\|");
+                parts = instance.getLocale().getMessage("interface.hopper.boostedstats", Integer.toString(boostData.getMultiplier()), Methods.makeReadable(boostData.getEndTime() - System.currentTimeMillis())).split("\\|");
                 lore.add("");
                 for (String line : parts)
-                    lore.add(TextComponent.formatText(line));
+                    lore.add(Methods.formatText(line));
             }
 
             itemmeta.setLore(lore);
@@ -144,7 +141,7 @@ public class EHopper implements Hopper {
             ArrayList<String> lorehook = new ArrayList<>();
             parts = instance.getLocale().getMessage("interface.hopper.synclore").split("\\|");
             for (String line : parts) {
-                lorehook.add(Arconix.pl().getApi().format().formatText(line));
+                lorehook.add(Methods.formatText(line));
             }
             hookmeta.setLore(lorehook);
             hook.setItemMeta(hookmeta);
@@ -165,7 +162,7 @@ public class EHopper implements Hopper {
             itemmetaECO.setDisplayName(instance.getLocale().getMessage("interface.hopper.upgradewitheconomy"));
             ArrayList<String> loreECO = new ArrayList<>();
             if (nextLevel != null)
-                loreECO.add(instance.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Arconix.pl().getApi().format().formatEconomy(nextLevel.getCostEconomy())));
+                loreECO.add(instance.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Methods.formatEconomy(nextLevel.getCostEconomy())));
             else
                 loreECO.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
             itemmetaECO.setLore(loreECO);
@@ -236,7 +233,7 @@ public class EHopper implements Hopper {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             instance.getPlayerDataManager().getPlayerData(player).setLastHopper(this);
 
-            Inventory i = Bukkit.createInventory(null, 27, Arconix.pl().getApi().format().formatText(Methods.formatName(level.getLevel(), false) + " &8-&f Crafting"));
+            Inventory i = Bukkit.createInventory(null, 27, Methods.formatText(Methods.formatName(level.getLevel(), false) + " &8-&f Crafting"));
 
             int nu = 0;
             while (nu != 27) {
@@ -275,7 +272,7 @@ public class EHopper implements Hopper {
         try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
 
-            Inventory i = Bukkit.createInventory(null, 54, Arconix.pl().getApi().format().formatText(Methods.formatName(level.getLevel(), false) + " &8-&f Filter"));
+            Inventory i = Bukkit.createInventory(null, 54, Methods.formatText(Methods.formatName(level.getLevel(), false) + " &8-&f Filter"));
 
             i.setItem(2, Methods.getBackgroundGlass(true));
             i.setItem(3, Methods.getBackgroundGlass(true));
@@ -370,7 +367,7 @@ public class EHopper implements Hopper {
             ArrayList<String> loreInfo = new ArrayList<>();
             String[] parts = instance.getLocale().getMessage("interface.filter.infolore").split("\\|");
             for (String line : parts) {
-                loreInfo.add(Arconix.pl().getApi().format().formatText(line));
+                loreInfo.add(Methods.formatText(line));
             }
             itemmetaInfo.setLore(loreInfo);
             itemInfo.setItemMeta(itemmetaInfo);
@@ -384,7 +381,7 @@ public class EHopper implements Hopper {
             ArrayList<String> lorehook = new ArrayList<>();
             parts = instance.getLocale().getMessage("interface.hopper.synclore").split("\\|");
             for (String line : parts) {
-                lorehook.add(Arconix.pl().getApi().format().formatText(line));
+                lorehook.add(Methods.formatText(line));
             }
             hookmeta.setLore(lorehook);
             hook.setItemMeta(hookmeta);

@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.storage;
 
-import com.songoda.arconix.plugin.Arconix;
+import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.Serializers;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -37,7 +37,7 @@ public class StorageItem {
     public StorageItem(String key, boolean type, List<Location> blocks) {
         StringBuilder object = new StringBuilder();
         for (Location location : blocks) {
-            object.append(Arconix.pl().getApi().serialize().serializeLocation(location));
+            object.append(Methods.serializeLocation(location));
             object.append(";;");
         }
         this.key = key;

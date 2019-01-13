@@ -1,13 +1,14 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
@@ -67,10 +68,10 @@ public class ModuleSuction implements Module {
             }
             ((Item) entity).setPickupDelay(10);
             entity.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
-            float xx = (float) (0 + (Math.random() * .3));
-            float yy = (float) (0 + (Math.random() * .3));
-            float zz = (float) (0 + (Math.random() * .3));
-            Arconix.pl().getApi().packetLibrary.getParticleManager().broadcastParticle(entity.getLocation(), xx, yy, zz, 0, "FLAME", 5);
+                float xx = (float) (0 + (Math.random() * .1));
+                float yy = (float) (0 + (Math.random() * .1));
+                float zz = (float) (0 + (Math.random() * .1));
+                entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
 
             for (ItemStack itemStack : hopperBlock.getInventory().addItem(hopItem).values()) {
                 entity.getWorld().dropItemNaturally(entity.getLocation(), itemStack);

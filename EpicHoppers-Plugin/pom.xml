@@ -33,12 +33,6 @@
             CreeperCow-->
         </dependency>
         <dependency>
-            <groupId>com.songoda</groupId>
-            <artifactId>arconix</artifactId>
-            <version>LATEST</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org</groupId>
             <artifactId>kingdoms</artifactId>
             <version>LATEST</version>
@@ -71,7 +65,13 @@
         <dependency>
             <groupId>com</groupId>
             <artifactId>plotsquared</artifactId>
-            <version>RELEASE</version>
+            <version>BREAKING</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.songoda</groupId>
+            <artifactId>skyblockearth</artifactId>
+            <version>LATEST</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

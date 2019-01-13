@@ -25,7 +25,7 @@ public class HookRedProtect implements ProtectionPluginHook {
     public boolean canBuild(Player player, Location location) {
         RedProtectAPI api = redProtect.getAPI();
         Region region = api.getRegion(location);
-        
+
         return region != null && region.canBuild(player);
     }
 

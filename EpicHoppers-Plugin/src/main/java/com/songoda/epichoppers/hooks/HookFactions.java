@@ -27,7 +27,7 @@ public class HookFactions implements ClaimableProtectionPluginHook {
     public boolean canBuild(Player player, Location location) {
         FPlayer fPlayer = FPlayers.getBySender(player);
         Faction faction = Factions.getFactionAt(location);
-        
+
         return faction.isNone() || fPlayer.getFaction().equals(faction);
     }
 

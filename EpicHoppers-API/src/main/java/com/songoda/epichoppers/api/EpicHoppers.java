@@ -34,14 +34,15 @@ public interface EpicHoppers {
      */
     HopperManager getHopperManager();
 
-    void register(Supplier<ProtectionPluginHook> hookSupplier);
+    ProtectionPluginHook register(Supplier<ProtectionPluginHook> hookSupplier);
 
     /**
      * Register a new {@link ProtectionPluginHook} implementation
-     * in order for EpicSpawners to support plugins that protect
+     * in order for EpicHoppers to support plugins that protect
      * blocks from being interacted with
      *
      * @param hook the hook to register
      */
-    void registerProtectionHook(ProtectionPluginHook hook);
+    ProtectionPluginHook registerProtectionHook(ProtectionPluginHook hook);
+
 }

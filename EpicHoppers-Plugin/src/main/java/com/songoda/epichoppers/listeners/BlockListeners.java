@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
@@ -153,7 +152,7 @@ public class BlockListeners implements Listener {
         ItemMeta meta = tool.getItemMeta();
         if (tool.getItemMeta().getLore().size() != 2) return;
 
-        Location location = Arconix.pl().getApi().serialize().unserializeLocation(meta.getLore().get(1).replaceAll("§", ""));
+        Location location = Methods.unserializeLocation(meta.getLore().get(1).replaceAll("§", ""));
 
         if (location.getBlock().getType() != Material.CHEST) return;
 

@@ -1,11 +1,11 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 
@@ -45,10 +45,11 @@ public class ModuleBlockBreak implements Module {
             Location locationAbove = above.getLocation();
             locationAbove.add(.5, .5, .5);
 
-            float ox = (float) (0 + (Math.random() * .5));
-            float oy = (float) (0 + (Math.random() * .5));
-            float oz = (float) (0 + (Math.random() * .5));
-            Arconix.pl().getApi().packetLibrary.getParticleManager().broadcastParticle(locationAbove, ox, oy, oz, 0, EpicHoppersPlugin.getInstance().getConfig().getString("Main.BlockBreak Particle Type"), 15);
+                float xx = (float) (0 + (Math.random() * .5));
+                float yy = (float) (0 + (Math.random() * .5));
+                float zz = (float) (0 + (Math.random() * .5));
+                above.getWorld().spawnParticle(Particle.valueOf(EpicHoppersPlugin.getInstance().getConfig().getString("Main.BlockBreak Particle Type")), locationAbove, 15, xx, yy, zz);
+
             above.breakNaturally();
         }
         blockTick.remove(block);

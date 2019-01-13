@@ -1,10 +1,6 @@
 package com.songoda.epichoppers;
 
 import com.google.common.base.Preconditions;
-import com.songoda.arconix.api.methods.formatting.TextComponent;
-import com.songoda.arconix.api.methods.serialize.Serialize;
-import com.songoda.arconix.api.utils.ConfigWrapper;
-import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.api.EpicHoppers;
 import com.songoda.epichoppers.api.EpicHoppersAPI;
 import com.songoda.epichoppers.api.hopper.Hopper;
@@ -36,13 +32,13 @@ import com.songoda.epichoppers.storage.StorageItem;
 import com.songoda.epichoppers.storage.StorageRow;
 import com.songoda.epichoppers.storage.types.StorageMysql;
 import com.songoda.epichoppers.storage.types.StorageYaml;
+import com.songoda.epichoppers.utils.ConfigWrapper;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.SettingsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -72,7 +68,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     public References references = null;
     public EnchantmentHandler enchantmentHandler;
     private List<ProtectionPluginHook> protectionHooks = new ArrayList<>();
-    private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook;
+    private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook, skyBlockEarhHook;
     private SettingsManager settingsManager;
     private ConfigWrapper hooksFile = new ConfigWrapper(this, "", "hooks.yml");
     private Locale locale;
@@ -117,11 +113,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         INSTANCE = this;
         EpicHoppersAPI.setImplementation(this);
 
-        Arconix.pl().hook(this);
-
-        console.sendMessage(TextComponent.formatText("&a============================="));
-        console.sendMessage(TextComponent.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3&7!"));
-        console.sendMessage(TextComponent.formatText("&7Action: &aEnabling&7..."));
+        console.sendMessage(Methods.formatText("&a============================="));
+        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3&7!"));
+        console.sendMessage(Methods.formatText("&7Action: &aEnabling&7..."));
 
         settingsManager = new SettingsManager(this);
         this.setupConfig();
@@ -150,7 +144,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         Bukkit.getScheduler().runTaskLater(this, () -> {
             if (storage.containsGroup("sync")) {
                 for (StorageRow row : storage.getRowsByGroup("sync")) {
-                    Location location = Serialize.getInstance().unserializeLocation(row.getKey());
+                    Location location = Methods.unserializeLocation(row.getKey());
                     if (location == null) return;
 
                     int level = row.get("level").asInt();
@@ -159,7 +153,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     List<Location> blocks = new ArrayList<>();
                     if (blockLoc != null) {
                         for (String string : blockLoc) {
-                            blocks.add(Arconix.pl().getApi().serialize().unserializeLocation(string));
+                            blocks.add(Methods.unserializeLocation(string));
                         }
                     }
 
@@ -177,7 +171,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     Material autoCrafting = Material.valueOf(row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString());
 
                     String blackLoc = row.get("black").asString();
-                    Location black = blackLoc == null ? null : Arconix.pl().getApi().serialize().unserializeLocation(blackLoc);
+                    Location black = blackLoc == null ? null : Methods.unserializeLocation(blackLoc);
 
                     EFilter filter = new EFilter();
 
@@ -229,27 +223,29 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
 
         // Register default hooks
+
         if (pluginManager.isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
         if (pluginManager.isPluginEnabled("FactionsFramework")) this.register(HookFactions::new);
         if (pluginManager.isPluginEnabled("GriefPrevention")) this.register(HookGriefPrevention::new);
         if (pluginManager.isPluginEnabled("Kingdoms")) this.register(HookKingdoms::new);
         if (pluginManager.isPluginEnabled("PlotSquared")) this.register(HookPlotSquared::new);
         if (pluginManager.isPluginEnabled("RedProtect")) this.register(HookRedProtect::new);
-        if (pluginManager.isPluginEnabled("Towny")) this.register(HookTowny::new);
-        if (pluginManager.isPluginEnabled("USkyBlock")) this.register(HookUSkyBlock::new);
+        if (pluginManager.isPluginEnabled("Towny")) townyHook = (ClaimableProtectionPluginHook)this.register(HookTowny::new);
+        if (pluginManager.isPluginEnabled("USkyBlock")) uSkyblockHook = (ClaimableProtectionPluginHook)this.register(HookUSkyBlock::new);
+        if (pluginManager.isPluginEnabled("SkyBlock")) skyBlockEarhHook = (ClaimableProtectionPluginHook)this.register(HookSkyBlockEarth::new);
         if (pluginManager.isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
 
-        console.sendMessage(TextComponent.formatText("&a============================="));
+        console.sendMessage(Methods.formatText("&a============================="));
     }
 
     public void onDisable() {
         saveToFile();
         this.storage.closeConnection();
         this.protectionHooks.clear();
-        console.sendMessage(TextComponent.formatText("&a============================="));
-        console.sendMessage(TextComponent.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3!"));
-        console.sendMessage(TextComponent.formatText("&7Action: &cDisabling&7..."));
-        console.sendMessage(TextComponent.formatText("&a============================="));
+        console.sendMessage(Methods.formatText("&a============================="));
+        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3!"));
+        console.sendMessage(Methods.formatText("&7Action: &cDisabling&7..."));
+        console.sendMessage(Methods.formatText("&a============================="));
     }
 
     private void update() {
@@ -307,7 +303,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         for (Hopper hopper : hopperManager.getHoppers().values()) {
             if (hopper.getLevel() == null || hopper.getLocation() == null || hopper.getLocation().getChunk() == null)
                 continue;
-            String locationStr = Arconix.pl().getApi().serialize().serializeLocation(hopper.getLocation());
+            String locationStr = Methods.serializeLocation(hopper.getLocation());
 
             storage.prepareSaveItem("sync", new StorageItem("location", locationStr),
                     new StorageItem("level", hopper.getLevel().getLevel()),
@@ -320,7 +316,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
                     new StorageItem("blacklist", hopper.getFilter().getBlackList()),
                     new StorageItem("void", hopper.getFilter().getVoidList()),
-                    new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Arconix.pl().getApi().serialize().serializeLocation(hopper.getFilter().getEndPoint())));
+                    new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Methods.serializeLocation(hopper.getFilter().getEndPoint())));
         }
 
         /*
@@ -491,7 +487,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     public ItemStack newHopperItem(Level level) {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
-        itemmeta.setDisplayName(TextComponent.formatText(Methods.formatName(level.getLevel(), true)));
+        itemmeta.setDisplayName(Methods.formatText(Methods.formatName(level.getLevel(), true)));
         String line = getLocale().getMessage("general.nametag.lore");
         if (!line.equals("")) {
             itemmeta.setLore(Arrays.asList(line.split("\n")));
@@ -539,12 +535,13 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     }
 
     @Override
-    public void register(Supplier<ProtectionPluginHook> hookSupplier) {
-        this.registerProtectionHook(hookSupplier.get());
+    public ProtectionPluginHook register(Supplier<ProtectionPluginHook> hookSupplier) {
+        return this.registerProtectionHook(hookSupplier.get());
     }
 
+
     @Override
-    public void registerProtectionHook(ProtectionPluginHook hook) {
+    public ProtectionPluginHook registerProtectionHook(ProtectionPluginHook hook) {
         Preconditions.checkNotNull(hook, "Cannot register null hook");
         Preconditions.checkNotNull(hook.getPlugin(), "Protection plugin hook returns null plugin instance (#getPlugin())");
 
@@ -556,12 +553,13 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         }
 
         this.hooksFile.getConfig().addDefault("hooks." + hookPlugin.getName(), true);
-        if (!hooksFile.getConfig().getBoolean("hooks." + hookPlugin.getName(), true)) return;
+        if (!hooksFile.getConfig().getBoolean("hooks." + hookPlugin.getName(), true)) return null;
         this.hooksFile.getConfig().options().copyDefaults(true);
         this.hooksFile.saveConfig();
 
         this.protectionHooks.add(hook);
         this.getLogger().info("Registered protection hook for plugin: " + hook.getPlugin().getName());
+        return hook;
     }
 
 }

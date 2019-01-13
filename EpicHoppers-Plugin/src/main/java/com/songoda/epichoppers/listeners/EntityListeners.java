@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.arconix.plugin.Arconix;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
@@ -53,7 +52,7 @@ public class EntityListeners implements Listener {
 
             ItemStack item = p.getItemInHand();
             ItemMeta meta = item.getItemMeta();
-            Location location = Arconix.pl().getApi().serialize().unserializeLocation(meta.getLore().get(1).replaceAll("§", ""));
+            Location location = Methods.unserializeLocation(meta.getLore().get(1).replaceAll("§", ""));
             if (location.getBlock().getType() != Material.CHEST) return;
             InventoryHolder ih = (InventoryHolder) location.getBlock().getState();
             for (ItemStack is : e.getDrops()) {

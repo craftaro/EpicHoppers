@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.storage;
 
-import com.songoda.arconix.api.utils.ConfigWrapper;
 import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.utils.ConfigWrapper;
 
 import java.util.List;
 
