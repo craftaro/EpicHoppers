@@ -193,13 +193,13 @@ public class EHopper implements Hopper {
                 i.setItem(21, crafting);
             }
 
-            if (instance.getConfig().getBoolean("Main.Upgrade With XP") && player.hasPermission("EpicHoppers.Upgrade.XP")) {
+            if (instance.getConfig().getBoolean("Main.Upgrade With XP") && player.hasPermission("EpicHoppers.Upgrade.XP") && level.getCostExperience() != -1) {
                 i.setItem(11, itemXP);
             }
 
             i.setItem(13, item);
 
-            if (instance.getConfig().getBoolean("Main.Upgrade With Economy") && player.hasPermission("EpicHoppers.Upgrade.ECO")) {
+            if (instance.getConfig().getBoolean("Main.Upgrade With Economy") && player.hasPermission("EpicHoppers.Upgrade.ECO") && level.getCostEconomy() != -1) {
                 i.setItem(15, itemECO);
             }
 

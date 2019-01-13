@@ -104,12 +104,12 @@ public class InventoryListeners implements Listener {
                 if (!event.getCurrentItem().getItemMeta().getDisplayName().equals("§l")) {
                     ((EHopper) hopper).filter(player);
                 }
-            } else if (event.getSlot() == 11 && player.hasPermission("EpicHoppers.Upgrade.XP")) {
+            } else if (event.getSlot() == 11 && player.hasPermission("EpicHoppers.Upgrade.XP") && hopper.getLevel().getCostExperience() != -1) {
                 if (!event.getCurrentItem().getItemMeta().getDisplayName().equals("§l")) {
                     ((EHopper) hopper).upgrade("XP", player);
                     player.closeInventory();
                 }
-            } else if (event.getSlot() == 15 && player.hasPermission("EpicHoppers.Upgrade.ECO")) {
+            } else if (event.getSlot() == 15 && player.hasPermission("EpicHoppers.Upgrade.ECO") && hopper.getLevel().getCostEconomy() != -1) {
                 if (!event.getCurrentItem().getItemMeta().getDisplayName().equals("§l")) {
                     ((EHopper) hopper).upgrade("ECO", player);
                     player.closeInventory();

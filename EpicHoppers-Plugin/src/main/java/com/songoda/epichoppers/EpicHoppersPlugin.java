@@ -348,8 +348,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             int linkAmount = levels.getInt("Link-amount", 1);
             boolean filter = levels.getBoolean("Filter");
             boolean teleport = levels.getBoolean("Teleport");
-            int costExperiance = levels.getInt("Cost-xp");
-            int costEconomy = levels.getInt("Cost-eco");
+            int costExperiance = levels.getInt("Cost-xp", -1);
+            int costEconomy = levels.getInt("Cost-eco", -1);
 
             ArrayList<Module> modules = new ArrayList<>();
 
