@@ -31,6 +31,7 @@ public class ModuleBlockBreak implements Module {
     @Override
     public void run(Hopper hopper) {
         Block block = hopper.getLocation().getBlock();
+
         if (!blockTick.containsKey(block)) {
             blockTick.put(block, 1);
             return;
@@ -40,6 +41,8 @@ public class ModuleBlockBreak implements Module {
         blockTick.put(block, put);
         if (tick < amount) return;
         Block above = block.getRelative(0, 1, 0);
+        if (above.getType() == Material.WATER || above.getType() == Material.LAVA) return;
+        
         if (above.getType() != Material.AIR && above.getType() != Material.HOPPER && !EpicHoppersPlugin.getInstance().getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
             above.getWorld().playSound(above.getLocation(), Sound.BLOCK_STONE_BREAK, 1F, 1F);
             Location locationAbove = above.getLocation();
