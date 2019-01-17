@@ -23,6 +23,7 @@ import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.hopper.EHopperManager;
 import com.songoda.epichoppers.hopper.levels.ELevelManager;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSell;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleBlockBreak;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
 import com.songoda.epichoppers.listeners.*;
@@ -167,6 +168,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     List<ItemStack> whiteList = row.get("whitelist").asItemStackList();
                     List<ItemStack> blackList = row.get("blacklist").asItemStackList();
                     List<ItemStack> voidList = row.get("void").asItemStackList();
+
+                    int autoSell = row.get("autosell").asInt();
 
                     Material autoCrafting = Material.valueOf(row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString());
 
@@ -350,6 +353,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             boolean teleport = levels.getBoolean("Teleport");
             int costExperiance = levels.getInt("Cost-xp", -1);
             int costEconomy = levels.getInt("Cost-eco", -1);
+            int autoSell = levels.getInt("AutoSell");
 
             ArrayList<Module> modules = new ArrayList<>();
 
@@ -360,10 +364,12 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     modules.add(new ModuleBlockBreak(levels.getInt("BlockBreak")));
                 } else if (key.equals("AutoCrafting")) {
                     modules.add(new ModuleAutoCrafting());
+                } else if (key.equals("AutoSell")) {
+                    modules.add(new ModuleAutoSell(autoSell));
                 }
 
             }
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
+            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, autoSell, modules);
         }
     }
 
@@ -413,6 +419,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             levels.set("Level-6.BlockBreak", 2);
             levels.set("Level-6.Filter", true);
             levels.set("Level-6.Teleport", true);
+            levels.set("Level-6.AutoSell", 60);
             levels.set("Level-6.Link-amount", 3);
             levels.set("Level-6.Cost-xp", 45);
             levels.set("Level-6.Cost-eco", 20000);
@@ -423,6 +430,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             levels.set("Level-7.BlockBreak", 2);
             levels.set("Level-7.Filter", true);
             levels.set("Level-7.Teleport", true);
+            levels.set("Level-7.AutoSell", 30);
             levels.set("Level-7.AutoCrafting", true);
             levels.set("Level-7.Link-amount", 4);
             levels.set("Level-7.Cost-xp", 50);

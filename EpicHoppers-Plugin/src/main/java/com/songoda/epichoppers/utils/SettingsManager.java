@@ -188,6 +188,8 @@ public class SettingsManager implements Listener {
         SOUNDS("Main.Sounds Enabled", true),
         BLOCKBREAK_PARTICLE("Main.BlockBreak Particle Type", "LAVA"),
         BLACKLIST("Main.BlockBreak Blacklisted Blocks", Arrays.asList("BEDROCK")),
+        AUTOSELL_PRICES("Main.AutoSell Prices", Arrays.asList("STONE,0.50", "COBBLESTONE,0.20", "IRON_ORE,0.35", "COAL_ORE,0.20")),
+
         RAINBOW("Interfaces.Replace Glass Type 1 With Rainbow Glass", false),
         ECO_ICON("Interfaces.Economy Icon", "SUNFLOWER"),
         XP_ICON("Interfaces.XP Icon", "EXPERIENCE_BOTTLE"),

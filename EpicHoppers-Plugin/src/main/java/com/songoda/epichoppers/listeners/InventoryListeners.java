@@ -116,6 +116,13 @@ public class InventoryListeners implements Listener {
                 }
             } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.craftingtitle"))) {
                 ((EHopper) hopper).crafting(player);
+            } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.selltitle"))) {
+                if (((EHopper)hopper).getAutoSellTimer() == -9999) {
+                    ((EHopper)hopper).setAutoSellTimer(0);
+                } else {
+                    ((EHopper)hopper).setAutoSellTimer(-9999);
+                }
+                ((EHopper) hopper).overview(player);
             } else if (event.getCurrentItem().getItemMeta().getDisplayName().equals(instance.getLocale().getMessage("interface.hopper.synchopper"))) {
                 if (event.isRightClick()) {
                     player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.desync"));

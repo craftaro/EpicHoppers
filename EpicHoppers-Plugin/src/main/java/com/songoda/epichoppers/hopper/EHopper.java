@@ -19,10 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -38,6 +35,7 @@ public class EHopper implements Hopper {
     private TeleportTrigger teleportTrigger;
     private Material autoCrafting;
     private org.bukkit.block.Hopper hopper;
+    private int autoSellTimer = 0;
 
     public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
@@ -110,6 +108,17 @@ public class EHopper implements Hopper {
             craftingmeta.setLore(lorecrafting);
             crafting.setItemMeta(craftingmeta);
 
+            ItemStack sell = new ItemStack(Material.SUNFLOWER, 1);
+            ItemMeta sellmeta = sell.getItemMeta();
+            sellmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.selltitle"));
+            ArrayList<String> loresell = new ArrayList<>();
+            parts = instance.getLocale().getMessage("interface.hopper.selllore", autoSellTimer == -9999 ? "\u221E" : Math.floor(autoSellTimer / 20)).split("\\|");
+            for (String line : parts) {
+                loresell.add(Methods.formatText(line));
+            }
+            sellmeta.setLore(loresell);
+            sell.setItemMeta(sellmeta);
+
 
             ItemStack item = new ItemStack(Material.HOPPER, 1);
             ItemMeta itemmeta = item.getItemMeta();
@@ -174,24 +183,46 @@ public class EHopper implements Hopper {
                 nu++;
             }
 
+            Map<Integer, Integer[]> layouts =  new HashMap<>();
+            layouts.put(1, new Integer[]{22});
+            layouts.put(2, new Integer[]{22, 4});
+            layouts.put(3, new Integer[]{22, 3, 5});
+            layouts.put(4, new Integer[]{23, 3, 5, 21});
+            layouts.put(5, new Integer[]{23, 3, 5, 21, 22});
+
+            int amount = 1;
+
             boolean canFilter = level.isFilter() || player.hasPermission("EpicHoppers.Filter");
             boolean canTeleport = level.isTeleport() || player.hasPermission("EpicHoppers.Teleport");
-            if (!canFilter && canTeleport)
-                i.setItem(4, perl);
-            else if (!canTeleport && canFilter)
-                i.setItem(4, filter);
-            else if (canFilter) {
-                i.setItem(3, perl);
-                i.setItem(5, filter);
+            boolean canCraft = level.getRegisteredModules().removeIf(e -> e.getName().equals("AutoCrafting"));
+            boolean canAutoSell = level.getAutoSell() != 0;
+            if (canFilter) amount ++;
+            if (canTeleport) amount ++;
+            if (canAutoSell) amount ++;
+            if (canCraft) amount ++;
+
+            Integer[] layout = layouts.get(amount);
+
+            for (int ii = 0; ii < amount; ii ++) {
+                int slot = layout[ii];
+
+                if (ii == 0) {
+                    i.setItem(slot, hook);
+                } else if (canTeleport) {
+                    i.setItem(slot, perl);
+                    canTeleport = false;
+                } else if (canFilter) {
+                    i.setItem(slot, filter);
+                    canFilter = false;
+                } else if (canCraft) {
+                    i.setItem(slot, crafting);
+                    canCraft = false;
+                } else if (canAutoSell) {
+                    i.setItem(slot, sell);
+                    canAutoSell = false;
+                }
             }
 
-            boolean canCraft = level.getRegisteredModules().removeIf(e -> e.getName().equals("AutoCrafting"));
-            if (!canCraft)
-                i.setItem(22, hook);
-            else if (canFilter) {
-                i.setItem(23, hook);
-                i.setItem(21, crafting);
-            }
 
             if (instance.getConfig().getBoolean("Main.Upgrade With XP") && player.hasPermission("EpicHoppers.Upgrade.XP") && level.getCostExperience() != -1) {
                 i.setItem(11, itemXP);
@@ -635,6 +666,14 @@ public class EHopper implements Hopper {
     @Override
     public TeleportTrigger getTeleportTrigger() {
         return teleportTrigger;
+    }
+
+    public int getAutoSellTimer() {
+        return autoSellTimer;
+    }
+
+    public void setAutoSellTimer(int autoSellTimer) {
+        this.autoSellTimer = autoSellTimer;
     }
 
     @Override

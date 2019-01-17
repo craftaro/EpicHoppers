@@ -20,7 +20,7 @@ public interface LevelManager {
      * @param filter Whether or not access to the filter is allowed.
      * @param teleport Whether or not teleporting through hoppers is allowed.
      */
-    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, ArrayList<Module> modules);
+    void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount,  int autoSell, ArrayList<Module> modules);
 
     /**
      * Get {@link Level} by corresponding integer value.

@@ -51,6 +51,8 @@ public interface Level {
     boolean isTeleport();
 
 
+    int getAutoSell();
+
     int getLinkAmount();
 
     /**
