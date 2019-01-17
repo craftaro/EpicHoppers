@@ -58,8 +58,8 @@ public class ModuleAutoSell implements Module {
                     for (ItemStack itemStack : hopperBlock.getInventory().getContents()) {
                         if (itemStack.getType() == material) {
                             econ.depositPlayer(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
+                            hopperBlock.getInventory().removeItem(itemStack);
                         }
-                        hopperBlock.getInventory().removeItem(itemStack);
                     }
                 } catch (Exception ignored) {}
             }
