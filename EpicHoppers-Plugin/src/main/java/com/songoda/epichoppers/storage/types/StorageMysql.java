@@ -17,8 +17,8 @@ import java.util.Map;
 
 public class StorageMysql extends Storage {
 
-    private MySQLDatabase database;
     private static List<String> toSave = new ArrayList<>();
+    private MySQLDatabase database;
 
     public StorageMysql(EpicHoppersPlugin instance) {
         super(instance);

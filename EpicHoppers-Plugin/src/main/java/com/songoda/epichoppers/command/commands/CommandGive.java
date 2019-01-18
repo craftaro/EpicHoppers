@@ -24,30 +24,30 @@ public class CommandGive extends AbstractCommand {
             return ReturnType.FAILURE;
         }
 
-            Level level = instance.getLevelManager().getLowestLevel();
-            Player player;
-            if (args.length != 1 && Bukkit.getPlayer(args[1]) == null) {
-                sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cThat player does not exist or is currently offline."));
+        Level level = instance.getLevelManager().getLowestLevel();
+        Player player;
+        if (args.length != 1 && Bukkit.getPlayer(args[1]) == null) {
+            sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cThat player does not exist or is currently offline."));
+            return ReturnType.FAILURE;
+        } else if (args.length == 1) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cYou need to be a player to give a hopper to yourself."));
                 return ReturnType.FAILURE;
-            } else if (args.length == 1) {
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cYou need to be a player to give a hopper to yourself."));
-                    return ReturnType.FAILURE;
-                }
-                player = (Player) sender;
-            } else {
-                player = Bukkit.getPlayer(args[1]);
             }
+            player = (Player) sender;
+        } else {
+            player = Bukkit.getPlayer(args[1]);
+        }
 
 
-            if (args.length >= 3 && !instance.getLevelManager().isLevel(Integer.parseInt(args[2]))) {
-                sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cNot a valid level... The current valid levels are: &4" + instance.getLevelManager().getLowestLevel().getLevel() + "-" + instance.getLevelManager().getHighestLevel().getLevel() + "&c."));
-                return ReturnType.FAILURE;
-            } else if (args.length != 1) {
-                level = instance.getLevelManager().getLevel(Integer.parseInt(args[2]));
-            }
-            player.getInventory().addItem(instance.newHopperItem(level));
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("command.give.success", level.getLevel()));
+        if (args.length >= 3 && !instance.getLevelManager().isLevel(Integer.parseInt(args[2]))) {
+            sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cNot a valid level... The current valid levels are: &4" + instance.getLevelManager().getLowestLevel().getLevel() + "-" + instance.getLevelManager().getHighestLevel().getLevel() + "&c."));
+            return ReturnType.FAILURE;
+        } else if (args.length != 1) {
+            level = instance.getLevelManager().getLevel(Integer.parseInt(args[2]));
+        }
+        player.getInventory().addItem(instance.newHopperItem(level));
+        player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("command.give.success", level.getLevel()));
 
         return ReturnType.SUCCESS;
     }

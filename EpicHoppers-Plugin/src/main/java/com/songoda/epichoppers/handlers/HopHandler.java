@@ -86,9 +86,9 @@ public class HopHandler {
 
                     for (Entity entity : nearbyEntite) {
                         if (entity.getType() == EntityType.MINECART_HOPPER)
-                            override = ((HopperMinecart)entity).getInventory();
+                            override = ((HopperMinecart) entity).getInventory();
                         else if (entity.getType() == EntityType.MINECART_CHEST)
-                            override = ((StorageMinecart)entity).getInventory();
+                            override = ((StorageMinecart) entity).getInventory();
                     }
 
                     if (linked.isEmpty()) continue;
@@ -110,7 +110,7 @@ public class HopHandler {
                             hopper.clearLinkedBlocks();
                             continue;
                         }
-                        destinationInventory = ((InventoryHolder)state).getInventory();
+                        destinationInventory = ((InventoryHolder) state).getInventory();
                     }
 
                     BoostData boostData = instance.getBoostManager().getBoost(hopper.getPlacedBy());
@@ -170,7 +170,7 @@ public class HopHandler {
                 hopper.getFilter().setEndPoint(null);
                 return;
             }
-            Inventory destinationInventory = ((InventoryHolder)state).getInventory();
+            Inventory destinationInventory = ((InventoryHolder) state).getInventory();
 
             addItem(hopperState, hopper, destinationInventory, destinationBlock, item, amt, place);
         } catch (Exception e) {

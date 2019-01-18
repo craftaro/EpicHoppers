@@ -3,17 +3,16 @@ package com.songoda.epichoppers.storage;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.Serializers;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class StorageItem {
 
-    private String key = null;
-
     private final Object object;
+    private String key = null;
 
     public StorageItem(Object object) {
         this.object = object;
@@ -50,17 +49,17 @@ public class StorageItem {
 
     public String asString() {
         if (object == null) return null;
-        return (String)object;
+        return (String) object;
     }
 
     public boolean asBoolean() {
         if (object == null) return false;
-        return (boolean)object;
+        return (boolean) object;
     }
 
     public int asInt() {
         if (object == null) return 0;
-        return (int)object;
+        return (int) object;
     }
 
     public Object asObject() {
@@ -71,7 +70,7 @@ public class StorageItem {
         List<ItemStack> list = new ArrayList<>();
         if (object == null) return list;
         String obj = (String) object;
-        if (obj.equals("[]"))return list;
+        if (obj.equals("[]")) return list;
         List<String> sers = new ArrayList<>(Arrays.asList(obj.split(";;")));
         for (String ser : sers) {
             list.add(Serializers.deserialize(ser));

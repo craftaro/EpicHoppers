@@ -8,9 +8,7 @@ import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
@@ -71,7 +69,7 @@ public class TeleportHandler {
 
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             Hopper lastHopper = hopper;
-            for (int i = 0; i < 15; i ++) {
+            for (int i = 0; i < 15; i++) {
                 boolean empty = lastHopper.getLinkedBlocks().isEmpty();
                 if (empty && i == 0) {
                     if (teleportFrom.containsKey(hopper.getLocation()))
@@ -101,6 +99,6 @@ public class TeleportHandler {
         player.teleport(location);
 
         if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
-            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10,10);
+            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
     }
 }

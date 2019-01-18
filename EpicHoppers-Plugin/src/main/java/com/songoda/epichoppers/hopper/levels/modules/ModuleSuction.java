@@ -6,7 +6,6 @@ import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
@@ -20,11 +19,11 @@ import java.util.Collection;
 import java.util.List;
 
 public class ModuleSuction implements Module {
-    
+
     private final int amount;
 
     private boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
-    
+
     public ModuleSuction(int amount) {
         this.amount = amount;
     }
@@ -59,7 +58,7 @@ public class ModuleSuction implements Module {
                 continue;
 
             if (wildStacker)
-                hopItem.setAmount(WildStackerAPI.getItemAmount((Item)entity));
+                hopItem.setAmount(WildStackerAPI.getItemAmount((Item) entity));
 
             ItemStack item = ((Item) entity).getItemStack();
             if (item == null) continue;
@@ -68,10 +67,10 @@ public class ModuleSuction implements Module {
             }
             ((Item) entity).setPickupDelay(10);
             entity.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
-                float xx = (float) (0 + (Math.random() * .1));
-                float yy = (float) (0 + (Math.random() * .1));
-                float zz = (float) (0 + (Math.random() * .1));
-                entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
+            float xx = (float) (0 + (Math.random() * .1));
+            float yy = (float) (0 + (Math.random() * .1));
+            float zz = (float) (0 + (Math.random() * .1));
+            entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
 
             for (ItemStack itemStack : hopperBlock.getInventory().addItem(hopItem).values()) {
                 entity.getWorld().dropItemNaturally(entity.getLocation(), itemStack);

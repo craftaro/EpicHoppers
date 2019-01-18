@@ -23,18 +23,18 @@ public class MySQLDatabase {
             //ToDo: This is sloppy
             connection.createStatement().execute(
                     "CREATE TABLE IF NOT EXISTS `" + instance.getConfig().getString("Database.Prefix") + "sync` (\n" +
-                    "\t`location` TEXT NULL,\n" +
-                    "\t`level` INT NULL,\n" +
-                    "\t`block` TEXT NULL,\n" +
-                    "\t`placedby` TEXT NULL,\n" +
-                    "\t`player` TEXT NULL,\n" +
-                    "\t`teleporttrigger` TEXT NULL,\n" +
-                    "\t`autocrafting` TEXT NULL,\n" +
-                    "\t`whitelist` TEXT NULL,\n" +
-                    "\t`blacklist` TEXT NULL,\n" +
-                    "\t`void` TEXT NULL,\n" +
-                    "\t`black` TEXT NULL\n" +
-                    ")");
+                            "\t`location` TEXT NULL,\n" +
+                            "\t`level` INT NULL,\n" +
+                            "\t`block` TEXT NULL,\n" +
+                            "\t`placedby` TEXT NULL,\n" +
+                            "\t`player` TEXT NULL,\n" +
+                            "\t`teleporttrigger` TEXT NULL,\n" +
+                            "\t`autocrafting` TEXT NULL,\n" +
+                            "\t`whitelist` TEXT NULL,\n" +
+                            "\t`blacklist` TEXT NULL,\n" +
+                            "\t`void` TEXT NULL,\n" +
+                            "\t`black` TEXT NULL\n" +
+                            ")");
 
             connection.createStatement().execute("CREATE TABLE IF NOT EXISTS `" + instance.getConfig().getString("Database.Prefix") + "boosts` (\n" +
                     "\t`endtime` TEXT NULL,\n" +

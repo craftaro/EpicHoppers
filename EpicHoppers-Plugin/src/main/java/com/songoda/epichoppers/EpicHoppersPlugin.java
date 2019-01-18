@@ -115,7 +115,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         EpicHoppersAPI.setImplementation(this);
 
         console.sendMessage(Methods.formatText("&a============================="));
-        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3&7!"));
+        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3&7!"));
         console.sendMessage(Methods.formatText("&7Action: &aEnabling&7..."));
 
         settingsManager = new SettingsManager(this);
@@ -211,7 +211,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         new HopHandler(this);
         teleportHandler = new TeleportHandler(this);
 
-        int timeout = getConfig().getInt("Main.Auto Save Interval In Seconds")* 60 * 20;
+        int timeout = getConfig().getInt("Main.Auto Save Interval In Seconds") * 60 * 20;
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, timeout, timeout);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
@@ -233,9 +233,12 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         if (pluginManager.isPluginEnabled("Kingdoms")) this.register(HookKingdoms::new);
         if (pluginManager.isPluginEnabled("PlotSquared")) this.register(HookPlotSquared::new);
         if (pluginManager.isPluginEnabled("RedProtect")) this.register(HookRedProtect::new);
-        if (pluginManager.isPluginEnabled("Towny")) townyHook = (ClaimableProtectionPluginHook)this.register(HookTowny::new);
-        if (pluginManager.isPluginEnabled("USkyBlock")) uSkyblockHook = (ClaimableProtectionPluginHook)this.register(HookUSkyBlock::new);
-        if (pluginManager.isPluginEnabled("SkyBlock")) skyBlockEarhHook = (ClaimableProtectionPluginHook)this.register(HookSkyBlockEarth::new);
+        if (pluginManager.isPluginEnabled("Towny"))
+            townyHook = (ClaimableProtectionPluginHook) this.register(HookTowny::new);
+        if (pluginManager.isPluginEnabled("USkyBlock"))
+            uSkyblockHook = (ClaimableProtectionPluginHook) this.register(HookUSkyBlock::new);
+        if (pluginManager.isPluginEnabled("SkyBlock"))
+            skyBlockEarhHook = (ClaimableProtectionPluginHook) this.register(HookSkyBlockEarth::new);
         if (pluginManager.isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
 
         console.sendMessage(Methods.formatText("&a============================="));
@@ -246,7 +249,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         this.storage.closeConnection();
         this.protectionHooks.clear();
         console.sendMessage(Methods.formatText("&a============================="));
-        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Brianna <3!"));
+        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3!"));
         console.sendMessage(Methods.formatText("&7Action: &cDisabling&7..."));
         console.sendMessage(Methods.formatText("&a============================="));
     }
@@ -271,7 +274,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             for (Object o : files) {
                 JSONObject file = (JSONObject) o;
 
-                switch ((String)file.get("type")) {
+                switch ((String) file.get("type")) {
                     case "locale":
                         InputStream in = new URL((String) file.get("link")).openStream();
                         Locale.saveDefaultLocale(in, (String) file.get("name"));
@@ -292,6 +295,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             this.storage = new StorageYaml(this);
         }
     }
+
     /*
      * Saves registered hopper to file.
      */

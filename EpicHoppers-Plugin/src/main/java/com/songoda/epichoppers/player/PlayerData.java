@@ -11,8 +11,6 @@ public class PlayerData {
 
     private Hopper lastHopper = null;
 
-    private MenuType inMenu = MenuType.NOT_IN;
-
     private SyncType syncType = null; // Null means off.
 
     private Date lastTeleport = null; // Null means off.
@@ -21,24 +19,12 @@ public class PlayerData {
         this.playerUUID = playerUUID;
     }
 
-    public UUID getPlayerUUID() {
-        return playerUUID;
-    }
-
     public Hopper getLastHopper() {
         return lastHopper;
     }
 
     public void setLastHopper(Hopper lastHopper) {
         this.lastHopper = lastHopper;
-    }
-
-    public MenuType getInMenu() {
-        return inMenu;
-    }
-
-    public void setInMenu(MenuType inMenu) {
-        this.inMenu = inMenu;
     }
 
     public SyncType getSyncType() {

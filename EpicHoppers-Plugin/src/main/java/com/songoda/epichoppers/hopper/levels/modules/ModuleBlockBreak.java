@@ -15,9 +15,8 @@ import java.util.Map;
 
 public class ModuleBlockBreak implements Module {
 
-    private Map<Block, Integer> blockTick = new HashMap<>();
-
     private final int amount;
+    private Map<Block, Integer> blockTick = new HashMap<>();
 
     public ModuleBlockBreak(int amount) {
         this.amount = amount;
@@ -42,16 +41,16 @@ public class ModuleBlockBreak implements Module {
         if (tick < amount) return;
         Block above = block.getRelative(0, 1, 0);
         if (above.getType() == Material.WATER || above.getType() == Material.LAVA) return;
-        
+
         if (above.getType() != Material.AIR && above.getType() != Material.HOPPER && !EpicHoppersPlugin.getInstance().getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
             above.getWorld().playSound(above.getLocation(), Sound.BLOCK_STONE_BREAK, 1F, 1F);
             Location locationAbove = above.getLocation();
             locationAbove.add(.5, .5, .5);
 
-                float xx = (float) (0 + (Math.random() * .5));
-                float yy = (float) (0 + (Math.random() * .5));
-                float zz = (float) (0 + (Math.random() * .5));
-                above.getWorld().spawnParticle(Particle.valueOf(EpicHoppersPlugin.getInstance().getConfig().getString("Main.BlockBreak Particle Type")), locationAbove, 15, xx, yy, zz);
+            float xx = (float) (0 + (Math.random() * .5));
+            float yy = (float) (0 + (Math.random() * .5));
+            float zz = (float) (0 + (Math.random() * .5));
+            above.getWorld().spawnParticle(Particle.valueOf(EpicHoppersPlugin.getInstance().getConfig().getString("Main.BlockBreak Particle Type")), locationAbove, 15, xx, yy, zz);
 
             above.breakNaturally();
         }

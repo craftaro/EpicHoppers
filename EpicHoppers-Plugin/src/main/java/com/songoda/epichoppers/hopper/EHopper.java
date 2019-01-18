@@ -1,12 +1,12 @@
 package com.songoda.epichoppers.hopper;
 
 import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.api.CostType;
 import com.songoda.epichoppers.api.hopper.Filter;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.api.hopper.levels.Level;
-import com.songoda.epichoppers.boost.BoostData;
-import com.songoda.epichoppers.player.MenuType;
+import com.songoda.epichoppers.gui.GUIHoppperOverview;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
@@ -14,12 +14,11 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -60,428 +59,28 @@ public class EHopper implements Hopper {
 
     public void overview(Player player) {
         try {
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
-            if (!player.hasPermission("epichoppers.overview")) return;
-
             if (lastPlayer != null && lastPlayer != player.getUniqueId()) {
                 Bukkit.getPlayer(lastPlayer).closeInventory();
             }
-
             if (placedBy == null) placedBy = player.getUniqueId();
 
-            instance.getPlayerDataManager().getPlayerData(player).setLastHopper(this);
-
-            Level nextLevel = instance.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? instance.getLevelManager().getLevel(level.getLevel() + 1) : null;
-
-            Inventory i = Bukkit.createInventory(null, 27, Methods.formatName(level.getLevel(), false));
-
-            ItemStack perl = new ItemStack(Material.ENDER_PEARL, 1);
-            ItemMeta perlmeta = perl.getItemMeta();
-            perlmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.perltitle"));
-            ArrayList<String> loreperl = new ArrayList<>();
-            String[] parts = instance.getLocale().getMessage("interface.hopper.perllore2", teleportTrigger == TeleportTrigger.DISABLED ? instance.getLocale().getMessage("general.word.disabled") : teleportTrigger.name()).split("\\|");
-            for (String line : parts) {
-                loreperl.add(Methods.formatText(line));
-            }
-            perlmeta.setLore(loreperl);
-            perl.setItemMeta(perlmeta);
-
-            ItemStack filter = new ItemStack(Material.COMPARATOR, 1);
-            ItemMeta filtermeta = filter.getItemMeta();
-            filtermeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.filtertitle"));
-            ArrayList<String> lorefilter = new ArrayList<>();
-            parts = instance.getLocale().getMessage("interface.hopper.filterlore").split("\\|");
-            for (String line : parts) {
-                lorefilter.add(Methods.formatText(line));
-            }
-            filtermeta.setLore(lorefilter);
-            filter.setItemMeta(filtermeta);
-
-            ItemStack crafting = new ItemStack(Material.CRAFTING_TABLE, 1);
-            ItemMeta craftingmeta = crafting.getItemMeta();
-            craftingmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.craftingtitle"));
-            ArrayList<String> lorecrafting = new ArrayList<>();
-            parts = instance.getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
-            for (String line : parts) {
-                lorecrafting.add(Methods.formatText(line));
-            }
-            craftingmeta.setLore(lorecrafting);
-            crafting.setItemMeta(craftingmeta);
-
-            ItemStack sell = new ItemStack(Material.SUNFLOWER, 1);
-            ItemMeta sellmeta = sell.getItemMeta();
-            sellmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.selltitle"));
-            ArrayList<String> loresell = new ArrayList<>();
-            parts = instance.getLocale().getMessage("interface.hopper.selllore", autoSellTimer == -9999 ? "\u221E" : Math.floor(autoSellTimer / 20)).split("\\|");
-            for (String line : parts) {
-                loresell.add(Methods.formatText(line));
-            }
-            sellmeta.setLore(loresell);
-            sell.setItemMeta(sellmeta);
-
-
-            ItemStack item = new ItemStack(Material.HOPPER, 1);
-            ItemMeta itemmeta = item.getItemMeta();
-            itemmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.currentlevel", level.getLevel()));
-            List<String> lore = this.level.getDescription();
-            if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")) {
-                lore.add("");
-                if (nextLevel == null) lore.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
-                else {
-                    lore.add(instance.getLocale().getMessage("interface.hopper.nextlevel", nextLevel.getLevel()));
-                    lore.addAll(nextLevel.getDescription());
-                }
-            }
-
-            BoostData boostData = instance.getBoostManager().getBoost(placedBy);
-            if (boostData != null) {
-                parts = instance.getLocale().getMessage("interface.hopper.boostedstats", Integer.toString(boostData.getMultiplier()), Methods.makeReadable(boostData.getEndTime() - System.currentTimeMillis())).split("\\|");
-                lore.add("");
-                for (String line : parts)
-                    lore.add(Methods.formatText(line));
-            }
-
-            itemmeta.setLore(lore);
-            item.setItemMeta(itemmeta);
-
-            ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
-            ItemMeta hookmeta = hook.getItemMeta();
-            hookmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.synchopper"));
-            ArrayList<String> lorehook = new ArrayList<>();
-            parts = instance.getLocale().getMessage("interface.hopper.synclore").split("\\|");
-            for (String line : parts) {
-                lorehook.add(Methods.formatText(line));
-            }
-            hookmeta.setLore(lorehook);
-            hook.setItemMeta(hookmeta);
-
-            ItemStack itemXP = new ItemStack(Material.valueOf(instance.getConfig().getString("Interfaces.XP Icon")), 1);
-            ItemMeta itemmetaXP = itemXP.getItemMeta();
-            itemmetaXP.setDisplayName(instance.getLocale().getMessage("interface.hopper.upgradewithxp"));
-            ArrayList<String> loreXP = new ArrayList<>();
-            if (nextLevel != null)
-                loreXP.add(instance.getLocale().getMessage("interface.hopper.upgradewithxplore", nextLevel.getCostExperience()));
-            else
-                loreXP.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
-            itemmetaXP.setLore(loreXP);
-            itemXP.setItemMeta(itemmetaXP);
-
-            ItemStack itemECO = new ItemStack(Material.valueOf(instance.getConfig().getString("Interfaces.Economy Icon")), 1);
-            ItemMeta itemmetaECO = itemECO.getItemMeta();
-            itemmetaECO.setDisplayName(instance.getLocale().getMessage("interface.hopper.upgradewitheconomy"));
-            ArrayList<String> loreECO = new ArrayList<>();
-            if (nextLevel != null)
-                loreECO.add(instance.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Methods.formatEconomy(nextLevel.getCostEconomy())));
-            else
-                loreECO.add(instance.getLocale().getMessage("interface.hopper.alreadymaxed"));
-            itemmetaECO.setLore(loreECO);
-            itemECO.setItemMeta(itemmetaECO);
-
-            int nu = 0;
-            while (nu != 27) {
-                i.setItem(nu, Methods.getGlass());
-                nu++;
-            }
-
-            Map<Integer, Integer[]> layouts =  new HashMap<>();
-            layouts.put(1, new Integer[]{22});
-            layouts.put(2, new Integer[]{22, 4});
-            layouts.put(3, new Integer[]{22, 3, 5});
-            layouts.put(4, new Integer[]{23, 3, 5, 21});
-            layouts.put(5, new Integer[]{23, 3, 5, 21, 22});
-
-            int amount = 1;
-
-            boolean canFilter = level.isFilter() || player.hasPermission("EpicHoppers.Filter");
-            boolean canTeleport = level.isTeleport() || player.hasPermission("EpicHoppers.Teleport");
-            boolean canCraft = level.getRegisteredModules().removeIf(e -> e.getName().equals("AutoCrafting"));
-            boolean canAutoSell = level.getAutoSell() != 0;
-            if (canFilter) amount ++;
-            if (canTeleport) amount ++;
-            if (canAutoSell) amount ++;
-            if (canCraft) amount ++;
-
-            Integer[] layout = layouts.get(amount);
-
-            for (int ii = 0; ii < amount; ii ++) {
-                int slot = layout[ii];
-
-                if (ii == 0) {
-                    i.setItem(slot, hook);
-                } else if (canTeleport) {
-                    i.setItem(slot, perl);
-                    canTeleport = false;
-                } else if (canFilter) {
-                    i.setItem(slot, filter);
-                    canFilter = false;
-                } else if (canCraft) {
-                    i.setItem(slot, crafting);
-                    canCraft = false;
-                } else if (canAutoSell) {
-                    i.setItem(slot, sell);
-                    canAutoSell = false;
-                }
-            }
-
-
-            if (instance.getConfig().getBoolean("Main.Upgrade With XP") && player.hasPermission("EpicHoppers.Upgrade.XP") && level.getCostExperience() != -1) {
-                i.setItem(11, itemXP);
-            }
-
-            i.setItem(13, item);
-
-            if (instance.getConfig().getBoolean("Main.Upgrade With Economy") && player.hasPermission("EpicHoppers.Upgrade.ECO") && level.getCostEconomy() != -1) {
-                i.setItem(15, itemECO);
-            }
-
-            i.setItem(0, Methods.getBackgroundGlass(true));
-            i.setItem(1, Methods.getBackgroundGlass(true));
-            i.setItem(2, Methods.getBackgroundGlass(false));
-            i.setItem(6, Methods.getBackgroundGlass(false));
-            i.setItem(7, Methods.getBackgroundGlass(true));
-            i.setItem(8, Methods.getBackgroundGlass(true));
-            i.setItem(9, Methods.getBackgroundGlass(true));
-            i.setItem(10, Methods.getBackgroundGlass(false));
-            i.setItem(16, Methods.getBackgroundGlass(false));
-            i.setItem(17, Methods.getBackgroundGlass(true));
-            i.setItem(18, Methods.getBackgroundGlass(true));
-            i.setItem(19, Methods.getBackgroundGlass(true));
-            i.setItem(20, Methods.getBackgroundGlass(false));
-            i.setItem(24, Methods.getBackgroundGlass(false));
-            i.setItem(25, Methods.getBackgroundGlass(true));
-            i.setItem(26, Methods.getBackgroundGlass(true));
-
-            player.openInventory(i);
-            instance.getPlayerDataManager().getPlayerData(player).setInMenu(MenuType.OVERVIEW);
-            lastPlayer = player.getUniqueId();
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-    }
-
-    public void crafting(Player player) {
-        try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
-            instance.getPlayerDataManager().getPlayerData(player).setLastHopper(this);
-
-            Inventory i = Bukkit.createInventory(null, 27, Methods.formatText(Methods.formatName(level.getLevel(), false) + " &8-&f Crafting"));
-
-            int nu = 0;
-            while (nu != 27) {
-                i.setItem(nu, Methods.getGlass());
-                nu++;
-            }
-
-            i.setItem(0, Methods.getBackgroundGlass(true));
-            i.setItem(1, Methods.getBackgroundGlass(true));
-            i.setItem(2, Methods.getBackgroundGlass(false));
-            i.setItem(6, Methods.getBackgroundGlass(false));
-            i.setItem(7, Methods.getBackgroundGlass(true));
-            i.setItem(8, Methods.getBackgroundGlass(true));
-            i.setItem(9, Methods.getBackgroundGlass(true));
-            i.setItem(10, Methods.getBackgroundGlass(false));
-            i.setItem(16, Methods.getBackgroundGlass(false));
-            i.setItem(17, Methods.getBackgroundGlass(true));
-            i.setItem(18, Methods.getBackgroundGlass(true));
-            i.setItem(19, Methods.getBackgroundGlass(true));
-            i.setItem(20, Methods.getBackgroundGlass(false));
-            i.setItem(24, Methods.getBackgroundGlass(false));
-            i.setItem(25, Methods.getBackgroundGlass(true));
-            i.setItem(26, Methods.getBackgroundGlass(true));
-
-            i.setItem(13, new ItemStack(autoCrafting == null ? Material.AIR : autoCrafting));
-
-            player.openInventory(i);
-            instance.getPlayerDataManager().getPlayerData(player).setInMenu(MenuType.CRAFTING);
-            lastPlayer = player.getUniqueId();
+            if (!player.hasPermission("epichoppers.overview")) return;
+            new GUIHoppperOverview(instance, this, player);
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    public void filter(Player player) {
-        try {
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
-
-            Inventory i = Bukkit.createInventory(null, 54, Methods.formatText(Methods.formatName(level.getLevel(), false) + " &8-&f Filter"));
-
-            i.setItem(2, Methods.getBackgroundGlass(true));
-            i.setItem(3, Methods.getBackgroundGlass(true));
-            i.setItem(4, Methods.getBackgroundGlass(true));
-            i.setItem(5, Methods.getBackgroundGlass(false));
-            i.setItem(6, Methods.getBackgroundGlass(false));
-
-            i.setItem(11, Methods.getBackgroundGlass(true));
-            i.setItem(15, Methods.getBackgroundGlass(false));
-
-            i.setItem(20, Methods.getBackgroundGlass(true));
-            i.setItem(24, Methods.getBackgroundGlass(true));
-
-            i.setItem(29, Methods.getBackgroundGlass(true));
-            i.setItem(33, Methods.getBackgroundGlass(true));
-
-            i.setItem(38, Methods.getBackgroundGlass(false));
-            i.setItem(42, Methods.getBackgroundGlass(true));
-
-            i.setItem(47, Methods.getBackgroundGlass(false));
-            i.setItem(48, Methods.getBackgroundGlass(false));
-            i.setItem(49, Methods.getBackgroundGlass(true));
-            i.setItem(50, Methods.getBackgroundGlass(true));
-            i.setItem(51, Methods.getBackgroundGlass(true));
-
-            i.setItem(12, Methods.getGlass());
-            i.setItem(14, Methods.getGlass());
-            i.setItem(21, Methods.getGlass());
-            i.setItem(22, Methods.getGlass());
-            i.setItem(23, Methods.getGlass());
-            i.setItem(30, Methods.getGlass());
-            i.setItem(31, Methods.getGlass());
-            i.setItem(32, Methods.getGlass());
-            i.setItem(39, Methods.getGlass());
-            i.setItem(41, Methods.getGlass());
-
-            ItemStack it = new ItemStack(Material.WHITE_STAINED_GLASS_PANE, 1);
-            ItemMeta itm = it.getItemMeta();
-            itm.setDisplayName(instance.getLocale().getMessage("interface.filter.whitelist"));
-            it.setItemMeta(itm);
-            int[] whiteSlots = {0, 1, 9, 10, 18, 19};
-            for (int nu : whiteSlots) {
-                i.setItem(nu, it);
-            }
-
-            int num = 0;
-            for (ItemStack m  : filter.getWhiteList()) {
-                if (m != null) {
-                    i.setItem(whiteSlots[num], new ItemStack(m));
-                    num++;
-                }
-            }
-
-            it = new ItemStack(Material.BLACK_STAINED_GLASS_PANE, 1);
-            itm = it.getItemMeta();
-            itm.setDisplayName(instance.getLocale().getMessage("interface.filter.blacklist"));
-            it.setItemMeta(itm);
-            int[] blackSlots = {27, 28, 36, 37, 45, 46};
-            for (int nu : blackSlots) {
-                i.setItem(nu, it);
-            }
-
-            num = 0;
-            for (ItemStack m : filter.getBlackList()) {
-                if (m != null) {
-                    i.setItem(blackSlots[num], new ItemStack(m));
-                    num++;
-                }
-            }
-
-            it = new ItemStack(Material.BARRIER);
-            itm = it.getItemMeta();
-            itm.setDisplayName(instance.getLocale().getMessage("interface.filter.void"));
-            it.setItemMeta(itm);
-            int[] avoid = {7, 8, 16, 17, 25, 26, 34, 35, 43, 44, 52, 53};
-            for (int nu : avoid) {
-                i.setItem(nu, it);
-            }
-
-            num = 0;
-            for (ItemStack m : filter.getVoidList()) {
-                if (m != null) {
-                    i.setItem(avoid[num], new ItemStack(m));
-                    num++;
-                }
-
-            }
-
-            ItemStack itemInfo = new ItemStack(Material.PAPER, 1);
-            ItemMeta itemmetaInfo = itemInfo.getItemMeta();
-            itemmetaInfo.setDisplayName(instance.getLocale().getMessage("interface.filter.infotitle"));
-            ArrayList<String> loreInfo = new ArrayList<>();
-            String[] parts = instance.getLocale().getMessage("interface.filter.infolore").split("\\|");
-            for (String line : parts) {
-                loreInfo.add(Methods.formatText(line));
-            }
-            itemmetaInfo.setLore(loreInfo);
-            itemInfo.setItemMeta(itemmetaInfo);
-
-            i.setItem(13, itemInfo);
-
-
-            ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
-            ItemMeta hookmeta = hook.getItemMeta();
-            hookmeta.setDisplayName(instance.getLocale().getMessage("interface.hopper.rejectsync"));
-            ArrayList<String> lorehook = new ArrayList<>();
-            parts = instance.getLocale().getMessage("interface.hopper.synclore").split("\\|");
-            for (String line : parts) {
-                lorehook.add(Methods.formatText(line));
-            }
-            hookmeta.setLore(lorehook);
-            hook.setItemMeta(hookmeta);
-            i.setItem(40, hook);
-
-            player.openInventory(i);
-            instance.getPlayerDataManager().getPlayerData(player).setInMenu(MenuType.FILTER);
-            lastPlayer = player.getUniqueId();
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-    }
-
-    public void compile(Player p) {
-        try {
-            ItemStack[] items2 = p.getOpenInventory().getTopInventory().getContents();
-
-            List<ItemStack> owhite = new ArrayList<>();
-            List<ItemStack> oblack = new ArrayList<>();
-            List<ItemStack> ovoid = new ArrayList<>();
-
-            int[] awhite = {0, 1, 9, 10, 18, 19};
-            int[] ablack = {27, 28, 36, 37, 45, 46};
-            int[] avoid = {7, 8, 16, 17, 25, 26, 34, 35, 43, 44, 52, 53};
-
-            int num = 0;
-            for (ItemStack item : items2) {
-                for (int aa : awhite) {
-                    if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS") && items2[num].getType() != Material.AIR)
-                            owhite.add(items2[num]);
-                    }
-                }
-                for (int aa : ablack) {
-                    if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().name().contains("STAINED_GLASS") && items2[num].getType() != Material.AIR)
-                            oblack.add(items2[num]);
-                    }
-                }
-                for (int aa : avoid) {
-                    if (aa == num) {
-                        if (items2[num] != null && !items2[num].getType().equals(Material.BARRIER) && items2[num].getType() != Material.AIR)
-                            ovoid.add(items2[num]);
-                    }
-                }
-                num++;
-            }
-            filter.setWhiteList(owhite);
-            filter.setBlackList(oblack);
-            filter.setVoidList(ovoid);
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-    }
-
-    public void upgrade(String type, Player player) {
+    public void upgrade(Player player, CostType type) {
         try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             if (instance.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) {
 
                 Level level = instance.getLevelManager().getLevel(this.level.getLevel() + 1);
-                int cost;
-                if (type.equals("XP")) {
-                    cost = level.getCostExperience();
-                } else {
-                    cost = level.getCostEconomy();
-                }
+                int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
 
-                if (type.equals("ECO")) {
+                if (type == CostType.ECONOMY) {
                     if (instance.getServer().getPluginManager().getPlugin("Vault") != null) {
                         RegisteredServiceProvider<Economy> rsp = instance.getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
                         net.milkbowl.vault.economy.Economy econ = rsp.getProvider();
@@ -494,7 +93,7 @@ public class EHopper implements Hopper {
                     } else {
                         player.sendMessage("Vault is not installed.");
                     }
-                } else if (type.equals("XP")) {
+                } else if (type == CostType.EXPERIENCE) {
                     if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
                         if (player.getGameMode() != GameMode.CREATIVE) {
                             player.setLevel(player.getLevel() - cost);
@@ -589,8 +188,12 @@ public class EHopper implements Hopper {
 
             if (!filtered)
                 this.linkedBlocks.add(toLink.getLocation());
-            else
+            else {
                 this.filter.setEndPoint(toLink.getLocation());
+                player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
+                instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
+                return;
+            }
             this.lastPlayer = player.getUniqueId();
 
             if (level.getLinkAmount() > 1) {
@@ -602,6 +205,7 @@ public class EHopper implements Hopper {
                 return;
             }
             player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
+            instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
 
         } catch (Exception e) {
             Debugger.runReport(e);
@@ -668,17 +272,17 @@ public class EHopper implements Hopper {
         return teleportTrigger;
     }
 
+    @Override
+    public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
+        this.teleportTrigger = teleportTrigger;
+    }
+
     public int getAutoSellTimer() {
         return autoSellTimer;
     }
 
     public void setAutoSellTimer(int autoSellTimer) {
         this.autoSellTimer = autoSellTimer;
-    }
-
-    @Override
-    public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
-        this.teleportTrigger = teleportTrigger;
     }
 
     @Override

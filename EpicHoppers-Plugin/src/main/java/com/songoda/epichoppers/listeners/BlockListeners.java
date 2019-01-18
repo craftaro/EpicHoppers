@@ -124,7 +124,7 @@ public class BlockListeners implements Listener {
 
             for (ItemStack m : hopper.getFilter().getWhiteList()) {
                 if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(),m);
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
             }
 
             for (ItemStack m : hopper.getFilter().getBlackList()) {
@@ -133,7 +133,7 @@ public class BlockListeners implements Listener {
             }
             for (ItemStack m : hopper.getFilter().getVoidList()) {
                 if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(),m);
+                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
             }
             instance.getHopperManager().removeHopper(block.getLocation());
 

@@ -72,7 +72,7 @@ public class InteractListeners implements Listener {
             int z = location.getBlockZ() >> 4;
 
             if (location.getWorld().getChunkAt(x, z) == to) {
-                ((EHopper)hopper).reloadHopper();
+                ((EHopper) hopper).reloadHopper();
             }
         }
     }
@@ -120,8 +120,6 @@ public class InteractListeners implements Listener {
                 }
                 return;
             }
-
-            if (e.getClickedBlock().getType() == Material.BREWING_STAND) return;
 
             if (e.getClickedBlock().getState() instanceof InventoryHolder || e.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests")) {
                 Hopper hopper = playerData.getLastHopper();

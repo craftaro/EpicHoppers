@@ -2,7 +2,6 @@ package com.songoda.epichoppers.hopper;
 
 import com.songoda.epichoppers.api.hopper.Filter;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;

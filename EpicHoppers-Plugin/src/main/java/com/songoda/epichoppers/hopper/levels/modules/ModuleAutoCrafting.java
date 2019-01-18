@@ -4,7 +4,6 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.Debugger;
-import jdk.nashorn.internal.ir.Block;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.*;
@@ -45,54 +44,54 @@ public class ModuleAutoCrafting implements Module {
         if (hopper.getAutoCrafting() != null && canMove(hopperBlock.getInventory(), new ItemStack(hopper.getAutoCrafting()))) {
 
             Recipe recipe = cachedRecipes.get(hopper.getAutoCrafting());
-                if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe)) return;
-                List<ItemStack> ingredientMap = null;
-                if (recipe instanceof ShapelessRecipe) ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
-                if (recipe instanceof ShapedRecipe)
-                    ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
-                if (hopperBlock.getInventory().getSize() == 0) return;
+            if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe)) return;
+            List<ItemStack> ingredientMap = null;
+            if (recipe instanceof ShapelessRecipe) ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
+            if (recipe instanceof ShapedRecipe)
+                ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
+            if (hopperBlock.getInventory().getSize() == 0) return;
 
-                Map<Material, Integer> items = new HashMap<>();
-                for (ItemStack item : ingredientMap) {
-                    if (item == null) continue;
-                    if (!items.containsKey(item.getType())) {
-                        items.put(item.getType(), item.getAmount());
-                    } else {
-                        items.put(item.getType(), items.get(item.getType()) + 1);
-                    }
+            Map<Material, Integer> items = new HashMap<>();
+            for (ItemStack item : ingredientMap) {
+                if (item == null) continue;
+                if (!items.containsKey(item.getType())) {
+                    items.put(item.getType(), item.getAmount());
+                } else {
+                    items.put(item.getType(), items.get(item.getType()) + 1);
                 }
-
-                for (Material material : items.keySet()) {
-                    int amt = 0;
-                    ItemStack item = new ItemStack(material, items.get(material));
-                    for (ItemStack i : hopperBlock.getInventory().getContents()) {
-                        if (i == null) continue;
-                        if (i.getType() != material) continue;
-                        amt += i.getAmount();
-                    }
-
-                    if (amt < item.getAmount()) {
-                        return;
-                    }
-                }
-                main2:
-                for (Material material : items.keySet()) {
-                    int amtRemoved = 0;
-                    ItemStack toRemove = new ItemStack(material, items.get(material));
-                    for (ItemStack i : hopperBlock.getInventory().getContents()) {
-                        if (i ==  null || i.getType() != material) continue;
-                        if (toRemove.getAmount() - amtRemoved <= i.getAmount()) {
-                            toRemove.setAmount(toRemove.getAmount() - amtRemoved);
-                            hopperBlock.getInventory().removeItem(toRemove);
-                            continue main2;
-                        } else {
-                            amtRemoved += i.getAmount();
-                            hopperBlock.getInventory().removeItem(i);
-                        }
-                    }
-                }
-                hopperBlock.getInventory().addItem(recipe.getResult());
             }
+
+            for (Material material : items.keySet()) {
+                int amt = 0;
+                ItemStack item = new ItemStack(material, items.get(material));
+                for (ItemStack i : hopperBlock.getInventory().getContents()) {
+                    if (i == null) continue;
+                    if (i.getType() != material) continue;
+                    amt += i.getAmount();
+                }
+
+                if (amt < item.getAmount()) {
+                    return;
+                }
+            }
+            main2:
+            for (Material material : items.keySet()) {
+                int amtRemoved = 0;
+                ItemStack toRemove = new ItemStack(material, items.get(material));
+                for (ItemStack i : hopperBlock.getInventory().getContents()) {
+                    if (i == null || i.getType() != material) continue;
+                    if (toRemove.getAmount() - amtRemoved <= i.getAmount()) {
+                        toRemove.setAmount(toRemove.getAmount() - amtRemoved);
+                        hopperBlock.getInventory().removeItem(toRemove);
+                        continue main2;
+                    } else {
+                        amtRemoved += i.getAmount();
+                        hopperBlock.getInventory().removeItem(i);
+                    }
+                }
+            }
+            hopperBlock.getInventory().addItem(recipe.getResult());
+        }
 
     }
 

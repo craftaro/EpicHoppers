@@ -15,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -23,21 +22,16 @@ import java.util.regex.Pattern;
  */
 public class SettingsManager implements Listener {
 
-    private String pluginName = "EpicHoppers";
-
     private static final Pattern SETTINGS_PATTERN = Pattern.compile("(.{1,28}(?:\\s|$))|(.{0,28})", Pattern.DOTALL);
-
-    
-    private Map<Player, String> cat = new HashMap<>();
-
     private final EpicHoppersPlugin instance;
+    private String pluginName = "EpicHoppers";
+    private Map<Player, String> cat = new HashMap<>();
+    private Map<Player, String> current = new HashMap<>();
 
     public SettingsManager(EpicHoppersPlugin plugin) {
         this.instance = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
-
-    private Map<Player, String> current = new HashMap<>();
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {

@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class Methods {
 
+    private static Map<String, Location> serializeCache = new HashMap<>();
+
     public static boolean isSync(Player p) {
         try {
             if (p.getItemInHand().hasItemMeta()
@@ -97,13 +99,11 @@ public class Methods {
             location.setX(location.getX() + .5);
             location.setY(location.getY() + .5);
             location.setZ(location.getZ() + .5);
-                p.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
+            p.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
-
-
 
     /**
      * Serializes the location of the block specified.
@@ -134,8 +134,6 @@ public class Methods {
         str = str.replace(".0", "").replace("/", "");
         return str;
     }
-
-    private static Map<String, Location> serializeCache = new HashMap<>();
 
     /**
      * Deserializes a location from the string.

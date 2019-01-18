@@ -21,48 +21,48 @@ public class CommandBoost extends AbstractCommand {
         if (args.length < 3) {
             return ReturnType.SYNTAX_ERROR;
         }
-            if (Bukkit.getPlayer(args[1]) == null) {
-                sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&cThat player does not exist..."));
-                return ReturnType.FAILURE;
-            } else if (!Methods.isInt(args[2])) {
-                sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&6" + args[2] + " &7is not a number..."));
-                return ReturnType.FAILURE;
-            } else {
-                Calendar c = Calendar.getInstance();
-                Date currentDate = new Date();
-                c.setTime(currentDate);
+        if (Bukkit.getPlayer(args[1]) == null) {
+            sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&cThat player does not exist..."));
+            return ReturnType.FAILURE;
+        } else if (!Methods.isInt(args[2])) {
+            sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&6" + args[2] + " &7is not a number..."));
+            return ReturnType.FAILURE;
+        } else {
+            Calendar c = Calendar.getInstance();
+            Date currentDate = new Date();
+            c.setTime(currentDate);
 
-                String time = "&7.";
+            String time = "&7.";
 
-                if (args.length > 3) {
-                    if (args[3].contains("m:")) {
-                        String[] arr2 = (args[3]).split(":");
-                        c.add(Calendar.MINUTE, Integer.parseInt(arr2[1]));
-                        time = " &7for &6" + arr2[1] + " minutes&7.";
-                    } else if (args[3].contains("h:")) {
-                        String[] arr2 = (args[3]).split(":");
-                        c.add(Calendar.HOUR, Integer.parseInt(arr2[1]));
-                        time = " &7for &6" + arr2[1] + " hours&7.";
-                    } else if (args[3].contains("d:")) {
-                        String[] arr2 = (args[3]).split(":");
-                        c.add(Calendar.HOUR, Integer.parseInt(arr2[1]) * 24);
-                        time = " &7for &6" + arr2[1] + " days&7.";
-                    } else if (args[3].contains("y:")) {
-                        String[] arr2 = (args[3]).split(":");
-                        c.add(Calendar.YEAR, Integer.parseInt(arr2[1]));
-                        time = " &7for &6" + arr2[1] + " years&7.";
-                    } else {
-                        sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7" + args[3] + " &7is invalid."));
-                        return ReturnType.SUCCESS;
-                    }
+            if (args.length > 3) {
+                if (args[3].contains("m:")) {
+                    String[] arr2 = (args[3]).split(":");
+                    c.add(Calendar.MINUTE, Integer.parseInt(arr2[1]));
+                    time = " &7for &6" + arr2[1] + " minutes&7.";
+                } else if (args[3].contains("h:")) {
+                    String[] arr2 = (args[3]).split(":");
+                    c.add(Calendar.HOUR, Integer.parseInt(arr2[1]));
+                    time = " &7for &6" + arr2[1] + " hours&7.";
+                } else if (args[3].contains("d:")) {
+                    String[] arr2 = (args[3]).split(":");
+                    c.add(Calendar.HOUR, Integer.parseInt(arr2[1]) * 24);
+                    time = " &7for &6" + arr2[1] + " days&7.";
+                } else if (args[3].contains("y:")) {
+                    String[] arr2 = (args[3]).split(":");
+                    c.add(Calendar.YEAR, Integer.parseInt(arr2[1]));
+                    time = " &7for &6" + arr2[1] + " years&7.";
                 } else {
-                    c.add(Calendar.YEAR, 10);
+                    sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7" + args[3] + " &7is invalid."));
+                    return ReturnType.SUCCESS;
                 }
-
-                BoostData boostData = new BoostData(Integer.parseInt(args[2]), c.getTime().getTime(), Bukkit.getPlayer(args[1]).getUniqueId());
-                instance.getBoostManager().addBoostToPlayer(boostData);
-                sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName() + "'s &7hoppers transfer rates by &6" + args[2] + "x" + time));
+            } else {
+                c.add(Calendar.YEAR, 10);
             }
+
+            BoostData boostData = new BoostData(Integer.parseInt(args[2]), c.getTime().getTime(), Bukkit.getPlayer(args[1]).getUniqueId());
+            instance.getBoostManager().addBoostToPlayer(boostData);
+            sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName() + "'s &7hoppers transfer rates by &6" + args[2] + "x" + time));
+        }
         return ReturnType.FAILURE;
     }
 

@@ -10,12 +10,9 @@ import java.util.List;
 public class ELevel implements Level {
 
     private final ArrayList<Module> registeredModules;
-
-    private int level, costExperience, costEconomy, range, amount, linkAmount, autoSell;
-
-    private boolean filter, teleport;
-
     private final List<String> description = new ArrayList<>();
+    private int level, costExperience, costEconomy, range, amount, linkAmount, autoSell;
+    private boolean filter, teleport;
 
     ELevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, int autoSell, ArrayList<Module> registeredModules) {
         this.level = level;
@@ -33,10 +30,10 @@ public class ELevel implements Level {
 
         description.add(instance.getLocale().getMessage("interface.hopper.range", range));
         description.add(instance.getLocale().getMessage("interface.hopper.amount", amount));
-        if (linkAmount != 1) description.add(instance.getLocale().getMessage("interface.hopper.linkamount", linkAmount));
+        if (linkAmount != 1)
+            description.add(instance.getLocale().getMessage("interface.hopper.linkamount", linkAmount));
         if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
         if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.teleport", true));
-        if (autoSell != 0) description.add(instance.getLocale().getMessage("interface.hopper.autosell", autoSell));
 
         for (Module module : registeredModules) {
             description.add(module.getDescription());
