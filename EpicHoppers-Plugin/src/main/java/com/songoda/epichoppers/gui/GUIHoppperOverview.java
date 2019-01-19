@@ -195,16 +195,17 @@ public class GUIHoppperOverview extends AbstractGUI {
             }
         }
 
-
-        if (plugin.getConfig().getBoolean("Main.Upgrade With XP") && player.hasPermission("EpicHoppers.Upgrade.XP") && level.getCostExperience() != -1) {
+        if (plugin.getConfig().getBoolean("Main.Upgrade With XP")
+                && player.hasPermission("EpicHoppers.Upgrade.XP")
+                && level.getCostExperience() != -1)
             inventory.setItem(11, itemXP);
-        }
 
         inventory.setItem(13, item);
 
-        if (plugin.getConfig().getBoolean("Main.Upgrade With Economy") && player.hasPermission("EpicHoppers.Upgrade.ECO") && level.getCostEconomy() != -1) {
+        if (plugin.getConfig().getBoolean("Main.Upgrade With Economy")
+                && player.hasPermission("EpicHoppers.Upgrade.ECO")
+                && level.getCostEconomy() != -1)
             inventory.setItem(15, itemECO);
-        }
 
         inventory.setItem(0, Methods.getBackgroundGlass(true));
         inventory.setItem(1, Methods.getBackgroundGlass(true));
@@ -227,7 +228,7 @@ public class GUIHoppperOverview extends AbstractGUI {
     }
 
     private void runTask() {
-        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::constructGUI, 10L, 10L);
+        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::constructGUI, 5L, 5L);
     }
 
     @Override
