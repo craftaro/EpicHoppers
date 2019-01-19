@@ -308,7 +308,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
          * Dump HopperManager to file.
          */
         for (Hopper hopper : hopperManager.getHoppers().values()) {
-            if (hopper.getLevel() == null || hopper.getLocation() == null || hopper.getLocation().getChunk() == null)
+            if (hopper.getLevel() == null || hopper.getLocation() == null)
                 continue;
             String locationStr = Methods.serializeLocation(hopper.getLocation());
 
