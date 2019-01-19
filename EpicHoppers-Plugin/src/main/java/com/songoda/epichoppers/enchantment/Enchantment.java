@@ -1,4 +1,4 @@
-package com.songoda.epichoppers.handlers;
+package com.songoda.epichoppers.enchantment;
 
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
@@ -12,15 +12,15 @@ import java.util.ArrayList;
 /**
  * Created by songoda on 3/22/2017.
  */
-public class EnchantmentHandler {
+public class Enchantment {
 
-    public ItemStack createSyncTouch(ItemStack item, Block b) {
+    public ItemStack createSyncTouch(ItemStack item, Block block) {
         try {
             ItemMeta itemmeta = item.getItemMeta();
             ArrayList<String> lore = new ArrayList<>();
-            if (b != null) {
+            if (block != null) {
                 lore.add(Methods.formatText("&aSync Touch"));
-                lore.add(Methods.convertToInvisibleString(Methods.serializeLocation(b)));
+                lore.add(Methods.convertToInvisibleString(Methods.serializeLocation(block)));
             } else {
                 lore.add(Methods.formatText("&7Sync Touch"));
             }

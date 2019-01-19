@@ -14,7 +14,7 @@ import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.command.CommandManager;
-import com.songoda.epichoppers.handlers.EnchantmentHandler;
+import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.HopHandler;
 import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hooks.*;
@@ -67,7 +67,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     private static EpicHoppersPlugin INSTANCE;
     public References references = null;
-    public EnchantmentHandler enchantmentHandler;
+    public Enchantment enchantmentHandler;
     private List<ProtectionPluginHook> protectionHooks = new ArrayList<>();
     private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook, skyBlockEarhHook;
     private SettingsManager settingsManager;
@@ -130,7 +130,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             this.update();
         }
 
-        this.enchantmentHandler = new EnchantmentHandler();
+        this.enchantmentHandler = new Enchantment();
         this.hopperManager = new EHopperManager();
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
