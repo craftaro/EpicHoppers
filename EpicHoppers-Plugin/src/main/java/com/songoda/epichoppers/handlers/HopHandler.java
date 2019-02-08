@@ -161,6 +161,7 @@ public class HopHandler {
     private void doBlacklist(Hopper hopperState, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, int amt, int place) {
         try {
             Location dest = hopper.getFilter().getEndPoint();
+            if (dest == null) return;
             if (!dest.getWorld().isChunkLoaded(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
                 return;
 
