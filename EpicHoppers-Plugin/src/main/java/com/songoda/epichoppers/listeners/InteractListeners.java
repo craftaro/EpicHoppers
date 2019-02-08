@@ -53,31 +53,6 @@ public class InteractListeners implements Listener {
     }
 
     @EventHandler
-    public void onMoveChunk(PlayerMoveEvent e) {
-        updateHopper(e.getFrom().getChunk(), e.getTo().getChunk());
-    }
-
-    @EventHandler
-    public void onTeleport(PlayerTeleportEvent e) {
-        updateHopper(e.getFrom().getChunk(), e.getTo().getChunk());
-    }
-
-    private void updateHopper(Chunk from, Chunk to) {
-        if (from == to) return;
-
-        for (Hopper hopper : instance.getHopperManager().getHoppers().values()) {
-            Location location = hopper.getLocation();
-
-            int x = location.getBlockX() >> 4;
-            int z = location.getBlockZ() >> 4;
-
-            if (location.getWorld().getChunkAt(x, z) == to) {
-                ((EHopper) hopper).reloadHopper();
-            }
-        }
-    }
-
-    @EventHandler
     public void onBlockInteract(PlayerInteractEvent e) {
         try {
             Player player = e.getPlayer();
