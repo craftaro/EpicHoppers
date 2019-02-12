@@ -169,8 +169,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     List<ItemStack> blackList = row.get("blacklist").asItemStackList();
                     List<ItemStack> voidList = row.get("void").asItemStackList();
 
-                    int autoSell = row.get("autosell").asInt();
-
                     Material autoCrafting = Material.valueOf(row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString());
 
                     String blackLoc = row.get("black").asString();
@@ -310,6 +308,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         for (Hopper hopper : hopperManager.getHoppers().values()) {
             if (hopper.getLevel() == null || hopper.getLocation() == null)
                 continue;
+
             String locationStr = Methods.serializeLocation(hopper.getLocation());
 
             storage.prepareSaveItem("sync", new StorageItem("location", locationStr),

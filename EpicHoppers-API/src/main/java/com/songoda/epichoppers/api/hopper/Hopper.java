@@ -12,8 +12,6 @@ import java.util.UUID;
 
 public interface Hopper {
 
-    org.bukkit.block.Hopper getHopper();
-
     /**
      * This will link this hopper with another hopper.
      *

@@ -63,7 +63,7 @@ public class HopHandler {
 
                 for (Module module : hopper.getLevel().getRegisteredModules()) {
                     // Run Module
-                    module.run(hopper);
+                    module.run(hopper, hopperState);
 
                     // Add banned materials to list.
                     List<Material> materials = module.getBlockedItems(hopper);
@@ -82,9 +82,9 @@ public class HopHandler {
 
                     linked.add(check);
 
-                    Collection<Entity> nearbyEntite = hopper.getLocation().getWorld().getNearbyEntities(check, .5, .5, .5);
+                    Collection<Entity> nearbyEntities = hopper.getLocation().getWorld().getNearbyEntities(check, .5, .5, .5);
 
-                    for (Entity entity : nearbyEntite) {
+                    for (Entity entity : nearbyEntities) {
                         if (entity.getType() == EntityType.MINECART_HOPPER)
                             override = ((HopperMinecart) entity).getInventory();
                         else if (entity.getType() == EntityType.MINECART_CHEST)

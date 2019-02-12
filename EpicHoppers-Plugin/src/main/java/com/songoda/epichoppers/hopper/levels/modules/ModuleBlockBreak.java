@@ -28,7 +28,7 @@ public class ModuleBlockBreak implements Module {
     }
 
     @Override
-    public void run(Hopper hopper) {
+    public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
         Block block = hopper.getLocation().getBlock();
 
         if (!blockTick.containsKey(block)) {

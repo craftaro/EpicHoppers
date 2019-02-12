@@ -54,10 +54,8 @@ public class ModuleSuction implements Module {
     }
 
     @Override
-    public void run(Hopper hopper) {
+    public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
         double radius = amount + .5;
-
-        org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
 
         Collection<Entity> nearbyEntite = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius);
 

@@ -29,8 +29,7 @@ public class ModuleAutoSell implements Module {
     }
 
     @Override
-    public void run(Hopper hopper) {
-        org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
+    public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
         if (hopperBlock == null || hopperBlock.getInventory() == null) return;
 
         if (((EHopper) hopper).getAutoSellTimer() == -9999) return;

@@ -9,7 +9,7 @@ public interface Module {
 
     String getName();
 
-    void run(Hopper hopper);
+    void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock);
 
     List<Material> getBlockedItems(Hopper hopper);
 

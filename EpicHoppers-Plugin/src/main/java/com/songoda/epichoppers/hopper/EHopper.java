@@ -49,7 +49,6 @@ public class EHopper implements Hopper {
         if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4))
             return;
 
-        this.reloadHopper();
         this.syncName();
     }
 
@@ -157,15 +156,6 @@ public class EHopper implements Hopper {
         } catch (Exception e) {
             Debugger.runReport(e);
         }
-    }
-
-    @Override
-    public org.bukkit.block.Hopper getHopper() {
-        return hopper;
-    }
-
-    public void reloadHopper() {
-        this.hopper = (org.bukkit.block.Hopper) (location.getBlock() != null && location.getBlock().getType() == Material.HOPPER ? location.getBlock().getState() : null);
     }
 
     @Override

@@ -38,8 +38,7 @@ public class ModuleAutoCrafting implements Module {
         return "AutoCrafting";
     }
 
-    public void run(Hopper hopper) {
-        org.bukkit.block.Hopper hopperBlock = hopper.getHopper();
+    public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
         if (hopper.getAutoCrafting() == null || hopperBlock == null || hopperBlock.getInventory() == null) return;
         if (hopper.getAutoCrafting() != null && canMove(hopperBlock.getInventory(), new ItemStack(hopper.getAutoCrafting()))) {
 
