@@ -27,7 +27,7 @@ public class HopperListeners implements Listener {
         try {
             Inventory source = event.getSource();
 
-            if (source.getLocation().getBlock().getType() != Material.HOPPER) return;
+            //if (!(source.getHolder() instanceof org.bukkit.block.Hopper)) return;
 
             if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
                 return;
