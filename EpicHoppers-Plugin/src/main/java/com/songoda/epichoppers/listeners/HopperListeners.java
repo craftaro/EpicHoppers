@@ -3,8 +3,10 @@ package com.songoda.epichoppers.listeners;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.utils.Debugger;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
@@ -27,7 +29,9 @@ public class HopperListeners implements Listener {
         try {
             Inventory source = event.getSource();
 
-            //if (!(source.getHolder() instanceof org.bukkit.block.Hopper)) return;
+            if (!(source.getHolder() instanceof org.bukkit.block.Hopper)) return;
+
+            if (source.getLocation().getBlock().getRelative(BlockFace.DOWN).equals(event.getDestination().getLocation().getBlock())) return;
 
             if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
                 return;
