@@ -6,14 +6,14 @@ import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 public class CommandBoost extends AbstractCommand {
 
     public CommandBoost(AbstractCommand parent) {
-        super("boost", parent, false);
+        super(parent, false, "boost");
     }
 
     @Override
@@ -64,6 +64,22 @@ public class CommandBoost extends AbstractCommand {
             sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName() + "'s &7hoppers transfer rates by &6" + args[2] + "x" + time));
         }
         return ReturnType.FAILURE;
+    }
+
+    @Override
+    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+        if (args.length == 2) {
+            List<String> players = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                players.add(player.getName());
+            }
+            return players;
+        } else if (args.length == 3) {
+            return Arrays.asList("1", "2", "3", "4", "5");
+        } else if (args.length == 4) {
+            return Arrays.asList("m:", "h:", "d:", "y:");
+        }
+        return null;
     }
 
     @Override

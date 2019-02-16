@@ -7,10 +7,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class CommandBook extends AbstractCommand {
 
     public CommandBook(AbstractCommand parent) {
-        super("book", parent, false);
+        super(parent, false, "book");
     }
 
     @Override
@@ -28,6 +30,11 @@ public class CommandBook extends AbstractCommand {
             return ReturnType.SUCCESS;
         }
         return ReturnType.FAILURE;
+    }
+
+    @Override
+    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+        return null;
     }
 
     @Override

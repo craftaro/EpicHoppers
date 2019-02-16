@@ -5,10 +5,12 @@ import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.command.CommandSender;
 
+import java.util.List;
+
 public class CommandEpicHoppers extends AbstractCommand {
 
     public CommandEpicHoppers() {
-        super("EpicHoppers", null, false);
+        super(null, false, "EpicHoppers");
     }
 
     @Override
@@ -24,6 +26,11 @@ public class CommandEpicHoppers extends AbstractCommand {
         sender.sendMessage("");
 
         return ReturnType.SUCCESS;
+    }
+
+    @Override
+    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+        return null;
     }
 
     @Override

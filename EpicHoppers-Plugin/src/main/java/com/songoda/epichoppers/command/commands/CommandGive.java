@@ -8,10 +8,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class CommandGive extends AbstractCommand {
 
     public CommandGive(AbstractCommand parent) {
-        super("give", parent, false);
+        super(parent, false,"give");
     }
 
     @Override
@@ -50,6 +54,20 @@ public class CommandGive extends AbstractCommand {
         player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("command.give.success", level.getLevel()));
 
         return ReturnType.SUCCESS;
+    }
+
+    @Override
+    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+        if (args.length == 2) {
+            List<String> players = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                players.add(player.getName());
+            }
+            return players;
+        } else if (args.length == 3) {
+            return Arrays.asList("1", "2", "3", "4", "5");
+        }
+        return null;
     }
 
     @Override

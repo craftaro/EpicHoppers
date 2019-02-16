@@ -5,10 +5,12 @@ import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.command.CommandSender;
 
+import java.util.List;
+
 public class CommandReload extends AbstractCommand {
 
     public CommandReload(AbstractCommand parent) {
-        super("reload", parent, false);
+        super(parent, false, "reload");
     }
 
     @Override
@@ -16,6 +18,11 @@ public class CommandReload extends AbstractCommand {
         instance.reload();
         sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Configuration and Language files reloaded."));
         return ReturnType.SUCCESS;
+    }
+
+    @Override
+    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+        return null;
     }
 
     @Override

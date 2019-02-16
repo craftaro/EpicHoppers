@@ -5,10 +5,12 @@ import com.songoda.epichoppers.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class CommandSettings extends AbstractCommand {
 
     public CommandSettings(AbstractCommand parent) {
-        super("settings", parent, true);
+        super(parent, true, "settings");
     }
 
     @Override
@@ -16,6 +18,11 @@ public class CommandSettings extends AbstractCommand {
         Player p = (Player) sender;
         instance.getSettingsManager().openSettingsManager(p);
         return ReturnType.SUCCESS;
+    }
+
+    @Override
+    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+        return null;
     }
 
     @Override
