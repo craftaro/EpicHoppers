@@ -31,18 +31,18 @@ public class HopperListeners implements Listener {
 
             if (!(source.getHolder() instanceof org.bukkit.block.Hopper)) return;
 
-            if (source.getLocation().getBlock().getRelative(BlockFace.DOWN).equals(event.getDestination().getLocation().getBlock())) return;
-
             if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
                 return;
 
             Hopper hopper = instance.getHopperManager().getHopper(source.getLocation());
-            if ((hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty())) {
-                hopper.clearLinkedBlocks();
-                Location location = event.getDestination().getLocation();
-                if (location.getBlock() instanceof InventoryHolder)
-                    hopper.addLinkedBlock(location);
-            }
+
+            if (!(event.getDestination().getLocation().getBlock().getState() instanceof InventoryHolder)) return;
+
+            hopper.clearLinkedBlocks();
+            hopper.addLinkedBlock(event.getDestination().getLocation());
+
+            event.setCancelled(true);
+
             event.setCancelled(true);
         } catch (Exception ee) {
             Debugger.runReport(ee);
