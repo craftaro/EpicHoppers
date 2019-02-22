@@ -51,6 +51,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -72,6 +73,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook, skyBlockEarhHook;
     private SettingsManager settingsManager;
     private ConfigWrapper hooksFile = new ConfigWrapper(this, "", "hooks.yml");
+    private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
     private Locale locale;
 
     private HopperManager hopperManager;
@@ -108,37 +110,142 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     @Override
     public void onEnable() {
-        // Check to make sure the Bukkit version is compatible.
-        if (!checkVersion()) return;
-
         INSTANCE = this;
         EpicHoppersAPI.setImplementation(this);
+
+        // Check to make sure the Bukkit version is compatible.
+        if (!checkVersion()) return;
 
         console.sendMessage(Methods.formatText("&a============================="));
         console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3&7!"));
         console.sendMessage(Methods.formatText("&7Action: &aEnabling&7..."));
 
-        settingsManager = new SettingsManager(this);
+        this.settingsManager = new SettingsManager(this);
         this.setupConfig();
 
+        // Setup language
         String langMode = getConfig().getString("System.Language Mode");
         Locale.init(this);
         Locale.saveDefaultLocale("en_US");
         this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
 
-        if (getConfig().getBoolean("System.Download Needed Data Files")) {
+        if (getConfig().getBoolean("System.Download Needed Data Files"))
             this.update();
-        }
 
         this.enchantmentHandler = new Enchantment();
         this.hopperManager = new EHopperManager();
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
+        this.references = new References();
         this.commandManager = new CommandManager(this);
 
         this.loadLevelManager();
         this.checkStorage();
 
+        // Load from file
+        loadFromFile();
+
+        new HopHandler(this);
+        this.teleportHandler = new TeleportHandler(this);
+
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
+        // Register Listeners
+        pluginManager.registerEvents(new HopperListeners(this), this);
+        pluginManager.registerEvents(new EntityListeners(this), this);
+        pluginManager.registerEvents(new BlockListeners(this), this);
+        pluginManager.registerEvents(new InteractListeners(this), this);
+        pluginManager.registerEvents(new InventoryListeners(this), this);
+
+        // Check for liquid tanks
+        if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
+
+        // Register default hooks
+        if (pluginManager.isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
+        if (pluginManager.isPluginEnabled("FactionsFramework")) this.register(HookFactions::new);
+        if (pluginManager.isPluginEnabled("GriefPrevention")) this.register(HookGriefPrevention::new);
+        if (pluginManager.isPluginEnabled("Kingdoms")) this.register(HookKingdoms::new);
+        if (pluginManager.isPluginEnabled("PlotSquared")) this.register(HookPlotSquared::new);
+        if (pluginManager.isPluginEnabled("RedProtect")) this.register(HookRedProtect::new);
+        if (pluginManager.isPluginEnabled("Towny"))
+            townyHook = (ClaimableProtectionPluginHook) this.register(HookTowny::new);
+        if (pluginManager.isPluginEnabled("USkyBlock"))
+            uSkyblockHook = (ClaimableProtectionPluginHook) this.register(HookUSkyBlock::new);
+        if (pluginManager.isPluginEnabled("SkyBlock"))
+            skyBlockEarhHook = (ClaimableProtectionPluginHook) this.register(HookSkyBlockEarth::new);
+        if (pluginManager.isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
+
+        // Start auto save
+        int saveInterval = getConfig().getInt("Main.Auto Save Interval In Seconds") * 60 * 20;
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, saveInterval, saveInterval);
+
+        console.sendMessage(Methods.formatText("&a============================="));
+    }
+
+    @Override
+    public void onDisable() {
+        this.saveToFile();
+        this.storage.closeConnection();
+        this.protectionHooks.clear();
+
+        console.sendMessage(Methods.formatText("&a============================="));
+        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3!"));
+        console.sendMessage(Methods.formatText("&7Action: &cDisabling&7..."));
+        console.sendMessage(Methods.formatText("&a============================="));
+    }
+
+    private void update() {
+        try {
+            URL url = new URL("http://update.songoda.com/index.php?plugin=" + getDescription().getName() + "&version=" + getDescription().getVersion());
+            URLConnection urlConnection = url.openConnection();
+            InputStream is = urlConnection.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+
+            int numCharsRead;
+            char[] charArray = new char[1024];
+            StringBuffer sb = new StringBuffer();
+            while ((numCharsRead = isr.read(charArray)) > 0) {
+                sb.append(charArray, 0, numCharsRead);
+            }
+            String jsonString = sb.toString();
+            JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
+
+            JSONArray files = (JSONArray) json.get("neededFiles");
+            for (Object o : files) {
+                JSONObject file = (JSONObject) o;
+
+                switch ((String) file.get("type")) {
+                    case "locale":
+                        InputStream in = new URL((String) file.get("link")).openStream();
+                        Locale.saveDefaultLocale(in, (String) file.get("name"));
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to update.");
+            //e.printStackTrace();
+        }
+    }
+
+
+    private void checkStorage() {
+        if (getConfig().getBoolean("Database.Activate Mysql Support")) {
+            this.storage = new StorageMysql(this);
+        } else {
+            this.storage = new StorageYaml(this);
+        }
+    }
+
+    /*
+     * Saves registered hoppers to file.
+     */
+    private void saveToFile() {
+        checkStorage();
+
+        storage.doSave();
+    }
+
+    private void loadFromFile() {
         /*
          * Register hoppers into HopperManger from configuration
          */
@@ -205,117 +312,27 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             // Save data initially so that if the person reloads again fast they don't lose all their data.
             this.saveToFile();
         }, 10);
-
-        references = new References();
-
-        new HopHandler(this);
-        teleportHandler = new TeleportHandler(this);
-
-        int timeout = getConfig().getInt("Main.Auto Save Interval In Seconds") * 60 * 20;
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, timeout, timeout);
-
-        PluginManager pluginManager = Bukkit.getPluginManager();
-
-        // Register Listeners
-        pluginManager.registerEvents(new HopperListeners(this), this);
-        pluginManager.registerEvents(new EntityListeners(this), this);
-        pluginManager.registerEvents(new BlockListeners(this), this);
-        pluginManager.registerEvents(new InteractListeners(this), this);
-        pluginManager.registerEvents(new InventoryListeners(this), this);
-
-        if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
-
-        // Register default hooks
-
-        if (pluginManager.isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
-        if (pluginManager.isPluginEnabled("FactionsFramework")) this.register(HookFactions::new);
-        if (pluginManager.isPluginEnabled("GriefPrevention")) this.register(HookGriefPrevention::new);
-        if (pluginManager.isPluginEnabled("Kingdoms")) this.register(HookKingdoms::new);
-        if (pluginManager.isPluginEnabled("PlotSquared")) this.register(HookPlotSquared::new);
-        if (pluginManager.isPluginEnabled("RedProtect")) this.register(HookRedProtect::new);
-        if (pluginManager.isPluginEnabled("Towny"))
-            townyHook = (ClaimableProtectionPluginHook) this.register(HookTowny::new);
-        if (pluginManager.isPluginEnabled("USkyBlock"))
-            uSkyblockHook = (ClaimableProtectionPluginHook) this.register(HookUSkyBlock::new);
-        if (pluginManager.isPluginEnabled("SkyBlock"))
-            skyBlockEarhHook = (ClaimableProtectionPluginHook) this.register(HookSkyBlockEarth::new);
-        if (pluginManager.isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
-
-        console.sendMessage(Methods.formatText("&a============================="));
-    }
-
-    public void onDisable() {
-        saveToFile();
-        this.storage.closeConnection();
-        this.protectionHooks.clear();
-        console.sendMessage(Methods.formatText("&a============================="));
-        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3!"));
-        console.sendMessage(Methods.formatText("&7Action: &cDisabling&7..."));
-        console.sendMessage(Methods.formatText("&a============================="));
-    }
-
-    private void update() {
-        try {
-            URL url = new URL("http://update.songoda.com/index.php?plugin=" + getDescription().getName() + "&version=" + getDescription().getVersion());
-            URLConnection urlConnection = url.openConnection();
-            InputStream is = urlConnection.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-
-            int numCharsRead;
-            char[] charArray = new char[1024];
-            StringBuffer sb = new StringBuffer();
-            while ((numCharsRead = isr.read(charArray)) > 0) {
-                sb.append(charArray, 0, numCharsRead);
-            }
-            String jsonString = sb.toString();
-            JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
-
-            JSONArray files = (JSONArray) json.get("neededFiles");
-            for (Object o : files) {
-                JSONObject file = (JSONObject) o;
-
-                switch ((String) file.get("type")) {
-                    case "locale":
-                        InputStream in = new URL((String) file.get("link")).openStream();
-                        Locale.saveDefaultLocale(in, (String) file.get("name"));
-                        break;
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Failed to update.");
-            //e.printStackTrace();
-        }
-    }
-
-
-    private void checkStorage() {
-        if (getConfig().getBoolean("Database.Activate Mysql Support")) {
-            this.storage = new StorageMysql(this);
-        } else {
-            this.storage = new StorageYaml(this);
-        }
-    }
-
-    /*
-     * Saves registered hopper to file.
-     */
-    private void saveToFile() {
-        checkStorage();
-
-        storage.doSave();
     }
 
     private void loadLevelManager() {
+        File folder = getDataFolder();
+        File voucherFile = new File(folder, "levels.yml");
+        if (!voucherFile.exists()) {
+            saveResource("levels.yml", true);
+        }
+
         // Load an instance of LevelManager
         levelManager = new ELevelManager();
         /*
          * Register Levels into LevelManager from configuration.
          */
         ((ELevelManager) levelManager).clear();
-        for (String levelName : getConfig().getConfigurationSection("settings.levels").getKeys(false)) {
+        System.out.println("Loading levels");
+        for (String levelName : levelsFile.getConfig().getKeys(false)) {
+            System.out.println("loaded " + levelName);
             int level = Integer.valueOf(levelName.split("-")[1]);
 
-            ConfigurationSection levels = getConfig().getConfigurationSection("settings.levels." + levelName);
+            ConfigurationSection levels = levelsFile.getConfig().getConfigurationSection(levelName);
 
             int radius = levels.getInt("Range");
             int amount = levels.getInt("Amount");
@@ -346,68 +363,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     private void setupConfig() {
         settingsManager.updateSettings();
-
-        if (!getConfig().contains("settings.levels.Level-1")) {
-            ConfigurationSection levels =
-                    getConfig().createSection("settings.levels");
-
-            levels.set("Level-1.Range", 10);
-            levels.set("Level-1.Amount", 1);
-            levels.set("Level-1.Cost-xp", 20);
-            levels.set("Level-1.Cost-eco", 5000);
-
-            levels.set("Level-2.Range", 20);
-            levels.set("Level-2.Amount", 2);
-            levels.set("Level-2.Cost-xp", 25);
-            levels.set("Level-2.Cost-eco", 7500);
-
-            levels.set("Level-3.Range", 30);
-            levels.set("Level-3.Amount", 3);
-            levels.set("Level-3.Suction", 1);
-            levels.set("Level-3.Cost-xp", 30);
-            levels.set("Level-3.Link-amount", 2);
-            levels.set("Level-3.Cost-eco", 10000);
-
-            levels.set("Level-4.Range", 40);
-            levels.set("Level-4.Amount", 4);
-            levels.set("Level-4.Suction", 2);
-            levels.set("Level-4.Link-amount", 2);
-            levels.set("Level-4.BlockBreak", 4);
-            levels.set("Level-4.Cost-xp", 35);
-            levels.set("Level-4.Cost-eco", 12000);
-
-            levels.set("Level-5.Range", 50);
-            levels.set("Level-5.Amount", 5);
-            levels.set("Level-5.Suction", 3);
-            levels.set("Level-5.BlockBreak", 2);
-            levels.set("Level-5.Link-amount", 3);
-            levels.set("Level-5.Cost-xp", 40);
-            levels.set("Level-5.Cost-eco", 15000);
-
-            levels.set("Level-6.Range", 60);
-            levels.set("Level-6.Amount", 5);
-            levels.set("Level-6.Suction", 3);
-            levels.set("Level-6.BlockBreak", 2);
-            levels.set("Level-6.Filter", true);
-            levels.set("Level-6.Teleport", true);
-            levels.set("Level-6.AutoSell", 60);
-            levels.set("Level-6.Link-amount", 3);
-            levels.set("Level-6.Cost-xp", 45);
-            levels.set("Level-6.Cost-eco", 20000);
-
-            levels.set("Level-7.Range", 70);
-            levels.set("Level-7.Amount", 5);
-            levels.set("Level-7.Suction", 3);
-            levels.set("Level-7.BlockBreak", 2);
-            levels.set("Level-7.Filter", true);
-            levels.set("Level-7.Teleport", true);
-            levels.set("Level-7.AutoSell", 30);
-            levels.set("Level-7.AutoCrafting", true);
-            levels.set("Level-7.Link-amount", 4);
-            levels.set("Level-7.Cost-xp", 50);
-            levels.set("Level-7.Cost-eco", 30000);
-
-        }
         this.getConfig().options().copyDefaults(true);
         this.saveConfig();
     }

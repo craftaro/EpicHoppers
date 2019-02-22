@@ -1,0 +1,56 @@
+Level-1:
+  Range: 10
+  Amount: 1
+  Cost-xp: 20
+  Cost-eco: 5000
+Level-2:
+  Range: 20
+  Amount: 2
+  Cost-xp: 25
+  Cost-eco: 7500
+Level-3:
+  Range: 30
+  Amount: 3
+  Suction: 1
+  Cost-xp: 30
+  Link-amount: 2
+  Cost-eco: 10000
+Level-4:
+  Range: 40
+  Amount: 4
+  Suction: 2
+  Link-amount: 2
+  BlockBreak: 4
+  Cost-xp: 35
+  Cost-eco: 12000
+Level-5:
+  Range: 50
+  Amount: 5
+  Suction: 3
+  BlockBreak: 2
+  Link-amount: 3
+  Cost-xp: 40
+  Cost-eco: 15000
+Level-6:
+  Range: 60
+  Amount: 5
+  Suction: 3
+  BlockBreak: 2
+  Filter: true
+  Teleport: true
+  AutoSell: 60
+  Link-amount: 3
+  Cost-xp: 45
+  Cost-eco: 20000
+Level-7:
+  Range: 70
+  Amount: 5
+  Suction: 3
+  BlockBreak: 2
+  Filter: true
+  Teleport: true
+  AutoSell: 30
+  AutoCrafting: true
+  Link-amount: 4
+  Cost-xp: 50
+  Cost-eco: 30000
