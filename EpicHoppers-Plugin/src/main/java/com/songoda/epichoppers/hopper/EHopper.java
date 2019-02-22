@@ -33,7 +33,6 @@ public class EHopper implements Hopper {
     private Filter filter;
     private TeleportTrigger teleportTrigger;
     private Material autoCrafting;
-    private org.bukkit.block.Hopper hopper;
     private int autoSellTimer = 0;
 
     public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
@@ -108,7 +107,7 @@ public class EHopper implements Hopper {
         }
     }
 
-    public void upgradeFinal(Level level, Player player) {
+    private void upgradeFinal(Level level, Player player) {
         try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             this.level = level;
@@ -138,7 +137,7 @@ public class EHopper implements Hopper {
     }
 
     private void syncName() {
-        if (hopper == null) return;
+        org.bukkit.block.Hopper hopper = (org.bukkit.block.Hopper)location.getBlock().getState();
         hopper.setCustomName(Methods.formatName(level.getLevel(), false));
         hopper.update(true);
     }

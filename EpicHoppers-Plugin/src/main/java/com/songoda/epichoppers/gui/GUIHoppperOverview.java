@@ -25,15 +25,14 @@ public class GUIHoppperOverview extends AbstractGUI {
 
     private final EpicHoppersPlugin plugin;
     private final EHopper hopper;
-    private final Player player;
 
     private int task;
 
     public GUIHoppperOverview(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
-        this.player = player;
         this.hopper = hopper;
+
 
         init(Methods.formatName(hopper.getLevel().getLevel(), false), 27);
         runTask();

@@ -327,9 +327,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
          * Register Levels into LevelManager from configuration.
          */
         ((ELevelManager) levelManager).clear();
-        System.out.println("Loading levels");
         for (String levelName : levelsFile.getConfig().getKeys(false)) {
-            System.out.println("loaded " + levelName);
             int level = Integer.valueOf(levelName.split("-")[1]);
 
             ConfigurationSection levels = levelsFile.getConfig().getConfigurationSection(levelName);

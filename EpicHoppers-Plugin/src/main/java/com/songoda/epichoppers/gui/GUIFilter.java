@@ -22,13 +22,11 @@ public class GUIFilter extends AbstractGUI {
 
     private final EpicHoppersPlugin plugin;
     private final EHopper hopper;
-    private final Player player;
 
     public GUIFilter(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
         this.hopper = hopper;
-        this.player = player;
 
         init(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Filter"), 54);
     }

@@ -6,6 +6,7 @@ import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.gui.AbstractGUI;
 import com.songoda.epichoppers.utils.gui.Range;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,13 +15,11 @@ public class GUICrafting extends AbstractGUI {
 
     private final EpicHoppersPlugin plugin;
     private final EHopper hopper;
-    private final Player player;
 
     public GUICrafting(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
         this.hopper = hopper;
-        this.player = player;
 
         init(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Crafting"), 27);
     }
@@ -63,7 +62,6 @@ public class GUICrafting extends AbstractGUI {
     @Override
     protected void registerOnCloses() {
         registerOnClose(((player, inventory) -> {
-            Hopper hopper = plugin.getHopperManager().getHopperFromPlayer(player);
             ItemStack item = inventory.getItem(13);
             hopper.setAutoCrafting(item == null ? Material.AIR : item.getType());
         }));
