@@ -42,8 +42,6 @@ public class HopperListeners implements Listener {
             hopper.addLinkedBlock(event.getDestination().getLocation());
 
             event.setCancelled(true);
-
-            event.setCancelled(true);
         } catch (Exception ee) {
             Debugger.runReport(ee);
         }
