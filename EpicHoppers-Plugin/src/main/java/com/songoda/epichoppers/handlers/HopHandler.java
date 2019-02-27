@@ -262,7 +262,7 @@ public class HopHandler {
             } else if (destinationBlock.getType() == Material.FURNACE) {
                 FurnaceInventory furnaceInventory = (FurnaceInventory) destinationInventory;
 
-                boolean isFuel = item.getType().isFuel();
+                boolean isFuel = item.getType().isFuel() && !item.getType().name().contains("LOG");
                 ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
                 if (output != null && !output.isSimilar(newItem)) return false;
                 int maxSize = newItem.getMaxStackSize();
