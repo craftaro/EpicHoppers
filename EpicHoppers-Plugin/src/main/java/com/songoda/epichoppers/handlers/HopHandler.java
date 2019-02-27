@@ -219,8 +219,9 @@ public class HopHandler {
                 }
                 return true;
             }
-
-            if (destinationBlock.getType() == Material.BREWING_STAND) {
+            if (destinationBlock.getType().name().contains("SHULKER_BOX")) {
+                if (item.getType().name().contains("SHULKER_BOX")) return false;
+            } else if (destinationBlock.getType() == Material.BREWING_STAND) {
                 BrewerInventory brewerInventory = (BrewerInventory) destinationInventory;
 
                 int maxSize = newItem.getMaxStackSize();
