@@ -13,7 +13,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import xyz.wildseries.wildstacker.api.WildStackerAPI;
+import com.bgsoftware.wildstacker.api.WildStackerAPI;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

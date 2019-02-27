@@ -155,7 +155,7 @@
         <dependency>
             <groupId>xyz.wildseries</groupId>
             <artifactId>wildstacker</artifactId>
-            <version>b6</version>
+            <version>b13</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
