@@ -179,6 +179,9 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         int saveInterval = getConfig().getInt("Main.Auto Save Interval In Seconds") * 60 * 20;
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, saveInterval, saveInterval);
 
+        // Start Metrics
+        new Metrics(this);
+
         console.sendMessage(Methods.formatText("&a============================="));
     }
 
