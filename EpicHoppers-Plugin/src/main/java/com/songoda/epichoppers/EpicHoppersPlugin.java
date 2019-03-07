@@ -35,6 +35,7 @@ import com.songoda.epichoppers.storage.types.StorageMysql;
 import com.songoda.epichoppers.storage.types.StorageYaml;
 import com.songoda.epichoppers.utils.ConfigWrapper;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.Metrics;
 import com.songoda.epichoppers.utils.SettingsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
