@@ -1,7 +1,7 @@
-package com.songoda.epicspawners.hook.hooks;
+package com.songoda.epichoppers.hook.hooks;
 
-import com.songoda.epicspawners.hook.HookType;
-import com.songoda.epicspawners.hook.ProtectionPluginHook;
+import com.songoda.epichoppers.hook.HookType;
+import com.songoda.epichoppers.hook.ProtectionPluginHook;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
