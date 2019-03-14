@@ -1,6 +1,7 @@
-package com.songoda.epichoppers.hooks;
+package com.songoda.epicspawners.hook.hooks;
 
-import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
+import com.songoda.epicspawners.hook.HookType;
+import com.songoda.epicspawners.hook.ProtectionPluginHook;
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Location;
@@ -22,9 +23,29 @@ public class HookGriefPrevention implements ProtectionPluginHook {
     }
 
     @Override
+    public HookType getHookType() {
+        return HookType.REGULAR;
+    }
+
+    @Override
     public boolean canBuild(Player player, Location location) {
         Claim claim = griefPrevention.dataStore.getClaimAt(location, false, null);
-        return claim != null && claim.allowBuild(player, Material.HOPPER) == null;
+        return claim != null && claim.allowBuild(player, Material.MOB_SPAWNER) == null;
+    }
+
+    @Override
+    public boolean isInClaim(Location location) {
+        return griefPrevention.dataStore.getClaimAt(location, false, null) != null;
+    }
+
+    @Override
+    public boolean isInClaim(Location location, String id) {
+        return false;
+    }
+
+    @Override
+    public String getClaimID(String name) {
+        return null;
     }
 
 }

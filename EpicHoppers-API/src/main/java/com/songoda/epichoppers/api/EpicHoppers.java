@@ -3,7 +3,6 @@ package com.songoda.epichoppers.api;
 import com.songoda.epichoppers.api.hopper.HopperManager;
 import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.api.hopper.levels.LevelManager;
-import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Supplier;
@@ -33,16 +32,4 @@ public interface EpicHoppers {
      * @return the hopper manager
      */
     HopperManager getHopperManager();
-
-    ProtectionPluginHook register(Supplier<ProtectionPluginHook> hookSupplier);
-
-    /**
-     * Register a new {@link ProtectionPluginHook} implementation
-     * in order for EpicHoppers to support plugins that protect
-     * blocks from being interacted with
-     *
-     * @param hook the hook to register
-     */
-    ProtectionPluginHook registerProtectionHook(ProtectionPluginHook hook);
-
 }

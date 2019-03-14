@@ -3,21 +3,18 @@ package com.songoda.epichoppers;
 import com.google.common.base.Preconditions;
 import com.songoda.epichoppers.api.EpicHoppers;
 import com.songoda.epichoppers.api.EpicHoppersAPI;
-import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.HopperManager;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.api.hopper.levels.Level;
 import com.songoda.epichoppers.api.hopper.levels.LevelManager;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
-import com.songoda.epichoppers.api.utils.ClaimableProtectionPluginHook;
-import com.songoda.epichoppers.api.utils.ProtectionPluginHook;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.command.CommandManager;
 import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.HopHandler;
 import com.songoda.epichoppers.handlers.TeleportHandler;
-import com.songoda.epichoppers.hooks.*;
+import com.songoda.epichoppers.hook.HookManager;
 import com.songoda.epichoppers.hopper.EFilter;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.hopper.EHopperManager;
@@ -29,7 +26,6 @@ import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
 import com.songoda.epichoppers.listeners.*;
 import com.songoda.epichoppers.player.PlayerDataManager;
 import com.songoda.epichoppers.storage.Storage;
-import com.songoda.epichoppers.storage.StorageItem;
 import com.songoda.epichoppers.storage.StorageRow;
 import com.songoda.epichoppers.storage.types.StorageMysql;
 import com.songoda.epichoppers.storage.types.StorageYaml;
@@ -70,8 +66,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private static EpicHoppersPlugin INSTANCE;
     public References references = null;
     public Enchantment enchantmentHandler;
-    private List<ProtectionPluginHook> protectionHooks = new ArrayList<>();
-    private ClaimableProtectionPluginHook factionsHook, townyHook, aSkyblockHook, uSkyblockHook, skyBlockEarhHook;
     private SettingsManager settingsManager;
     private ConfigWrapper hooksFile = new ConfigWrapper(this, "", "hooks.yml");
     private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
@@ -82,6 +76,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private LevelManager levelManager;
     private BoostManager boostManager;
     private PlayerDataManager playerDataManager;
+    private HookManager hookManager;
 
     private TeleportHandler teleportHandler;
 
@@ -139,6 +134,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         this.boostManager = new BoostManager();
         this.references = new References();
         this.commandManager = new CommandManager(this);
+        this.hookManager = new HookManager(this);
 
         this.loadLevelManager();
         this.checkStorage();
@@ -161,21 +157,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         // Check for liquid tanks
         if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
 
-        // Register default hooks
-        if (pluginManager.isPluginEnabled("ASkyBlock")) this.register(HookASkyBlock::new);
-        if (pluginManager.isPluginEnabled("FactionsFramework")) this.register(HookFactions::new);
-        if (pluginManager.isPluginEnabled("GriefPrevention")) this.register(HookGriefPrevention::new);
-        if (pluginManager.isPluginEnabled("Kingdoms")) this.register(HookKingdoms::new);
-        if (pluginManager.isPluginEnabled("PlotSquared")) this.register(HookPlotSquared::new);
-        if (pluginManager.isPluginEnabled("RedProtect")) this.register(HookRedProtect::new);
-        if (pluginManager.isPluginEnabled("Towny"))
-            townyHook = (ClaimableProtectionPluginHook) this.register(HookTowny::new);
-        if (pluginManager.isPluginEnabled("USkyBlock"))
-            uSkyblockHook = (ClaimableProtectionPluginHook) this.register(HookUSkyBlock::new);
-        if (pluginManager.isPluginEnabled("SkyBlock"))
-            skyBlockEarhHook = (ClaimableProtectionPluginHook) this.register(HookSkyBlockEarth::new);
-        if (pluginManager.isPluginEnabled("WorldGuard")) this.register(HookWorldGuard::new);
-
         // Start auto save
         int saveInterval = getConfig().getInt("Main.Auto Save Interval In Seconds") * 60 * 20;
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, saveInterval, saveInterval);
@@ -190,7 +171,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     public void onDisable() {
         this.saveToFile();
         this.storage.closeConnection();
-        this.protectionHooks.clear();
 
         console.sendMessage(Methods.formatText("&a============================="));
         console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3!"));
@@ -373,40 +353,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         String langMode = getConfig().getString("System.Language Mode");
         this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
         this.locale.reloadMessages();
+        this.hookManager = new HookManager(this);
         references = new References();
         this.setupConfig();
         loadLevelManager();
-    }
-
-    public boolean canBuild(Player player, Location location) {
-        if (player.hasPermission(getDescription().getName() + ".bypass")) {
-            return true;
-        }
-
-        for (ProtectionPluginHook hook : protectionHooks)
-            if (!hook.canBuild(player, location)) return false;
-        return true;
-    }
-
-    public boolean isInFaction(String name, Location l) {
-        return factionsHook != null && factionsHook.isInClaim(l, name);
-    }
-
-    public String getFactionId(String name) {
-        return (factionsHook != null) ? factionsHook.getClaimID(name) : null;
-    }
-
-    public boolean isInTown(String name, Location l) {
-        return townyHook != null && townyHook.isInClaim(l, name);
-    }
-
-    public String getTownId(String name) {
-        return (townyHook != null) ? townyHook.getClaimID(name) : null;
-    }
-
-    @SuppressWarnings("deprecation")
-    public String getIslandId(String name) {
-        return Bukkit.getOfflinePlayer(name).getUniqueId().toString();
     }
 
     @Override
@@ -448,6 +398,10 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         return commandManager;
     }
 
+    public HookManager getHookManager() {
+        return hookManager;
+    }
+
     @Override
     public LevelManager getLevelManager() {
         return levelManager;
@@ -468,34 +422,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
 
     public boolean isLiquidtanks() {
         return liquidtanks;
-    }
-
-    @Override
-    public ProtectionPluginHook register(Supplier<ProtectionPluginHook> hookSupplier) {
-        return this.registerProtectionHook(hookSupplier.get());
-    }
-
-
-    @Override
-    public ProtectionPluginHook registerProtectionHook(ProtectionPluginHook hook) {
-        Preconditions.checkNotNull(hook, "Cannot register null hook");
-        Preconditions.checkNotNull(hook.getPlugin(), "Protection plugin hook returns null plugin instance (#getPlugin())");
-
-        JavaPlugin hookPlugin = hook.getPlugin();
-        for (ProtectionPluginHook existingHook : protectionHooks) {
-            if (existingHook.getPlugin().equals(hookPlugin)) {
-                throw new IllegalArgumentException("Hook already registered");
-            }
-        }
-
-        this.hooksFile.getConfig().addDefault("hooks." + hookPlugin.getName(), true);
-        if (!hooksFile.getConfig().getBoolean("hooks." + hookPlugin.getName(), true)) return null;
-        this.hooksFile.getConfig().options().copyDefaults(true);
-        this.hooksFile.saveConfig();
-
-        this.protectionHooks.add(hook);
-        this.getLogger().info("Registered protection hook for plugin: " + hook.getPlugin().getName());
-        return hook;
     }
 
 }
