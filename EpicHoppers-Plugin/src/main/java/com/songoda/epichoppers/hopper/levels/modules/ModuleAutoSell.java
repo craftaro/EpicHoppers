@@ -41,7 +41,7 @@ public class ModuleAutoSell implements Module {
             RegisteredServiceProvider<Economy> rsp = instance.getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
             net.milkbowl.vault.economy.Economy econ = rsp.getProvider();
 
-            List<String> list = (List<String>) EpicHoppersPlugin.getInstance().getConfig().getList("Main.AutoSell Prices");
+            List<String> list = instance.getConfig().getStringList("Main.AutoSell Prices");
 
             for (String line : list) {
                 try {
@@ -51,10 +51,10 @@ public class ModuleAutoSell implements Module {
                     double price = Double.valueOf(split[1]);
 
                     for (ItemStack itemStack : hopperBlock.getInventory().getContents()) {
-                        if (itemStack.getType() == material) {
-                            econ.depositPlayer(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
-                            hopperBlock.getInventory().removeItem(itemStack);
-                        }
+                        if (itemStack == null || itemStack.getType() != material) continue;
+
+                        econ.depositPlayer(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
+                        hopperBlock.getInventory().removeItem(itemStack);
                     }
                 } catch (Exception ignored) {
                 }

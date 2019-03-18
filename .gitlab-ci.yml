@@ -4,7 +4,7 @@ stages:
 variables:
     name: "EpicHoppers"
     path: "/builds/Songoda/$name"
-    version: "3.5.8"
+    version: "3.5.9"
 
 build:
   stage: build
