@@ -44,11 +44,6 @@ public class EHopper implements Hopper {
         this.placedBy = placedBy;
         this.teleportTrigger = teleportTrigger;
         this.autoCrafting = autoCrafting;
-
-        if (!location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4))
-            return;
-
-        this.syncName();
     }
 
     public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
