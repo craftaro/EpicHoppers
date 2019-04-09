@@ -32,8 +32,8 @@ public class ELevel implements Level {
         description.add(instance.getLocale().getMessage("interface.hopper.amount", amount));
         if (linkAmount != 1)
             description.add(instance.getLocale().getMessage("interface.hopper.linkamount", linkAmount));
-        if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", true));
-        if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.teleport", true));
+        if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
+        if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.teleport", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
 
         for (Module module : registeredModules) {
             description.add(module.getDescription());

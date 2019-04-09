@@ -34,6 +34,7 @@ public class EHopper implements Hopper {
     private TeleportTrigger teleportTrigger;
     private Material autoCrafting;
     private int autoSellTimer = 0;
+    private boolean autoBreaking = true;
 
     public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
@@ -267,6 +268,14 @@ public class EHopper implements Hopper {
 
     public void setAutoSellTimer(int autoSellTimer) {
         this.autoSellTimer = autoSellTimer;
+    }
+
+    public boolean isAutoBreaking() {
+        return autoBreaking;
+    }
+
+    public void toggleAutoBreaking() {
+        this.autoBreaking = !autoBreaking;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
+import com.songoda.epichoppers.hopper.EHopper;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -30,6 +31,8 @@ public class ModuleBlockBreak implements Module {
     @Override
     public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
         Block block = hopper.getLocation().getBlock();
+
+        if (!((EHopper)hopper).isAutoBreaking()) return;
 
         if (!blockTick.containsKey(block)) {
             blockTick.put(block, 1);

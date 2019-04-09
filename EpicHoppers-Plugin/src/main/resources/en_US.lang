@@ -6,6 +6,7 @@ general.nametag.back = "&9Back"
 general.nametag.nameformat = "&eLevel %level% &fHopper"
 general.nametag.lore = ""
 general.word.disabled = "DISABLED"
+general.word.enabled = "ENABLED"
 
 #Interface Messages
 
@@ -32,9 +33,11 @@ interface.hopper.perllore2 = "|&7Left-Click to teleport to|&7the end of the chai
 interface.hopper.filtertitle = "&cClick to Filter"
 interface.hopper.filterlore = "|&7This allows you to choose|&7which items go where."
 interface.hopper.craftingtitle = "&cClick to Setup AutoCrafting"
-interface.hopper.craftinglore = "|&7This allows you to choose|&7which item this hopper|&7will automaticly craft."
+interface.hopper.craftinglore = "|&7This allows you to choose|&7which item this hopper|&7will automatically craft."
 interface.hopper.selltitle = "&6Click to Toggle AutoSelling"
 interface.hopper.selllore = "|&7Selling in &6%timeleft%s&7."
+interface.hopper.blocktitle = "&6Click to Toggle BlockBreak"
+interface.hopper.blocklore = "|&7BlockBreak is set to &6%enabled%&7."
 interface.hopper.synchopper = "&6Click to Link This hopper"
 interface.hopper.rejectsync = "&6Click to Link Rejected Items"
 interface.filter.infotitle = "&aFilter Guide"

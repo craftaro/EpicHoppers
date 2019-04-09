@@ -131,7 +131,7 @@ public class ModuleAutoCrafting implements Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.crafting", true);
+        return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.crafting", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled"));
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {

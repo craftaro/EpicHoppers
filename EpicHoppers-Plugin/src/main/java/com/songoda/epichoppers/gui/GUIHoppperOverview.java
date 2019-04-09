@@ -90,6 +90,17 @@ public class GUIHoppperOverview extends AbstractGUI {
         sellmeta.setLore(loresell);
         sell.setItemMeta(sellmeta);
 
+        ItemStack block = new ItemStack(Material.IRON_ORE, 1);
+        ItemMeta blockmeta = block.getItemMeta();
+        blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.blocktitle"));
+        ArrayList<String> loreblock = new ArrayList<>();
+        parts = plugin.getLocale().getMessage("interface.hopper.blocklore", hopper.isAutoBreaking() ? plugin.getLocale().getMessage("general.word.enabled") : plugin.getLocale().getMessage("general.word.disabled")).split("\\|");
+        for (String line : parts) {
+            loreblock.add(Methods.formatText(line));
+        }
+        blockmeta.setLore(loreblock);
+        block.setItemMeta(blockmeta);
+
 
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
@@ -160,6 +171,7 @@ public class GUIHoppperOverview extends AbstractGUI {
         layouts.put(3, new Integer[]{22, 3, 5});
         layouts.put(4, new Integer[]{23, 3, 5, 21});
         layouts.put(5, new Integer[]{23, 3, 5, 21, 22});
+        layouts.put(6, new Integer[]{23, 3, 4, 5, 21, 22});
 
         int amount = 1;
 
@@ -167,10 +179,12 @@ public class GUIHoppperOverview extends AbstractGUI {
         boolean canTeleport = level.isTeleport() || player.hasPermission("EpicHoppers.Teleport");
         boolean canCraft = level.getRegisteredModules().removeIf(e -> e.getName().equals("AutoCrafting"));
         boolean canAutoSell = level.getAutoSell() != 0;
+        boolean canBreak = level.getRegisteredModules().removeIf(e -> e.getName().equals("BlockBreak"));
         if (canFilter) amount++;
         if (canTeleport) amount++;
         if (canAutoSell) amount++;
         if (canCraft) amount++;
+        if (canBreak) amount++;
 
         Integer[] layout = layouts.get(amount);
 
@@ -191,6 +205,9 @@ public class GUIHoppperOverview extends AbstractGUI {
             } else if (canAutoSell) {
                 inventory.setItem(slot, sell);
                 canAutoSell = false;
+            } else if (canBreak) {
+                inventory.setItem(slot, block);
+                canBreak = false;
             }
         }
 
@@ -254,9 +271,13 @@ public class GUIHoppperOverview extends AbstractGUI {
                 } else {
                     hopper.setAutoSellTimer(-9999);
                 }
+
             } else if (inventory.getItem(slot).getItemMeta()
                     .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.craftingtitle"))) {
                 new GUICrafting(plugin, hopper, player);
+            } else if (inventory.getItem(slot).getItemMeta()
+                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.blocktitle"))) {
+                hopper.toggleAutoBreaking();
             } else if (inventory.getItem(slot).getItemMeta()
                     .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.filtertitle"))) {
                 new GUIFilter(plugin, hopper, player);
