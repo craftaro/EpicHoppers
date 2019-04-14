@@ -127,9 +127,9 @@ public class Methods {
         if (location == null)
             return "";
         String w = location.getWorld().getName();
-        double x = location.getX();
-        double y = location.getY();
-        double z = location.getZ();
+        double x = location.getBlockX();
+        double y = location.getBlockY();
+        double z = location.getBlockZ();
         String str = w + ":" + x + ":" + y + ":" + z;
         str = str.replace(".0", "").replace("/", "");
         return str;
