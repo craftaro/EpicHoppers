@@ -136,13 +136,11 @@ public class HopHandler {
                         if (!whiteList.isEmpty()
                                 && whiteList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
                             doBlacklist(hopperState, hopper, hopperContents[i].clone(), amount, i);
-                            block.getState().update();
                             continue main;
                         }
 
                         if (blackList.stream().noneMatch(itemStack -> itemStack.isSimilar(hopperContents[finalIncrement]))) {
                             if (addItem(hopperState, hopper, destinationInventory, destinationBlock, hopperContents[i], amount, i)) {
-                                block.getState().update();
                                 continue main;
                             }
                         }
