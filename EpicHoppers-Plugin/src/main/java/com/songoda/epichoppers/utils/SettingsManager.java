@@ -82,7 +82,9 @@ public class SettingsManager implements Listener {
             config.set(value, event.getMessage());
         }
 
-        this.finishEditing(player);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(EpicHoppersPlugin.getInstance(), () ->
+                this.finishEditing(player), 0L);
+
         event.setCancelled(true);
     }
 
