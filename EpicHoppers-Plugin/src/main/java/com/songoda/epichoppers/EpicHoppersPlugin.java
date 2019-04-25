@@ -63,7 +63,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     private static EpicHoppersPlugin INSTANCE;
     public References references = null;
     public Enchantment enchantmentHandler;
-    private SettingsManager settingsManager;    private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
+    private SettingsManager settingsManager;
+    private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
     private Locale locale;
 
     private HopperManager hopperManager;
