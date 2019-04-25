@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.Inventory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ public class ModuleBlockBreak implements Module {
     }
 
     @Override
-    public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
+    public void run(Hopper hopper, Inventory hopperInventory) {
         Block block = hopper.getLocation().getBlock();
 
         if (!((EHopper)hopper).isAutoBreaking()) return;

@@ -7,6 +7,7 @@ import com.songoda.epichoppers.hopper.EHopper;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -29,8 +30,8 @@ public class ModuleAutoSell implements Module {
     }
 
     @Override
-    public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
-        if (hopperBlock == null || hopperBlock.getInventory() == null) return;
+    public void run(Hopper hopper, Inventory hopperInventory) {
+        if (hopperInventory == null) return;
 
         if (((EHopper) hopper).getAutoSellTimer() == -9999) return;
 
@@ -50,11 +51,11 @@ public class ModuleAutoSell implements Module {
                     Material material = Material.valueOf(split[0]);
                     double price = Double.valueOf(split[1]);
 
-                    for (ItemStack itemStack : hopperBlock.getInventory().getContents()) {
+                    for (ItemStack itemStack : hopperInventory.getContents()) {
                         if (itemStack == null || itemStack.getType() != material) continue;
 
                         econ.depositPlayer(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
-                        hopperBlock.getInventory().removeItem(itemStack);
+                        hopperInventory.removeItem(itemStack);
                     }
                 } catch (Exception ignored) {
                 }

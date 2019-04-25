@@ -43,14 +43,14 @@ public class SettingsManager implements Listener {
             return;
         }
 
-        if (event.getInventory().getTitle().equals(pluginName + " Settings Manager")) {
+        if (event.getView().getTitle().equals(pluginName + " Settings Manager")) {
             event.setCancelled(true);
             if (clickedItem.getType().name().contains("STAINED_GLASS")) return;
 
             String type = ChatColor.stripColor(clickedItem.getItemMeta().getDisplayName());
             this.cat.put((Player) event.getWhoClicked(), type);
             this.openEditor((Player) event.getWhoClicked());
-        } else if (event.getInventory().getTitle().equals(pluginName + " Settings Editor")) {
+        } else if (event.getView().getTitle().equals(pluginName + " Settings Editor")) {
             event.setCancelled(true);
             if (clickedItem.getType().name().contains("STAINED_GLASS")) return;
 
@@ -82,7 +82,9 @@ public class SettingsManager implements Listener {
             config.set(value, event.getMessage());
         }
 
-        this.finishEditing(player);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(EpicHoppersPlugin.getInstance(), () ->
+                this.finishEditing(player), 0L);
+
         event.setCancelled(true);
     }
 
@@ -211,5 +213,20 @@ public class SettingsManager implements Listener {
             this.option = option;
         }
 
+        public List<String> getStringList() {
+            return EpicHoppersPlugin.getInstance().getConfig().getStringList(setting);
+        }
+
+        public boolean getBoolean() {
+            return EpicHoppersPlugin.getInstance().getConfig().getBoolean(setting);
+        }
+
+        public int getInt() {
+            return EpicHoppersPlugin.getInstance().getConfig().getInt(setting);
+        }
+
+        public String getString() {
+            return EpicHoppersPlugin.getInstance().getConfig().getString(setting);
+        }
     }
 }

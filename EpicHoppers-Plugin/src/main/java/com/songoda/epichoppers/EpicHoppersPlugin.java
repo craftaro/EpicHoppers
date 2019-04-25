@@ -1,6 +1,5 @@
 package com.songoda.epichoppers;
 
-import com.google.common.base.Preconditions;
 import com.songoda.epichoppers.api.EpicHoppers;
 import com.songoda.epichoppers.api.EpicHoppersAPI;
 import com.songoda.epichoppers.api.hopper.HopperManager;
@@ -12,7 +11,7 @@ import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.command.CommandManager;
 import com.songoda.epichoppers.enchantment.Enchantment;
-import com.songoda.epichoppers.handlers.HopHandler;
+import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hook.HookManager;
 import com.songoda.epichoppers.hopper.EFilter;
@@ -39,7 +38,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
@@ -57,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 
 public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
@@ -67,7 +64,6 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     public References references = null;
     public Enchantment enchantmentHandler;
     private SettingsManager settingsManager;
-    private ConfigWrapper hooksFile = new ConfigWrapper(this, "", "hooks.yml");
     private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
     private Locale locale;
 
@@ -142,7 +138,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
         // Load from file
         loadFromFile();
 
-        new HopHandler(this);
+        new HopTask(this);
         this.teleportHandler = new TeleportHandler(this);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
