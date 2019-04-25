@@ -54,7 +54,7 @@ public class ModuleSuction implements Module {
     }
 
     @Override
-    public void run(Hopper hopper, org.bukkit.block.Hopper hopperBlock) {
+    public void run(Hopper hopper, Inventory hopperInventory) {
         double radius = amount + .5;
 
         Collection<Entity> nearbyEntite = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius);
@@ -82,7 +82,7 @@ public class ModuleSuction implements Module {
 
             if (item == null) continue;
 
-            if (!canMove(hopperBlock.getInventory(), item)) {
+            if (!canMove(hopperInventory, item)) {
                 continue;
             }
             ((Item) entity).setPickupDelay(10);
@@ -92,7 +92,7 @@ public class ModuleSuction implements Module {
             float zz = (float) (0 + (Math.random() * .1));
             entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
 
-            for (ItemStack itemStack : hopperBlock.getInventory().addItem(hopItem).values()) {
+            for (ItemStack itemStack : hopperInventory.addItem(hopItem).values()) {
                 entity.getWorld().dropItemNaturally(entity.getLocation(), itemStack);
             }
             entity.remove();

@@ -213,5 +213,20 @@ public class SettingsManager implements Listener {
             this.option = option;
         }
 
+        public List<String> getStringList() {
+            return EpicHoppersPlugin.getInstance().getConfig().getStringList(setting);
+        }
+
+        public boolean getBoolean() {
+            return EpicHoppersPlugin.getInstance().getConfig().getBoolean(setting);
+        }
+
+        public int getInt() {
+            return EpicHoppersPlugin.getInstance().getConfig().getInt(setting);
+        }
+
+        public String getString() {
+            return EpicHoppersPlugin.getInstance().getConfig().getString(setting);
+        }
     }
 }

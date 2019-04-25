@@ -73,7 +73,7 @@ public class TeleportHandler {
                 boolean empty = lastHopper.getLinkedBlocks().isEmpty();
                 if (empty && i == 0) {
                     if (teleportFrom.containsKey(hopper.getLocation()))
-                        doTeleport(player, teleportFrom.get(hopper.getLocation()));
+                        doTeleport(player, teleportFrom.get(hopper.getLocation()).clone());
                     return;
                 }
 
