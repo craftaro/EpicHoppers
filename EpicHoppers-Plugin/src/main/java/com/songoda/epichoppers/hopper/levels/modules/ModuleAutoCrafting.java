@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class ModuleAutoCrafting implements Module {
 
-    private final Map<Material, Recipe> cachedRecipes = new HashMap<>();
+    private final Map<Material, Recipes> cachedRecipes = new HashMap<>();
     private final Map<Hopper, Material> lastMaterial = new HashMap<>();
 
     public static List<ItemStack> compressItemStack(List<ItemStack> target) {
@@ -43,56 +43,59 @@ public class ModuleAutoCrafting implements Module {
         
         if (hopper.getAutoCrafting() != null && canMove(hopperInventory, new ItemStack(hopper.getAutoCrafting()))) {
 
-            Recipe recipe = cachedRecipes.get(hopper.getAutoCrafting());
-            if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe)) return;
-            List<ItemStack> ingredientMap = null;
-            if (recipe instanceof ShapelessRecipe) ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
-            if (recipe instanceof ShapedRecipe)
-                ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
-            if (hopperInventory.getSize() == 0) return;
+            if (cachedRecipes.get(hopper.getAutoCrafting()) == null) return;
 
-            Map<Material, Integer> items = new HashMap<>();
-            for (ItemStack item : ingredientMap) {
-                if (item == null) continue;
-                if (!items.containsKey(item.getType())) {
-                    items.put(item.getType(), item.getAmount());
-                } else {
-                    items.put(item.getType(), items.get(item.getType()) + 1);
-                }
-            }
+            top:
+            for (Recipe recipe : cachedRecipes.get(hopper.getAutoCrafting()).getRecipes()) {
+                if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe)) continue;
+                List<ItemStack> ingredientMap = null;
+                if (recipe instanceof ShapelessRecipe) ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
+                if (recipe instanceof ShapedRecipe)
+                    ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
+                if (hopperInventory.getSize() == 0) return;
 
-            for (Material material : items.keySet()) {
-                int amt = 0;
-                ItemStack item = new ItemStack(material, items.get(material));
-                for (ItemStack i : hopperInventory.getContents()) {
-                    if (i == null) continue;
-                    if (i.getType() != material) continue;
-                    amt += i.getAmount();
-                }
-
-                if (amt < item.getAmount()) {
-                    return;
-                }
-            }
-            main2:
-            for (Material material : items.keySet()) {
-                int amtRemoved = 0;
-                ItemStack toRemove = new ItemStack(material, items.get(material));
-                for (ItemStack i : hopperInventory.getContents()) {
-                    if (i == null || i.getType() != material) continue;
-                    if (toRemove.getAmount() - amtRemoved <= i.getAmount()) {
-                        toRemove.setAmount(toRemove.getAmount() - amtRemoved);
-                        hopperInventory.removeItem(toRemove);
-                        continue main2;
+                Map<Material, Integer> items = new HashMap<>();
+                for (ItemStack item : ingredientMap) {
+                    if (item == null) continue;
+                    if (!items.containsKey(item.getType())) {
+                        items.put(item.getType(), item.getAmount());
                     } else {
-                        amtRemoved += i.getAmount();
-                        hopperInventory.removeItem(i);
+                        items.put(item.getType(), items.get(item.getType()) + 1);
                     }
                 }
-            }
-            hopperInventory.addItem(recipe.getResult());
-        }
 
+                for (Material material : items.keySet()) {
+                    int amt = 0;
+                    ItemStack item = new ItemStack(material, items.get(material));
+                    for (ItemStack i : hopperInventory.getContents()) {
+                        if (i == null) continue;
+                        if (i.getType() != material) continue;
+                        amt += i.getAmount();
+                    }
+
+                    if (amt < item.getAmount()) {
+                        continue top;
+                    }
+                }
+                main2:
+                for (Material material : items.keySet()) {
+                    int amtRemoved = 0;
+                    ItemStack toRemove = new ItemStack(material, items.get(material));
+                    for (ItemStack i : hopperInventory.getContents()) {
+                        if (i == null || i.getType() != material) continue;
+                        if (toRemove.getAmount() - amtRemoved <= i.getAmount()) {
+                            toRemove.setAmount(toRemove.getAmount() - amtRemoved);
+                            hopperInventory.removeItem(toRemove);
+                            continue main2;
+                        } else {
+                            amtRemoved += i.getAmount();
+                            hopperInventory.removeItem(i);
+                        }
+                    }
+                }
+                hopperInventory.addItem(recipe.getResult());
+            }
+        }
     }
 
     public List<Material> getBlockedItems(Hopper hopper) {
@@ -109,20 +112,24 @@ public class ModuleAutoCrafting implements Module {
             }
 
             if (!cachedRecipes.containsKey(material)) {
+                Recipes recipes = new Recipes();
                 for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(material))) {
-                    cachedRecipes.put(material, recipe);
+                    recipes.addRecipe(recipe);
                 }
+                cachedRecipes.put(material, recipes);
             } else {
-                Recipe recipe = cachedRecipes.get(material);
-                if (recipe instanceof ShapedRecipe) {
-                    for (ItemStack itemStack : ((ShapedRecipe) recipe).getIngredientMap().values()) {
-                        if (itemStack == null) continue;
-                        materials.add(itemStack.getType());
-                    }
-                } else if (recipe instanceof ShapelessRecipe) {
-                    for (ItemStack itemStack : ((ShapelessRecipe) recipe).getIngredientList()) {
-                        if (itemStack == null) continue;
-                        materials.add(itemStack.getType());
+                Recipes recipes = cachedRecipes.get(material);
+                for (Recipe recipe : recipes.getRecipes()) {
+                    if (recipe instanceof ShapedRecipe) {
+                        for (ItemStack itemStack : ((ShapedRecipe) recipe).getIngredientMap().values()) {
+                            if (itemStack == null) continue;
+                            materials.add(itemStack.getType());
+                        }
+                    } else if (recipe instanceof ShapelessRecipe) {
+                        for (ItemStack itemStack : ((ShapelessRecipe) recipe).getIngredientList()) {
+                            if (itemStack == null) continue;
+                            materials.add(itemStack.getType());
+                        }
                     }
                 }
             }
@@ -148,5 +155,22 @@ public class ModuleAutoCrafting implements Module {
             Debugger.runReport(e);
         }
         return false;
+    }
+
+    class Recipes {
+
+        private List<Recipe> recipes = new ArrayList<>();
+
+        public List<Recipe> getRecipes() {
+            return new ArrayList<>(recipes);
+        }
+
+        public void addRecipe(Recipe recipe) {
+            this.recipes.add(recipe);
+        }
+
+        public void clearRecipes() {
+            recipes.clear();
+        }
     }
 }
