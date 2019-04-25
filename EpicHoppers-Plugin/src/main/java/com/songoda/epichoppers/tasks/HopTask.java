@@ -223,8 +223,7 @@ public class HopTask extends BukkitRunnable {
             case SHULKER_BOX:
             case WHITE_SHULKER_BOX:
             case YELLOW_SHULKER_BOX:
-                if (item.getType().name().contains("SHULKER_BOX")) return false;
-                break;
+                return false;
             case BREWING_STAND: {
                 BrewerInventory brewerInventory = (BrewerInventory) destinationInventory;
 
