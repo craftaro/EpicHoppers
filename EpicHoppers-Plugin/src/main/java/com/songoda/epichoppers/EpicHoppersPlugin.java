@@ -277,7 +277,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
             // Adding in Boosts
             if (storage.containsGroup("boosts")) {
                 for (StorageRow row : storage.getRowsByGroup("boosts")) {
-                    if (row.getItems().get("uuid").asObject() != null)
+                    if (row.get("uuid").asObject() == null)
                         continue;
 
                     BoostData boostData = new BoostData(
