@@ -138,8 +138,6 @@ public class HopTask extends BukkitRunnable {
                             continue main;
                         }
                     } else {
-                        if (hopper.getFilter().getEndPoint() == null) continue;
-
                         doBlacklist(hopperInventory, hopper, hopperContents[i].clone(), amount, i);
                         continue main;
                     }
@@ -151,6 +149,7 @@ public class HopTask extends BukkitRunnable {
 
     private void doBlacklist(Inventory hopperInventory, com.songoda.epichoppers.api.hopper.Hopper hopper, ItemStack item, int amt, int place) {
         Location dest = hopper.getFilter().getEndPoint();
+        if (hopper.getFilter().getEndPoint() == null) return;
         if (!dest.getWorld().isChunkLoaded(dest.getBlockX() >> 4, dest.getBlockZ() >> 4))
             return;
 
