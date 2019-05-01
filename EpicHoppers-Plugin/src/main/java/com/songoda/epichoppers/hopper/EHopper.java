@@ -6,7 +6,7 @@ import com.songoda.epichoppers.api.hopper.Filter;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.api.hopper.levels.Level;
-import com.songoda.epichoppers.gui.GUIHoppperOverview;
+import com.songoda.epichoppers.gui.GUIOverview;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
@@ -34,7 +34,7 @@ public class EHopper implements Hopper {
     private TeleportTrigger teleportTrigger;
     private Material autoCrafting;
     private int autoSellTimer = 0;
-    private boolean autoBreaking = true;
+    private boolean autoBreaking = false;
 
     public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
         this.location = location;
@@ -60,7 +60,7 @@ public class EHopper implements Hopper {
 
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             if (!player.hasPermission("epichoppers.overview")) return;
-            new GUIHoppperOverview(instance, this, player);
+            new GUIOverview(instance, this, player);
         } catch (Exception e) {
             Debugger.runReport(e);
         }

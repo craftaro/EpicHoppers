@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GUIHoppperOverview extends AbstractGUI {
+public class GUIOverview extends AbstractGUI {
 
     private final EpicHoppersPlugin plugin;
     private final EHopper hopper;
 
     private int task;
 
-    public GUIHoppperOverview(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
+    public GUIOverview(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
         this.hopper = hopper;
