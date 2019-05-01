@@ -4,6 +4,9 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.utils.SettingsManager;
+import me.goodandevil.skyblock.SkyBlock;
+import me.goodandevil.skyblock.stackable.Stackable;
+import me.goodandevil.skyblock.stackable.StackableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,6 +27,8 @@ import java.util.*;
  * Created by songoda on 3/14/2017.
  */
 public class HopTask extends BukkitRunnable {
+
+    // Hop to the bop to the be bop top.
 
     private static EpicHoppersPlugin plugin;
 
@@ -68,12 +73,14 @@ public class HopTask extends BukkitRunnable {
             // Fetch all hopper contents.
             ItemStack[] hopperContents = hopperInventory.getContents();
 
+            // Get hopper orientation.
+            HopperDirection hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
+            Location check = hopperDirection.getLocation(location);
+
             Inventory override = null;
             List<Location> linked = hopper.getLinkedBlocks();
 
             if (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()) {
-                HopperDirection hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
-                Location check = hopperDirection.getLocation(location);
 
                 linked.add(check);
 
@@ -87,6 +94,31 @@ public class HopTask extends BukkitRunnable {
                 }
 
                 if (linked.isEmpty()) continue;
+            }
+
+
+            // Support for FabledSkyBlock stackables.
+            if (Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock")) {
+                StackableManager stackableManager = SkyBlock.getInstance().getStackableManager();
+                if (stackableManager != null && stackableManager.isStacked(check)) {
+                    Stackable stackable = stackableManager.getStack(check, check.getBlock().getType());
+
+                    for (int i = 0; i < 5; i++) {
+                        if (hopperContents[i] == null) continue;
+                        ItemStack item = hopperContents[i].clone();
+
+                        if (item.getType() == stackable.getMaterial()) {
+                            stackable.addOne();
+                            if (item.getAmount() == 1) {
+                                hopperInventory.setItem(i, null);
+                            } else {
+                                item.setAmount(item.getAmount() - 1);
+                                hopperInventory.setItem(i, item);
+                            }
+                            return;
+                        }
+                    }
+                }
             }
 
             for (Location destinationLocation : linked) {
