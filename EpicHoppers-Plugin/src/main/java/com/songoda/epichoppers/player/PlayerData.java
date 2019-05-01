@@ -13,8 +13,6 @@ public class PlayerData {
 
     private SyncType syncType = null; // Null means off.
 
-    private Date lastTeleport = null; // Null means off.
-
     PlayerData(UUID playerUUID) {
         this.playerUUID = playerUUID;
     }
@@ -33,13 +31,5 @@ public class PlayerData {
 
     public void setSyncType(SyncType syncType) {
         this.syncType = syncType;
-    }
-
-    public Date getLastTeleport() {
-        return lastTeleport;
-    }
-
-    public void setLastTeleport(Date lastTeleport) {
-        this.lastTeleport = lastTeleport;
     }
 }

@@ -285,7 +285,7 @@ public class GUIOverview extends AbstractGUI {
                     .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.perltitle"))) {
                 if (type == ClickType.LEFT) {
                     if (hopper.getLinkedBlocks() != null) {
-                        plugin.getTeleportHandler().tpPlayer(player, hopper);
+                        plugin.getTeleportHandler().tpEntity(player, hopper);
                         player.closeInventory();
                     }
                 } else {

@@ -3,6 +3,7 @@ package com.songoda.epichoppers.utils;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -93,13 +94,13 @@ public class Methods {
         return null;
     }
 
-    public static void doParticles(Player p, Location location) {
+    public static void doParticles(Entity entity, Location location) {
         try {
             EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
             location.setX(location.getX() + .5);
             location.setY(location.getY() + .5);
             location.setZ(location.getZ() + .5);
-            p.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
+            entity.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
         } catch (Exception e) {
             Debugger.runReport(e);
         }

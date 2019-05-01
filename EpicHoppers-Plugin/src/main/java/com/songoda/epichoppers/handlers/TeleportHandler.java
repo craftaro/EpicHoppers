@@ -3,24 +3,29 @@ package com.songoda.epichoppers.handlers;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
-import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class TeleportHandler {
 
     //Teleport from - teleport 2
     private final Map<Location, Location> teleportFrom = new HashMap<>();
+    private final Map<UUID, Long> lastTeleports = new HashMap<>();
 
     private EpicHoppersPlugin instance;
 
@@ -34,36 +39,39 @@ public class TeleportHandler {
     }
 
     private void teleportRunner() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!instance.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers") || !player.hasPermission("EpicHoppers.Teleport")) {
-                continue;
-            }
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (!(entity instanceof LivingEntity) ||entity.getType() == EntityType.ARMOR_STAND) continue;
 
-            Location location = player.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
-
-            if (!instance.getHopperManager().isHopper(location)) {
-                continue;
-            }
-
-            Hopper hopper = instance.getHopperManager().getHopper(location);
-
-            if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON) continue;
-
-            PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
-
-            if (playerData.getLastTeleport() != null) {
-                long duration = (new Date()).getTime() - playerData.getLastTeleport().getTime();
-                if (duration <= 5 * 1000) {
+                if (!instance.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers")
+                        || entity instanceof Player && !((Player)entity).hasPermission("EpicHoppers.Teleport")) {
                     continue;
                 }
-            }
 
-            tpPlayer(player, hopper);
-            playerData.setLastTeleport(new Date());
+                Location location = entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
+
+                if (!instance.getHopperManager().isHopper(location)) {
+                    continue;
+                }
+
+                Hopper hopper = instance.getHopperManager().getHopper(location);
+
+                if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON) continue;
+
+                if (lastTeleports.containsKey(entity.getUniqueId())) {
+                    long duration = (new Date()).getTime() - new Date(lastTeleports.get(entity.getUniqueId())).getTime();
+                    if (duration <= 5 * 1000) {
+                        continue;
+                    }
+                }
+
+                tpEntity(entity, hopper);
+                lastTeleports.put(entity.getUniqueId(), System.currentTimeMillis());
+            }
         }
     }
 
-    public void tpPlayer(Player player, Hopper hopper) {
+    public void tpEntity(Entity entity, Hopper hopper) {
         try {
             if (hopper == null || !instance.getHopperManager().isHopper(hopper.getLocation())) return;
 
@@ -73,7 +81,7 @@ public class TeleportHandler {
                 boolean empty = lastHopper.getLinkedBlocks().isEmpty();
                 if (empty && i == 0) {
                     if (teleportFrom.containsKey(hopper.getLocation()))
-                        doTeleport(player, teleportFrom.get(hopper.getLocation()).clone());
+                        doTeleport(entity, teleportFrom.get(hopper.getLocation()).clone());
                     return;
                 }
 
@@ -84,21 +92,21 @@ public class TeleportHandler {
             }
 
             teleportFrom.put(lastHopper.getLocation(), hopper.getLocation());
-            doTeleport(player, lastHopper.getLocation());
+            doTeleport(entity, lastHopper.getLocation());
         } catch (Exception e) {
             Debugger.runReport(e);
         }
     }
 
-    private void doTeleport(Player player, Location location) {
+    private void doTeleport(Entity entity, Location location) {
         location.add(.0, 1, .0);
-        location.setPitch(player.getLocation().getPitch());
-        location.setDirection(player.getLocation().getDirection());
-        Methods.doParticles(player, location);
-        Methods.doParticles(player, player.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation());
-        player.teleport(location);
+        location.setPitch(entity.getLocation().getPitch());
+        location.setDirection(entity.getLocation().getDirection());
+        Methods.doParticles(entity, location);
+        Methods.doParticles(entity, entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation());
+        entity.teleport(location);
 
         if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
-            player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
+            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
     }
 }

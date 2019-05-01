@@ -8,7 +8,6 @@ import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -18,8 +17,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -44,11 +41,11 @@ public class InteractListeners implements Listener {
             if (instance.getHopperManager().isHopper(down)) {
                 Hopper hopper = instance.getHopperManager().getHopper(down);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
-                    instance.getTeleportHandler().tpPlayer(player, hopper);
+                    instance.getTeleportHandler().tpEntity(player, hopper);
             } else if (instance.getHopperManager().isHopper(location)) {
                 Hopper hopper = instance.getHopperManager().getHopper(location);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
-                    instance.getTeleportHandler().tpPlayer(player, hopper);
+                    instance.getTeleportHandler().tpEntity(player, hopper);
             }
         }
     }
