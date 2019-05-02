@@ -53,7 +53,9 @@ public class EHopper implements Hopper {
 
     public void overview(Player player) {
         try {
-            if (lastPlayer != null && lastPlayer != player.getUniqueId()) {
+            if (lastPlayer != null
+                    && lastPlayer != player.getUniqueId()
+                    && Bukkit.getPlayer(lastPlayer) != null) {
                 Bukkit.getPlayer(lastPlayer).closeInventory();
             }
             if (placedBy == null) placedBy = player.getUniqueId();
