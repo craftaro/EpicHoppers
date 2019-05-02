@@ -295,11 +295,7 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
     }
 
     private void loadLevelManager() {
-        File folder = getDataFolder();
-        File voucherFile = new File(folder, "levels.yml");
-        if (!voucherFile.exists()) {
-            saveResource("levels.yml", true);
-        }
+        saveResource("levels.yml", false);
 
         // Load an instance of LevelManager
         levelManager = new ELevelManager();

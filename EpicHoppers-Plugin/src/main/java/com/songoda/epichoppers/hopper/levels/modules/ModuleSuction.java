@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -98,6 +99,16 @@ public class ModuleSuction implements Module {
             entity.remove();
             break;
         }
+    }
+
+    @Override
+    public ItemStack getGUIButton(Hopper hopper) {
+        return null;
+    }
+
+    @Override
+    public void runButtonPress(Player player, Hopper hopper) {
+
     }
 
     @Override

@@ -4,13 +4,18 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +64,28 @@ public class ModuleBlockBreak implements Module {
             above.breakNaturally();
         }
         blockTick.remove(block);
+    }
+
+    @Override
+    public ItemStack getGUIButton(Hopper hopper) {
+        ItemStack block = new ItemStack(Material.IRON_ORE, 1);
+        ItemMeta blockmeta = block.getItemMeta();
+        blockmeta.setDisplayName(EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.blocktitle"));
+        ArrayList<String> loreblock = new ArrayList<>();
+        String[] parts = EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.blocklore",
+                ((EHopper)hopper).isAutoBreaking() ? EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")
+                        : EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.disabled")).split("\\|");
+        for (String line : parts) {
+            loreblock.add(Methods.formatText(line));
+        }
+        blockmeta.setLore(loreblock);
+        block.setItemMeta(blockmeta);
+        return block;
+    }
+
+    @Override
+    public void runButtonPress(Player player, Hopper hopper) {
+        ((EHopper)hopper).toggleAutoBreaking();
     }
 
     @Override
