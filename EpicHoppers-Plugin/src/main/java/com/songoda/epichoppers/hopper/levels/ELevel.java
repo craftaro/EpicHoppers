@@ -26,19 +26,27 @@ public class ELevel implements Level {
         this.autoSell = autoSell;
         this.registeredModules = registeredModules;
 
+        buildDescription();
+
+    }
+
+    public void buildDescription() {
         EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+
+        description.clear();
 
         description.add(instance.getLocale().getMessage("interface.hopper.range", range));
         description.add(instance.getLocale().getMessage("interface.hopper.amount", amount));
         if (linkAmount != 1)
             description.add(instance.getLocale().getMessage("interface.hopper.linkamount", linkAmount));
-        if (filter) description.add(instance.getLocale().getMessage("interface.hopper.filter", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
-        if (teleport) description.add(instance.getLocale().getMessage("interface.hopper.teleport", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
+        if (filter)
+            description.add(instance.getLocale().getMessage("interface.hopper.filter", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
+        if (teleport)
+            description.add(instance.getLocale().getMessage("interface.hopper.teleport", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
 
         for (Module module : registeredModules) {
             description.add(module.getDescription());
         }
-
     }
 
     @Override
@@ -99,6 +107,7 @@ public class ELevel implements Level {
     @Override
     public void addModule(Module module) {
         registeredModules.add(module);
+        buildDescription();
     }
 
 }

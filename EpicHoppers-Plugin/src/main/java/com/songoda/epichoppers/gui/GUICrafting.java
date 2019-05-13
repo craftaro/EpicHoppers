@@ -16,10 +16,10 @@ public class GUICrafting extends AbstractGUI {
     private final EpicHoppersPlugin plugin;
     private final EHopper hopper;
 
-    public GUICrafting(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
+    public GUICrafting(EpicHoppersPlugin plugin, Hopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
-        this.hopper = hopper;
+        this.hopper = (EHopper)hopper;
 
         init(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Crafting"), 27);
     }

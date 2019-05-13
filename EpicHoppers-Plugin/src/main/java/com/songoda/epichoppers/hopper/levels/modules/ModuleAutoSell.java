@@ -4,13 +4,17 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.utils.Methods;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ModuleAutoSell implements Module {
@@ -63,6 +67,32 @@ public class ModuleAutoSell implements Module {
             ((EHopper) hopper).setAutoSellTimer(timeOut);
         }
         ((EHopper) hopper).setAutoSellTimer(((EHopper) hopper).getAutoSellTimer() - hopperTickRate);
+    }
+
+    @Override
+    public ItemStack getGUIButton(Hopper hopper) {
+        EHopper eHopper = (EHopper)hopper;
+        ItemStack sell = new ItemStack(Material.SUNFLOWER, 1);
+        ItemMeta sellmeta = sell.getItemMeta();
+        sellmeta.setDisplayName(EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.selltitle"));
+        ArrayList<String> loresell = new ArrayList<>();
+        String[] parts = EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.selllore", eHopper.getAutoSellTimer() == -9999 ? "\u221E" : (int) Math.floor(eHopper.getAutoSellTimer() / 20)).split("\\|");
+        for (String line : parts) {
+            loresell.add(Methods.formatText(line));
+        }
+        sellmeta.setLore(loresell);
+        sell.setItemMeta(sellmeta);
+        return sell;
+    }
+
+    @Override
+    public void runButtonPress(Player player, Hopper hopper) {
+        EHopper eHopper = (EHopper)hopper;
+        if (eHopper.getAutoSellTimer() == -9999) {
+            eHopper.setAutoSellTimer(0);
+        } else {
+            eHopper.setAutoSellTimer(-9999);
+        }
     }
 
     @Override

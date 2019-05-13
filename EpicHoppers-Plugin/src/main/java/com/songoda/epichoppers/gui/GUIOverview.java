@@ -4,6 +4,7 @@ import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.CostType;
 import com.songoda.epichoppers.api.hopper.TeleportTrigger;
 import com.songoda.epichoppers.api.hopper.levels.Level;
+import com.songoda.epichoppers.api.hopper.levels.modules.Module;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.player.SyncType;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GUIOverview extends AbstractGUI {
 
@@ -67,39 +69,6 @@ public class GUIOverview extends AbstractGUI {
         }
         filtermeta.setLore(lorefilter);
         filter.setItemMeta(filtermeta);
-
-        ItemStack crafting = new ItemStack(Material.CRAFTING_TABLE, 1);
-        ItemMeta craftingmeta = crafting.getItemMeta();
-        craftingmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.craftingtitle"));
-        ArrayList<String> lorecrafting = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
-        for (String line : parts) {
-            lorecrafting.add(Methods.formatText(line));
-        }
-        craftingmeta.setLore(lorecrafting);
-        crafting.setItemMeta(craftingmeta);
-
-        ItemStack sell = new ItemStack(Material.SUNFLOWER, 1);
-        ItemMeta sellmeta = sell.getItemMeta();
-        sellmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.selltitle"));
-        ArrayList<String> loresell = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.selllore", hopper.getAutoSellTimer() == -9999 ? "\u221E" : (int) Math.floor(hopper.getAutoSellTimer() / 20)).split("\\|");
-        for (String line : parts) {
-            loresell.add(Methods.formatText(line));
-        }
-        sellmeta.setLore(loresell);
-        sell.setItemMeta(sellmeta);
-
-        ItemStack block = new ItemStack(Material.IRON_ORE, 1);
-        ItemMeta blockmeta = block.getItemMeta();
-        blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.blocktitle"));
-        ArrayList<String> loreblock = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.blocklore", hopper.isAutoBreaking() ? plugin.getLocale().getMessage("general.word.enabled") : plugin.getLocale().getMessage("general.word.disabled")).split("\\|");
-        for (String line : parts) {
-            loreblock.add(Methods.formatText(line));
-        }
-        blockmeta.setLore(loreblock);
-        block.setItemMeta(blockmeta);
 
 
         ItemStack item = new ItemStack(Material.HOPPER, 1);
@@ -172,19 +141,20 @@ public class GUIOverview extends AbstractGUI {
         layouts.put(4, new Integer[]{23, 3, 5, 21});
         layouts.put(5, new Integer[]{23, 3, 5, 21, 22});
         layouts.put(6, new Integer[]{23, 3, 4, 5, 21, 22});
+        layouts.put(7, new Integer[]{23, 3, 4, 5, 21, 22, 12});
+        layouts.put(8, new Integer[]{23, 3, 4, 5, 21, 22, 12, 14});
 
         int amount = 1;
 
         boolean canFilter = level.isFilter() || player.hasPermission("EpicHoppers.Filter");
         boolean canTeleport = level.isTeleport() || player.hasPermission("EpicHoppers.Teleport");
-        boolean canCraft = level.getRegisteredModules().removeIf(e -> e.getName().equals("AutoCrafting"));
-        boolean canAutoSell = level.getAutoSell() != 0;
-        boolean canBreak = level.getRegisteredModules().removeIf(e -> e.getName().equals("BlockBreak"));
         if (canFilter) amount++;
         if (canTeleport) amount++;
-        if (canAutoSell) amount++;
-        if (canCraft) amount++;
-        if (canBreak) amount++;
+
+        List<Module> modules = level.getRegisteredModules().stream().filter(module ->
+                module.getGUIButton(hopper) != null).collect(Collectors.toList());
+
+        amount += modules.size();
 
         Integer[] layout = layouts.get(amount);
 
@@ -199,15 +169,11 @@ public class GUIOverview extends AbstractGUI {
             } else if (canFilter) {
                 inventory.setItem(slot, filter);
                 canFilter = false;
-            } else if (canCraft) {
-                inventory.setItem(slot, crafting);
-                canCraft = false;
-            } else if (canAutoSell) {
-                inventory.setItem(slot, sell);
-                canAutoSell = false;
-            } else if (canBreak) {
-                inventory.setItem(slot, block);
-                canBreak = false;
+            } else {
+                if (modules.isEmpty()) break;
+                Module module = modules.get(0);
+                modules.remove(module);
+                inventory.setItem(slot, module.getGUIButton(hopper));
             }
         }
 
@@ -264,21 +230,14 @@ public class GUIOverview extends AbstractGUI {
         }));
 
         registerClickable(3, 23, ((player, inventory, cursor, slot, type) -> {
-            if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.selltitle"))) {
-                if (hopper.getAutoSellTimer() == -9999) {
-                    hopper.setAutoSellTimer(0);
-                } else {
-                    hopper.setAutoSellTimer(-9999);
-                }
+            for (Module module : hopper.getLevel().getRegisteredModules()) {
+                if (module.getGUIButton(hopper) != null && !module.getGUIButton(hopper).getItemMeta()
+                        .getDisplayName().equalsIgnoreCase(inventory.getItem(slot).getItemMeta().getDisplayName()))
+                    continue;
 
-            } else if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.craftingtitle"))) {
-                new GUICrafting(plugin, hopper, player);
-            } else if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.blocktitle"))) {
-                hopper.toggleAutoBreaking();
-            } else if (inventory.getItem(slot).getItemMeta()
+                module.runButtonPress(player, hopper);
+            }
+            if (inventory.getItem(slot).getItemMeta()
                     .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.filtertitle"))) {
                 new GUIFilter(plugin, hopper, player);
             } else if (inventory.getItem(slot).getItemMeta()

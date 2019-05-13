@@ -3,10 +3,14 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
+import com.songoda.epichoppers.gui.GUICrafting;
 import com.songoda.epichoppers.utils.Debugger;
+import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,6 +100,26 @@ public class ModuleAutoCrafting implements Module {
                 hopperInventory.addItem(recipe.getResult());
             }
         }
+    }
+
+    @Override
+    public ItemStack getGUIButton(Hopper hopper) {
+        ItemStack crafting = new ItemStack(Material.CRAFTING_TABLE, 1);
+        ItemMeta craftingmeta = crafting.getItemMeta();
+        craftingmeta.setDisplayName(EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.craftingtitle"));
+        ArrayList<String> lorecrafting = new ArrayList<>();
+        String[] parts = EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
+        for (String line : parts) {
+            lorecrafting.add(Methods.formatText(line));
+        }
+        craftingmeta.setLore(lorecrafting);
+        crafting.setItemMeta(craftingmeta);
+        return crafting;
+    }
+
+    @Override
+    public void runButtonPress(Player player, Hopper hopper) {
+        new GUICrafting(EpicHoppersPlugin.getInstance(), hopper, player);
     }
 
     public List<Material> getBlockedItems(Hopper hopper) {
