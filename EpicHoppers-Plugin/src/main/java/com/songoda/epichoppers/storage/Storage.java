@@ -3,6 +3,7 @@ package com.songoda.epichoppers.storage;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.boost.BoostData;
+import com.songoda.epichoppers.hopper.EHopper;
 import com.songoda.epichoppers.utils.ConfigWrapper;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Material;
@@ -50,6 +51,7 @@ public abstract class Storage {
                     new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
                     new StorageItem("blacklist", hopper.getFilter().getBlackList()),
                     new StorageItem("void", hopper.getFilter().getVoidList()),
+                    new StorageItem("autobreak", ((EHopper)hopper).isAutoBreaking()),
                     new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Methods.serializeLocation(hopper.getFilter().getEndPoint())));
         }
 
