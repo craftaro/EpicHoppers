@@ -42,6 +42,10 @@ public class GUIOverview extends AbstractGUI {
 
     @Override
     protected void constructGUI() {
+        inventory.clear();
+        resetClickables();
+        registerClickables();
+
         plugin.getPlayerDataManager().getPlayerData(player).setLastHopper(hopper);
 
         Level level = hopper.getLevel();
@@ -179,15 +183,27 @@ public class GUIOverview extends AbstractGUI {
 
         if (plugin.getConfig().getBoolean("Main.Upgrade With XP")
                 && player.hasPermission("EpicHoppers.Upgrade.XP")
-                && level.getCostExperience() != -1)
+                && level.getCostExperience() != -1) {
             inventory.setItem(11, itemXP);
+
+            registerClickable(11, ((player, inventory, cursor, slot, type) -> {
+                hopper.upgrade(player, CostType.EXPERIENCE);
+                this.hopper.overview(player);
+            }));
+        }
 
         inventory.setItem(13, item);
 
         if (plugin.getConfig().getBoolean("Main.Upgrade With Economy")
                 && player.hasPermission("EpicHoppers.Upgrade.ECO")
-                && level.getCostEconomy() != -1)
+                && level.getCostEconomy() != -1) {
             inventory.setItem(15, itemECO);
+
+            registerClickable(15, ((player, inventory, cursor, slot, type) -> {
+                hopper.upgrade(player, CostType.ECONOMY);
+                this.hopper.overview(player);
+            }));
+        }
 
         inventory.setItem(0, Methods.getBackgroundGlass(true));
         inventory.setItem(1, Methods.getBackgroundGlass(true));
@@ -215,19 +231,6 @@ public class GUIOverview extends AbstractGUI {
 
     @Override
     protected void registerClickables() {
-        registerClickable(11, ((player, inventory, cursor, slot, type) -> {
-            if (!player.hasPermission("EpicHoppers.Upgrade.XP")
-                    || hopper.getLevel().getCostExperience() == -1) return;
-            hopper.upgrade(player, CostType.EXPERIENCE);
-            this.hopper.overview(player);
-        }));
-
-        registerClickable(15, ((player, inventory, cursor, slot, type) -> {
-            if (!player.hasPermission("EpicHoppers.Upgrade.ECO")
-                    || hopper.getLevel().getCostExperience() == -1) return;
-            hopper.upgrade(player, CostType.ECONOMY);
-            this.hopper.overview(player);
-        }));
 
         registerClickable(3, 23, ((player, inventory, cursor, slot, type) -> {
             for (Module module : hopper.getLevel().getRegisteredModules()) {

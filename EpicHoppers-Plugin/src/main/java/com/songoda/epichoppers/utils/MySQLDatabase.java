@@ -34,6 +34,7 @@ public class MySQLDatabase {
                             "\t`blacklist` TEXT NULL,\n" +
                             "\t`void` TEXT NULL,\n" +
                             "\t`black` TEXT NULL\n" +
+                            "\t`autobreak` TEXT NULL\n" +
                             ")");
 
             connection.createStatement().execute("CREATE TABLE IF NOT EXISTS `" + instance.getConfig().getString("Database.Prefix") + "boosts` (\n" +

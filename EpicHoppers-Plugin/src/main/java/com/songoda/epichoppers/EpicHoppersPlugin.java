@@ -261,6 +261,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     String blackLoc = row.get("black").asString();
                     Location black = blackLoc == null ? null : Methods.unserializeLocation(blackLoc);
 
+                    boolean autoBreak = row.get("autobreak").asBoolean();
+
                     EFilter filter = new EFilter();
 
                     filter.setWhiteList(whiteList);
@@ -269,6 +271,8 @@ public class EpicHoppersPlugin extends JavaPlugin implements EpicHoppers {
                     filter.setEndPoint(black);
 
                     EHopper hopper = new EHopper(location, levelManager.getLevel(level), lastPlayer, placedBy, blocks, filter, teleportTrigger, autoCrafting);
+
+                    if (autoBreak) hopper.toggleAutoBreaking();
 
                     hopperManager.addHopper(location, hopper);
                 }
