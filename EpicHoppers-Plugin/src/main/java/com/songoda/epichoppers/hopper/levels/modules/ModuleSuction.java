@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.epichoppers.EpicHoppersPlugin;
 import com.songoda.epichoppers.api.hopper.Hopper;
 import com.songoda.epichoppers.api.hopper.levels.modules.Module;
@@ -8,17 +9,14 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import com.bgsoftware.wildstacker.api.WildStackerAPI;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 
 public class ModuleSuction implements Module {
@@ -58,33 +56,29 @@ public class ModuleSuction implements Module {
     public void run(Hopper hopper, Inventory hopperInventory) {
         double radius = amount + .5;
 
-        Collection<Entity> nearbyEntite = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius);
+        hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius).stream()
+                .filter(entity -> entity instanceof Item
+                        && entity.getTicksLived() > 10
+                        && entity.getLocation().getBlock().getType() != Material.HOPPER).forEach(entity -> {
 
-        for (Entity entity : nearbyEntite) {
-            if (!(entity instanceof Item) || entity.getTicksLived() < 10 || entity.getLocation().getBlock().getType() == Material.HOPPER) {
-                continue;
-            }
+            Item item = (Item) entity;
+            ItemStack itemStack = setMax(item.getItemStack().clone(), 0, true);
 
-            ItemStack hopItem = ((Item) entity).getItemStack().clone();
-            if (hopItem.getType().name().contains("SHULKER_BOX"))
-                continue;
+            if (itemStack.getType().name().contains("SHULKER_BOX"))
+                return;
 
-            if (hopItem.hasItemMeta() && hopItem.getItemMeta().hasDisplayName() &&
-                    StringUtils.substring(hopItem.getItemMeta().getDisplayName(), 0, 3).equals("***")) {
-                continue; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
+            if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() &&
+                    StringUtils.substring(itemStack.getItemMeta().getDisplayName(), 0, 3).equals("***")) {
+                return; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
             }
             if (entity.hasMetadata("grabbed") || !entity.isOnGround())
-                continue;
+                return;
 
             if (wildStacker)
-                hopItem.setAmount(WildStackerAPI.getItemAmount((Item) entity));
+                itemStack.setAmount(WildStackerAPI.getItemAmount((Item) entity));
 
-            ItemStack item = setMax(((Item) entity).getItemStack(), 0, true);
-
-            if (item == null) continue;
-
-            if (!canMove(hopperInventory, item)) {
-                continue;
+            if (!canMove(hopperInventory, itemStack)) {
+                return;
             }
             ((Item) entity).setPickupDelay(10);
             entity.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
@@ -93,12 +87,11 @@ public class ModuleSuction implements Module {
             float zz = (float) (0 + (Math.random() * .1));
             entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
 
-            for (ItemStack itemStack : hopperInventory.addItem(hopItem).values()) {
-                entity.getWorld().dropItemNaturally(entity.getLocation(), itemStack);
+            for (ItemStack is : hopperInventory.addItem(itemStack).values()) {
+                entity.getWorld().dropItemNaturally(entity.getLocation(), is);
             }
             entity.remove();
-            break;
-        }
+        });
     }
 
     @Override
