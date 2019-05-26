@@ -1,41 +1,50 @@
 package com.songoda.epichoppers.hopper.levels;
 
-import com.songoda.epichoppers.api.hopper.levels.Level;
-import com.songoda.epichoppers.api.hopper.levels.LevelManager;
-import com.songoda.epichoppers.api.hopper.levels.modules.Module;
+import com.songoda.epichoppers.hopper.levels.modules.Module;
+import org.bukkit.ChatColor;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-public class ELevelManager implements LevelManager {
+public class LevelManager {
 
-    private final NavigableMap<Integer, ELevel> registeredLevels = new TreeMap<>();
+    private final NavigableMap<Integer, Level> registeredLevels = new TreeMap<>();
 
-    @Override
+    
     public void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, int autoSell, ArrayList<Module> modules) {
-        registeredLevels.put(level, new ELevel(level, costExperience, costEconomy, range, amount, filter, teleport, linkAmount, autoSell, modules));
+        registeredLevels.put(level, new Level(level, costExperience, costEconomy, range, amount, filter, teleport, linkAmount, autoSell, modules));
     }
 
-    @Override
+
     public Level getLevel(int level) {
         return registeredLevels.get(level);
     }
 
-    @Override
+    public Level getLevel(ItemStack item) {
+        if (item.getItemMeta().getDisplayName().contains(":")) {
+            String arr[] = item.getItemMeta().getDisplayName().replace(String.valueOf(ChatColor.COLOR_CHAR), "").split(":");
+            return getLevel(Integer.parseInt(arr[0]));
+        } else {
+            return getLowestLevel();
+        }
+    }
+
+    
     public Level getLowestLevel() {
         return registeredLevels.firstEntry().getValue();
     }
 
-    @Override
+
     public Level getHighestLevel() {
         return registeredLevels.lastEntry().getValue();
     }
 
-    @Override
+
     public boolean isLevel(int level) {
         return registeredLevels.containsKey(level);
     }
 
-    @Override
+
     public Map<Integer, Level> getLevels() {
         return Collections.unmodifiableMap(registeredLevels);
     }

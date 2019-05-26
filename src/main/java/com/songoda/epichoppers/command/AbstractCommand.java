@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.command;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
@@ -41,9 +41,9 @@ public abstract class AbstractCommand {
         subCommand.add(command);
     }
 
-    protected abstract ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args);
+    protected abstract ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args);
 
-    protected abstract List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args);
+    protected abstract List<String> onTab(EpicHoppers instance, CommandSender sender, String... args);
 
     public abstract String getPermissionNode();
 

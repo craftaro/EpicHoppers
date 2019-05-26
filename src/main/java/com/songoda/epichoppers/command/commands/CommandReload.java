@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.command.commands;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.command.CommandSender;
@@ -14,14 +14,14 @@ public class CommandReload extends AbstractCommand {
     }
 
     @Override
-    protected ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
         instance.reload();
         sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Configuration and Language files reloaded."));
         return ReturnType.SUCCESS;
     }
 
     @Override
-    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected List<String> onTab(EpicHoppers instance, CommandSender sender, String... args) {
         return null;
     }
 

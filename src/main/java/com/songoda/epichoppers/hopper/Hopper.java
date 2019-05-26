@@ -1,20 +1,17 @@
 package com.songoda.epichoppers.hopper;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.CostType;
-import com.songoda.epichoppers.api.hopper.Filter;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.TeleportTrigger;
-import com.songoda.epichoppers.api.hopper.levels.Level;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUIOverview;
+import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.player.PlayerData;
-import com.songoda.epichoppers.utils.Debugger;
+import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
-import net.milkbowl.vault.economy.Economy;
+import com.songoda.epichoppers.utils.ServerVersion;
+import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +20,7 @@ import java.util.UUID;
 /**
  * Created by songoda on 3/14/2017.
  */
-public class EHopper implements Hopper {
+public class Hopper {
 
     private Location location;
     private Level level;
@@ -32,11 +29,11 @@ public class EHopper implements Hopper {
     private List<Location> linkedBlocks;
     private Filter filter;
     private TeleportTrigger teleportTrigger;
-    private Material autoCrafting;
+    private ItemStack autoCrafting;
     private int autoSellTimer = 0;
     private boolean autoBreaking = false;
 
-    public EHopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+    public Hopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
         this.location = location;
         this.level = level;
         this.linkedBlocks = linkedBlocks;
@@ -47,12 +44,11 @@ public class EHopper implements Hopper {
         this.autoCrafting = autoCrafting;
     }
 
-    public EHopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, Material autoCrafting) {
+    public Hopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
         this(block.getLocation(), level, lastPlayer, placedBy, linkedBlocks, filter, teleportTrigger, autoCrafting);
     }
 
     public void overview(Player player) {
-        try {
             if (lastPlayer != null
                     && lastPlayer != player.getUniqueId()
                     && Bukkit.getPlayer(lastPlayer) != null) {
@@ -60,35 +56,28 @@ public class EHopper implements Hopper {
             }
             if (placedBy == null) placedBy = player.getUniqueId();
 
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        EpicHoppers instance = EpicHoppers.getInstance();
             if (!player.hasPermission("epichoppers.overview")) return;
             new GUIOverview(instance, this, player);
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
     }
 
     public void upgrade(Player player, CostType type) {
-        try {
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
-            if (instance.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) {
+        EpicHoppers plugin = EpicHoppers.getInstance();
+        if (plugin.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) {
 
-                Level level = instance.getLevelManager().getLevel(this.level.getLevel() + 1);
+            Level level = plugin.getLevelManager().getLevel(this.level.getLevel() + 1);
                 int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
 
                 if (type == CostType.ECONOMY) {
-                    if (instance.getServer().getPluginManager().getPlugin("Vault") != null) {
-                        RegisteredServiceProvider<Economy> rsp = instance.getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
-                        net.milkbowl.vault.economy.Economy econ = rsp.getProvider();
-                        if (econ.has(player, cost)) {
-                            econ.withdrawPlayer(player, cost);
-                            upgradeFinal(level, player);
-                        } else {
-                            player.sendMessage(instance.getLocale().getMessage("event.upgrade.cannotafford"));
-                        }
-                    } else {
-                        player.sendMessage("Vault is not installed.");
+                    if (plugin.getEconomy() == null) {
+                        player.sendMessage("Economy not enabled.");
+                        return;
                     }
+                    if (!plugin.getEconomy().hasBalance(player, cost)) {
+                        player.sendMessage(plugin.references.getPrefix() + plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford"));
+                        return;
+                    }
+                    upgradeFinal(level, player);
                 } else if (type == CostType.EXPERIENCE) {
                     if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
                         if (player.getGameMode() != GameMode.CREATIVE) {
@@ -96,18 +85,14 @@ public class EHopper implements Hopper {
                         }
                         upgradeFinal(level, player);
                     } else {
-                        player.sendMessage(instance.getLocale().getMessage("event.upgrade.cannotafford"));
+                        player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.upgrade.cannotafford"));
                     }
                 }
             }
-        } catch (Exception ex) {
-            Debugger.runReport(ex);
-        }
     }
 
     private void upgradeFinal(Level level, Player player) {
-        try {
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        EpicHoppers instance = EpicHoppers.getInstance();
             this.level = level;
             syncName();
             if (instance.getLevelManager().getHighestLevel() != level) {
@@ -116,33 +101,31 @@ public class EHopper implements Hopper {
                 player.sendMessage(instance.getLocale().getMessage("event.upgrade.maxed", level.getLevel()));
             }
             Location loc = location.clone().add(.5, .5, .5);
+
+            if (!instance.isServerVersionAtLeast(ServerVersion.V1_12)) return;
+
             player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
 
-            if (instance.getConfig().getBoolean("Main.Sounds Enabled")) {
-                if (instance.getLevelManager().getHighestLevel() != level) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
-                } else {
-                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
+            if (instance.getLevelManager().getHighestLevel() != level) {
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
+            } else {
+                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
 
-                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2F, 25.0F);
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
-                }
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2F, 25.0F);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
+                Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
             }
-        } catch (Exception ex) {
-            Debugger.runReport(ex);
-        }
     }
 
     private void syncName() {
         org.bukkit.block.Hopper hopper = (org.bukkit.block.Hopper)location.getBlock().getState();
-        hopper.setCustomName(Methods.formatName(level.getLevel(), false));
-        hopper.update(true);
+        if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_10))
+            hopper.setCustomName(Methods.formatName(level.getLevel(), false));
+            hopper.update(true);
     }
 
     public void timeout(Player player) {
-        try {
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        EpicHoppers instance = EpicHoppers.getInstance();
             Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
                 PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
                 if (playerData.getSyncType() != null) {
@@ -150,15 +133,10 @@ public class EHopper implements Hopper {
                     playerData.setSyncType(null);
                 }
             }, instance.getConfig().getLong("Main.Timeout When Syncing Hoppers"));
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
     }
 
-    @Override
     public void link(Block toLink, boolean filtered, Player player) {
-        try {
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        EpicHoppers instance = EpicHoppers.getInstance();
 
             if (location.getWorld().equals(toLink.getLocation().getWorld())
                     && !player.hasPermission("EpicHoppers.Override")
@@ -193,73 +171,58 @@ public class EHopper implements Hopper {
             }
             player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
             instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
-
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
     }
 
-    @Override
     public Location getLocation() {
         return location.clone();
     }
 
-    @Override
     public World getWorld() {
         return location.getWorld();
     }
 
-    @Override
     public int getX() {
         return location.getBlockX();
     }
 
-    @Override
     public int getY() {
         return location.getBlockY();
     }
 
-    @Override
     public int getZ() {
         return location.getBlockZ();
     }
 
-    @Override
     public Level getLevel() {
         return level;
     }
 
-    @Override
     public UUID getPlacedBy() {
         return placedBy;
     }
 
-    @Override
     public UUID getLastPlayer() {
         return lastPlayer;
     }
 
-    @Override
     public void setLastPlayer(UUID uuid) {
         lastPlayer = uuid;
     }
 
-    @Override
-    public Material getAutoCrafting() {
+    public ItemStack getAutoCrafting() {
         return autoCrafting;
     }
 
-    @Override
-    public void setAutoCrafting(Material autoCrafting) {
+    public void setAutoCrafting(ItemStack autoCrafting) {
         this.autoCrafting = autoCrafting;
+        autoCrafting.setAmount(1);
     }
 
-    @Override
     public TeleportTrigger getTeleportTrigger() {
         return teleportTrigger;
     }
 
-    @Override
+
     public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
         this.teleportTrigger = teleportTrigger;
     }
@@ -280,22 +243,18 @@ public class EHopper implements Hopper {
         this.autoBreaking = !autoBreaking;
     }
 
-    @Override
     public List<Location> getLinkedBlocks() {
         return new ArrayList<>(linkedBlocks);
     }
 
-    @Override
     public void addLinkedBlock(Location block) {
         linkedBlocks.add(block);
     }
 
-    @Override
     public void clearLinkedBlocks() {
         this.linkedBlocks.clear();
     }
 
-    @Override
     public Filter getFilter() {
         return filter;
     }

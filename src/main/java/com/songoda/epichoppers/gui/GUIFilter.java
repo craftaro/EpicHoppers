@@ -1,11 +1,11 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Filter;
-import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.Filter;
+import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.player.SyncType;
-import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.gui.AbstractGUI;
 import com.songoda.epichoppers.utils.gui.Range;
 import org.bukkit.Bukkit;
@@ -20,10 +20,10 @@ import java.util.List;
 
 public class GUIFilter extends AbstractGUI {
 
-    private final EpicHoppersPlugin plugin;
-    private final EHopper hopper;
+    private final EpicHoppers plugin;
+    private final Hopper hopper;
 
-    public GUIFilter(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
+    public GUIFilter(EpicHoppers plugin, Hopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
         this.hopper = hopper;
@@ -53,7 +53,7 @@ public class GUIFilter extends AbstractGUI {
         inventory.setItem(52, Methods.getBackgroundGlass(true));
         inventory.setItem(53, Methods.getBackgroundGlass(true));
 
-        ItemStack it = new ItemStack(Material.WHITE_STAINED_GLASS_PANE, 1);
+        ItemStack it = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.WHITE_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1);
         ItemMeta itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist"));
         it.setItemMeta(itm);
@@ -71,7 +71,7 @@ public class GUIFilter extends AbstractGUI {
             num++;
         }
 
-        it = new ItemStack(Material.BLACK_STAINED_GLASS_PANE, 1);
+        it = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.BLACK_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1, (short) 15);
         itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.blacklist"));
         it.setItemMeta(itm);
@@ -156,7 +156,6 @@ public class GUIFilter extends AbstractGUI {
 
 
     private void compile(Player p) {
-        try {
             ItemStack[] items = p.getOpenInventory().getTopInventory().getContents();
 
             Filter filter = hopper.getFilter();
@@ -210,9 +209,6 @@ public class GUIFilter extends AbstractGUI {
             filter.setWhiteList(owhite);
             filter.setBlackList(oblack);
             filter.setVoidList(ovoid);
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
     }
 
     @Override

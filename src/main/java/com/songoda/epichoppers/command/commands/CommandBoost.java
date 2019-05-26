@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.command.commands;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.utils.Methods;
@@ -17,7 +17,7 @@ public class CommandBoost extends AbstractCommand {
     }
 
     @Override
-    protected ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
         if (args.length < 3) {
             return ReturnType.SYNTAX_ERROR;
         }
@@ -67,7 +67,7 @@ public class CommandBoost extends AbstractCommand {
     }
 
     @Override
-    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected List<String> onTab(EpicHoppers instance, CommandSender sender, String... args) {
         if (args.length == 2) {
             List<String> players = new ArrayList<>();
             for (Player player : Bukkit.getOnlinePlayers()) {

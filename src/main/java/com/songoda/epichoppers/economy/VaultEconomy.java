@@ -1,15 +1,16 @@
-package com.songoda.epicspawners.economy;
+package com.songoda.epichoppers.economy;
 
-import com.songoda.epicspawners.EpicSpawners;
+import com.songoda.epichoppers.EpicHoppers;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class VaultEconomy implements Economy {
 
-    private final EpicSpawners plugin;
+    private final EpicHoppers plugin;
 
     private final net.milkbowl.vault.economy.Economy vault;
 
-    public VaultEconomy(EpicSpawners plugin) {
+    public VaultEconomy(EpicHoppers plugin) {
         this.plugin = plugin;
 
         this.vault = plugin.getServer().getServicesManager().
@@ -17,12 +18,17 @@ public class VaultEconomy implements Economy {
     }
 
     @Override
-    public boolean hasBalance(Player player, double cost) {
+    public boolean hasBalance(OfflinePlayer player, double cost) {
         return vault.has(player, cost);
     }
 
     @Override
-    public boolean withdrawBalance(Player player, double cost) {
+    public boolean withdrawBalance(OfflinePlayer player, double cost) {
         return vault.withdrawPlayer(player, cost).transactionSuccess();
+    }
+
+    @Override
+    public boolean deposit(OfflinePlayer player, double amount) {
+        return vault.depositPlayer(player, amount).transactionSuccess();
     }
 }

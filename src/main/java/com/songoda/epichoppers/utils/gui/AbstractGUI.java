@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.utils.gui;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -120,7 +120,7 @@ public abstract class AbstractGUI implements Listener {
             registerOnCloses();
         }
         constructGUI();
-        initializeListeners(EpicHoppersPlugin.getInstance());
+        initializeListeners(EpicHoppers.getInstance());
         player.openInventory(inventory);
     }
 

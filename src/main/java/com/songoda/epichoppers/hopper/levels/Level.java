@@ -1,20 +1,19 @@
 package com.songoda.epichoppers.hopper.levels;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.levels.Level;
-import com.songoda.epichoppers.api.hopper.levels.modules.Module;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.levels.modules.Module;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ELevel implements Level {
+public class Level {
 
     private final ArrayList<Module> registeredModules;
     private final List<String> description = new ArrayList<>();
     private int level, costExperience, costEconomy, range, amount, linkAmount, autoSell;
     private boolean filter, teleport;
 
-    ELevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, int autoSell, ArrayList<Module> registeredModules) {
+    Level(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, int autoSell, ArrayList<Module> registeredModules) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
@@ -31,7 +30,7 @@ public class ELevel implements Level {
     }
 
     public void buildDescription() {
-        EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        EpicHoppers instance = EpicHoppers.getInstance();
 
         description.clear();
 
@@ -40,71 +39,71 @@ public class ELevel implements Level {
         if (linkAmount != 1)
             description.add(instance.getLocale().getMessage("interface.hopper.linkamount", linkAmount));
         if (filter)
-            description.add(instance.getLocale().getMessage("interface.hopper.filter", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
+            description.add(instance.getLocale().getMessage("interface.hopper.filter", EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled")));
         if (teleport)
-            description.add(instance.getLocale().getMessage("interface.hopper.teleport", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled")));
+            description.add(instance.getLocale().getMessage("interface.hopper.teleport", EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled")));
 
         for (Module module : registeredModules) {
             description.add(module.getDescription());
         }
     }
 
-    @Override
+
     public int getLevel() {
         return level;
     }
 
-    @Override
+
     public int getRange() {
         return range;
     }
 
-    @Override
+
     public int getAmount() {
         return amount;
     }
 
-    @Override
+
     public boolean isFilter() {
         return filter;
     }
 
-    @Override
+
     public boolean isTeleport() {
         return teleport;
     }
 
-    @Override
+
     public int getAutoSell() {
         return autoSell;
     }
 
-    @Override
+
     public int getLinkAmount() {
         return linkAmount;
     }
 
-    @Override
+
     public int getCostExperience() {
         return costExperience;
     }
 
-    @Override
+
     public int getCostEconomy() {
         return costEconomy;
     }
 
-    @Override
+
     public List<String> getDescription() {
         return new ArrayList<>(description);
     }
 
-    @Override
+
     public ArrayList<Module> getRegisteredModules() {
         return new ArrayList<>(registeredModules);
     }
 
-    @Override
+
     public void addModule(Module module) {
         registeredModules.add(module);
         buildDescription();

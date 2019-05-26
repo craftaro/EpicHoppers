@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.command.commands;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
@@ -16,7 +16,7 @@ public class CommandBook extends AbstractCommand {
     }
 
     @Override
-    protected ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
         if (args.length == 1) {
             if (sender instanceof Player) {
                 ((Player) sender).getInventory().addItem(instance.enchantmentHandler.getbook());
@@ -33,7 +33,7 @@ public class CommandBook extends AbstractCommand {
     }
 
     @Override
-    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected List<String> onTab(EpicHoppers instance, CommandSender sender, String... args) {
         return null;
     }
 

@@ -1,18 +1,15 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.levels.modules.Module;
-import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
-import net.milkbowl.vault.economy.Economy;
+import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,28 +20,26 @@ public class ModuleAutoSell implements Module {
     private int hopperTickRate;
 
     public ModuleAutoSell(int timeOut) {
-        EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        EpicHoppers instance = EpicHoppers.getInstance();
         this.timeOut = timeOut * 20;
         this.hopperTickRate = (int) instance.getConfig().getLong("Main.Amount of Ticks Between Hops");
     }
 
-    @Override
+
     public String getName() {
         return "AutoSell";
     }
 
-    @Override
+
     public void run(Hopper hopper, Inventory hopperInventory) {
         if (hopperInventory == null) return;
 
-        if (((EHopper) hopper).getAutoSellTimer() == -9999) return;
+        if (hopper.getAutoSellTimer() == -9999) return;
 
-        if (((EHopper) hopper).getAutoSellTimer() <= 0) {
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        if (hopper.getAutoSellTimer() <= 0) {
+            EpicHoppers instance = EpicHoppers.getInstance();
 
-            if (instance.getServer().getPluginManager().getPlugin("Vault") == null) return;
-            RegisteredServiceProvider<Economy> rsp = instance.getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
-            net.milkbowl.vault.economy.Economy econ = rsp.getProvider();
+            if (instance.getEconomy() == null) return;
 
             List<String> list = instance.getConfig().getStringList("Main.AutoSell Prices");
 
@@ -58,25 +53,25 @@ public class ModuleAutoSell implements Module {
                     for (ItemStack itemStack : hopperInventory.getContents()) {
                         if (itemStack == null || itemStack.getType() != material) continue;
 
-                        econ.depositPlayer(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
+                        instance.getEconomy().deposit(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
                         hopperInventory.removeItem(itemStack);
                     }
                 } catch (Exception ignored) {
                 }
             }
-            ((EHopper) hopper).setAutoSellTimer(timeOut);
+            hopper.setAutoSellTimer(timeOut);
         }
-        ((EHopper) hopper).setAutoSellTimer(((EHopper) hopper).getAutoSellTimer() - hopperTickRate);
+        hopper.setAutoSellTimer(hopper.getAutoSellTimer() - hopperTickRate);
     }
 
-    @Override
+
     public ItemStack getGUIButton(Hopper hopper) {
-        EHopper eHopper = (EHopper)hopper;
-        ItemStack sell = new ItemStack(Material.SUNFLOWER, 1);
+        Hopper eHopper = hopper;
+        ItemStack sell = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? Material.SUNFLOWER : Material.valueOf("DOUBLE_PLANT"), 1);
         ItemMeta sellmeta = sell.getItemMeta();
-        sellmeta.setDisplayName(EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.selltitle"));
+        sellmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle"));
         ArrayList<String> loresell = new ArrayList<>();
-        String[] parts = EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.selllore", eHopper.getAutoSellTimer() == -9999 ? "\u221E" : (int) Math.floor(eHopper.getAutoSellTimer() / 20)).split("\\|");
+        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selllore", eHopper.getAutoSellTimer() == -9999 ? "\u221E" : (int) Math.floor(eHopper.getAutoSellTimer() / 20)).split("\\|");
         for (String line : parts) {
             loresell.add(Methods.formatText(line));
         }
@@ -85,9 +80,9 @@ public class ModuleAutoSell implements Module {
         return sell;
     }
 
-    @Override
+
     public void runButtonPress(Player player, Hopper hopper) {
-        EHopper eHopper = (EHopper)hopper;
+        Hopper eHopper = hopper;
         if (eHopper.getAutoSellTimer() == -9999) {
             eHopper.setAutoSellTimer(0);
         } else {
@@ -95,13 +90,13 @@ public class ModuleAutoSell implements Module {
         }
     }
 
-    @Override
+
     public List<Material> getBlockedItems(Hopper hopper) {
         return null;
     }
 
-    @Override
+
     public String getDescription() {
-        return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.autosell", (int) Math.floor(timeOut / 20));
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.autosell", (int) Math.floor(timeOut / 20));
     }
 }

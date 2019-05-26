@@ -1,13 +1,11 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.TeleportTrigger;
-import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
-import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -26,9 +24,9 @@ import org.bukkit.inventory.ItemStack;
  */
 public class InteractListeners implements Listener {
 
-    private final EpicHoppersPlugin instance;
+    private final EpicHoppers instance;
 
-    public InteractListeners(EpicHoppersPlugin instance) {
+    public InteractListeners(EpicHoppers instance) {
         this.instance = instance;
     }
 
@@ -52,19 +50,17 @@ public class InteractListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockInteract(PlayerInteractEvent e) {
-        try {
             Player player = e.getPlayer();
             if (e.getAction() != Action.LEFT_CLICK_BLOCK
                     || e.getClickedBlock() == null
                     || player.isSneaking()
                     || !player.hasPermission("EpicHoppers.overview")
-                    || !instance.getHookManager().canBuild(player, e.getClickedBlock().getLocation())
                     || !(e.getClickedBlock().getState() instanceof InventoryHolder || e.getClickedBlock().getType().equals(Material.ENDER_CHEST))) {
                 return;
             }
 
             if (e.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
-                ItemStack item = e.getPlayer().getInventory().getItemInMainHand();
+                ItemStack item = e.getPlayer().getInventory().getItemInHand();
                 if (item.getItemMeta().getLore().size() == 2) {
                     player.sendMessage(instance.getLocale().getMessage("event.hopper.desyncchest", item.getType().toString()));
                     instance.enchantmentHandler.createSyncTouch(item, null);
@@ -86,7 +82,7 @@ public class InteractListeners implements Listener {
                     playerData.setLastHopper(hopper);
                     if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")
                             && !player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
-                        ((EHopper) hopper).overview(player);
+                        hopper.overview(player);
                         e.setCancelled(true);
                         return;
                     }
@@ -107,8 +103,5 @@ public class InteractListeners implements Listener {
                     playerData.setSyncType(null);
                 }
             }
-        } catch (Exception ee) {
-            Debugger.runReport(ee);
-        }
     }
 }

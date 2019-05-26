@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.enchantment;
 
-import com.songoda.epichoppers.utils.Debugger;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 public class Enchantment {
 
     public ItemStack createSyncTouch(ItemStack item, Block block) {
-        try {
             ItemMeta itemmeta = item.getItemMeta();
             ArrayList<String> lore = new ArrayList<>();
             if (block != null) {
@@ -27,14 +25,9 @@ public class Enchantment {
             itemmeta.setLore(lore);
             item.setItemMeta(itemmeta);
             return item;
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-        return null;
     }
 
     public ItemStack getbook() {
-        try {
             ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
             ItemMeta meta = book.getItemMeta();
             meta.setDisplayName(Methods.formatText("&eEnchanted Book"));
@@ -44,9 +37,5 @@ public class Enchantment {
             meta.setLore(lore);
             book.setItemMeta(meta);
             return book;
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-        return null;
     }
 }

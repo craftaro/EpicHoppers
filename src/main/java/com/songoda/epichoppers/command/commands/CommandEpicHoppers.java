@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.command.commands;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.command.CommandSender;
@@ -14,7 +14,7 @@ public class CommandEpicHoppers extends AbstractCommand {
     }
 
     @Override
-    protected ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
         sender.sendMessage("");
         sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Version " + instance.getDescription().getVersion() + " Created with <3 by &5&l&oSongoda"));
 
@@ -29,7 +29,7 @@ public class CommandEpicHoppers extends AbstractCommand {
     }
 
     @Override
-    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected List<String> onTab(EpicHoppers instance, CommandSender sender, String... args) {
         return null;
     }
 

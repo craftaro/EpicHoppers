@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.command.commands;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.command.AbstractCommand;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,14 +14,14 @@ public class CommandSettings extends AbstractCommand {
     }
 
     @Override
-    protected ReturnType runCommand(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
         Player p = (Player) sender;
         instance.getSettingsManager().openSettingsManager(p);
         return ReturnType.SUCCESS;
     }
 
     @Override
-    protected List<String> onTab(EpicHoppersPlugin instance, CommandSender sender, String... args) {
+    protected List<String> onTab(EpicHoppers instance, CommandSender sender, String... args) {
         return null;
     }
 

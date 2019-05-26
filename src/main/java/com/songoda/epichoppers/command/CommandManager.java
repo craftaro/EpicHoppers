@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.command;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.command.commands.*;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.command.Command;
@@ -14,12 +14,12 @@ import java.util.List;
 
 public class CommandManager implements CommandExecutor {
 
-    private EpicHoppersPlugin instance;
+    private EpicHoppers instance;
     private TabManager tabManager;
 
     private List<AbstractCommand> commands = new ArrayList<>();
 
-    public CommandManager(EpicHoppersPlugin instance) {
+    public CommandManager(EpicHoppers instance) {
         this.instance = instance;
         this.tabManager = new TabManager(this);
 

@@ -1,18 +1,18 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.TeleportTrigger;
-import com.songoda.epichoppers.api.hopper.levels.Level;
-import com.songoda.epichoppers.hopper.EFilter;
-import com.songoda.epichoppers.hopper.EHopper;
-import com.songoda.epichoppers.utils.Debugger;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.Filter;
+import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.ServerVersion;
+import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,15 +31,14 @@ import java.util.ArrayList;
  */
 public class BlockListeners implements Listener {
 
-    private final EpicHoppersPlugin instance;
+    private final EpicHoppers instance;
 
-    public BlockListeners(EpicHoppersPlugin instance) {
+    public BlockListeners(EpicHoppers instance) {
         this.instance = instance;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent e) {
-        try {
             Player player = e.getPlayer();
 
             if (e.getBlock().getType() != Material.HOPPER) return;
@@ -61,11 +60,7 @@ public class BlockListeners implements Listener {
 
             ItemStack item = e.getItemInHand().clone();
 
-            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new EHopper(e.getBlock(), instance.getLevelFromItem(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new EFilter(), TeleportTrigger.DISABLED, null));
-
-        } catch (Exception ee) {
-            Debugger.runReport(ee);
-        }
+            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new Hopper(e.getBlock(), instance.getLevelManager().getLevel(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new Filter(), TeleportTrigger.DISABLED, null));
     }
 
     private int maxHoppers(Player player) {
@@ -79,7 +74,6 @@ public class BlockListeners implements Listener {
     }
 
     private int count(Chunk c) {
-        try {
             int count = 0;
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
@@ -89,19 +83,12 @@ public class BlockListeners implements Listener {
                 }
             }
             return count;
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
-        return 9999;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        try {
             Block block = event.getBlock();
             Player player = event.getPlayer();
-
-            if (player.getInventory().getItemInMainHand() == null) return;
 
             handleSyncTouch(event);
 
@@ -138,17 +125,12 @@ public class BlockListeners implements Listener {
             instance.getHopperManager().removeHopper(block.getLocation());
 
             instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
-
-
-        } catch (Exception ee) {
-            Debugger.runReport(ee);
-        }
     }
 
-    private void handleSyncTouch(BlockBreakEvent e) {
-        if (!Methods.isSync(e.getPlayer())) return;
+    private void handleSyncTouch(BlockBreakEvent event) {
+        if (!Methods.isSync(event.getPlayer())) return;
 
-        ItemStack tool = e.getPlayer().getInventory().getItemInMainHand();
+        ItemStack tool = event.getPlayer().getInventory().getItemInHand();
         ItemMeta meta = tool.getItemMeta();
         if (tool.getItemMeta().getLore().size() != 2) return;
 
@@ -156,20 +138,33 @@ public class BlockListeners implements Listener {
 
         if (location.getBlock().getType() != Material.CHEST) return;
 
-        if (e.getBlock().getType() == Material.SHULKER_BOX
-                || e.getBlock().getType() == Material.SPAWNER
-                || e.getBlock().getType() == Material.HOPPER
-                || e.getBlock().getType() == Material.DISPENSER) {
+        if (event.getBlock().getType().name().contains("SHULKER")
+                || (instance.isServerVersionAtLeast(ServerVersion.V1_13) ? event.getBlock().getType() == Material.SPAWNER : event.getBlock().getType() == Material.valueOf("MOB_SPAWNER"))
+                || event.getBlock().getType() == Material.HOPPER
+                || event.getBlock().getType() == Material.DISPENSER) {
             return;
         }
 
         InventoryHolder ih = (InventoryHolder) location.getBlock().getState();
-        if (e.getPlayer().getInventory().getItemInMainHand().getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
-            ih.getInventory().addItem(new ItemStack(e.getBlock().getType(), 1, e.getBlock().getData()));
+        if (event.getPlayer().getInventory().getItemInHand().getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
+            ih.getInventory().addItem(new ItemStack(event.getBlock().getType(), 1, event.getBlock().getData()));
         } else {
-            for (ItemStack is : e.getBlock().getDrops())
+            for (ItemStack is : event.getBlock().getDrops())
                 ih.getInventory().addItem(is);
         }
-        e.setDropItems(false);
+        if (instance.isServerVersionAtLeast(ServerVersion.V1_12)) {
+            event.setDropItems(false);
+            return;
+        }
+
+        event.isCancelled();
+        event.getPlayer().getItemInHand().setDurability((short) (event.getPlayer().getItemInHand().getDurability() + 1));
+        if (event.getPlayer().getItemInHand().getDurability() >= event.getPlayer().getItemInHand().getType().getMaxDurability()) {
+            event.getPlayer().getItemInHand().setType(null);
+        }
+        if (event.getExpToDrop() > 0)
+            event.getPlayer().getWorld().spawn(event.getBlock().getLocation(), ExperienceOrb.class).setExperience(event.getExpToDrop());
+        event.getBlock().setType(Material.AIR);
+
     }
 }

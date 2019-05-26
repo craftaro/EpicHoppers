@@ -1,10 +1,10 @@
 package com.songoda.epichoppers.handlers;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.TeleportTrigger;
-import com.songoda.epichoppers.utils.Debugger;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.ServerVersion;
+import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -27,15 +27,11 @@ public class TeleportHandler {
     private final Map<Location, Location> teleportFrom = new HashMap<>();
     private final Map<UUID, Long> lastTeleports = new HashMap<>();
 
-    private EpicHoppersPlugin instance;
+    private EpicHoppers instance;
 
-    public TeleportHandler(EpicHoppersPlugin instance) {
-        try {
+    public TeleportHandler(EpicHoppers instance) {
             this.instance = instance;
             Bukkit.getScheduler().scheduleSyncRepeatingTask(instance, this::teleportRunner, 0, instance.getConfig().getLong("Main.Amount of Ticks Between Teleport"));
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
     }
 
     private void teleportRunner() {
@@ -72,10 +68,9 @@ public class TeleportHandler {
     }
 
     public void tpEntity(Entity entity, Hopper hopper) {
-        try {
             if (hopper == null || !instance.getHopperManager().isHopper(hopper.getLocation())) return;
 
-            EpicHoppersPlugin instance = EpicHoppersPlugin.getInstance();
+        EpicHoppers instance = EpicHoppers.getInstance();
             Hopper lastHopper = hopper;
             for (int i = 0; i < 15; i++) {
                 boolean empty = lastHopper.getLinkedBlocks().isEmpty();
@@ -93,9 +88,6 @@ public class TeleportHandler {
 
             teleportFrom.put(lastHopper.getLocation(), hopper.getLocation());
             doTeleport(entity, lastHopper.getLocation());
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
     }
 
     private void doTeleport(Entity entity, Location location) {
@@ -106,7 +98,7 @@ public class TeleportHandler {
         Methods.doParticles(entity, entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation());
         entity.teleport(location);
 
-        if (instance.getConfig().getBoolean("Main.Sounds Enabled"))
+        if (instance.isServerVersionAtLeast(ServerVersion.V1_12))
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
     }
 }

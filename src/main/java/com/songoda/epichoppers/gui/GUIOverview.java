@@ -1,14 +1,14 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.CostType;
-import com.songoda.epichoppers.api.hopper.TeleportTrigger;
-import com.songoda.epichoppers.api.hopper.levels.Level;
-import com.songoda.epichoppers.api.hopper.levels.modules.Module;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
-import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.levels.Level;
+import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.player.SyncType;
+import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.TeleportTrigger;
 import com.songoda.epichoppers.utils.gui.AbstractGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 
 public class GUIOverview extends AbstractGUI {
 
-    private final EpicHoppersPlugin plugin;
-    private final EHopper hopper;
+    private final EpicHoppers plugin;
+    private final Hopper hopper;
 
     private int task;
 
-    public GUIOverview(EpicHoppersPlugin plugin, EHopper hopper, Player player) {
+    public GUIOverview(EpicHoppers plugin, Hopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
         this.hopper = hopper;

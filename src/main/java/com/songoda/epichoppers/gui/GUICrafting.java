@@ -1,27 +1,25 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.hopper.EHopper;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.gui.AbstractGUI;
 import com.songoda.epichoppers.utils.gui.Range;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class GUICrafting extends AbstractGUI {
 
-    private final EpicHoppersPlugin plugin;
-    private final EHopper hopper;
+    private final EpicHoppers plugin;
+    private final Hopper hopper;
 
-    public GUICrafting(EpicHoppersPlugin plugin, Hopper hopper, Player player) {
+    public GUICrafting(EpicHoppers plugin, Hopper hopper, Player player) {
         super(player);
         this.plugin = plugin;
-        this.hopper = (EHopper)hopper;
+        this.hopper = hopper;
 
-        init(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Crafting"), 27);
+        init(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Crafting", 27);
     }
 
 
@@ -50,7 +48,7 @@ public class GUICrafting extends AbstractGUI {
         inventory.setItem(25, Methods.getBackgroundGlass(true));
         inventory.setItem(26, Methods.getBackgroundGlass(true));
 
-        inventory.setItem(13, new ItemStack(hopper.getAutoCrafting() == null ? Material.AIR : hopper.getAutoCrafting()));
+        inventory.setItem(13, hopper.getAutoCrafting() == null ? new ItemStack(Material.AIR) : hopper.getAutoCrafting());
 
         addDraggable(new Range(13, 13, null, false), true);
     }
@@ -61,10 +59,8 @@ public class GUICrafting extends AbstractGUI {
 
     @Override
     protected void registerOnCloses() {
-        registerOnClose(((player, inventory) -> {
-            ItemStack item = inventory.getItem(13);
-            hopper.setAutoCrafting(item == null ? Material.AIR : item.getType());
-        }));
+        registerOnClose(((player, inventory) ->
+                hopper.setAutoCrafting(inventory.getItem(13))));
 
     }
 }

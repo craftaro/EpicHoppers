@@ -1,11 +1,10 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.levels.modules.Module;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUICrafting;
-import com.songoda.epichoppers.utils.Debugger;
+import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,8 +18,8 @@ import java.util.Map;
 
 public class ModuleAutoCrafting implements Module {
 
-    private final Map<Material, Recipes> cachedRecipes = new HashMap<>();
-    private final Map<Hopper, Material> lastMaterial = new HashMap<>();
+    private final Map<ItemStack, Recipes> cachedRecipes = new HashMap<>();
+    private final Map<Hopper, ItemStack> lastMaterial = new HashMap<>();
 
     public static List<ItemStack> compressItemStack(List<ItemStack> target) {
         HashMap<Material, ItemStack> sortingList = new HashMap<>();
@@ -44,7 +43,7 @@ public class ModuleAutoCrafting implements Module {
 
     public void run(Hopper hopper, Inventory hopperInventory) {
         if (hopper.getAutoCrafting() == null || hopperInventory == null) return;
-        
+
         if (hopper.getAutoCrafting() != null && canMove(hopperInventory, new ItemStack(hopper.getAutoCrafting()))) {
 
             if (cachedRecipes.get(hopper.getAutoCrafting()) == null) return;
@@ -58,22 +57,21 @@ public class ModuleAutoCrafting implements Module {
                     ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
                 if (hopperInventory.getSize() == 0) return;
 
-                Map<Material, Integer> items = new HashMap<>();
+                Map<Material, ItemStack> items = new HashMap<>();
                 for (ItemStack item : ingredientMap) {
                     if (item == null) continue;
                     if (!items.containsKey(item.getType())) {
-                        items.put(item.getType(), item.getAmount());
+                        items.put(item.getType(), item.clone());
                     } else {
-                        items.put(item.getType(), items.get(item.getType()) + 1);
+                        items.get(item.getType()).setAmount(items.get(item.getType()).getAmount() + 1);
                     }
                 }
 
-                for (Material material : items.keySet()) {
+                for (ItemStack item : items.values()) {
                     int amt = 0;
-                    ItemStack item = new ItemStack(material, items.get(material));
                     for (ItemStack i : hopperInventory.getContents()) {
                         if (i == null) continue;
-                        if (i.getType() != material) continue;
+                        if (!i.isSimilar(item)) continue;
                         amt += i.getAmount();
                     }
 
@@ -82,11 +80,10 @@ public class ModuleAutoCrafting implements Module {
                     }
                 }
                 main2:
-                for (Material material : items.keySet()) {
+                for (ItemStack toRemove : items.values()) {
                     int amtRemoved = 0;
-                    ItemStack toRemove = new ItemStack(material, items.get(material));
                     for (ItemStack i : hopperInventory.getContents()) {
-                        if (i == null || i.getType() != material) continue;
+                        if (i == null || !i.isSimilar(toRemove)) continue;
                         if (toRemove.getAmount() - amtRemoved <= i.getAmount()) {
                             toRemove.setAmount(toRemove.getAmount() - amtRemoved);
                             hopperInventory.removeItem(toRemove);
@@ -98,17 +95,18 @@ public class ModuleAutoCrafting implements Module {
                     }
                 }
                 hopperInventory.addItem(recipe.getResult());
+
             }
         }
     }
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        ItemStack crafting = new ItemStack(Material.CRAFTING_TABLE, 1);
+        ItemStack crafting = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? Material.CRAFTING_TABLE : Material.valueOf("WORKBENCH"), 1);
         ItemMeta craftingmeta = crafting.getItemMeta();
-        craftingmeta.setDisplayName(EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.craftingtitle"));
+        craftingmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftingtitle"));
         ArrayList<String> lorecrafting = new ArrayList<>();
-        String[] parts = EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
+        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
         for (String line : parts) {
             lorecrafting.add(Methods.formatText(line));
         }
@@ -119,40 +117,40 @@ public class ModuleAutoCrafting implements Module {
 
     @Override
     public void runButtonPress(Player player, Hopper hopper) {
-        new GUICrafting(EpicHoppersPlugin.getInstance(), hopper, player);
+        new GUICrafting(EpicHoppers.getInstance(), hopper, player);
     }
 
     public List<Material> getBlockedItems(Hopper hopper) {
         List<Material> materials = new ArrayList<>();
         if (hopper.getAutoCrafting() != null) {
 
-            Material material = hopper.getAutoCrafting();
+            ItemStack itemStack = hopper.getAutoCrafting();
 
-            if (material == Material.AIR) return materials;
+            if (itemStack.getType() == Material.AIR) return materials;
 
-            if (lastMaterial.get(hopper) != material) {
-                lastMaterial.put(hopper, material);
+            if (lastMaterial.get(hopper) != null && !lastMaterial.get(hopper).isSimilar(itemStack)) {
+                lastMaterial.put(hopper, itemStack);
                 cachedRecipes.remove(hopper);
             }
 
-            if (!cachedRecipes.containsKey(material)) {
+            if (cachedRecipes.keySet().stream().noneMatch(itemStack1 -> itemStack1.isSimilar(itemStack))) {
                 Recipes recipes = new Recipes();
-                for (Recipe recipe : Bukkit.getServer().getRecipesFor(new ItemStack(material))) {
+                for (Recipe recipe : Bukkit.getServer().getRecipesFor(itemStack)) {
                     recipes.addRecipe(recipe);
                 }
-                cachedRecipes.put(material, recipes);
+                cachedRecipes.put(itemStack, recipes);
             } else {
-                Recipes recipes = cachedRecipes.get(material);
+                Recipes recipes = cachedRecipes.get(itemStack);
                 for (Recipe recipe : recipes.getRecipes()) {
                     if (recipe instanceof ShapedRecipe) {
-                        for (ItemStack itemStack : ((ShapedRecipe) recipe).getIngredientMap().values()) {
-                            if (itemStack == null) continue;
-                            materials.add(itemStack.getType());
+                        for (ItemStack itemStack1 : ((ShapedRecipe) recipe).getIngredientMap().values()) {
+                            if (itemStack1 == null) continue;
+                            materials.add(itemStack1.getType());
                         }
                     } else if (recipe instanceof ShapelessRecipe) {
-                        for (ItemStack itemStack : ((ShapelessRecipe) recipe).getIngredientList()) {
-                            if (itemStack == null) continue;
-                            materials.add(itemStack.getType());
+                        for (ItemStack itemStack1 : ((ShapelessRecipe) recipe).getIngredientList()) {
+                            if (itemStack1 == null) continue;
+                            materials.add(itemStack1.getType());
                         }
                     }
                 }
@@ -163,11 +161,10 @@ public class ModuleAutoCrafting implements Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.crafting", EpicHoppersPlugin.getInstance().getLocale().getMessage("general.word.enabled"));
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.crafting", EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled"));
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {
-        try {
             if (inventory.firstEmpty() != -1) return true;
 
             for (ItemStack stack : inventory.getContents()) {
@@ -175,9 +172,6 @@ public class ModuleAutoCrafting implements Module {
                     return true;
                 }
             }
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
         return false;
     }
 

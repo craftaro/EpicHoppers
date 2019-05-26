@@ -1,8 +1,8 @@
-package com.songoda.epicspawners.utils.settings;
+package com.songoda.epichoppers.utils.settings;
 
-import com.songoda.epicspawners.EpicSpawners;
-import com.songoda.epicspawners.utils.Methods;
-import com.songoda.epicspawners.utils.ServerVersion;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -24,11 +24,11 @@ import java.util.*;
  */
 public class SettingsManager implements Listener {
 
-    private final EpicSpawners plugin;
+    private final EpicHoppers plugin;
     private Map<Player, String> cat = new HashMap<>();
     private Map<Player, String> current = new HashMap<>();
 
-    public SettingsManager(EpicSpawners plugin) {
+    public SettingsManager(EpicHoppers plugin) {
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
@@ -84,7 +84,7 @@ public class SettingsManager implements Listener {
             config.set(value, event.getMessage());
         }
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(EpicSpawners.getInstance(), () ->
+        Bukkit.getScheduler().scheduleSyncDelayedTask(EpicHoppers.getInstance(), () ->
                 this.finishEditing(player), 0L);
 
         event.setCancelled(true);

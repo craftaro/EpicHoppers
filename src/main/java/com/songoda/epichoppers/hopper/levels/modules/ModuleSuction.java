@@ -1,10 +1,9 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
-import com.songoda.epichoppers.EpicHoppersPlugin;
-import com.songoda.epichoppers.api.hopper.Hopper;
-import com.songoda.epichoppers.api.hopper.levels.modules.Module;
-import com.songoda.epichoppers.utils.Debugger;
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.utils.ServerVersion;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,11 +16,15 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ModuleSuction implements Module {
 
     private final int amount;
+
+    public static List<UUID> blacklist = new ArrayList<>();
 
     private boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
 
@@ -47,12 +50,12 @@ public class ModuleSuction implements Module {
         }
     }
 
-    @Override
+
     public String getName() {
         return "Suction";
     }
 
-    @Override
+
     public void run(Hopper hopper, Inventory hopperInventory) {
         double radius = amount + .5;
 
@@ -77,14 +80,18 @@ public class ModuleSuction implements Module {
             if (wildStacker)
                 itemStack.setAmount(WildStackerAPI.getItemAmount((Item) entity));
 
-            if (!canMove(hopperInventory, itemStack)) {
+            if (!canMove(hopperInventory, itemStack))
                 return;
-            }
+
+            blacklist.add(item.getUniqueId());
+
             ((Item) entity).setPickupDelay(10);
-            entity.setMetadata("grabbed", new FixedMetadataValue(EpicHoppersPlugin.getInstance(), ""));
+            entity.setMetadata("grabbed", new FixedMetadataValue(EpicHoppers.getInstance(), ""));
             float xx = (float) (0 + (Math.random() * .1));
             float yy = (float) (0 + (Math.random() * .1));
             float zz = (float) (0 + (Math.random() * .1));
+
+            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
             entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
 
             for (ItemStack is : hopperInventory.addItem(itemStack).values()) {
@@ -94,28 +101,31 @@ public class ModuleSuction implements Module {
         });
     }
 
-    @Override
+    public static boolean isBlacklisted(UUID uuid) {
+        return blacklist.contains(uuid);
+    }
+
+
     public ItemStack getGUIButton(Hopper hopper) {
         return null;
     }
 
-    @Override
+
     public void runButtonPress(Player player, Hopper hopper) {
 
     }
 
-    @Override
+
     public List<Material> getBlockedItems(Hopper hopper) {
         return null;
     }
 
-    @Override
+
     public String getDescription() {
-        return EpicHoppersPlugin.getInstance().getLocale().getMessage("interface.hopper.suction", amount);
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction", amount);
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {
-        try {
             if (inventory.firstEmpty() != -1) return true;
 
             for (ItemStack stack : inventory.getContents()) {
@@ -123,9 +133,6 @@ public class ModuleSuction implements Module {
                     return true;
                 }
             }
-        } catch (Exception e) {
-            Debugger.runReport(e);
-        }
         return false;
     }
 
