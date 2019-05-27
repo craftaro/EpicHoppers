@@ -77,6 +77,7 @@ public class Hopper {
                         player.sendMessage(plugin.references.getPrefix() + plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford"));
                         return;
                     }
+                    plugin.getEconomy().withdrawBalance(player, cost);
                     upgradeFinal(level, player);
                 } else if (type == CostType.EXPERIENCE) {
                     if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
