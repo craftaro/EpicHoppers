@@ -8,6 +8,7 @@ import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.TeleportTrigger;
 import com.songoda.epichoppers.utils.gui.AbstractGUI;
 import org.bukkit.Bukkit;
@@ -63,7 +64,7 @@ public class GUIOverview extends AbstractGUI {
         perlmeta.setLore(loreperl);
         perl.setItemMeta(perlmeta);
 
-        ItemStack filter = new ItemStack(Material.COMPARATOR, 1);
+        ItemStack filter = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.COMPARATOR : Material.valueOf("REDSTONE_COMPARATR"), 1);
         ItemMeta filtermeta = filter.getItemMeta();
         filtermeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.filtertitle"));
         ArrayList<String> lorefilter = new ArrayList<>();

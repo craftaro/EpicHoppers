@@ -309,7 +309,7 @@ public class HopTask extends BukkitRunnable {
     }
 
     private Class<?> clazzCraftWorld, clazzCraftBlock, clazzBlockPosition;
-    private Method getHandle, updateAdjacentComparators, getNMS, getBlock;
+    private Method getHandle, updateAdjacentComparators, getNMSBlock;
 
     private void updateAdjacentComparators(Location location) {
         try {
@@ -320,26 +320,23 @@ public class HopTask extends BukkitRunnable {
                 clazzCraftBlock = Class.forName("org.bukkit.craftbukkit." + ver + ".block.CraftBlock");
                 clazzBlockPosition = Class.forName("net.minecraft.server." + ver + ".BlockPosition");
                 Class<?> clazzWorld = Class.forName("net.minecraft.server." + ver + ".World");
-                Class<?> clazzIBlockData = Class.forName("net.minecraft.server." + ver + ".IBlockData");
                 Class<?> clazzBlock = Class.forName("net.minecraft.server." + ver + ".Block");
 
                 getHandle = clazzCraftWorld.getMethod("getHandle");
                 updateAdjacentComparators = clazzWorld.getMethod("updateAdjacentComparators", clazzBlockPosition, clazzBlock);
-                getNMS = clazzCraftBlock.getMethod("getNMS");
-                getBlock = clazzIBlockData.getMethod("getBlock");
+                getNMSBlock = clazzCraftBlock.getMethod("getNMSBlock");
             }
 
             // invoke and cast objects.
             Object craftWorld = clazzCraftWorld.cast(location.getWorld());
             Object world = getHandle.invoke(craftWorld);
             Object craftBlock = clazzCraftBlock.cast(location.getBlock());
-            Object iBlockData = getNMS.invoke(craftBlock);
 
             // Invoke final method.
             updateAdjacentComparators
                     .invoke(world, clazzBlockPosition.getConstructor(double.class, double.class, double.class)
                             .newInstance(location.getX(), location.getY(), location.getZ()),
-                            getBlock.invoke(iBlockData));
+                            getNMSBlock.invoke(craftBlock));
 
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
