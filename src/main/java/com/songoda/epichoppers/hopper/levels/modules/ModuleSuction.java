@@ -75,19 +75,15 @@ public class ModuleSuction implements Module {
                     StringUtils.substring(itemStack.getItemMeta().getDisplayName(), 0, 3).equals("***")) {
                 return; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
             }
-            if (entity.hasMetadata("grabbed") || !entity.isOnGround())
-                return;
 
             if (wildStacker)
                 itemStack.setAmount(WildStackerAPI.getItemAmount((Item) entity));
 
-            if (!canMove(hopperInventory, itemStack))
+            if (!canMove(hopperInventory, itemStack) || blacklist.contains(item.getUniqueId()))
                 return;
 
             blacklist.add(item.getUniqueId());
 
-            ((Item) entity).setPickupDelay(10);
-            entity.setMetadata("grabbed", new FixedMetadataValue(EpicHoppers.getInstance(), ""));
             float xx = (float) (0 + (Math.random() * .1));
             float yy = (float) (0 + (Math.random() * .1));
             float zz = (float) (0 + (Math.random() * .1));
@@ -105,6 +101,10 @@ public class ModuleSuction implements Module {
 
     public static boolean isBlacklisted(UUID uuid) {
         return blacklist.contains(uuid);
+    }
+
+    public static boolean addToBlacklist(UUID uuid) {
+        return blacklist.add(uuid);
     }
 
     public ItemStack getGUIButton(Hopper hopper) {
