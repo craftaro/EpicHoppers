@@ -94,8 +94,12 @@ public class TeleportHandler {
         location.add(.0, 1, .0);
         location.setPitch(entity.getLocation().getPitch());
         location.setDirection(entity.getLocation().getDirection());
-        Methods.doParticles(entity, location);
-        Methods.doParticles(entity, entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation());
+
+        if (instance.isServerVersionAtLeast(ServerVersion.V1_12)) {
+            Methods.doParticles(entity, location);
+            Methods.doParticles(entity, entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation());
+        }
+        
         entity.teleport(location);
 
         if (instance.isServerVersionAtLeast(ServerVersion.V1_12))
