@@ -324,7 +324,8 @@ public class HopTask extends BukkitRunnable {
 
                 getHandle = clazzCraftWorld.getMethod("getHandle");
                 updateAdjacentComparators = clazzWorld.getMethod("updateAdjacentComparators", clazzBlockPosition, clazzBlock);
-                getNMSBlock = clazzCraftBlock.getMethod("getNMSBlock");
+                getNMSBlock = clazzCraftBlock.getDeclaredMethod("getNMSBlock");
+                getNMSBlock.setAccessible(true);
             }
 
             // invoke and cast objects.

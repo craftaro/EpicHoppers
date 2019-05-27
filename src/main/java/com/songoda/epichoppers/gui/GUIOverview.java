@@ -64,7 +64,7 @@ public class GUIOverview extends AbstractGUI {
         perlmeta.setLore(loreperl);
         perl.setItemMeta(perlmeta);
 
-        ItemStack filter = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.COMPARATOR : Material.valueOf("REDSTONE_COMPARATR"), 1);
+        ItemStack filter = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.COMPARATOR : Material.valueOf("REDSTONE_COMPARATOR"), 1);
         ItemMeta filtermeta = filter.getItemMeta();
         filtermeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.filtertitle"));
         ArrayList<String> lorefilter = new ArrayList<>();
