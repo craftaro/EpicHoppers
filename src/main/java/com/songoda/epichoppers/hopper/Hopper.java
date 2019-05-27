@@ -251,8 +251,8 @@ public class Hopper {
         linkedBlocks.add(block);
     }
 
-    public void clearLinkedBlocks() {
-        this.linkedBlocks.clear();
+    public void removeLinkedBlock(Location location) {
+        this.linkedBlocks.remove(location);
     }
 
     public Filter getFilter() {

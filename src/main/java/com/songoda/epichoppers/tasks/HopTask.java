@@ -108,9 +108,9 @@ public class HopTask extends BukkitRunnable {
                 // Get the destination state.
                 BlockState blockState = destinationBlock.getState();
 
-                // Remove if destination is not a inventoryholder.
+                // Remove if destination is not a inventory holder.
                 if (!(blockState instanceof InventoryHolder)) {
-                    //ToDO: Have this remove the link all together.
+                    hopper.removeLinkedBlock(destinationLocation);
                     continue;
                 }
 
