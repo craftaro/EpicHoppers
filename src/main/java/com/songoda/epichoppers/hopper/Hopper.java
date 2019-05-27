@@ -255,7 +255,12 @@ public class Hopper {
         this.linkedBlocks.remove(location);
     }
 
+    public void clearLinkedBlocks() {
+        this.linkedBlocks.clear();
+    }
+
     public Filter getFilter() {
         return filter;
     }
+
 }
