@@ -233,7 +233,7 @@ public class EpicHoppers extends JavaPlugin {
                     Location location = Methods.unserializeLocation(row.getKey());
                     if (location == null) return;
 
-                    int level = row.get("level").asInt();
+                    int levelVal = row.get("level").asInt();
 
                     List<String> blockLoc = row.get("block").asStringList();
                     List<Location> blocks = new ArrayList<>();
@@ -272,7 +272,9 @@ public class EpicHoppers extends JavaPlugin {
                     filter.setVoidList(voidList);
                     filter.setEndPoint(black);
 
-                    Hopper hopper = new Hopper(location, levelManager.getLevel(level), lastPlayer, placedBy, blocks, filter, teleportTrigger, autoCrafting);
+                    Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
+
+                    Hopper hopper = new Hopper(location, level, lastPlayer, placedBy, blocks, filter, teleportTrigger, autoCrafting);
 
                     if (autoBreak) hopper.toggleAutoBreaking();
 
