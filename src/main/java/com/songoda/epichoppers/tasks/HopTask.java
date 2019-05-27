@@ -308,10 +308,10 @@ public class HopTask extends BukkitRunnable {
         return (InventoryHolder) state;
     }
 
-    private Class<?> clazzCraftWorld, clazzCraftBlock, clazzBlockPosition;
-    private Method getHandle, updateAdjacentComparators, getNMSBlock;
+    private static Class<?> clazzCraftWorld, clazzCraftBlock, clazzBlockPosition;
+    private static Method getHandle, updateAdjacentComparators, getNMSBlock;
 
-    private void updateAdjacentComparators(Location location) {
+    public static void updateAdjacentComparators(Location location) {
         try {
             // Cache reflection.
             if (clazzCraftWorld == null) {

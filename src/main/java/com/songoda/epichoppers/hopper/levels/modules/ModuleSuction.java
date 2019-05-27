@@ -3,6 +3,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.ServerVersion;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -97,6 +98,7 @@ public class ModuleSuction implements Module {
             for (ItemStack is : hopperInventory.addItem(itemStack).values()) {
                 entity.getWorld().dropItemNaturally(entity.getLocation(), is);
             }
+            HopTask.updateAdjacentComparators(hopper.getLocation());
             entity.remove();
         });
     }
@@ -105,16 +107,13 @@ public class ModuleSuction implements Module {
         return blacklist.contains(uuid);
     }
 
-
     public ItemStack getGUIButton(Hopper hopper) {
         return null;
     }
 
-
     public void runButtonPress(Player player, Hopper hopper) {
 
     }
-
 
     public List<Material> getBlockedItems(Hopper hopper) {
         return null;
