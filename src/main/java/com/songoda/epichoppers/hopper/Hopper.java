@@ -216,7 +216,8 @@ public class Hopper {
 
     public void setAutoCrafting(ItemStack autoCrafting) {
         this.autoCrafting = autoCrafting;
-        autoCrafting.setAmount(1);
+        if (autoCrafting != null)
+            autoCrafting.setAmount(1);
     }
 
     public TeleportTrigger getTeleportTrigger() {
