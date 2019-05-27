@@ -1,6 +1,7 @@
 package com.songoda.epichoppers.utils.settings;
 
 import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.utils.ServerVersion;
 
 import java.util.Arrays;
 import java.util.List;
@@ -63,8 +64,8 @@ public enum Setting {
             "Should PlayerPoints be used?"),
 
     RAINBOW("Interfaces.Replace Glass Type 1 With Rainbow Glass", false),
-    ECO_ICON("Interfaces.Economy Icon", "SUNFLOWER"),
-    XP_ICON("Interfaces.XP Icon", "EXPERIENCE_BOTTLE"),
+    ECO_ICON("Interfaces.Economy Icon", EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? "SUNFLOWER" : "DOUBLE_PLANT"),
+    XP_ICON("Interfaces.XP Icon", EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? "EXPERIENCE_BOTTLE" : "EXP_BOTTLE"),
     GLASS_TYPE_1("Interfaces.Glass Type 1", 7),
     GLASS_TYPE_2("Interfaces.Glass Type 2", 11),
     GLASS_TYPE_3("Interfaces.Glass Type 3", 3),
