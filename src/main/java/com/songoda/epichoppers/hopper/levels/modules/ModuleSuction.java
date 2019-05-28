@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -61,7 +62,7 @@ public class ModuleSuction implements Module {
         double radius = amount + .5;
 
         hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius).stream()
-                .filter(entity -> entity instanceof Item
+                .filter(entity -> entity.getType() == EntityType.DROPPED_ITEM
                         && entity.getTicksLived() > 10
                         && entity.getLocation().getBlock().getType() != Material.HOPPER).forEach(entity -> {
 
