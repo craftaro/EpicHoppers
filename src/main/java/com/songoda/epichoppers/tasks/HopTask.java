@@ -131,7 +131,7 @@ public class HopTask extends BukkitRunnable {
                        ItemStack item = hopperContents[i];
 
                        // Skip if item blacklisted.
-                       if (blacklist.contains(item) || blockedMaterials.contains(item))
+                       if (blacklist.contains(item) || blockedMaterials.contains(item.getType()))
                            continue;
 
                        // Get amount to move.
