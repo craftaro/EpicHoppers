@@ -30,8 +30,9 @@ public class Hopper {
     private Filter filter;
     private TeleportTrigger teleportTrigger;
     private ItemStack autoCrafting;
-    private int autoSellTimer = 0;
-    private boolean autoBreaking = false;
+    private int autoSellTimer;
+    private boolean autoBreaking;
+    private int transferTick;
 
     public Hopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
         this.location = location;
@@ -42,6 +43,9 @@ public class Hopper {
         this.placedBy = placedBy;
         this.teleportTrigger = teleportTrigger;
         this.autoCrafting = autoCrafting;
+        this.autoSellTimer = 0;
+        this.autoBreaking = false;
+        this.transferTick = 0;
     }
 
     public Hopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
@@ -174,6 +178,25 @@ public class Hopper {
             }
             player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
             instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
+    }
+
+    /**
+     * Ticks a hopper to determine when it can transfer items next
+     * @param maxTick The maximum amount the hopper can be ticked before next transferring items
+     * @param allowLooping If true, the hopper is allowed to transfer items if the tick is also valid
+     * @return true if the hopper should transfer an item, otherwise false
+     */
+    public boolean tryTick(int maxTick, boolean allowLooping) {
+        this.transferTick++;
+        if (this.transferTick >= maxTick) {
+            if (allowLooping) {
+                this.transferTick = 0;
+                return true;
+            } else {
+                this.transferTick = maxTick;
+            }
+        }
+        return false;
     }
 
     public Location getLocation() {

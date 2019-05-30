@@ -11,7 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Hopper;
@@ -40,10 +39,12 @@ public class HopTask extends BukkitRunnable {
     private static EpicHoppers plugin;
 
     private final Map<InventoryHolder, ItemStack> blacklist = new HashMap<>();
+    private final int hopTicks;
 
     public HopTask(EpicHoppers plug) {
         plugin = plug;
-        runTaskTimer(plugin, 0, Setting.HOP_TICKS.getInt());
+        this.hopTicks = Setting.HOP_TICKS.getInt() / 2; // Purposeful integer division
+        this.runTaskTimer(plugin, 0, 2);
     }
 
     @Override
@@ -73,7 +74,12 @@ public class HopTask extends BukkitRunnable {
                 }
 
                 // If hopper block is powered continue.
-                if (block.isBlockPowered() || block.isBlockIndirectlyPowered())
+                if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) {
+                    hopper.tryTick(this.hopTicks, false);
+                    continue;
+                }
+
+                if (!hopper.tryTick(this.hopTicks, true))
                     continue;
 
                 // Get hopper state.
@@ -110,7 +116,7 @@ public class HopTask extends BukkitRunnable {
                 ItemStack[] hopperContents = hopperState.getInventory().getContents();
 
                 // Get filter endpoint
-                InventoryHolder filterEndpoint = getFilterEndpoint(hopper);
+                InventoryHolder filterEndpoint = this.getFilterEndpoint(hopper);
 
                 // Loop through our container list.
                 for (Location destinationLocation : linkedContainers) {
@@ -146,12 +152,8 @@ public class HopTask extends BukkitRunnable {
                         ItemStack item = hopperContents[i];
 
                         // Skip if item blacklisted.
-                        System.out.println(blacklist.size() + " | " + blacklist.containsKey(hopperState) + " | " + (blacklist.containsKey(hopperState) && blacklist.get(hopperState).isSimilar(item)));
-                        System.out.println("Blacklist check: " + hopperState);
-                        if ((blacklist.containsKey(hopperState) && blacklist.get(hopperState).isSimilar(item)) || blockedMaterials.contains(item.getType())) {
-                            destinationLocation.getWorld().spawnParticle(Particle.CRIT, destinationLocation.clone().add(0.5, 1, 0.5), 10);
+                        if ((this.blacklist.containsKey(hopperState) && this.blacklist.get(hopperState).isSimilar(item)) || blockedMaterials.contains(item.getType()))
                             continue;
-                        }
 
                         // Get amount to move.
                         int amountToMove = item.getAmount() < amount ? item.getAmount() : amount;
@@ -176,13 +178,13 @@ public class HopTask extends BukkitRunnable {
                         // If blocked check to see if a movement can be made if blacklist skip to the next slot
                         // otherwise set the current destination to the endpoint.
                         if (blocked) {
-                            if (filterEndpoint == null || !canMove(filterEndpoint.getInventory(), itemToMove))
+                            if (filterEndpoint == null || !this.canMove(filterEndpoint.getInventory(), itemToMove))
                                 break;
                             currentDestination = filterEndpoint;
                         }
 
                         // Add item to container and continue on success.
-                        if (addItem(hopper, hopperState, currentDestination, destinationBlock.getType(), item, itemToMove, amountToMove))
+                        if (this.addItem(hopper, hopperState, currentDestination, destinationBlock.getType(), item, itemToMove, amountToMove))
                             continue main;
                     }
                 }
@@ -259,7 +261,7 @@ public class HopTask extends BukkitRunnable {
 
                     brewerInventory.setItem(entry.getKey(), currentOutput);
                 }
-                debt(item, amountToMove, currentHolder);
+                this.debt(item, amountToMove, currentHolder);
                 return true;
             }
             case "BLAST_FURNACE":
@@ -284,14 +286,14 @@ public class HopTask extends BukkitRunnable {
                     } else {
                         furnaceInventory.setSmelting(output);
                     }
-                    debt(item, amountToMove, currentHolder);
+                    this.debt(item, amountToMove, currentHolder);
                 }
                 return true;
             }
         }
 
         // Continue if move would fail.
-        if (!canMove(destinationInventory, itemToMove))
+        if (!this.canMove(destinationInventory, itemToMove))
             return false;
 
         // Prevent item from being moved again during this cycle.
@@ -303,7 +305,7 @@ public class HopTask extends BukkitRunnable {
         destinationInventory.addItem(itemToMove);
 
         // Debt hopper
-        debt(item, amountToMove, currentHolder);
+        this.debt(item, amountToMove, currentHolder);
 
         // Update comparators for destination hopper.
         updateAdjacentComparators(((BlockState) currentDestination).getLocation());
