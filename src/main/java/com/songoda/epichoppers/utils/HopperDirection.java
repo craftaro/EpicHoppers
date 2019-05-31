@@ -35,7 +35,7 @@ public enum HopperDirection {
     }
 
     public Location getLocation(Location location) {
-        return location.add(getX(), getY(), getZ());
+        return location.clone().add(getX(), getY(), getZ());
     }
 
     public int getX() {

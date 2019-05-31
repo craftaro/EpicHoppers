@@ -11,10 +11,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Hopper;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.FurnaceInventory;
@@ -30,6 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -115,21 +121,38 @@ public class HopTask extends BukkitRunnable {
                 BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
                 int amount = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
-                // Grab items from the container above
+                // Grab items from the container above (includes storage/hopper minecarts and EpicFarming farm items)
                 // If the container above is a hopper, ignore it if it's pointing down
                 Block above = block.getRelative(BlockFace.UP);
                 boolean isFarmItem = false;
+                Collection<Entity> nearbyEntities = null;
+                outer:
                 if ((above.getState() instanceof InventoryHolder
                         && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN))
+                        || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)).isEmpty()
                         || (isFarmItem = this.isFarmItem(above))) {
 
                     // Get the inventory holder. Special check for EpicFarming.
-                    InventoryHolder aboveInvHolder = !isFarmItem ? (InventoryHolder) above.getState() : this.getEpicFarmingItemWrapped(above);
+                    // Get the slots that we can pull items from.
+                    InventoryHolder aboveInvHolder;
+                    int[] pullableSlots;
+                    if (isFarmItem) {
+                        aboveInvHolder = this.getEpicFarmingItemWrapped(above);
+                        pullableSlots = IntStream.rangeClosed(27, 53).toArray();
+                    } else if (nearbyEntities != null) {
+                        if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null)
+                            break outer;
+                        if (aboveInvHolder instanceof StorageMinecart) {
+                            pullableSlots = IntStream.rangeClosed(0, 26).toArray();
+                        } else {
+                            pullableSlots = IntStream.rangeClosed(0, 4).toArray();
+                        }
+                    } else {
+                        aboveInvHolder = (InventoryHolder) above.getState();
+                        pullableSlots = this.getPullableSlots(aboveInvHolder, above.getType());
+                    }
 
                     ItemStack[] contents = aboveInvHolder.getInventory().getContents();
-
-                    // Get the slots that we can pull items from. EpicFarming gets a special check here.
-                    int[] pullableSlots = isFarmItem ? IntStream.rangeClosed(27, 53).toArray() : this.getPullableSlots(aboveInvHolder, above.getType());
 
                     // Loop over the pullable slots and try to pull something.
                     for (int i : pullableSlots) {
@@ -175,28 +198,41 @@ public class HopTask extends BukkitRunnable {
                 // Get filter endpoint
                 InventoryHolder filterEndpoint = this.getFilterEndpoint(hopper);
 
-                // Loop through our container list.
-                for (Location destinationLocation : linkedContainers) {
+                // Keep track of any destination containers
+                List<InventoryHolder> destinationContainers = new ArrayList<>();
 
+                // Add linked containers to the destinations
+                for (Location linkedContainerLocation : linkedContainers) {
                     // Make sure the destination chunk is loaded.
-                    if (!destinationLocation.getWorld().isChunkLoaded(destinationLocation.getBlockX() >> 4,
-                            destinationLocation.getBlockZ() >> 4))
+                    if (!linkedContainerLocation.getWorld().isChunkLoaded(linkedContainerLocation.getBlockX() >> 4,
+                            linkedContainerLocation.getBlockZ() >> 4))
                         continue;
 
                     // Get the destination block.
-                    Block destinationBlock = destinationLocation.getBlock();
+                    Block destinationBlock = linkedContainerLocation.getBlock();
 
                     // Get the destination state.
                     BlockState blockState = destinationBlock.getState();
 
                     // Remove if destination is not a inventory holder.
                     if (!(blockState instanceof InventoryHolder)) {
-                        hopper.removeLinkedBlock(destinationLocation);
+                        hopper.removeLinkedBlock(linkedContainerLocation);
                         continue;
                     }
 
-                    // Cast blockState to container
-                    InventoryHolder destinationContainer = ((InventoryHolder) blockState);
+                    // Add to the destination containers list
+                    destinationContainers.add((InventoryHolder) blockState);
+                }
+
+                // Add storage/hopper minecarts the hopper is pointing into to the list if there aren't any destinations
+                if (destinationContainers.size() < 2) {
+                    destinationContainers.addAll(block.getWorld().getNearbyEntities(hopperDirection.getLocation(location).clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)
+                            .stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
+                            .map(e -> (InventoryHolder) e).collect(Collectors.toSet()));
+                }
+
+                // Loop through our destination list.
+                for (InventoryHolder currentDestination : destinationContainers) {
 
                     // Loop through all of our hoppers item slots.
                     for (int i = 0; i < 5; i++) {
@@ -221,9 +257,6 @@ public class HopTask extends BukkitRunnable {
                         ItemStack itemToMove = item.clone();
                         itemToMove.setAmount(amountToMove);
 
-                        // Set current destination.
-                        InventoryHolder currentDestination = destinationContainer;
-
                         // Process whitelist and blacklist.
                         boolean blocked = (!hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getWhiteList().stream().noneMatch(itemStack -> itemStack.isSimilar(item))
                                 || hopper.getFilter().getBlackList().stream().anyMatch(itemStack -> itemStack.isSimilar(item)));
@@ -236,8 +269,11 @@ public class HopTask extends BukkitRunnable {
                             currentDestination = filterEndpoint;
                         }
 
+                        // Get the material of the destination
+                        Material destinationMaterial = currentDestination instanceof BlockState ? ((BlockState) currentDestination).getType() : Material.AIR;
+
                         // Add item to container and continue on success.
-                        if (this.addItem(hopper, hopperState, currentDestination, destinationBlock.getType(), item, itemToMove, amountToMove))
+                        if (this.addItem(hopper, hopperState, currentDestination, destinationMaterial, item, itemToMove, amountToMove))
                             continue main;
                     }
                 }
@@ -255,6 +291,7 @@ public class HopTask extends BukkitRunnable {
 
         Inventory destinationInventory = currentDestination.getInventory();
 
+        // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
         if (destinationType.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
             return false;
 
@@ -466,6 +503,23 @@ public class HopTask extends BukkitRunnable {
             default:
                 return IntStream.empty().toArray();
         }
+    }
+
+    /**
+     * Gets a random InventoryHolder from a collection of entities
+     * Only grabs InventoryHolders from StorageMinecarts and HopperMinecarts
+     * @param entities The collection of entities
+     * @return A random InventoryHolder if one exists, otherwise null
+     */
+    private InventoryHolder getRandomInventoryHolderFromEntities(Collection<Entity> entities) {
+        List<InventoryHolder> inventoryHolders = new ArrayList<>();
+        entities.stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
+                .forEach(e -> inventoryHolders.add((InventoryHolder) e));
+        if (inventoryHolders.isEmpty())
+            return null;
+        if (inventoryHolders.size() == 1)
+            return inventoryHolders.get(0);
+        return inventoryHolders.get(ThreadLocalRandom.current().nextInt(inventoryHolders.size()));
     }
 
     /**

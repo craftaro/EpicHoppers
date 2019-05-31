@@ -57,9 +57,6 @@ public class BlockListeners implements Listener {
             return;
         }
 
-        if (!e.getItemInHand().getItemMeta().hasDisplayName())
-            return;
-
         ItemStack item = e.getItemInHand().clone();
 
         instance.getHopperManager().addHopper(e.getBlock().getLocation(), new Hopper(e.getBlock(), instance.getLevelManager().getLevel(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new Filter(), TeleportTrigger.DISABLED, null));

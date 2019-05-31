@@ -7,6 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Minecart;
+import org.bukkit.entity.minecart.HopperMinecart;
+import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
@@ -29,7 +31,14 @@ public class HopperListeners implements Listener {
         Inventory source = event.getSource();
         Inventory destination = event.getDestination();
 
-        if (!(source.getHolder() instanceof org.bukkit.block.Hopper)) return;
+        if (destination.getHolder() instanceof StorageMinecart || destination.getHolder() instanceof HopperMinecart) {
+            if (source.getHolder() instanceof org.bukkit.block.Hopper)
+                event.setCancelled(true);
+            return;
+        }
+
+        if (!(source.getHolder() instanceof org.bukkit.block.Hopper))
+            return;
 
         if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
             return;
@@ -47,7 +56,8 @@ public class HopperListeners implements Listener {
             return;
         }
 
-        if (!(destinationLocation.getBlock().getState() instanceof InventoryHolder)) return;
+        if (!(destinationLocation.getBlock().getState() instanceof InventoryHolder))
+            return;
 
         Hopper hopper = instance.getHopperManager().getHopper(sourceHopper.getLocation());
 
@@ -55,6 +65,5 @@ public class HopperListeners implements Listener {
         hopper.addLinkedBlock(destinationLocation);
 
         event.setCancelled(true);
-
     }
 }
