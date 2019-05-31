@@ -74,6 +74,7 @@ public class EpicHoppers extends JavaPlugin {
     private Storage storage;
 
     private boolean liquidtanks = false;
+    private boolean epicfarming = false;
 
     public static EpicHoppers getInstance() {
         return INSTANCE;
@@ -134,6 +135,9 @@ public class EpicHoppers extends JavaPlugin {
 
         // Check for liquid tanks
         if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
+
+        // Check for epicfarming
+        if (pluginManager.isPluginEnabled("EpicFarming")) epicfarming = true;
 
         // Start auto save
         int saveInterval = Setting.AUTOSAVE.getInt() * 60 * 20;
@@ -402,6 +406,10 @@ public class EpicHoppers extends JavaPlugin {
 
     public boolean isLiquidtanks() {
         return liquidtanks;
+    }
+
+    public boolean isEpicFarming() {
+        return epicfarming;
     }
 
 }

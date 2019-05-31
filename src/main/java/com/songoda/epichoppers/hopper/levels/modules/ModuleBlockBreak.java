@@ -11,6 +11,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -37,7 +38,8 @@ public class ModuleBlockBreak implements Module {
     public void run(Hopper hopper, Inventory hopperInventory) {
         Block block = hopper.getLocation().getBlock();
 
-        if (!hopper.isAutoBreaking()) return;
+        if (!hopper.isAutoBreaking())
+            return;
 
         if (!blockTick.containsKey(block)) {
             blockTick.put(block, 1);
@@ -46,11 +48,21 @@ public class ModuleBlockBreak implements Module {
         int tick = blockTick.get(block);
         int put = tick + 1;
         blockTick.put(block, put);
-        if (tick < amount) return;
-        Block above = block.getRelative(0, 1, 0);
-        if (above.getType() == Material.WATER || above.getType() == Material.LAVA) return;
+        if (tick < amount)
+            return;
 
-        if (above.getType() != Material.AIR && above.getType() != Material.HOPPER && !EpicHoppers.getInstance().getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
+        Block above = block.getRelative(0, 1, 0);
+        if (above.getType() == Material.WATER
+                || above.getType() == Material.LAVA
+                || above.getType() == Material.AIR
+                || above instanceof InventoryHolder)
+            return;
+
+        // Don't break farm items from EpicFarming
+        if (EpicHoppers.getInstance().isEpicFarming() && com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(above) != null)
+            return;
+
+        if (!EpicHoppers.getInstance().getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
             if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
                 above.getWorld().playSound(above.getLocation(), Sound.BLOCK_STONE_BREAK, 1F, 1F);
             Location locationAbove = above.getLocation();

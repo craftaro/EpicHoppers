@@ -12,9 +12,11 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Hopper;
 import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -112,8 +115,62 @@ public class HopTask extends BukkitRunnable {
                 BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
                 int amount = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
+                // Grab items from the container above
+                // If the container above is a hopper, ignore it if it's pointing down
+                Block above = block.getRelative(BlockFace.UP);
+                boolean isFarmItem = false;
+                if ((above.getState() instanceof InventoryHolder
+                        && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN))
+                        || (isFarmItem = this.isFarmItem(above))) {
+
+                    // Get the inventory holder. Special check for EpicFarming.
+                    InventoryHolder aboveInvHolder = !isFarmItem ? (InventoryHolder) above.getState() : this.getEpicFarmingItemWrapped(above);
+
+                    ItemStack[] contents = aboveInvHolder.getInventory().getContents();
+
+                    // Get the slots that we can pull items from. EpicFarming gets a special check here.
+                    int[] pullableSlots = isFarmItem ? IntStream.rangeClosed(27, 53).toArray() : this.getPullableSlots(aboveInvHolder, above.getType());
+
+                    // Loop over the pullable slots and try to pull something.
+                    for (int i : pullableSlots) {
+                        // Get the item
+                        ItemStack item = contents[i];
+
+                        // If item is invalid, try the next slot.
+                        if (item == null)
+                            continue;
+
+                        // Get amount to move.
+                        int amountToMove = item.getAmount() < amount ? item.getAmount() : amount;
+
+                        // Create item that will be moved.
+                        ItemStack itemToMove = item.clone();
+                        itemToMove.setAmount(amountToMove);
+
+                        // Add item to container and break on success.
+                        if (this.addItem(hopper, aboveInvHolder, hopperState, block.getType(), item, itemToMove, amountToMove))
+                            break;
+                    }
+                }
+
                 // Fetch all hopper contents.
                 ItemStack[] hopperContents = hopperState.getInventory().getContents();
+
+                // Loop over hopper inventory to process void filtering.
+                if (!hopper.getFilter().getVoidList().isEmpty()) {
+                    for (ItemStack item : hopperContents) {
+                        // Skip if slot empty.
+                        if (item == null)
+                            continue;
+
+                        // Try to void it out
+                        int amountToVoid = item.getAmount() < amount ? item.getAmount() : amount;
+                        if (hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> itemStack.isSimilar(item))) {
+                            item.setAmount(item.getAmount() - amountToVoid);
+                            break;
+                        }
+                    }
+                }
 
                 // Get filter endpoint
                 InventoryHolder filterEndpoint = this.getFilterEndpoint(hopper);
@@ -144,15 +201,17 @@ public class HopTask extends BukkitRunnable {
                     // Loop through all of our hoppers item slots.
                     for (int i = 0; i < 5; i++) {
 
-                        // Skip if slot empty.
-                        if (hopperContents[i] == null)
-                            continue;
-
                         // Get potential item to move.
                         ItemStack item = hopperContents[i];
 
-                        // Skip if item blacklisted.
-                        if ((this.blacklist.containsKey(hopperState) && this.blacklist.get(hopperState).isSimilar(item)) || blockedMaterials.contains(item.getType()))
+                        // Skip if slot empty.
+                        if (item == null)
+                            continue;
+
+                        // Skip if item blacklisted or void.
+                        if ((this.blacklist.containsKey(hopperState) && this.blacklist.get(hopperState).isSimilar(item))
+                                || blockedMaterials.contains(item.getType())
+                                || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> itemStack.isSimilar(item)))
                             continue;
 
                         // Get amount to move.
@@ -161,12 +220,6 @@ public class HopTask extends BukkitRunnable {
                         // Create item that will be moved.
                         ItemStack itemToMove = item.clone();
                         itemToMove.setAmount(amountToMove);
-
-                        // Process void.
-                        if (hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> itemStack.isSimilar(item))) {
-                            item.setAmount(item.getAmount() - amountToMove);
-                            continue;
-                        }
 
                         // Set current destination.
                         InventoryHolder currentDestination = destinationContainer;
@@ -202,6 +255,9 @@ public class HopTask extends BukkitRunnable {
 
         Inventory destinationInventory = currentDestination.getInventory();
 
+        if (destinationType.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
+            return false;
+
         switch (destinationType.name()) {
             case "ENDER_CHEST":
                 OfflinePlayer op = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
@@ -209,24 +265,6 @@ public class HopTask extends BukkitRunnable {
                 if (op.isOnline())
                     destinationInventory = op.getPlayer().getEnderChest();
                 break;
-            case "BLACK_SHULKER_BOX":
-            case "BLUE_SHULKER_BOX":
-            case "BROWN_SHULKER_BOX":
-            case "CYAN_SHULKER_BOX":
-            case "GRAY_SHULKER_BOX":
-            case "GREEN_SHULKER_BOX":
-            case "LIGHT_BLUE_SHULKER_BOX":
-            case "LIGHT_GRAY_SHULKER_BOX":
-            case "LIME_SHULKER_BOX":
-            case "MAGENTA_SHULKER_BOX":
-            case "ORANGE_SHULKER_BOX":
-            case "PINK_SHULKER_BOX":
-            case "PURPLE_SHULKER_BOX":
-            case "RED_SHULKER_BOX":
-            case "SHULKER_BOX":
-            case "WHITE_SHULKER_BOX":
-            case "YELLOW_SHULKER_BOX":
-                return false;
             case "BREWING_STAND": {
                 BrewerInventory brewerInventory = (BrewerInventory) destinationInventory;
 
@@ -264,6 +302,7 @@ public class HopTask extends BukkitRunnable {
                 this.debt(item, amountToMove, currentHolder);
                 return true;
             }
+            case "SMOKER":
             case "BLAST_FURNACE":
             case "BURNING_FURNACE":
             case "FURNACE": {
@@ -298,7 +337,8 @@ public class HopTask extends BukkitRunnable {
 
         // Prevent item from being moved again during this cycle.
         // Only block if the hopper being transfered into doesn't already contain the same item.
-        if (!destinationInventory.contains(itemToMove))
+        // Don't blacklist if the block is transfering items into itself
+        if (!destinationInventory.contains(itemToMove) && currentDestination != currentHolder)
             this.blacklist.put(currentDestination, itemToMove);
 
         // Move item to destination.
@@ -307,8 +347,9 @@ public class HopTask extends BukkitRunnable {
         // Debt hopper
         this.debt(item, amountToMove, currentHolder);
 
-        // Update comparators for destination hopper.
-        updateAdjacentComparators(((BlockState) currentDestination).getLocation());
+        // Update comparators for destination block.
+        if (currentDestination instanceof BlockState)
+            updateAdjacentComparators(((BlockState) currentDestination).getLocation());
 
         // Update comparators for current hopper.
         updateAdjacentComparators(hopper.getLocation());
@@ -392,6 +433,59 @@ public class HopTask extends BukkitRunnable {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a set of slots that can be pulled from based on the given material
+     * @param material The material to get pullable slots for
+     * @return A set of valid pullable slots
+     */
+    private int[] getPullableSlots(InventoryHolder inventoryHolder, Material material) {
+        if (material.name().contains("SHULKER_BOX"))
+            return IntStream.rangeClosed(0, 26).toArray();
+
+        switch (material.name()) {
+            case "BARREL":
+            case "CHEST":
+            case "TRAPPED_CHEST":
+                if (inventoryHolder.getInventory() instanceof DoubleChestInventory)
+                    return IntStream.rangeClosed(0, 53).toArray();
+                return IntStream.rangeClosed(0, 26).toArray();
+            case "BREWING_STAND":
+                return IntStream.rangeClosed(0, 2).toArray();
+            case "HOPPER":
+                return IntStream.rangeClosed(0, 4).toArray();
+            case "DISPENSER":
+            case "DROPPER":
+                return IntStream.rangeClosed(0, 8).toArray();
+            case "SMOKER":
+            case "BLAST_FURNACE":
+            case "BURNING_FURNACE":
+            case "FURNACE":
+                return IntStream.of(2).toArray();
+            default:
+                return IntStream.empty().toArray();
+        }
+    }
+
+    /**
+     * Checks if a given block is an EpicFarming farm item
+     * @param block The block to check
+     * @return true if the block is a farm item, otherwise false
+     */
+    private boolean isFarmItem(Block block) {
+        return EpicHoppers.getInstance().isEpicFarming() && com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(block) != null;
+    }
+
+    /**
+     * Gets an EpicFarming block as an InventoryHolder
+     * Needed because EpicFarming doesn't natively support having an InventoryHolder for the farm item
+     *
+     * @param block The block to effectively attach an InventoryHolder to
+     * @return An InventoryHolder wrapping the EpicFarming inventory
+     */
+    private InventoryHolder getEpicFarmingItemWrapped(Block block) {
+        return () -> com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(block).getInventory();
     }
 
 }
