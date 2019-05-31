@@ -80,8 +80,7 @@ public class InteractListeners implements Listener {
                         return;
                     Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
                     playerData.setLastHopper(hopper);
-                    if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")
-                            && !player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
+                    if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
                         hopper.overview(player);
                         e.setCancelled(true);
                         return;

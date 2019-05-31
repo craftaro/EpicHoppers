@@ -43,7 +43,7 @@ public class HopTask extends BukkitRunnable {
 
     public HopTask(EpicHoppers plug) {
         plugin = plug;
-        this.hopTicks = Setting.HOP_TICKS.getInt() / 2; // Purposeful integer division
+        this.hopTicks = Math.max(1, Setting.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
     }
 
