@@ -104,7 +104,7 @@ public class GUIOverview extends AbstractGUI {
         ItemMeta hookmeta = hook.getItemMeta();
         hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.synchopper"));
         ArrayList<String> lorehook = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.synclore", hopper.getLinkedBlocks().size()).split("\\|");
+        parts = plugin.getLocale().getMessage("interface.hopper.synclore", hopper.getLinkedBlocks().stream().distinct().count()).split("\\|");
         for (String line : parts) {
             lorehook.add(Methods.formatText(line));
         }
