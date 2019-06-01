@@ -63,7 +63,7 @@ public class ModuleSuction implements Module {
 
         hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius).stream()
                 .filter(entity -> entity.getType() == EntityType.DROPPED_ITEM
-                        && entity.getTicksLived() > 10
+                        && entity.getTicksLived() >= ((Item)entity).getPickupDelay()
                         && entity.getLocation().getBlock().getType() != Material.HOPPER).forEach(entity -> {
 
             Item item = (Item) entity;
@@ -90,7 +90,7 @@ public class ModuleSuction implements Module {
             float zz = (float) (0 + (Math.random() * .1));
 
             if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
-            entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
+                entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
 
             for (ItemStack is : hopperInventory.addItem(itemStack).values()) {
                 entity.getWorld().dropItemNaturally(entity.getLocation(), is);
