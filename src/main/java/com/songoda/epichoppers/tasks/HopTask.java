@@ -2,6 +2,7 @@ package com.songoda.epichoppers.tasks;
 
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
+import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
@@ -11,7 +12,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -31,9 +31,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -61,6 +63,8 @@ public class HopTask extends BukkitRunnable {
         Collection<com.songoda.epichoppers.hopper.Hopper> hoppers = plugin.getHopperManager().getHoppers().values();
         Iterator<com.songoda.epichoppers.hopper.Hopper> itr = hoppers.iterator();
 
+        Set<Location> toRemove = new HashSet<>();
+
         main:
         while (itr.hasNext()) {
             com.songoda.epichoppers.hopper.Hopper hopper = itr.next();
@@ -78,7 +82,7 @@ public class HopTask extends BukkitRunnable {
 
                 // If block is not a hopper remove and continue.
                 if (block.getType() != Material.HOPPER) {
-                    plugin.getHopperManager().removeHopper(location);
+                    toRemove.add(location);
                     continue;
                 }
 
@@ -281,6 +285,10 @@ public class HopTask extends BukkitRunnable {
                 e.printStackTrace();
             }
         }
+
+        // Clear out invalid hoppers
+        HopperManager hopperManager = plugin.getHopperManager();
+        toRemove.forEach(hopperManager::removeHopper);
 
         // Empty blacklist in preparation for next cycle.
         this.blacklist.clear();
