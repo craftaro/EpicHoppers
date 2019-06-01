@@ -55,7 +55,7 @@ public class ModuleBlockBreak implements Module {
         if (above.getType() == Material.WATER
                 || above.getType() == Material.LAVA
                 || above.getType() == Material.AIR
-                || above instanceof InventoryHolder)
+                || above.getState() instanceof InventoryHolder)
             return;
 
         // Don't break farm items from EpicFarming

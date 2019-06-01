@@ -375,7 +375,7 @@ public class HopTask extends BukkitRunnable {
         // Prevent item from being moved again during this cycle.
         // Only block if the hopper being transfered into doesn't already contain the same item.
         // Don't blacklist if the block is transfering items into itself
-        if (!destinationInventory.contains(itemToMove) && currentDestination != currentHolder)
+        if (!destinationInventory.contains(itemToMove) && currentDestination != currentHolder && currentHolder instanceof Hopper)
             this.blacklist.put(currentDestination, itemToMove);
 
         // Move item to destination.
