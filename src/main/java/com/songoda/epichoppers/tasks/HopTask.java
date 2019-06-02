@@ -262,7 +262,7 @@ public class HopTask extends BukkitRunnable {
                         itemToMove.setAmount(amountToMove);
 
                         // Process whitelist and blacklist.
-                        boolean blocked = (!hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getWhiteList().stream().anyMatch(itemStack -> itemStack.isSimilar(item))
+                        boolean blocked = (!hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getWhiteList().stream().noneMatch(itemStack -> itemStack.isSimilar(item))
                                 || hopper.getFilter().getBlackList().stream().anyMatch(itemStack -> itemStack.isSimilar(item)));
 
                         // If blocked check to see if a movement can be made if blacklist skip to the next slot
