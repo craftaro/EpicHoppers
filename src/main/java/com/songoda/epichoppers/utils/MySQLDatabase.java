@@ -33,7 +33,7 @@ public class MySQLDatabase {
                             "\t`whitelist` TEXT NULL,\n" +
                             "\t`blacklist` TEXT NULL,\n" +
                             "\t`void` TEXT NULL,\n" +
-                            "\t`black` TEXT NULL\n" +
+                            "\t`black` TEXT NULL,\n" +
                             "\t`autobreak` TEXT NULL\n" +
                             ")");
 
@@ -44,7 +44,8 @@ public class MySQLDatabase {
                     ")");
 
         } catch (ClassNotFoundException | SQLException e) {
-            System.out.println("Database connection failed.");
+            System.err.println("Database connection failed.");
+            System.err.println(e.getMessage());
         }
     }
 
