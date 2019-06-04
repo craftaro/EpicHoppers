@@ -60,7 +60,7 @@ public class GUICrafting extends AbstractGUI {
     @Override
     protected void registerOnCloses() {
         registerOnClose(((player, inventory) ->
-                hopper.setAutoCrafting(inventory.getItem(13))));
+                hopper.setAutoCrafting(player, inventory.getItem(13))));
 
     }
 }

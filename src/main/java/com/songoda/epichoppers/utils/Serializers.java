@@ -36,7 +36,7 @@ public class Serializers {
 
     public static ItemStack deserialize(String serializedItem) {
         String[] strings = serializedItem.split(" ");
-        Map<Enchantment, Integer> enchants = new HashMap<Enchantment, Integer>();
+        Map<Enchantment, Integer> enchants = new HashMap<>();
         String[] args;
         ItemStack item = new ItemStack(Material.AIR);
         for (String str : strings) {
@@ -53,21 +53,22 @@ public class Serializers {
         }
         for (String str : strings) {
             args = str.split(":", 2);
+            Bukkit.broadcastMessage(Arrays.toString(args));
             if (isNumber(args[0])) item.setAmount(Integer.parseInt(args[0]));
             if (args.length == 1) continue;
-            if (args[0].equalsIgnoreCase("name:")) {
+            if (args[0].equalsIgnoreCase("name")) {
                 setName(item, ChatColor.translateAlternateColorCodes('&', args[1]));
                 continue;
             }
-            if (args[0].equalsIgnoreCase("lore:")) {
+            if (args[0].equalsIgnoreCase("lore")) {
                 setLore(item, ChatColor.translateAlternateColorCodes('&', args[1]));
                 continue;
             }
-            if (args[0].equalsIgnoreCase("rgb:")) {
+            if (args[0].equalsIgnoreCase("rgb")) {
                 setArmorColor(item, args[1]);
                 continue;
             }
-            if (args[0].equalsIgnoreCase("owner:")) {
+            if (args[0].equalsIgnoreCase("owner")) {
                 setOwner(item, args[1]);
                 continue;
             }
@@ -102,7 +103,7 @@ public class Serializers {
     }
 
     private static void setName(ItemStack item, String name) {
-        name = name.replace("_", " ");
+        name = name.replace("_", " ").replace('&', ChatColor.COLOR_CHAR);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(name);
         item.setItemMeta(meta);
@@ -120,7 +121,7 @@ public class Serializers {
     }
 
     private static void setLore(ItemStack item, String lore) {
-        lore = lore.replace("_", " ");
+        lore = lore.replace("_", " ").replace('&', ChatColor.COLOR_CHAR);
         ItemMeta meta = item.getItemMeta();
         meta.setLore(Arrays.asList(lore.split("\\|")));
         item.setItemMeta(meta);

@@ -244,10 +244,17 @@ public class Hopper {
         return autoCrafting;
     }
 
-    public void setAutoCrafting(ItemStack autoCrafting) {
+    public void setAutoCrafting(Player player, ItemStack autoCrafting) {
         this.autoCrafting = autoCrafting;
-        if (autoCrafting != null)
+        if (autoCrafting != null) {
+            int excess = autoCrafting.getAmount() - 1;
             autoCrafting.setAmount(1);
+            if (excess > 0 && player != null) {
+                ItemStack item = autoCrafting.clone();
+                item.setAmount(excess);
+                player.getInventory().addItem(item);
+            }
+        }
     }
 
     public TeleportTrigger getTeleportTrigger() {
