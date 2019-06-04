@@ -35,8 +35,9 @@ public class HopperListeners implements Listener {
 
         // Hopper minecarts should be able to take care of themselves
         // Let EpicHoppers take over if the hopper is pointing down though
-        if (destination.getHolder() instanceof HopperMinecart && (!(source.getHolder() instanceof org.bukkit.block.Hopper)
-                || HopperDirection.getDirection(((org.bukkit.block.Hopper)destination.getHolder()).getRawData()) != HopperDirection.DOWN))
+        if (destination.getHolder() instanceof HopperMinecart
+                && source.getHolder() instanceof org.bukkit.block.Hopper
+                && HopperDirection.getDirection(((org.bukkit.block.Hopper)source.getHolder()).getRawData()) != HopperDirection.DOWN)
             return;
 
         // Shulker boxes have a mind of their own and relentlessly steal items from hoppers
