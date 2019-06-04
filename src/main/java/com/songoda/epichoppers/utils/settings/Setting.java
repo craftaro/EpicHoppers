@@ -58,6 +58,11 @@ public enum Setting {
             Arrays.asList("STONE,0.50", "COBBLESTONE,0.20", "IRON_ORE,0.35", "COAL_ORE,0.20"),
             "These are the prices used by the auto sell module."),
 
+    AUTOSELL_SHOPGUIPLUS("Main.Use ShopGuiPlus for Prices", false,
+            "Should prices be grabbed from ShopGuiPlus?",
+            "If ShopGuiPlus is not enabled or the player is offline the default price list will be used.",
+            "If this is something that you do not want then you should empty the default list."),
+
     VAULT_ECONOMY("Economy.Use Vault Economy", true,
             "Should Vault be used?"),
 

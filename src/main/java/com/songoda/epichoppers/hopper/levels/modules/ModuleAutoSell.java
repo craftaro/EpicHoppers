@@ -5,8 +5,11 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
+import com.songoda.epichoppers.utils.settings.Setting;
+import net.brcdev.shopgui.ShopGuiPlusApi;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -46,23 +49,24 @@ public class ModuleAutoSell implements Module {
 
             List<String> list = instance.getConfig().getStringList("Main.AutoSell Prices");
 
-            for (String line : list) {
-                try {
-                    String[] split = line.split(",");
+            OfflinePlayer player = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
 
-                    Material material = Material.valueOf(split[0]);
-                    double price = Double.valueOf(split[1]);
+            for (ItemStack itemStack : hopperInventory.getContents()) {
+                if (itemStack == null) continue;
 
-                    for (ItemStack itemStack : hopperInventory.getContents()) {
-                        if (itemStack == null || itemStack.getType() != material) continue;
+                double value;
+                if (Setting.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline())
+                    value = ShopGuiPlusApi.getItemStackPriceSell(player.getPlayer(), itemStack);
+                else
+                    value = Double.valueOf(list.stream().filter(line -> Material.valueOf(line.split(",")[0])
+                            == itemStack.getType()).findFirst().orElse("0"));
 
-                        instance.getEconomy().deposit(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
-                        hopperInventory.removeItem(itemStack);
+                if (value == 0) continue;
 
-                        updateComparators = true;
-                    }
-                } catch (Exception ignored) {
-                }
+                    instance.getEconomy().deposit(player, value * itemStack.getAmount());
+                hopperInventory.removeItem(itemStack);
+
+                updateComparators = true;
             }
             hopper.setAutoSellTimer(timeOut);
 
