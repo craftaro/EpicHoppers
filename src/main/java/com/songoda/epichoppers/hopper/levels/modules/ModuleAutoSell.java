@@ -7,6 +7,7 @@ import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.settings.Setting;
 import net.brcdev.shopgui.ShopGuiPlusApi;
+import net.brcdev.shopgui.api.exception.PlayerDataNotLoadedException;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -55,9 +56,13 @@ public class ModuleAutoSell implements Module {
                 if (itemStack == null) continue;
 
                 double value;
-                if (Setting.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline())
-                    value = ShopGuiPlusApi.getItemStackPriceSell(player.getPlayer(), itemStack);
-                else
+                if (Setting.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline()) {
+                    try {
+                        value = ShopGuiPlusApi.getItemStackPriceSell(player.getPlayer(), itemStack);
+                    } catch (PlayerDataNotLoadedException e){
+                        value = 0;
+                    }
+                } else
                     value = Double.valueOf(list.stream().filter(line -> Material.valueOf(line.split(",")[0])
                             == itemStack.getType()).findFirst().orElse("0"));
 
