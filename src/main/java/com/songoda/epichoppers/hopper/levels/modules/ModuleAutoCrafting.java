@@ -175,7 +175,7 @@ public class ModuleAutoCrafting implements Module {
         if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)) {
             return is1.getType() == is2.getType();
         } else {
-            return is1.getType() == is2.getType() || is1.getDurability() == is2.getDurability();
+            return is1.getType() == is2.getType() && is1.getDurability() == is2.getDurability();
         }
     }
 
