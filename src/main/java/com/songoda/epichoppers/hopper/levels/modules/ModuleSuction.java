@@ -14,7 +14,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -29,6 +28,7 @@ public class ModuleSuction implements Module {
     public static List<UUID> blacklist = new ArrayList<>();
 
     private boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
+    private boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
 
     private Class<?> clazzItemStack, clazzItem, clazzCraftItemStack;
     private Method methodGetItem, methodAsNMSCopy;
@@ -79,6 +79,9 @@ public class ModuleSuction implements Module {
 
             if (wildStacker)
                 itemStack.setAmount(WildStackerAPI.getItemAmount((Item) entity));
+
+            if (ultimateStacker && item.hasMetadata("US_AMT"))
+                itemStack.setAmount(item.getMetadata("US_AMT").get(0).asInt());
 
             if (!canMove(hopperInventory, itemStack) || blacklist.contains(item.getUniqueId()))
                 return;
