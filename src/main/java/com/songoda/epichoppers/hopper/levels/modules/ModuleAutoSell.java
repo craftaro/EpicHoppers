@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ModuleAutoSell implements Module {
 
@@ -63,8 +64,8 @@ public class ModuleAutoSell implements Module {
                         value = 0;
                     }
                 } else
-                    value = Double.valueOf(list.stream().filter(line -> Material.valueOf(line.split(",")[0])
-                            == itemStack.getType()).findFirst().orElse("0"));
+                    value = list.stream().filter(line -> Material.valueOf(line.split(",")[0])
+                            == itemStack.getType()).findFirst().map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
 
                 if (value == 0) continue;
 
