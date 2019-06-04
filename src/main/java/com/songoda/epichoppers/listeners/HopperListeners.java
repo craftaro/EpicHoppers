@@ -45,6 +45,12 @@ public class HopperListeners implements Listener {
             return;
         }
 
+        // Hopper going into minecarts
+        if (destination.getHolder() instanceof Minecart && source.getHolder() instanceof org.bukkit.block.Hopper) {
+            event.setCancelled(true);
+            return;
+        }
+
         if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
             return;
 

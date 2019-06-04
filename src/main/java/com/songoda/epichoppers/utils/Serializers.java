@@ -53,7 +53,6 @@ public class Serializers {
         }
         for (String str : strings) {
             args = str.split(":", 2);
-            Bukkit.broadcastMessage(Arrays.toString(args));
             if (isNumber(args[0])) item.setAmount(Integer.parseInt(args[0]));
             if (args.length == 1) continue;
             if (args[0].equalsIgnoreCase("name")) {
