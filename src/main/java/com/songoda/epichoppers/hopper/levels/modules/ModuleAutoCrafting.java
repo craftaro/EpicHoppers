@@ -3,6 +3,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUICrafting;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Bukkit;
@@ -47,6 +48,8 @@ public class ModuleAutoCrafting implements Module {
         if (hopper.getAutoCrafting() != null && canMove(hopperInventory, new ItemStack(hopper.getAutoCrafting()))) {
 
             if (cachedRecipes.get(hopper.getAutoCrafting()) == null) return;
+
+            boolean updateComparators = false;
 
             top:
             for (Recipe recipe : cachedRecipes.get(hopper.getAutoCrafting()).getRecipes()) {
@@ -95,8 +98,11 @@ public class ModuleAutoCrafting implements Module {
                     }
                 }
                 hopperInventory.addItem(recipe.getResult());
-
+                updateComparators = true;
             }
+
+            if (updateComparators)
+                HopTask.updateAdjacentComparators(hopper.getLocation());
         }
     }
 

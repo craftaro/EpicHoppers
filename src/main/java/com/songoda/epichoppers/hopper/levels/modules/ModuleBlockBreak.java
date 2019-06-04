@@ -74,7 +74,17 @@ public class ModuleBlockBreak implements Module {
             if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
                 above.getWorld().spawnParticle(Particle.valueOf(EpicHoppers.getInstance().getConfig().getString("Main.BlockBreak Particle Type")), locationAbove, 15, xx, yy, zz);
 
+            boolean waterlogged = false;
+            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)
+                    && above.getBlockData() instanceof org.bukkit.block.data.Waterlogged
+                    && ((org.bukkit.block.data.Waterlogged)above.getBlockData()).isWaterlogged()) {
+                waterlogged = true;
+            }
+
             above.breakNaturally();
+
+            if (waterlogged)
+                above.setType(Material.WATER);
         }
         blockTick.remove(block);
     }

@@ -1,6 +1,7 @@
 package com.songoda.epichoppers.utils;
 
 import com.songoda.epichoppers.EpicHoppers;
+import org.bukkit.Bukkit;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -44,8 +45,8 @@ public class MySQLDatabase {
                     ")");
 
         } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("Database connection failed.");
-            System.err.println(e.getMessage());
+            Bukkit.getLogger().severe("Database connection failed.");
+            Bukkit.getLogger().severe(e.getMessage());
         }
     }
 
