@@ -39,28 +39,27 @@ public class BlockListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent e) {
-            Player player = e.getPlayer();
+        Player player = e.getPlayer();
 
-            if (e.getBlock().getType() != Material.HOPPER) return;
+        if (e.getBlock().getType() != Material.HOPPER)
+            return;
 
-            if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getBlock().getLocation()))
-                return;
+        if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getBlock().getLocation()))
+            return;
 
-            int amt = count(e.getBlock().getChunk());
+        int amt = count(e.getBlock().getChunk());
 
-            int max = maxHoppers(player);
+        int max = maxHoppers(player);
 
-            if (max != -1 && amt > max) {
-                player.sendMessage(instance.getLocale().getMessage("event.hopper.toomany", max));
-                e.setCancelled(true);
-                return;
-            }
+        if (max != -1 && amt > max) {
+            player.sendMessage(instance.getLocale().getMessage("event.hopper.toomany", max));
+            e.setCancelled(true);
+            return;
+        }
 
-            if (!e.getItemInHand().getItemMeta().hasDisplayName()) return;
+        ItemStack item = e.getItemInHand().clone();
 
-            ItemStack item = e.getItemInHand().clone();
-
-            instance.getHopperManager().addHopper(e.getBlock().getLocation(), new Hopper(e.getBlock(), instance.getLevelManager().getLevel(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new Filter(), TeleportTrigger.DISABLED, null));
+        instance.getHopperManager().addHopper(e.getBlock().getLocation(), new Hopper(e.getBlock(), instance.getLevelManager().getLevel(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new Filter(), TeleportTrigger.DISABLED, null));
     }
 
     private int maxHoppers(Player player) {
@@ -74,57 +73,57 @@ public class BlockListeners implements Listener {
     }
 
     private int count(Chunk c) {
-            int count = 0;
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    for (int y = 0; y < c.getWorld().getMaxHeight(); y++) {
-                        if (c.getBlock(x, y, z).getType() == Material.HOPPER) count++;
-                    }
+        int count = 0;
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = 0; y < c.getWorld().getMaxHeight(); y++) {
+                    if (c.getBlock(x, y, z).getType() == Material.HOPPER) count++;
                 }
             }
-            return count;
+        }
+        return count;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-            Block block = event.getBlock();
-            Player player = event.getPlayer();
+        Block block = event.getBlock();
+        Player player = event.getPlayer();
 
-            handleSyncTouch(event);
+        handleSyncTouch(event);
 
-            if (event.getBlock().getType() != Material.HOPPER) return;
+        if (event.getBlock().getType() != Material.HOPPER) return;
 
-            if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(block.getLocation()))
-                return;
+        if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(block.getLocation()))
+            return;
 
-            Hopper hopper = instance.getHopperManager().getHopper(block);
+        Hopper hopper = instance.getHopperManager().getHopper(block);
 
-            Level level = hopper.getLevel();
+        Level level = hopper.getLevel();
 
-            if (level.getLevel() > 1) {
-                event.setCancelled(true);
-                ItemStack item = instance.newHopperItem(level);
+        if (level.getLevel() > 1) {
+            event.setCancelled(true);
+            ItemStack item = instance.newHopperItem(level);
 
-                event.getBlock().setType(Material.AIR);
-                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
-            }
+            event.getBlock().setType(Material.AIR);
+            event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
+        }
 
-            for (ItemStack m : hopper.getFilter().getWhiteList()) {
-                if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
-            }
+        for (ItemStack m : hopper.getFilter().getWhiteList()) {
+            if (m != null)
+                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
+        }
 
-            for (ItemStack m : hopper.getFilter().getBlackList()) {
-                if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
-            }
-            for (ItemStack m : hopper.getFilter().getVoidList()) {
-                if (m != null)
-                    event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
-            }
-            instance.getHopperManager().removeHopper(block.getLocation());
+        for (ItemStack m : hopper.getFilter().getBlackList()) {
+            if (m != null)
+                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
+        }
+        for (ItemStack m : hopper.getFilter().getVoidList()) {
+            if (m != null)
+                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
+        }
+        instance.getHopperManager().removeHopper(block.getLocation());
 
-            instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
+        instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
 
     private void handleSyncTouch(BlockBreakEvent event) {

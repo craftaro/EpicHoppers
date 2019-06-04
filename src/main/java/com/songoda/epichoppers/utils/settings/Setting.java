@@ -50,7 +50,8 @@ public enum Setting {
     BLOCKBREAK_PARTICLE("Main.BlockBreak Particle Type", "LAVA",
             "The particle shown when the block break module performs a block break."),
 
-    BLACKLIST("Main.BlockBreak Blacklisted Blocks", Arrays.asList("BEDROCK"), "" +
+    BLACKLIST("Main.BlockBreak Blacklisted Blocks",
+            Arrays.asList("BEDROCK", "END_PORTAL", "ENDER_PORTAL", "END_PORTAL_FRAME", "ENDER_PORTAL_FRAME", "PISTON_HEAD", "PISTON_EXTENSION", "RAIL", "RAILS", "ACTIVATOR_RAIL", "DETECTOR_RAIL", "POWERED_RAIL"),
             "Anything listed here will not be broken by the block break module."),
 
     AUTOSELL_PRICES("Main.AutoSell Prices",

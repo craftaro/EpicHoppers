@@ -54,6 +54,7 @@ public class StorageItem {
 
     public boolean asBoolean() {
         if (object == null) return false;
+        if (object instanceof Integer) return (Integer) object == 1;
         return (boolean) object;
     }
 
@@ -63,6 +64,8 @@ public class StorageItem {
     }
 
     public Object asObject() {
+        if (object == null) return null;
+        if (object instanceof Boolean) return (Boolean) object ? 1 : 0;
         return object;
     }
 

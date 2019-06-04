@@ -156,59 +156,59 @@ public class GUIFilter extends AbstractGUI {
 
 
     private void compile(Player p) {
-            ItemStack[] items = p.getOpenInventory().getTopInventory().getContents();
+        ItemStack[] items = p.getOpenInventory().getTopInventory().getContents();
 
-            Filter filter = hopper.getFilter();
+        Filter filter = hopper.getFilter();
 
-            List<ItemStack> owhite = new ArrayList<>();
-            List<ItemStack> oblack = new ArrayList<>();
-            List<ItemStack> ovoid = new ArrayList<>();
+        List<ItemStack> owhite = new ArrayList<>();
+        List<ItemStack> oblack = new ArrayList<>();
+        List<ItemStack> ovoid = new ArrayList<>();
 
-            int[] awhite = {9, 10, 18, 19, 27, 28, 36, 37};
-            int[] ablack = {11, 12, 20, 21, 29, 30, 38, 39};
-            int[] avoid = {13, 14, 22, 23, 31, 32, 40, 41};
+        int[] awhite = {9, 10, 18, 19, 27, 28, 36, 37};
+        int[] ablack = {11, 12, 20, 21, 29, 30, 38, 39};
+        int[] avoid = {13, 14, 22, 23, 31, 32, 40, 41};
 
-            for (int i = 0; i < items.length; i++) {
-                for (int aa : awhite) {
-                    if (aa != i) continue;
-                    if (items[i] != null && items[i].getType() != Material.AIR) {
-                        ItemStack item = items[i];
-                        if (item.getAmount() != 1) {
-                            item.setAmount(item.getAmount() - 1);
-                            Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
-                            item.setAmount(1);
-                        }
-                        owhite.add(item);
+        for (int i = 0; i < items.length; i++) {
+            for (int aa : awhite) {
+                if (aa != i) continue;
+                if (items[i] != null && items[i].getType() != Material.AIR) {
+                    ItemStack item = items[i];
+                    if (item.getAmount() != 1) {
+                        item.setAmount(item.getAmount() - 1);
+                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        item.setAmount(1);
                     }
-                }
-                for (int aa : ablack) {
-                    if (aa != i) continue;
-                    if (items[i] != null && items[i].getType() != Material.AIR) {
-                        ItemStack item = items[i];
-                        if (item.getAmount() != 1) {
-                            item.setAmount(item.getAmount() - 1);
-                            Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
-                            item.setAmount(1);
-                        }
-                        oblack.add(item);
-                    }
-                }
-                for (int aa : avoid) {
-                    if (aa != i) continue;
-                    if (items[i] != null && items[i].getType() != Material.AIR) {
-                        ItemStack item = items[i];
-                        if (item.getAmount() != 1) {
-                            item.setAmount(item.getAmount() - 1);
-                            Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
-                            item.setAmount(1);
-                        }
-                        ovoid.add(item);
-                    }
+                    owhite.add(item);
                 }
             }
-            filter.setWhiteList(owhite);
-            filter.setBlackList(oblack);
-            filter.setVoidList(ovoid);
+            for (int aa : ablack) {
+                if (aa != i) continue;
+                if (items[i] != null && items[i].getType() != Material.AIR) {
+                    ItemStack item = items[i];
+                    if (item.getAmount() != 1) {
+                        item.setAmount(item.getAmount() - 1);
+                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        item.setAmount(1);
+                    }
+                    oblack.add(item);
+                }
+            }
+            for (int aa : avoid) {
+                if (aa != i) continue;
+                if (items[i] != null && items[i].getType() != Material.AIR) {
+                    ItemStack item = items[i];
+                    if (item.getAmount() != 1) {
+                        item.setAmount(item.getAmount() - 1);
+                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        item.setAmount(1);
+                    }
+                    ovoid.add(item);
+                }
+            }
+        }
+        filter.setWhiteList(owhite);
+        filter.setBlackList(oblack);
+        filter.setVoidList(ovoid);
     }
 
     @Override

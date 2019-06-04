@@ -1,6 +1,7 @@
 package com.songoda.epichoppers.utils;
 
 import com.songoda.epichoppers.EpicHoppers;
+import org.bukkit.Bukkit;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,8 +34,8 @@ public class MySQLDatabase {
                             "\t`whitelist` TEXT NULL,\n" +
                             "\t`blacklist` TEXT NULL,\n" +
                             "\t`void` TEXT NULL,\n" +
-                            "\t`black` TEXT NULL\n" +
-                            "\t`autobreak` TEXT NULL\n" +
+                            "\t`black` TEXT NULL,\n" +
+                            "\t`autobreak` TINYINT(1) NULL\n" +
                             ")");
 
             connection.createStatement().execute("CREATE TABLE IF NOT EXISTS `" + instance.getConfig().getString("Database.Prefix") + "boosts` (\n" +
@@ -44,7 +45,8 @@ public class MySQLDatabase {
                     ")");
 
         } catch (ClassNotFoundException | SQLException e) {
-            System.out.println("Database connection failed.");
+            Bukkit.getLogger().severe("Database connection failed.");
+            Bukkit.getLogger().severe(e.getMessage());
         }
     }
 

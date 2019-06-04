@@ -104,34 +104,12 @@ public class GUIOverview extends AbstractGUI {
         ItemMeta hookmeta = hook.getItemMeta();
         hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.synchopper"));
         ArrayList<String> lorehook = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.synclore", hopper.getLinkedBlocks().size()).split("\\|");
+        parts = plugin.getLocale().getMessage("interface.hopper.synclore", hopper.getLinkedBlocks().stream().distinct().count()).split("\\|");
         for (String line : parts) {
             lorehook.add(Methods.formatText(line));
         }
         hookmeta.setLore(lorehook);
         hook.setItemMeta(hookmeta);
-
-        ItemStack itemXP = new ItemStack(Material.valueOf(plugin.getConfig().getString("Interfaces.XP Icon")), 1);
-        ItemMeta itemmetaXP = itemXP.getItemMeta();
-        itemmetaXP.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewithxp"));
-        ArrayList<String> loreXP = new ArrayList<>();
-        if (nextLevel != null)
-            loreXP.add(plugin.getLocale().getMessage("interface.hopper.upgradewithxplore", nextLevel.getCostExperience()));
-        else
-            loreXP.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed"));
-        itemmetaXP.setLore(loreXP);
-        itemXP.setItemMeta(itemmetaXP);
-
-        ItemStack itemECO = new ItemStack(Material.valueOf(plugin.getConfig().getString("Interfaces.Economy Icon")), 1);
-        ItemMeta itemmetaECO = itemECO.getItemMeta();
-        itemmetaECO.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy"));
-        ArrayList<String> loreECO = new ArrayList<>();
-        if (nextLevel != null)
-            loreECO.add(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Methods.formatEconomy(nextLevel.getCostEconomy())));
-        else
-            loreECO.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed"));
-        itemmetaECO.setLore(loreECO);
-        itemECO.setItemMeta(itemmetaECO);
 
         int nu = 0;
         while (nu != 27) {
@@ -182,29 +160,53 @@ public class GUIOverview extends AbstractGUI {
             }
         }
 
-        if (plugin.getConfig().getBoolean("Main.Upgrade With XP")
-                && player.hasPermission("EpicHoppers.Upgrade.XP")
-                && level.getCostExperience() != -1) {
-            inventory.setItem(11, itemXP);
+        if (plugin.getConfig().getBoolean("Main.Allow hopper Upgrading")) {
+            ItemStack itemXP = new ItemStack(Material.valueOf(plugin.getConfig().getString("Interfaces.XP Icon")), 1);
+            ItemMeta itemmetaXP = itemXP.getItemMeta();
+            itemmetaXP.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewithxp"));
+            ArrayList<String> loreXP = new ArrayList<>();
+            if (nextLevel != null)
+                loreXP.add(plugin.getLocale().getMessage("interface.hopper.upgradewithxplore", nextLevel.getCostExperience()));
+            else
+                loreXP.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed"));
+            itemmetaXP.setLore(loreXP);
+            itemXP.setItemMeta(itemmetaXP);
 
-            registerClickable(11, ((player, inventory, cursor, slot, type) -> {
-                hopper.upgrade(player, CostType.EXPERIENCE);
-                this.hopper.overview(player);
-            }));
+            ItemStack itemECO = new ItemStack(Material.valueOf(plugin.getConfig().getString("Interfaces.Economy Icon")), 1);
+            ItemMeta itemmetaECO = itemECO.getItemMeta();
+            itemmetaECO.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy"));
+            ArrayList<String> loreECO = new ArrayList<>();
+            if (nextLevel != null)
+                loreECO.add(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Methods.formatEconomy(nextLevel.getCostEconomy())));
+            else
+                loreECO.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed"));
+            itemmetaECO.setLore(loreECO);
+            itemECO.setItemMeta(itemmetaECO);
+
+            if (plugin.getConfig().getBoolean("Main.Upgrade With XP")
+                    && player.hasPermission("EpicHoppers.Upgrade.XP")
+                    && level.getCostExperience() != -1) {
+                inventory.setItem(11, itemXP);
+
+                registerClickable(11, ((player, inventory, cursor, slot, type) -> {
+                    hopper.upgrade(player, CostType.EXPERIENCE);
+                    this.hopper.overview(player);
+                }));
+            }
+
+            if (plugin.getConfig().getBoolean("Main.Upgrade With Economy")
+                    && player.hasPermission("EpicHoppers.Upgrade.ECO")
+                    && level.getCostEconomy() != -1) {
+                inventory.setItem(15, itemECO);
+
+                registerClickable(15, ((player, inventory, cursor, slot, type) -> {
+                    hopper.upgrade(player, CostType.ECONOMY);
+                    this.hopper.overview(player);
+                }));
+            }
         }
 
         inventory.setItem(13, item);
-
-        if (plugin.getConfig().getBoolean("Main.Upgrade With Economy")
-                && player.hasPermission("EpicHoppers.Upgrade.ECO")
-                && level.getCostEconomy() != -1) {
-            inventory.setItem(15, itemECO);
-
-            registerClickable(15, ((player, inventory, cursor, slot, type) -> {
-                hopper.upgrade(player, CostType.ECONOMY);
-                this.hopper.overview(player);
-            }));
-        }
 
         inventory.setItem(0, Methods.getBackgroundGlass(true));
         inventory.setItem(1, Methods.getBackgroundGlass(true));

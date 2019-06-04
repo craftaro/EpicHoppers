@@ -50,58 +50,57 @@ public class InteractListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockInteract(PlayerInteractEvent e) {
-            Player player = e.getPlayer();
-            if (e.getAction() != Action.LEFT_CLICK_BLOCK
-                    || e.getClickedBlock() == null
-                    || player.isSneaking()
-                    || !player.hasPermission("EpicHoppers.overview")
-                    || !(e.getClickedBlock().getState() instanceof InventoryHolder || e.getClickedBlock().getType().equals(Material.ENDER_CHEST))) {
-                return;
+        Player player = e.getPlayer();
+        if (e.getAction() != Action.LEFT_CLICK_BLOCK
+                || e.getClickedBlock() == null
+                || player.isSneaking()
+                || !player.hasPermission("EpicHoppers.overview")
+                || !(e.getClickedBlock().getState() instanceof InventoryHolder || e.getClickedBlock().getType().equals(Material.ENDER_CHEST))) {
+            return;
+        }
+
+        if (e.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
+            ItemStack item = e.getPlayer().getInventory().getItemInHand();
+            if (item.getItemMeta().getLore().size() == 2) {
+                player.sendMessage(instance.getLocale().getMessage("event.hopper.desyncchest", item.getType().toString()));
+                instance.enchantmentHandler.createSyncTouch(item, null);
+            } else {
+                player.sendMessage(instance.getLocale().getMessage("event.hopper.syncchest", item.getType().toString()));
+                instance.enchantmentHandler.createSyncTouch(item, e.getClickedBlock());
             }
+            e.setCancelled(true);
+            return;
+        }
 
-            if (e.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
-                ItemStack item = e.getPlayer().getInventory().getItemInHand();
-                if (item.getItemMeta().getLore().size() == 2) {
-                    player.sendMessage(instance.getLocale().getMessage("event.hopper.desyncchest", item.getType().toString()));
-                    instance.enchantmentHandler.createSyncTouch(item, null);
-                } else {
-                    player.sendMessage(instance.getLocale().getMessage("event.hopper.syncchest", item.getType().toString()));
-                    instance.enchantmentHandler.createSyncTouch(item, e.getClickedBlock());
-                }
-                e.setCancelled(true);
-                return;
-            }
+        PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
 
-            PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
-
-            if (playerData.getSyncType() == null) {
-                if (e.getClickedBlock().getType() == Material.HOPPER) {
-                    if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getClickedBlock().getLocation()))
-                        return;
-                    Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
-                    playerData.setLastHopper(hopper);
-                    if (instance.getConfig().getBoolean("Main.Allow hopper Upgrading")
-                            && !player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
-                        hopper.overview(player);
-                        e.setCancelled(true);
-                        return;
-                    }
-                }
-                return;
-            }
-
-            if (e.getClickedBlock().getState() instanceof InventoryHolder || e.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests")) {
-                Hopper hopper = playerData.getLastHopper();
-                if (playerData.getSyncType() != null && e.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
-                    player.sendMessage(instance.getLocale().getMessage("event.hopper.syncself"));
-                } else if (playerData.getSyncType() != null) {
-                    hopper.link(e.getClickedBlock(), playerData.getSyncType() == SyncType.FILTERED, player);
-                }
-                e.setCancelled(true);
-                int amountLinked = hopper.getLevel().getLinkAmount();
-                if (hopper.getLinkedBlocks().size() >= amountLinked) {
-                    playerData.setSyncType(null);
+        if (playerData.getSyncType() == null) {
+            if (e.getClickedBlock().getType() == Material.HOPPER) {
+                if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getClickedBlock().getLocation()))
+                    return;
+                Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
+                playerData.setLastHopper(hopper);
+                if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
+                    hopper.overview(player);
+                    e.setCancelled(true);
+                    return;
                 }
             }
+            return;
+        }
+
+        if (e.getClickedBlock().getState() instanceof InventoryHolder || (e.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests"))) {
+            Hopper hopper = playerData.getLastHopper();
+            if (playerData.getSyncType() != null && e.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
+                player.sendMessage(instance.getLocale().getMessage("event.hopper.syncself"));
+            } else if (playerData.getSyncType() != null) {
+                hopper.link(e.getClickedBlock(), playerData.getSyncType() == SyncType.FILTERED, player);
+            }
+            e.setCancelled(true);
+            int amountLinked = hopper.getLevel().getLinkAmount();
+            if (hopper.getLinkedBlocks().size() >= amountLinked) {
+                playerData.setSyncType(null);
+            }
+        }
     }
 }

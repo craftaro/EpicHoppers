@@ -38,6 +38,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -74,6 +75,7 @@ public class EpicHoppers extends JavaPlugin {
     private Storage storage;
 
     private boolean liquidtanks = false;
+    private boolean epicfarming = false;
 
     public static EpicHoppers getInstance() {
         return INSTANCE;
@@ -134,6 +136,9 @@ public class EpicHoppers extends JavaPlugin {
 
         // Check for liquid tanks
         if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
+
+        // Check for epicfarming
+        if (pluginManager.isPluginEnabled("EpicFarming")) epicfarming = true;
 
         // Start auto save
         int saveInterval = Setting.AUTOSAVE.getInt() * 60 * 20;
@@ -303,7 +308,8 @@ public class EpicHoppers extends JavaPlugin {
     }
 
     private void loadLevelManager() {
-        saveResource("levels.yml", false);
+        if (!new File(this.getDataFolder(), "levels.yml").exists())
+            this.saveResource("levels.yml", false);
 
         // Load an instance of LevelManager
         levelManager = new LevelManager();
@@ -402,6 +408,10 @@ public class EpicHoppers extends JavaPlugin {
 
     public boolean isLiquidtanks() {
         return liquidtanks;
+    }
+
+    public boolean isEpicFarming() {
+        return epicfarming;
     }
 
 }

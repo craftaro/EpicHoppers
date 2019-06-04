@@ -2,6 +2,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Bukkit;
@@ -41,6 +42,8 @@ public class ModuleAutoSell implements Module {
 
             if (instance.getEconomy() == null) return;
 
+            boolean updateComparators = false;
+
             List<String> list = instance.getConfig().getStringList("Main.AutoSell Prices");
 
             for (String line : list) {
@@ -55,11 +58,16 @@ public class ModuleAutoSell implements Module {
 
                         instance.getEconomy().deposit(Bukkit.getOfflinePlayer(hopper.getPlacedBy()), price * itemStack.getAmount());
                         hopperInventory.removeItem(itemStack);
+
+                        updateComparators = true;
                     }
                 } catch (Exception ignored) {
                 }
             }
             hopper.setAutoSellTimer(timeOut);
+
+            if (updateComparators)
+                HopTask.updateAdjacentComparators(hopper.getLocation());
         }
         hopper.setAutoSellTimer(hopper.getAutoSellTimer() - hopperTickRate);
     }

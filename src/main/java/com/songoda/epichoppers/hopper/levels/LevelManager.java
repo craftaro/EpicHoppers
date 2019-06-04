@@ -21,7 +21,7 @@ public class LevelManager {
     }
 
     public Level getLevel(ItemStack item) {
-        if (item.getItemMeta().getDisplayName().contains(":")) {
+        if (item.hasItemMeta() && item.getItemMeta().getDisplayName().contains(":")) {
             String arr[] = item.getItemMeta().getDisplayName().replace(String.valueOf(ChatColor.COLOR_CHAR), "").split(":");
             return getLevel(Integer.parseInt(arr[0]));
         } else {

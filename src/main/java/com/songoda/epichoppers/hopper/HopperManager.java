@@ -20,9 +20,18 @@ public class HopperManager {
         registeredHoppers.put(roundLocation(location), hopper);
     }
 
-
+    /**
+     * Removes a hopper and unlinks it from any other hoppers
+     * @param location The location of the hopper to remove
+     * @return The removed hopper, or null if none was removed
+     */
     public Hopper removeHopper(Location location) {
-        return registeredHoppers.remove(location);
+        Hopper removed = this.registeredHoppers.remove(location);
+
+        for (Hopper hopper : this.registeredHoppers.values())
+            hopper.removeLinkedBlock(location);
+
+        return removed;
     }
 
 
