@@ -106,7 +106,7 @@
         <dependency>
             <groupId>net.brcdev</groupId>
             <artifactId>ShopGUIPlus</artifactId>
-            <version>1.19.1</version>
+            <version>1.19.5</version>
         </dependency>
     </dependencies>
 </project>
