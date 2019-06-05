@@ -3,14 +3,12 @@ package com.songoda.epichoppers.listeners;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.HopperDirection;
-import org.bukkit.Bukkit;
+import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Location;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
-import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.minecart.HopperMinecart;
-import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
@@ -35,12 +33,19 @@ public class HopperListeners implements Listener {
 
         // Hopper minecarts should be able to take care of themselves
         // Let EpicHoppers take over if the hopper is pointing down though
-        if (destination.getHolder() instanceof HopperMinecart && (!(source.getHolder() instanceof org.bukkit.block.Hopper)
-                || HopperDirection.getDirection(((org.bukkit.block.Hopper)destination.getHolder()).getRawData()) != HopperDirection.DOWN))
+        if (destination.getHolder() instanceof HopperMinecart
+                && source.getHolder() instanceof org.bukkit.block.Hopper
+                && HopperDirection.getDirection(((org.bukkit.block.Hopper)source.getHolder()).getRawData()) != HopperDirection.DOWN)
             return;
 
         // Shulker boxes have a mind of their own and relentlessly steal items from hoppers
-        if (destination.getHolder() instanceof ShulkerBox || !(source.getHolder() instanceof org.bukkit.block.Hopper)) {
+        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_11) && destination.getHolder() instanceof org.bukkit.block.ShulkerBox || !(source.getHolder() instanceof org.bukkit.block.Hopper)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // Hopper going into minecarts
+        if (destination.getHolder() instanceof Minecart && source.getHolder() instanceof org.bukkit.block.Hopper) {
             event.setCancelled(true);
             return;
         }
