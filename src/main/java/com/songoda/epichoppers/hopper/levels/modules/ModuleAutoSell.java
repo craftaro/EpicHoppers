@@ -6,8 +6,6 @@ import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.settings.Setting;
-import net.brcdev.shopgui.ShopGuiPlusApi;
-import net.brcdev.shopgui.api.exception.PlayerDataNotLoadedException;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -18,7 +16,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ModuleAutoSell implements Module {
 
@@ -59,8 +56,8 @@ public class ModuleAutoSell implements Module {
                 double value;
                 if (Setting.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline()) {
                     try {
-                        value = ShopGuiPlusApi.getItemStackPriceSell(player.getPlayer(), itemStack);
-                    } catch (PlayerDataNotLoadedException e){
+                        value = net.brcdev.shopgui.ShopGuiPlusApi.getItemStackPriceSell(player.getPlayer(), itemStack);
+                    } catch (Exception e){
                         value = 0;
                     }
                 } else
