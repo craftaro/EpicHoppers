@@ -24,6 +24,9 @@ import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.*;
 import com.songoda.epichoppers.utils.settings.Setting;
 import com.songoda.epichoppers.utils.settings.SettingsManager;
+import com.songoda.epichoppers.utils.updateModules.LocaleModule;
+import com.songoda.update.Plugin;
+import com.songoda.update.SongodaUpdate;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -92,11 +95,12 @@ public class EpicHoppers extends JavaPlugin {
         this.settingsManager = new SettingsManager(this);
         this.settingsManager.setupConfig();
 
-        // Setup language
-        String langMode = getConfig().getString("System.Language Mode");
-        Locale.init(this);
-        Locale.saveDefaultLocale("en_US");
-        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
+        this.setupLanguage();
+
+        // Running Songoda Updater
+        Plugin plugin = new Plugin(this, 13);
+        plugin.addModule(new LocaleModule());
+        SongodaUpdate.load(plugin);
 
         if (getConfig().getBoolean("System.Download Needed Data Files"))
             this.update();
@@ -194,6 +198,12 @@ public class EpicHoppers extends JavaPlugin {
         }
     }
 
+    private void setupLanguage() {
+        String langMode = getConfig().getString("System.Language Mode");
+        Locale.init(this);
+        Locale.saveDefaultLocale("en_US");
+        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
+    }
 
     public ServerVersion getServerVersion() {
         return serverVersion;

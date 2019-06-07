@@ -130,12 +130,13 @@ public class HopTask extends BukkitRunnable {
                 Block above = block.getRelative(BlockFace.UP);
                 boolean isFarmItem = false;
                 Collection<Entity> nearbyEntities = null;
+                BlockState aboveState = null;
                 outer:
-                if ((above.getState() instanceof InventoryHolder
-                        && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN))
+                if ((above.getType() != Material.AIR
+                        && (aboveState = above.getState()) instanceof InventoryHolder
+                        && (above.getType() != Material.HOPPER || HopperDirection.getDirection(aboveState.getRawData()) != HopperDirection.DOWN))
                         || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)).isEmpty()
                         || (isFarmItem = this.isFarmItem(above))) {
-
                     // Get the inventory holder. Special check for EpicFarming.
                     // Get the slots that we can pull items from.
                     InventoryHolder aboveInvHolder;
@@ -152,7 +153,7 @@ public class HopTask extends BukkitRunnable {
                             pullableSlots = IntStream.rangeClosed(0, 4).toArray();
                         }
                     } else {
-                        aboveInvHolder = (InventoryHolder) above.getState();
+                        aboveInvHolder = (InventoryHolder) aboveState;
                         pullableSlots = this.getPullableSlots(aboveInvHolder, above.getType());
                     }
 
