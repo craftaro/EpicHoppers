@@ -86,8 +86,8 @@ public class HopTask extends BukkitRunnable {
                     continue;
                 }
 
-                // If hopper block is powered continue.
-                if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) {
+                // If hopper block is powered, update its redstone state and continue.
+                if (block.getBlockPower() > 0) {
                     hopper.tryTick(this.hopTicks, false);
                     continue;
                 }
@@ -175,8 +175,11 @@ public class HopTask extends BukkitRunnable {
                         itemToMove.setAmount(amountToMove);
 
                         // Add item to container and break on success.
-                        if (this.addItem(hopper, aboveInvHolder, hopperState, block.getType(), item, itemToMove, amountToMove))
+                        if (this.addItem(hopper, aboveInvHolder, hopperState, block.getType(), item, itemToMove, amountToMove)) {
+                            updateAdjacentComparators(block.getLocation());
+                            updateAdjacentComparators(above.getLocation());
                             break;
+                        }
                     }
                 }
 
@@ -424,7 +427,7 @@ public class HopTask extends BukkitRunnable {
         // Cast to state.
         BlockState state = endPoint.getBlock().getState();
 
-        //Remove if not a container.
+        // Remove if not a container.
         if (!(state instanceof InventoryHolder)) {
             hopper.getFilter().setEndPoint(null);
             return null;
@@ -471,12 +474,9 @@ public class HopTask extends BukkitRunnable {
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {
-        if (inventory.firstEmpty() != -1) return true;
-        for (ItemStack stack : inventory.getContents()) {
-            if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) - 1 < stack.getMaxStackSize()) {
+        for (ItemStack stack : inventory.getContents())
+            if (stack == null || (stack.getType() == item.getType() && stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) - 1 < stack.getMaxStackSize()))
                 return true;
-            }
-        }
         return false;
     }
 

@@ -19,7 +19,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ModuleSuction implements Module {
 
@@ -50,6 +52,8 @@ public class ModuleSuction implements Module {
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
+
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(EpicHoppers.getInstance(), blacklist::clear, 0L, 100L);
     }
 
 
@@ -61,12 +65,15 @@ public class ModuleSuction implements Module {
     public void run(Hopper hopper, Inventory hopperInventory) {
         double radius = amount + .5;
 
-        hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius).stream()
+        Set<Item> itemsToSuck = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
+                .stream()
                 .filter(entity -> entity.getType() == EntityType.DROPPED_ITEM
-                        && entity.getTicksLived() >= ((Item)entity).getPickupDelay()
-                        && entity.getLocation().getBlock().getType() != Material.HOPPER).forEach(entity -> {
+                        && entity.getTicksLived() >= ((Item) entity).getPickupDelay()
+                        && entity.getLocation().getBlock().getType() != Material.HOPPER)
+                .map(entity -> (Item) entity)
+                .collect(Collectors.toSet());
 
-            Item item = (Item) entity;
+        for (Item item : itemsToSuck) {
             ItemStack itemStack = setMax(item.getItemStack().clone(), 0, true);
 
             if (itemStack.getType().name().contains("SHULKER_BOX"))
@@ -78,7 +85,7 @@ public class ModuleSuction implements Module {
             }
 
             if (wildStacker)
-                itemStack.setAmount(WildStackerAPI.getItemAmount((Item) entity));
+                itemStack.setAmount(WildStackerAPI.getItemAmount(item));
 
             if (ultimateStacker && item.hasMetadata("US_AMT"))
                 itemStack.setAmount(item.getMetadata("US_AMT").get(0).asInt());
@@ -93,14 +100,14 @@ public class ModuleSuction implements Module {
             float zz = (float) (0 + (Math.random() * .1));
 
             if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
-                entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
+                item.getLocation().getWorld().spawnParticle(Particle.FLAME, item.getLocation(), 5, xx, yy, zz, 0);
 
-            for (ItemStack is : hopperInventory.addItem(itemStack).values()) {
-                entity.getWorld().dropItemNaturally(entity.getLocation(), is);
-            }
+            for (ItemStack is : hopperInventory.addItem(itemStack).values())
+                item.getWorld().dropItemNaturally(item.getLocation(), is);
+
             HopTask.updateAdjacentComparators(hopper.getLocation());
-            entity.remove();
-        });
+            item.remove();
+        }
     }
 
     public static boolean isBlacklisted(UUID uuid) {
@@ -129,13 +136,13 @@ public class ModuleSuction implements Module {
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {
-            if (inventory.firstEmpty() != -1) return true;
+        if (inventory.firstEmpty() != -1) return true;
 
-            for (ItemStack stack : inventory.getContents()) {
-                if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()) {
-                    return true;
-                }
+        for (ItemStack stack : inventory.getContents()) {
+            if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()) {
+                return true;
             }
+        }
         return false;
     }
 
