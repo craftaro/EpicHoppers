@@ -39,18 +39,22 @@ public class HopperListeners implements Listener {
             return;
 
         // Shulker boxes have a mind of their own and relentlessly steal items from hoppers
-        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_11) && destination.getHolder() instanceof org.bukkit.block.ShulkerBox || !(source.getHolder() instanceof org.bukkit.block.Hopper)) {
+        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_11) && destination.getHolder() instanceof org.bukkit.block.ShulkerBox && destination.getHolder() instanceof org.bukkit.block.Hopper) {
             event.setCancelled(true);
             return;
         }
 
         // Hopper going into minecarts
         if (destination.getHolder() instanceof Minecart && source.getHolder() instanceof org.bukkit.block.Hopper) {
+            instance.getHopperManager().getHopper(((org.bukkit.block.Hopper) source.getHolder()).getLocation());
             event.setCancelled(true);
             return;
         }
 
         if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
+            return;
+
+        if (!(source.getHolder() instanceof org.bukkit.block.Hopper))
             return;
 
         org.bukkit.block.Hopper sourceHopper = (org.bukkit.block.Hopper) source.getHolder();

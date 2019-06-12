@@ -135,7 +135,7 @@ public class HopTask extends BukkitRunnable {
                 if ((above.getType() != Material.AIR
                         && (aboveState = above.getState()) instanceof InventoryHolder
                         && (above.getType() != Material.HOPPER || HopperDirection.getDirection(aboveState.getRawData()) != HopperDirection.DOWN))
-                        || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)).isEmpty()
+                        || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()
                         || (isFarmItem = this.isFarmItem(above))) {
                     // Get the inventory holder. Special check for EpicFarming.
                     // Get the slots that we can pull items from.
