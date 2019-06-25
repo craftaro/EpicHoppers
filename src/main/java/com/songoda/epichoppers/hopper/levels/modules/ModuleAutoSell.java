@@ -56,7 +56,9 @@ public class ModuleAutoSell implements Module {
                 double value;
                 if (Setting.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline()) {
                     try {
-                        value = net.brcdev.shopgui.ShopGuiPlusApi.getItemStackPriceSell(player.getPlayer(), itemStack);
+                        ItemStack clone = itemStack.clone();
+                        clone.setAmount(1);
+                        value = net.brcdev.shopgui.ShopGuiPlusApi.getItemStackPriceSell(player.getPlayer(), clone);
                     } catch (Exception e){
                         value = 0;
                     }
