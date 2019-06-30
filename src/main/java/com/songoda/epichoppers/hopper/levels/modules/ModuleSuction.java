@@ -52,8 +52,6 @@ public class ModuleSuction implements Module {
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
-
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(EpicHoppers.getInstance(), blacklist::clear, 0L, 100L);
     }
 
 
