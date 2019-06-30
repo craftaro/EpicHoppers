@@ -111,6 +111,10 @@ public class ModuleSuction implements Module {
     }
 
     public static boolean isBlacklisted(UUID uuid) {
+        if (blacklist.contains(uuid))
+            Bukkit.getScheduler().runTaskLater(EpicHoppers.getInstance(),
+                    () -> blacklist.remove(uuid), 10L);
+
         return blacklist.contains(uuid);
     }
 
