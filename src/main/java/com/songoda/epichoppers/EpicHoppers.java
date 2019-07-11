@@ -9,7 +9,6 @@ import com.songoda.epichoppers.economy.VaultEconomy;
 import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hopper.Filter;
-import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
@@ -236,6 +235,10 @@ public class EpicHoppers extends JavaPlugin {
     private void saveToFile() {
         checkStorage();
 
+        for (Level level : EpicHoppers.getInstance().getLevelManager().getLevels().values())
+            for (Module module : level.getRegisteredModules())
+                module.saveDataToFile();
+
         storage.doSave();
     }
 
@@ -281,14 +284,6 @@ public class EpicHoppers extends JavaPlugin {
 
                     TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
 
-                    String autoCraftingStr = row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString();
-                    String[] autoCraftingParts = autoCraftingStr.split(":");
-                    ItemStack autoCrafting = new ItemStack(Material.valueOf(autoCraftingParts[0]), 1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
-
-                    boolean autoSell = row.get("autosell").asBoolean();
-
-                    boolean autoBreak = row.get("autobreak").asBoolean();
-
                     hopperManager.addHopper(new HopperBuilder(location)
                             .setLevel(level)
                             .setLastPlayerOpened(lastPlayer)
@@ -296,9 +291,6 @@ public class EpicHoppers extends JavaPlugin {
                             .addLinkedBlocks(blocks.toArray(new Location[0]))
                             .setFilter(filter)
                             .setTeleportTrigger(teleportTrigger)
-                            .setAutoCrafting(autoCrafting)
-                            .setAutoSelling(autoSell)
-                            .setAutoBreaking(autoBreak)
                             .build());
                 }
             }
@@ -351,17 +343,17 @@ public class EpicHoppers extends JavaPlugin {
 
             for (String key : levels.getKeys(false)) {
                 if (key.equals("Suction") && levels.getInt("Suction") != 0) {
-                    modules.add(new ModuleSuction(levels.getInt("Suction")));
+                    modules.add(new ModuleSuction(this, levels.getInt("Suction")));
                 } else if (key.equals("BlockBreak") && levels.getInt("BlockBreak") != 0) {
-                    modules.add(new ModuleBlockBreak(levels.getInt("BlockBreak")));
+                    modules.add(new ModuleBlockBreak(this, levels.getInt("BlockBreak")));
                 } else if (key.equals("AutoCrafting")) {
-                    modules.add(new ModuleAutoCrafting());
+                    modules.add(new ModuleAutoCrafting(this));
                 } else if (key.equals("AutoSell")) {
-                    modules.add(new ModuleAutoSell(autoSell));
+                    modules.add(new ModuleAutoSell(this, autoSell));
                 }
 
             }
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, autoSell, modules);
+            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }
     }
 

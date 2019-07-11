@@ -1,5 +1,8 @@
 package com.songoda.epichoppers.hopper;
 
+import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.hopper.levels.Level;
+import com.songoda.epichoppers.hopper.levels.modules.Module;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -32,6 +35,10 @@ public class HopperManager {
 
         for (Hopper hopper : this.registeredHoppers.values())
             hopper.removeLinkedBlock(location);
+
+        for (Level level : EpicHoppers.getInstance().getLevelManager().getLevels().values())
+            for (Module module : level.getRegisteredModules())
+                module.clearData(removed);
 
         return removed;
     }

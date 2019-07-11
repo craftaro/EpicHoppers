@@ -46,11 +46,9 @@ public abstract class Storage {
                     new StorageItem("player", hopper.getLastPlayerOpened() == null ? null : hopper.getLastPlayerOpened().toString()),
                     new StorageItem("teleporttrigger", hopper.getTeleportTrigger().toString()),
 
-                    new StorageItem("autocrafting", hopper.getAutoCrafting() == null || hopper.getAutoCrafting().getType() == Material.AIR ? null : hopper.getAutoCrafting().getType().name() + (hopper.getAutoCrafting().getDurability() == 0 ? "" : ":" + hopper.getAutoCrafting().getDurability())),                    new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
+                    new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
                     new StorageItem("blacklist", hopper.getFilter().getBlackList()),
                     new StorageItem("void", hopper.getFilter().getVoidList()),
-                    new StorageItem("autobreak", hopper.isAutoBreaking()),
-                    new StorageItem("autosell", hopper.getAutoSellTimer() != -9999),
                     new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Methods.serializeLocation(hopper.getFilter().getEndPoint())));
         }
 

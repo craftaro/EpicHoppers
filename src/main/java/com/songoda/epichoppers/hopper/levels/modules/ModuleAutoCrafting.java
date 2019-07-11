@@ -8,11 +8,7 @@ import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -20,9 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModuleAutoCrafting implements Module {
+public class ModuleAutoCrafting extends Module {
 
     private final Map<ItemStack, Recipes> cachedRecipes = new HashMap<>();
+
+    public ModuleAutoCrafting(EpicHoppers plugin) {
+        super(plugin);
+    }
 
     @Override
     public String getName() {
@@ -30,15 +30,15 @@ public class ModuleAutoCrafting implements Module {
     }
 
     public void run(Hopper hopper, Inventory hopperInventory) {
-        if (hopper.getAutoCrafting() == null
+        if (getAutoCrafting(hopper) == null
                 || hopperInventory == null
                 || hopperInventory.getSize() == 0
-                || !canMove(hopperInventory, new ItemStack(hopper.getAutoCrafting()))
-                || cachedRecipes.get(hopper.getAutoCrafting()) == null)
+                || !canMove(hopperInventory, new ItemStack(getAutoCrafting(hopper)))
+                || cachedRecipes.get(getAutoCrafting(hopper)) == null)
             return;
 
         top:
-        for (Recipe recipe : cachedRecipes.get(hopper.getAutoCrafting()).getRecipes()) {
+        for (Recipe recipe : cachedRecipes.get(getAutoCrafting(hopper)).getRecipes()) {
             if (!(recipe instanceof ShapedRecipe) && !(recipe instanceof ShapelessRecipe))
                 continue;
 
@@ -113,14 +113,15 @@ public class ModuleAutoCrafting implements Module {
 
     @Override
     public void runButtonPress(Player player, Hopper hopper) {
-        new GUICrafting(EpicHoppers.getInstance(), hopper, player);
+        new GUICrafting(EpicHoppers.getInstance(), this, hopper, player);
     }
 
+    @Override
     public List<Material> getBlockedItems(Hopper hopper) {
         List<Material> materials = new ArrayList<>();
-        if (hopper.getAutoCrafting() != null) {
+        if (getAutoCrafting(hopper) != null) {
 
-            ItemStack itemStack = hopper.getAutoCrafting();
+            ItemStack itemStack = getAutoCrafting(hopper);
 
             if (itemStack.getType() == Material.AIR)
                 return materials;
@@ -157,7 +158,36 @@ public class ModuleAutoCrafting implements Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.crafting", EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled"));
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.crafting",
+                EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled"));
+    }
+
+    public ItemStack getAutoCrafting(Hopper hopper) {
+        Object autocrafting = getData(hopper, "autocrafting");
+        return autocrafting instanceof ItemStack ? (ItemStack) autocrafting : decode((String) autocrafting);
+    }
+
+    public void setAutoCrafting(Hopper hopper, Player player, ItemStack autoCrafting) {
+        saveData(hopper, "autocrafting", encode(autoCrafting), autoCrafting);
+        int excess = autoCrafting.getAmount() - 1;
+        autoCrafting.setAmount(1);
+        if (excess > 0 && player != null) {
+            ItemStack item = autoCrafting.clone();
+            item.setAmount(excess);
+            player.getInventory().addItem(item);
+        }
+    }
+
+    public String encode(ItemStack item) {
+        return item.getType() == Material.AIR ? null : item.getType().name()
+                + (item.getDurability() == 0 ? "" : ":" + item.getDurability());
+    }
+
+    public ItemStack decode(String string) {
+        String autoCraftingStr = string == null ? "AIR" : string;
+        String[] autoCraftingParts = autoCraftingStr.split(":");
+        return new ItemStack(Material.valueOf(autoCraftingParts[0]),
+                1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {

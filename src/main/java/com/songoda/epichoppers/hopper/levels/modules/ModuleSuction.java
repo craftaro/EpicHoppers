@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class ModuleSuction implements Module {
+public class ModuleSuction extends Module {
 
     private final int amount;
 
@@ -30,16 +30,17 @@ public class ModuleSuction implements Module {
     private boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
     private boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
 
-    public ModuleSuction(int amount) {
+    public ModuleSuction(EpicHoppers plugin, int amount) {
+        super(plugin);
         this.amount = amount;
     }
 
-
+    @Override
     public String getName() {
         return "Suction";
     }
 
-
+    @Override
     public void run(Hopper hopper, Inventory hopperInventory) {
         double radius = amount + .5;
 
@@ -96,19 +97,20 @@ public class ModuleSuction implements Module {
         return blacklist.contains(uuid);
     }
 
+    @Override
     public ItemStack getGUIButton(Hopper hopper) {
         return null;
     }
 
-    public void runButtonPress(Player player, Hopper hopper) {
+    @Override
+    public void runButtonPress(Player player, Hopper hopper) { }
 
-    }
-
+    @Override
     public List<Material> getBlockedItems(Hopper hopper) {
         return null;
     }
 
-
+    @Override
     public String getDescription() {
         return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction", amount);
     }

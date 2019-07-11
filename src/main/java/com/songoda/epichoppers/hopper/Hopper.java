@@ -8,18 +8,11 @@ import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.TeleportTrigger;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -33,10 +26,9 @@ public class Hopper {
     private List<Location> linkedBlocks = new ArrayList<>();
     private Filter filter = new Filter();
     private TeleportTrigger teleportTrigger = TeleportTrigger.DISABLED;
-    private ItemStack autoCrafting = null;
-    private int autoSellTimer = -9999;
-    private boolean autoBreaking = false;
     private int transferTick = 0;
+
+    private Map<String, Object> moduleCache = new HashMap<>();
 
     public Hopper(Location location) {
         this.location = location;
@@ -173,7 +165,7 @@ public class Hopper {
     /**
      * Ticks a hopper to determine when it can transfer items next
      *
-     * @param maxTick The maximum amount the hopper can be ticked before next transferring items
+     * @param maxTick      The maximum amount the hopper can be ticked before next transferring items
      * @param allowLooping If true, the hopper is allowed to transfer items if the tick is also valid
      * @return true if the hopper should transfer an item, otherwise false
      */
@@ -234,27 +226,6 @@ public class Hopper {
         lastPlayerOpened = uuid;
     }
 
-    public ItemStack getAutoCrafting() {
-        return autoCrafting;
-    }
-
-    public void setAutoCrafting(ItemStack autoCrafting) {
-        this.autoCrafting = autoCrafting;
-    }
-
-    public void setAutoCrafting(Player player, ItemStack autoCrafting) {
-        this.autoCrafting = autoCrafting;
-        if (autoCrafting != null) {
-            int excess = autoCrafting.getAmount() - 1;
-            autoCrafting.setAmount(1);
-            if (excess > 0 && player != null) {
-                ItemStack item = autoCrafting.clone();
-                item.setAmount(excess);
-                player.getInventory().addItem(item);
-            }
-        }
-    }
-
     public TeleportTrigger getTeleportTrigger() {
         return teleportTrigger;
     }
@@ -262,26 +233,6 @@ public class Hopper {
 
     public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
         this.teleportTrigger = teleportTrigger;
-    }
-
-    public int getAutoSellTimer() {
-        return autoSellTimer;
-    }
-
-    public void setAutoSellTimer(int autoSellTimer) {
-        this.autoSellTimer = autoSellTimer;
-    }
-
-    public boolean isAutoBreaking() {
-        return autoBreaking;
-    }
-
-    public void setAutoBreaking(boolean autoBreaking) {
-        this.autoBreaking = autoBreaking;
-    }
-
-    public void toggleAutoBreaking() {
-        this.autoBreaking = !autoBreaking;
     }
 
     public List<Location> getLinkedBlocks() {
@@ -306,5 +257,25 @@ public class Hopper {
 
     public void setFilter(Filter filter) {
         this.filter = filter;
+    }
+
+    public Object getDataFromModuleCache(String key) {
+        return this.moduleCache.getOrDefault(key, null);
+    }
+
+    public void addDataToModuleCache(String key, Object data) {
+        this.moduleCache.put(key, data);
+    }
+
+    public boolean isDataCachedInModuleCache(String key) {
+        return this.moduleCache.containsKey(key);
+    }
+
+    public void removeDataFromModuleCache(String key) {
+        this.moduleCache.remove(key);
+    }
+
+    public void clearModuleCache() {
+        this.moduleCache.clear();
     }
 }

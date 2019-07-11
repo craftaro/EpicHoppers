@@ -30,13 +30,10 @@ public class MySQLDatabase {
                             "\t`placedby` TEXT NULL,\n" +
                             "\t`player` TEXT NULL,\n" +
                             "\t`teleporttrigger` TEXT NULL,\n" +
-                            "\t`autocrafting` TEXT NULL,\n" +
-                            "\t`autosell` TEXT NULL,\n" +
                             "\t`whitelist` TEXT NULL,\n" +
                             "\t`blacklist` TEXT NULL,\n" +
                             "\t`void` TEXT NULL,\n" +
                             "\t`black` TEXT NULL,\n" +
-                            "\t`autobreak` TINYINT(1) NULL\n" +
                             ")");
 
             connection.createStatement().execute("CREATE TABLE IF NOT EXISTS `" + instance.getConfig().getString("Database.Prefix") + "boosts` (\n" +

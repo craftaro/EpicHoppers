@@ -11,8 +11,8 @@ public class LevelManager {
     private final NavigableMap<Integer, Level> registeredLevels = new TreeMap<>();
 
     
-    public void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, int autoSell, ArrayList<Module> modules) {
-        registeredLevels.put(level, new Level(level, costExperience, costEconomy, range, amount, filter, teleport, linkAmount, autoSell, modules));
+    public void addLevel(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, ArrayList<Module> modules) {
+        registeredLevels.put(level, new Level(level, costExperience, costEconomy, range, amount, filter, teleport, linkAmount, modules));
     }
 
 

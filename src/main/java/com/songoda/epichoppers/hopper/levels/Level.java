@@ -10,10 +10,10 @@ public class Level {
 
     private final ArrayList<Module> registeredModules;
     private final List<String> description = new ArrayList<>();
-    private int level, costExperience, costEconomy, range, amount, linkAmount, autoSell;
+    private int level, costExperience, costEconomy, range, amount, linkAmount;
     private boolean filter, teleport;
 
-    Level(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, int autoSell, ArrayList<Module> registeredModules) {
+    Level(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount,  ArrayList<Module> registeredModules) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
@@ -22,7 +22,6 @@ public class Level {
         this.filter = filter;
         this.teleport = teleport;
         this.linkAmount = linkAmount;
-        this.autoSell = autoSell;
         this.registeredModules = registeredModules;
 
         buildDescription();
@@ -71,11 +70,6 @@ public class Level {
 
     public boolean isTeleport() {
         return teleport;
-    }
-
-
-    public int getAutoSell() {
-        return autoSell;
     }
 
 

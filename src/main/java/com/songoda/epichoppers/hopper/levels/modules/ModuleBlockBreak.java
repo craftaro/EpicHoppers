@@ -20,25 +20,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ModuleBlockBreak implements Module {
+public class ModuleBlockBreak extends Module {
 
     private final int amount;
     private Map<Block, Integer> blockTick = new HashMap<>();
 
-    public ModuleBlockBreak(int amount) {
+    public ModuleBlockBreak(EpicHoppers plugin, int amount) {
+        super(plugin);
         this.amount = amount;
     }
 
-
+    @Override
     public String getName() {
         return "BlockBreak";
     }
 
-
+    @Override
     public void run(Hopper hopper, Inventory hopperInventory) {
         Block block = hopper.getLocation().getBlock();
 
-        if (!hopper.isAutoBreaking())
+        if (!isEnabled(hopper))
             return;
 
         if (!blockTick.containsKey(block)) {
@@ -59,11 +60,11 @@ public class ModuleBlockBreak implements Module {
             return;
 
         // Don't break farm items from EpicFarming
-        if (EpicHoppers.getInstance().isEpicFarming() && com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(above) != null)
+        if (plugin.isEpicFarming() && com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(above) != null)
             return;
 
-        if (!EpicHoppers.getInstance().getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
-            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
+        if (!plugin.getConfig().getStringList("Main.BlockBreak Blacklisted Blocks").contains(above.getType().name())) {
+            if (plugin.isServerVersionAtLeast(ServerVersion.V1_9))
                 above.getWorld().playSound(above.getLocation(), Sound.BLOCK_STONE_BREAK, 1F, 1F);
             Location locationAbove = above.getLocation();
             locationAbove.add(.5, .5, .5);
@@ -71,11 +72,11 @@ public class ModuleBlockBreak implements Module {
             float xx = (float) (0 + (Math.random() * .5));
             float yy = (float) (0 + (Math.random() * .5));
             float zz = (float) (0 + (Math.random() * .5));
-            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
-                above.getWorld().spawnParticle(Particle.valueOf(EpicHoppers.getInstance().getConfig().getString("Main.BlockBreak Particle Type")), locationAbove, 15, xx, yy, zz);
+            if (plugin.isServerVersionAtLeast(ServerVersion.V1_9))
+                above.getWorld().spawnParticle(Particle.valueOf(plugin.getConfig().getString("Main.BlockBreak Particle Type")), locationAbove, 15, xx, yy, zz);
 
             boolean waterlogged = false;
-            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)
+            if (plugin.isServerVersionAtLeast(ServerVersion.V1_13)
                     && above.getBlockData() instanceof org.bukkit.block.data.Waterlogged
                     && ((org.bukkit.block.data.Waterlogged)above.getBlockData()).isWaterlogged()) {
                 waterlogged = true;
@@ -89,15 +90,15 @@ public class ModuleBlockBreak implements Module {
         blockTick.remove(block);
     }
 
-
+    @Override
     public ItemStack getGUIButton(Hopper hopper) {
         ItemStack block = new ItemStack(Material.IRON_ORE, 1);
         ItemMeta blockmeta = block.getItemMeta();
-        blockmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.blocktitle"));
+        blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.blocktitle"));
         ArrayList<String> loreblock = new ArrayList<>();
-        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.blocklore",
-                hopper.isAutoBreaking() ? EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled")
-                        : EpicHoppers.getInstance().getLocale().getMessage("general.word.disabled")).split("\\|");
+        String[] parts = plugin.getLocale().getMessage("interface.hopper.blocklore",
+                isEnabled(hopper) ? plugin.getLocale().getMessage("general.word.enabled")
+                        : plugin.getLocale().getMessage("general.word.disabled")).split("\\|");
         for (String line : parts) {
             loreblock.add(Methods.formatText(line));
         }
@@ -106,18 +107,23 @@ public class ModuleBlockBreak implements Module {
         return block;
     }
 
-
+    @Override
     public void runButtonPress(Player player, Hopper hopper) {
-        hopper.toggleAutoBreaking();
+        saveData(hopper,"blockbreak", !isEnabled(hopper));
     }
 
-
+    @Override
     public List<Material> getBlockedItems(Hopper hopper) {
         return null;
     }
 
-
+    @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.blockbreak", amount);
+        return plugin.getLocale().getMessage("interface.hopper.blockbreak", amount);
+    }
+
+    public boolean isEnabled(Hopper hopper) {
+        Object isBlockBreaking = getData(hopper, "blockbreak");
+        return isBlockBreaking != null && (boolean) isBlockBreaking;
     }
 }

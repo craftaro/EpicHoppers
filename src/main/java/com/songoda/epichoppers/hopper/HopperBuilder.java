@@ -5,7 +5,6 @@ import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -58,21 +57,6 @@ public class HopperBuilder {
 
     public HopperBuilder setTeleportTrigger(TeleportTrigger teleportTrigger) {
         this.hopper.setTeleportTrigger(teleportTrigger);
-        return this;
-    }
-
-    public HopperBuilder setAutoCrafting(ItemStack autoCrafting) {
-        this.hopper.setAutoCrafting(autoCrafting);
-        return this;
-    }
-
-    public HopperBuilder setAutoSelling(boolean autoSelling) {
-        this.hopper.setAutoSellTimer(autoSelling ? 0 : -9999);
-        return this;
-    }
-
-    public HopperBuilder setAutoBreaking(boolean autoBreaking) {
-        this.hopper.setAutoBreaking(autoBreaking);
         return this;
     }
 
