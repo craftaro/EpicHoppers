@@ -347,6 +347,7 @@ public class HopTask extends BukkitRunnable {
                     }
 
                     brewerInventory.setItem(entry.getKey(), currentOutput);
+                    break;
                 }
                 this.debt(item, amountToMove, currentHolder);
                 return true;
