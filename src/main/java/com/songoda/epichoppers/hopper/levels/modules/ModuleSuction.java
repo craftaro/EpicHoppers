@@ -116,10 +116,6 @@ public class ModuleSuction implements Module {
         return blacklist.contains(uuid);
     }
 
-    public static boolean addToBlacklist(UUID uuid) {
-        return blacklist.add(uuid);
-    }
-
     public ItemStack getGUIButton(Hopper hopper) {
         return null;
     }

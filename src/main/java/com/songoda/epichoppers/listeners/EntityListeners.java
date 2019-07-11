@@ -61,6 +61,5 @@ public class EntityListeners implements Listener {
     public void onPlayerPickup(PlayerPickupItemEvent event) {
         if (ModuleSuction.isBlacklisted(event.getItem().getUniqueId()))
             event.setCancelled(true);
-        ModuleSuction.addToBlacklist(event.getItem().getUniqueId());
     }
 }
