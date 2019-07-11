@@ -25,7 +25,7 @@ public abstract class Module {
         this.config = new ConfigWrapper(plugin, File.separator + "modules", getName() + ".yml");
     }
 
-    abstract String getName();
+    public abstract String getName();
 
     public abstract void run(Hopper hopper, Inventory hopperInventory);
 
