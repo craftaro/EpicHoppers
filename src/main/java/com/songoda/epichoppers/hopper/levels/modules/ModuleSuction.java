@@ -15,8 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -32,26 +30,8 @@ public class ModuleSuction implements Module {
     private boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
     private boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
 
-    private Class<?> clazzItemStack, clazzItem, clazzCraftItemStack;
-    private Method methodGetItem, methodAsNMSCopy;
-    private Field fieldMaxStackSize;
-
     public ModuleSuction(int amount) {
         this.amount = amount;
-        try {
-            String ver = Bukkit.getServer().getClass().getPackage().getName().substring(23);
-            clazzCraftItemStack = Class.forName("org.bukkit.craftbukkit." + ver + ".inventory.CraftItemStack");
-            clazzItemStack = Class.forName("net.minecraft.server." + ver + ".ItemStack");
-            clazzItem = Class.forName("net.minecraft.server." + ver + ".Item");
-
-            methodAsNMSCopy = clazzCraftItemStack.getMethod("asNMSCopy", ItemStack.class);
-            methodGetItem = clazzItemStack.getDeclaredMethod("getItem");
-
-            fieldMaxStackSize = clazzItem.getDeclaredField("maxStackSize");
-            fieldMaxStackSize.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-        }
     }
 
 
@@ -72,7 +52,7 @@ public class ModuleSuction implements Module {
                 .collect(Collectors.toSet());
 
         for (Item item : itemsToSuck) {
-            ItemStack itemStack = setMax(item.getItemStack().clone(), 0, true);
+            ItemStack itemStack = item.getItemStack().clone();
 
             if (itemStack.getType().name().contains("SHULKER_BOX"))
                 return;
@@ -142,15 +122,5 @@ public class ModuleSuction implements Module {
             }
         }
         return false;
-    }
-
-    public ItemStack setMax(ItemStack item, int max, boolean reset) {
-        try {
-            Object objItemStack = methodGetItem.invoke(methodAsNMSCopy.invoke(null, item));
-            fieldMaxStackSize.set(objItemStack, reset ? new ItemStack(item.getType()).getMaxStackSize() : max);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-        }
-        return item;
     }
 }
