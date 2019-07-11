@@ -50,6 +50,7 @@ public abstract class Storage {
                     new StorageItem("blacklist", hopper.getFilter().getBlackList()),
                     new StorageItem("void", hopper.getFilter().getVoidList()),
                     new StorageItem("autobreak", hopper.isAutoBreaking()),
+                    new StorageItem("autosell", hopper.getAutoSellTimer() != -9999),
                     new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Methods.serializeLocation(hopper.getFilter().getEndPoint())));
         }
 

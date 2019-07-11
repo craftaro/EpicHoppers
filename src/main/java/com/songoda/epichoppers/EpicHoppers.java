@@ -271,6 +271,8 @@ public class EpicHoppers extends JavaPlugin {
 
                     String autoCraftingStr = row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString();
 
+                    boolean autoSell = row.get("autosell").asBoolean();
+
                     String[] autoCraftingParts = autoCraftingStr.split(":");
 
                     ItemStack autoCrafting = new ItemStack(Material.valueOf(autoCraftingParts[0]), 1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
@@ -290,6 +292,9 @@ public class EpicHoppers extends JavaPlugin {
                     Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
 
                     Hopper hopper = new Hopper(location, level, lastPlayer, placedBy, blocks, filter, teleportTrigger, autoCrafting);
+
+                    if (!autoSell)
+                        hopper.setAutoSellTimer(-9999);
 
                     if (autoBreak) hopper.toggleAutoBreaking();
 

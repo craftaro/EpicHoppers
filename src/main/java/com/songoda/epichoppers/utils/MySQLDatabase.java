@@ -31,6 +31,7 @@ public class MySQLDatabase {
                             "\t`player` TEXT NULL,\n" +
                             "\t`teleporttrigger` TEXT NULL,\n" +
                             "\t`autocrafting` TEXT NULL,\n" +
+                            "\t`autosell` TEXT NULL,\n" +
                             "\t`whitelist` TEXT NULL,\n" +
                             "\t`blacklist` TEXT NULL,\n" +
                             "\t`void` TEXT NULL,\n" +
