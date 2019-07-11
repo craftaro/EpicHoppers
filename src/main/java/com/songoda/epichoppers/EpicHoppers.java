@@ -10,6 +10,7 @@ import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
@@ -249,6 +250,12 @@ public class EpicHoppers extends JavaPlugin {
                     if (location == null) return;
 
                     int levelVal = row.get("level").asInt();
+                    Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
+
+                    String playerStr = row.get("player").asString();
+                    String placedByStr = row.get("placedby").asString();
+                    UUID lastPlayer = playerStr == null ? null : UUID.fromString(row.get("player").asString());
+                    UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
 
                     List<String> blockLoc = row.get("block").asStringList();
                     List<Location> blocks = new ArrayList<>();
@@ -258,47 +265,41 @@ public class EpicHoppers extends JavaPlugin {
                         }
                     }
 
-                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
-
-                    String playerStr = row.get("player").asString();
-                    String placedByStr = row.get("placedby").asString();
-                    UUID lastPlayer = playerStr == null ? null : UUID.fromString(playerStr);
-                    UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
+                    Filter filter = new Filter();
 
                     List<ItemStack> whiteList = row.get("whitelist").asItemStackList();
                     List<ItemStack> blackList = row.get("blacklist").asItemStackList();
                     List<ItemStack> voidList = row.get("void").asItemStackList();
 
-                    String autoCraftingStr = row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString();
-
-                    boolean autoSell = row.get("autosell").asBoolean();
-
-                    String[] autoCraftingParts = autoCraftingStr.split(":");
-
-                    ItemStack autoCrafting = new ItemStack(Material.valueOf(autoCraftingParts[0]), 1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
-
                     String blackLoc = row.get("black").asString();
                     Location black = blackLoc == null ? null : Methods.unserializeLocation(blackLoc);
-
-                    boolean autoBreak = row.get("autobreak").asBoolean();
-
-                    Filter filter = new Filter();
 
                     filter.setWhiteList(whiteList);
                     filter.setBlackList(blackList);
                     filter.setVoidList(voidList);
                     filter.setEndPoint(black);
 
-                    Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
+                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
 
-                    Hopper hopper = new Hopper(location, level, lastPlayer, placedBy, blocks, filter, teleportTrigger, autoCrafting);
+                    String autoCraftingStr = row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString();
+                    String[] autoCraftingParts = autoCraftingStr.split(":");
+                    ItemStack autoCrafting = new ItemStack(Material.valueOf(autoCraftingParts[0]), 1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
 
-                    if (!autoSell)
-                        hopper.setAutoSellTimer(-9999);
+                    boolean autoSell = row.get("autosell").asBoolean();
 
-                    if (autoBreak) hopper.toggleAutoBreaking();
+                    boolean autoBreak = row.get("autobreak").asBoolean();
 
-                    hopperManager.addHopper(location, hopper);
+                    hopperManager.addHopper(new HopperBuilder(location)
+                            .setLevel(level)
+                            .setLastPlayerOpened(lastPlayer)
+                            .setPlacedBy(placedBy)
+                            .addLinkedBlocks(blocks.toArray(new Location[0]))
+                            .setFilter(filter)
+                            .setTeleportTrigger(teleportTrigger)
+                            .setAutoCrafting(autoCrafting)
+                            .setAutoSelling(autoSell)
+                            .setAutoBreaking(autoBreak)
+                            .build());
                 }
             }
 

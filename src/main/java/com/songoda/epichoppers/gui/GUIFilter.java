@@ -175,7 +175,7 @@ public class GUIFilter extends AbstractGUI {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     owhite.add(item);
@@ -187,7 +187,7 @@ public class GUIFilter extends AbstractGUI {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     oblack.add(item);
@@ -199,7 +199,7 @@ public class GUIFilter extends AbstractGUI {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     ovoid.add(item);

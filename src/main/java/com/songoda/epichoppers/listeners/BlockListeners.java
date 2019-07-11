@@ -3,6 +3,7 @@ package com.songoda.epichoppers.listeners;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
@@ -59,7 +60,11 @@ public class BlockListeners implements Listener {
 
         ItemStack item = e.getItemInHand().clone();
 
-        instance.getHopperManager().addHopper(e.getBlock().getLocation(), new Hopper(e.getBlock(), instance.getLevelManager().getLevel(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new Filter(), TeleportTrigger.DISABLED, null));
+        instance.getHopperManager().addHopper(e.getBlock().getLocation(),
+                new HopperBuilder(e.getBlock())
+                        .setLevel(instance.getLevelManager().getLevel(item))
+                        .setPlacedBy(player)
+                        .setLastPlayerOpened(player).build());
     }
 
     private int maxHoppers(Player player) {

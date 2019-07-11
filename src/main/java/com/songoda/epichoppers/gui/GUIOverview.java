@@ -225,7 +225,7 @@ public class GUIOverview extends AbstractGUI {
         inventory.setItem(25, Methods.getBackgroundGlass(true));
         inventory.setItem(26, Methods.getBackgroundGlass(true));
 
-        hopper.setLastPlayer(player.getUniqueId());
+        hopper.setLastPlayerOpened(player.getUniqueId());
     }
 
     private void runTask() {
@@ -269,7 +269,7 @@ public class GUIOverview extends AbstractGUI {
                     player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.desync"));
                     hopper.clearLinkedBlocks();
                 } else {
-                    if (hopper.getLastPlayer() != null && !hopper.getLastPlayer().equals(player.getUniqueId())) {
+                    if (hopper.getLastPlayerOpened() != null && !hopper.getLastPlayerOpened().equals(player.getUniqueId())) {
                         player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.syncdidnotplace"));
                         return;
                     }

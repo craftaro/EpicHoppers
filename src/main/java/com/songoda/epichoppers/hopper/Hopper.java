@@ -27,40 +27,26 @@ import java.util.UUID;
 public class Hopper {
 
     private Location location;
-    private Level level;
-    private UUID lastPlayer;
-    private UUID placedBy;
-    private List<Location> linkedBlocks;
-    private Filter filter;
-    private TeleportTrigger teleportTrigger;
-    private ItemStack autoCrafting;
-    private int autoSellTimer;
-    private boolean autoBreaking;
-    private int transferTick;
+    private Level level = EpicHoppers.getInstance().getLevelManager().getLowestLevel();
+    private UUID lastPlayerOpened = null;
+    private UUID placedBy = null;
+    private List<Location> linkedBlocks = new ArrayList<>();
+    private Filter filter = new Filter();
+    private TeleportTrigger teleportTrigger = TeleportTrigger.DISABLED;
+    private ItemStack autoCrafting = null;
+    private int autoSellTimer = -9999;
+    private boolean autoBreaking = false;
+    private int transferTick = 0;
 
-    public Hopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
+    public Hopper(Location location) {
         this.location = location;
-        this.level = level;
-        this.linkedBlocks = linkedBlocks;
-        this.filter = filter;
-        this.lastPlayer = lastPlayer;
-        this.placedBy = placedBy;
-        this.teleportTrigger = teleportTrigger;
-        this.autoCrafting = autoCrafting;
-        this.autoSellTimer = 0;
-        this.autoBreaking = false;
-        this.transferTick = 0;
-    }
-
-    public Hopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
-        this(block.getLocation(), level, lastPlayer, placedBy, linkedBlocks, filter, teleportTrigger, autoCrafting);
     }
 
     public void overview(Player player) {
-        if (lastPlayer != null
-                && lastPlayer != player.getUniqueId()
-                && Bukkit.getPlayer(lastPlayer) != null) {
-            Bukkit.getPlayer(lastPlayer).closeInventory();
+        if (lastPlayerOpened != null
+                && lastPlayerOpened != player.getUniqueId()
+                && Bukkit.getPlayer(lastPlayerOpened) != null) {
+            Bukkit.getPlayer(lastPlayerOpened).closeInventory();
         }
         if (placedBy == null) placedBy = player.getUniqueId();
 
@@ -170,7 +156,7 @@ public class Hopper {
             instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
             return;
         }
-        this.lastPlayer = player.getUniqueId();
+        this.lastPlayerOpened = player.getUniqueId();
 
         if (level.getLinkAmount() > 1) {
             if (getLinkedBlocks().size() == level.getLinkAmount()) {
@@ -228,20 +214,32 @@ public class Hopper {
         return level;
     }
 
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
     public UUID getPlacedBy() {
         return placedBy;
     }
 
-    public UUID getLastPlayer() {
-        return lastPlayer;
+    public void setPlacedBy(UUID placedBy) {
+        this.placedBy = placedBy;
     }
 
-    public void setLastPlayer(UUID uuid) {
-        lastPlayer = uuid;
+    public UUID getLastPlayerOpened() {
+        return lastPlayerOpened;
+    }
+
+    public void setLastPlayerOpened(UUID uuid) {
+        lastPlayerOpened = uuid;
     }
 
     public ItemStack getAutoCrafting() {
         return autoCrafting;
+    }
+
+    public void setAutoCrafting(ItemStack autoCrafting) {
+        this.autoCrafting = autoCrafting;
     }
 
     public void setAutoCrafting(Player player, ItemStack autoCrafting) {
@@ -278,6 +276,10 @@ public class Hopper {
         return autoBreaking;
     }
 
+    public void setAutoBreaking(boolean autoBreaking) {
+        this.autoBreaking = autoBreaking;
+    }
+
     public void toggleAutoBreaking() {
         this.autoBreaking = !autoBreaking;
     }
@@ -302,4 +304,7 @@ public class Hopper {
         return filter;
     }
 
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
 }
