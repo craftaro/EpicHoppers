@@ -241,7 +241,7 @@ public class GUIOverview extends AbstractGUI {
                         .getDisplayName().equalsIgnoreCase(inventory.getItem(slot).getItemMeta().getDisplayName()))
                     continue;
 
-                module.runButtonPress(player, hopper);
+                module.runButtonPress(player, hopper, type);
             }
             if (inventory.getItem(slot).getItemMeta()
                     .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.filtertitle"))) {

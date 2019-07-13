@@ -8,6 +8,7 @@ import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -112,7 +113,7 @@ public class ModuleAutoCrafting extends Module {
     }
 
     @Override
-    public void runButtonPress(Player player, Hopper hopper) {
+    public void runButtonPress(Player player, Hopper hopper, ClickType type) {
         new GUICrafting(EpicHoppers.getInstance(), this, hopper, player);
     }
 

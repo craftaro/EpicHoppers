@@ -79,30 +79,30 @@ public class Hopper {
     }
 
     private void upgradeFinal(Level level, Player player) {
-        EpicHoppers instance = EpicHoppers.getInstance();
+        EpicHoppers plugin = EpicHoppers.getInstance();
         this.level = level;
         syncName();
-        if (instance.getLevelManager().getHighestLevel() != level) {
-            player.sendMessage(instance.getLocale().getMessage("event.upgrade.success", level.getLevel()));
+        if (plugin.getLevelManager().getHighestLevel() != level) {
+            player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.upgrade.success", level.getLevel()));
         } else {
-            player.sendMessage(instance.getLocale().getMessage("event.upgrade.maxed", level.getLevel()));
+            player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.upgrade.maxed", level.getLevel()));
         }
         Location loc = location.clone().add(.5, .5, .5);
 
-        if (!instance.isServerVersionAtLeast(ServerVersion.V1_12)) return;
+        if (!plugin.isServerVersionAtLeast(ServerVersion.V1_12)) return;
 
-        player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
+        player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(plugin.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
 
-        if (instance.getLevelManager().getHighestLevel() != level) {
+        if (plugin.getLevelManager().getHighestLevel() != level) {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
         } else {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
 
-            if (!instance.isServerVersionAtLeast(ServerVersion.V1_13)) return;
+            if (!plugin.isServerVersionAtLeast(ServerVersion.V1_13)) return;
 
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2F, 25.0F);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
         }
     }
 

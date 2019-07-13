@@ -7,6 +7,7 @@ import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -31,7 +32,7 @@ public abstract class Module {
 
     public abstract ItemStack getGUIButton(Hopper hopper);
 
-    public abstract void runButtonPress(Player player, Hopper hopper);
+    public abstract void runButtonPress(Player player, Hopper hopper, ClickType type);
 
     public abstract List<Material> getBlockedItems(Hopper hopper);
 

@@ -12,6 +12,7 @@ import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -103,7 +104,7 @@ public class ModuleSuction extends Module {
     }
 
     @Override
-    public void runButtonPress(Player player, Hopper hopper) { }
+    public void runButtonPress(Player player, Hopper hopper, ClickType type) { }
 
     @Override
     public List<Material> getBlockedItems(Hopper hopper) {

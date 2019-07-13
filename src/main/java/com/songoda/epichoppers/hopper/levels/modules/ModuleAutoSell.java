@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -44,13 +45,14 @@ public class ModuleAutoSell extends Module {
         if (currentTime == -9999) return;
 
         if (currentTime <= 0) {
-            EpicHoppers instance = EpicHoppers.getInstance();
+            int amountSold = 0;
+            double totalValue = 0;
 
-            if (instance.getEconomy() == null) return;
+            if (plugin.getEconomy() == null) return;
 
             boolean updateComparators = false;
 
-            List<String> list = instance.getConfig().getStringList("Main.AutoSell Prices");
+            List<String> list = plugin.getConfig().getStringList("Main.AutoSell Prices");
 
             OfflinePlayer player = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
 
@@ -72,7 +74,11 @@ public class ModuleAutoSell extends Module {
 
                 if (value == 0) continue;
 
-                instance.getEconomy().deposit(player, value * itemStack.getAmount());
+                double sellingFor = value * itemStack.getAmount();
+
+                plugin.getEconomy().deposit(player, sellingFor);
+                totalValue += sellingFor;
+                amountSold += itemStack.getAmount();
                 hopperInventory.removeItem(itemStack);
 
                 updateComparators = true;
@@ -81,32 +87,39 @@ public class ModuleAutoSell extends Module {
 
             if (updateComparators)
                 HopTask.updateAdjacentComparators(hopper.getLocation());
+
+            if (totalValue != 0 && player.isOnline()) {
+                player.getPlayer().sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.autosell", amountSold, Methods.formatEconomy(totalValue)));
+            }
         }
         modifyDataCache(hopper, "time", getTime(hopper) - hopperTickRate);
     }
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        Hopper eHopper = hopper;
         ItemStack sell = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? Material.SUNFLOWER : Material.valueOf("DOUBLE_PLANT"), 1);
         ItemMeta sellmeta = sell.getItemMeta();
         sellmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle"));
-        ArrayList<String> loresell = new ArrayList<>();
-        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selllore", getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20)).split("\\|");
+        ArrayList<String> loreSell = new ArrayList<>();
+        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selllore", getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20), isNotifying(hopper)).split("\\|");
         for (String line : parts) {
-            loresell.add(Methods.formatText(line));
+            loreSell.add(Methods.formatText(line));
         }
-        sellmeta.setLore(loresell);
+        sellmeta.setLore(loreSell);
         sell.setItemMeta(sellmeta);
         return sell;
     }
 
     @Override
-    public void runButtonPress(Player player, Hopper hopper) {
-        if (getTime(hopper) == -9999) {
-            saveData(hopper, "time", 0);
-        } else {
-            saveData(hopper, "time", -9999);
+    public void runButtonPress(Player player, Hopper hopper, ClickType type) {
+        if (type == ClickType.LEFT) {
+            if (getTime(hopper) == -9999) {
+                saveData(hopper, "time", timeOut);
+            } else {
+                saveData(hopper, "time", -9999);
+            }
+        } else if (type == ClickType.RIGHT) {
+            saveData(hopper,"notifications", !isNotifying(hopper));
         }
     }
 
@@ -120,7 +133,13 @@ public class ModuleAutoSell extends Module {
         return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.autosell", (int) Math.floor(timeOut / 20));
     }
 
-    public int getTime(Hopper hopper) {
+    private boolean isNotifying(Hopper hopper) {
+        Object notifications = getData(hopper, "notifications");
+        if (notifications == null) return false;
+        return (boolean) notifications;
+    }
+
+    private int getTime(Hopper hopper) {
         Object time = getData(hopper, "time");
         if (time == null) return -9999;
         return (int) time;

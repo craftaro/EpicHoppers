@@ -10,6 +10,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -108,7 +109,7 @@ public class ModuleBlockBreak extends Module {
     }
 
     @Override
-    public void runButtonPress(Player player, Hopper hopper) {
+    public void runButtonPress(Player player, Hopper hopper, ClickType type) {
         saveData(hopper,"blockbreak", !isEnabled(hopper));
     }
 
