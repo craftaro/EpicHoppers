@@ -98,7 +98,7 @@ public class EpicHoppers extends JavaPlugin {
         this.setupLanguage();
 
         // Running Songoda Updater
-        Plugin plugin = new Plugin(this, 13);
+        Plugin plugin = new Plugin(this, 15);
         plugin.addModule(new LocaleModule());
         SongodaUpdate.load(plugin);
 
