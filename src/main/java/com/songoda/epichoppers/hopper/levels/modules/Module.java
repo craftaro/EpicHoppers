@@ -48,12 +48,13 @@ public abstract class Module {
     }
 
     public void modifyDataCache(Hopper hopper, String setting, Object value) {
-        hopper.addDataToModuleCache(setting, value);
+        hopper.addDataToModuleCache(getName() + "." + setting, value);
     }
 
     protected Object getData(Hopper hopper, String setting) {
-        if (hopper.isDataCachedInModuleCache(setting))
-            return hopper.getDataFromModuleCache(setting);
+        String cacheStr = getName() + "." + setting;
+        if (hopper.isDataCachedInModuleCache(cacheStr))
+            return hopper.getDataFromModuleCache(cacheStr);
 
         Object data = config.getConfig().get("data." + Methods.serializeLocation(hopper.getLocation()) + "." + setting);
         modifyDataCache(hopper, setting, data);

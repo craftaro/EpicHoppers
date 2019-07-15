@@ -25,9 +25,8 @@ public class ModuleAutoSell extends Module {
 
     public ModuleAutoSell(EpicHoppers plugin, int timeOut) {
         super(plugin);
-        EpicHoppers instance = EpicHoppers.getInstance();
         this.timeOut = timeOut * 20;
-        this.hopperTickRate = (int) instance.getConfig().getLong("Main.Amount of Ticks Between Hops");
+        this.hopperTickRate = Setting.HOP_TICKS.getInt();
     }
 
     @Override
@@ -44,7 +43,9 @@ public class ModuleAutoSell extends Module {
 
         if (currentTime == -9999) return;
 
-        if (currentTime <= 0) {
+        int subtract = getTime(hopper) - hopperTickRate;
+
+        if (subtract <= 0) {
             int amountSold = 0;
             double totalValue = 0;
 
@@ -83,7 +84,6 @@ public class ModuleAutoSell extends Module {
 
                 updateComparators = true;
             }
-            modifyDataCache(hopper, "time", timeOut);
 
             if (updateComparators)
                 HopTask.updateAdjacentComparators(hopper.getLocation());
@@ -91,8 +91,12 @@ public class ModuleAutoSell extends Module {
             if (totalValue != 0 && player.isOnline()) {
                 player.getPlayer().sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.autosell", amountSold, Methods.formatEconomy(totalValue)));
             }
+
+            modifyDataCache(hopper, "time", timeOut);
+            return;
         }
-        modifyDataCache(hopper, "time", getTime(hopper) - hopperTickRate);
+
+        modifyDataCache(hopper, "time", subtract);
     }
 
     @Override

@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class Hopper {
 
-    private Location location;
+    private final Location location;
     private Level level = EpicHoppers.getInstance().getLevelManager().getLowestLevel();
     private UUID lastPlayerOpened = null;
     private UUID placedBy = null;
