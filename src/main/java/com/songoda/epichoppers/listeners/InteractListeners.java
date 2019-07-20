@@ -62,10 +62,12 @@ public class InteractListeners implements Listener {
         if (e.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
             ItemStack item = e.getPlayer().getInventory().getItemInHand();
             if (item.getItemMeta().getLore().size() == 2) {
-                player.sendMessage(instance.getLocale().getMessage("event.hopper.desyncchest", item.getType().toString()));
+                instance.getLocale().getMessage("event.hopper.desyncchest")
+                        .processPlaceholder("name", item.getType().toString()).sendPrefixedMessage(player);
                 instance.enchantmentHandler.createSyncTouch(item, null);
             } else {
-                player.sendMessage(instance.getLocale().getMessage("event.hopper.syncchest", item.getType().toString()));
+                instance.getLocale().getMessage("event.hopper.syncchest")
+                        .processPlaceholder("name", item.getType().toString()).sendPrefixedMessage(player);
                 instance.enchantmentHandler.createSyncTouch(item, e.getClickedBlock());
             }
             e.setCancelled(true);
@@ -92,7 +94,7 @@ public class InteractListeners implements Listener {
         if (e.getClickedBlock().getState() instanceof InventoryHolder || (e.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests"))) {
             Hopper hopper = playerData.getLastHopper();
             if (playerData.getSyncType() != null && e.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
-                player.sendMessage(instance.getLocale().getMessage("event.hopper.syncself"));
+                instance.getLocale().getMessage("event.hopper.syncself").sendPrefixedMessage(player);
             } else if (playerData.getSyncType() != null) {
                 hopper.link(e.getClickedBlock(), playerData.getSyncType() == SyncType.FILTERED, player);
             }

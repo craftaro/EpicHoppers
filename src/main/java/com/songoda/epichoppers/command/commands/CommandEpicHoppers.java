@@ -16,7 +16,8 @@ public class CommandEpicHoppers extends AbstractCommand {
     @Override
     protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
         sender.sendMessage("");
-        sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Version " + instance.getDescription().getVersion() + " Created with <3 by &5&l&oSongoda"));
+        instance.getLocale().newMessage("&7Version " + instance.getDescription().getVersion()
+                + " Created with <3 by &5&l&oSongoda").sendPrefixedMessage(sender);
 
         for (AbstractCommand command : instance.getCommandManager().getCommands()) {
             if (command.getPermissionNode() == null || sender.hasPermission(command.getPermissionNode())) {

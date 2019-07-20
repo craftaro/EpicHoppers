@@ -141,7 +141,8 @@ public class Methods {
 
     public static String formatName(int level, boolean full) {
             EpicHoppers instance = EpicHoppers.getInstance();
-            String name = instance.getLocale().getMessage("general.nametag.nameformat", level);
+            String name = instance.getLocale().getMessage("general.nametag.nameformat")
+                    .processPlaceholder("level", level).getMessage();
 
             String info = "";
             if (full) {

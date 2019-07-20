@@ -23,6 +23,7 @@ import com.songoda.epichoppers.storage.types.StorageMysql;
 import com.songoda.epichoppers.storage.types.StorageYaml;
 import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.*;
+import com.songoda.epichoppers.utils.locale.Locale;
 import com.songoda.epichoppers.utils.settings.Setting;
 import com.songoda.epichoppers.utils.settings.SettingsManager;
 import com.songoda.epichoppers.utils.updateModules.LocaleModule;
@@ -38,15 +39,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +54,6 @@ public class EpicHoppers extends JavaPlugin {
 
     private ServerVersion serverVersion = ServerVersion.fromPackageName(Bukkit.getServer().getClass().getPackage().getName());
 
-    public References references = null;
     public Enchantment enchantmentHandler;
     private SettingsManager settingsManager;
     private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
@@ -96,21 +89,19 @@ public class EpicHoppers extends JavaPlugin {
         this.settingsManager = new SettingsManager(this);
         this.settingsManager.setupConfig();
 
-        this.setupLanguage();
+        // Setup language
+        new Locale(this, "en_US");
+        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode"));
 
         // Running Songoda Updater
         Plugin plugin = new Plugin(this, 15);
         plugin.addModule(new LocaleModule());
         SongodaUpdate.load(plugin);
 
-        if (getConfig().getBoolean("System.Download Needed Data Files"))
-            this.update();
-
         this.enchantmentHandler = new Enchantment();
         this.hopperManager = new HopperManager();
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
-        this.references = new References();
         this.commandManager = new CommandManager(this);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
@@ -164,46 +155,6 @@ public class EpicHoppers extends JavaPlugin {
         console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3!"));
         console.sendMessage(Methods.formatText("&7Action: &cDisabling&7..."));
         console.sendMessage(Methods.formatText("&a============================="));
-    }
-
-    private void update() {
-        try {
-            URL url = new URL("http://update.songoda.com/index.php?plugin=" + getDescription().getName() + "&version=" + getDescription().getVersion());
-            URLConnection urlConnection = url.openConnection();
-            InputStream is = urlConnection.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-
-            int numCharsRead;
-            char[] charArray = new char[1024];
-            StringBuffer sb = new StringBuffer();
-            while ((numCharsRead = isr.read(charArray)) > 0) {
-                sb.append(charArray, 0, numCharsRead);
-            }
-            String jsonString = sb.toString();
-            JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
-
-            JSONArray files = (JSONArray) json.get("neededFiles");
-            for (Object o : files) {
-                JSONObject file = (JSONObject) o;
-
-                switch ((String) file.get("type")) {
-                    case "locale":
-                        InputStream in = new URL((String) file.get("link")).openStream();
-                        Locale.saveDefaultLocale(in, (String) file.get("name"));
-                        break;
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Failed to update.");
-            //e.printStackTrace();
-        }
-    }
-
-    private void setupLanguage() {
-        String langMode = getConfig().getString("System.Language Mode");
-        Locale.init(this);
-        Locale.saveDefaultLocale("en_US");
-        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
     }
 
     public ServerVersion getServerVersion() {
@@ -359,10 +310,8 @@ public class EpicHoppers extends JavaPlugin {
     }
 
     public void reload() {
-        String langMode = getConfig().getString("System.Language Mode");
-        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
+        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode"));
         this.locale.reloadMessages();
-        references = new References();
         this.settingsManager.reloadConfig();
         loadLevelManager();
     }
@@ -371,7 +320,7 @@ public class EpicHoppers extends JavaPlugin {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
         itemmeta.setDisplayName(Methods.formatText(Methods.formatName(level.getLevel(), true)));
-        String line = getLocale().getMessage("general.nametag.lore");
+        String line = getLocale().getMessage("general.nametag.lore").getMessage();
         if (!line.equals("")) {
             itemmeta.setLore(Arrays.asList(line.split("\n")));
         }

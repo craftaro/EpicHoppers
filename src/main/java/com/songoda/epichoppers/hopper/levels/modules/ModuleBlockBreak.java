@@ -95,11 +95,13 @@ public class ModuleBlockBreak extends Module {
     public ItemStack getGUIButton(Hopper hopper) {
         ItemStack block = new ItemStack(Material.IRON_ORE, 1);
         ItemMeta blockmeta = block.getItemMeta();
-        blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.blocktitle"));
+        blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.blocktitle").getMessage());
         ArrayList<String> loreblock = new ArrayList<>();
-        String[] parts = plugin.getLocale().getMessage("interface.hopper.blocklore",
-                isEnabled(hopper) ? plugin.getLocale().getMessage("general.word.enabled")
-                        : plugin.getLocale().getMessage("general.word.disabled")).split("\\|");
+        String[] parts = plugin.getLocale().getMessage("interface.hopper.blocklore")
+                .processPlaceholder("enabled", isEnabled(hopper)
+                        ? plugin.getLocale().getMessage("general.word.enabled").getMessage()
+                        : plugin.getLocale().getMessage("general.word.disabled").getMessage())
+                .getMessage().split("\\|");
         for (String line : parts) {
             loreblock.add(Methods.formatText(line));
         }
@@ -120,7 +122,8 @@ public class ModuleBlockBreak extends Module {
 
     @Override
     public String getDescription() {
-        return plugin.getLocale().getMessage("interface.hopper.blockbreak", amount);
+        return plugin.getLocale().getMessage("interface.hopper.blockbreak")
+                .processPlaceholder("ticks", amount).getMessage();
     }
 
     public boolean isEnabled(Hopper hopper) {

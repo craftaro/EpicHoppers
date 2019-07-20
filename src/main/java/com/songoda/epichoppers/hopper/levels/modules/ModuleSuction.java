@@ -145,7 +145,8 @@ public class ModuleSuction extends Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction", amount);
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction")
+                .processPlaceholder("suction", amount).getMessage();
     }
 
     private boolean canMove(Inventory inventory, ItemStack item) {

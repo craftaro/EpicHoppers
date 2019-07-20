@@ -101,9 +101,11 @@ public class ModuleAutoCrafting extends Module {
     public ItemStack getGUIButton(Hopper hopper) {
         ItemStack crafting = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? Material.CRAFTING_TABLE : Material.valueOf("WORKBENCH"), 1);
         ItemMeta craftingmeta = crafting.getItemMeta();
-        craftingmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftingtitle"));
+        craftingmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftingtitle")
+                .getMessage());
         ArrayList<String> lorecrafting = new ArrayList<>();
-        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftinglore").split("\\|");
+        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftinglore")
+                .getMessage().split("\\|");
         for (String line : parts) {
             lorecrafting.add(Methods.formatText(line));
         }
@@ -159,8 +161,8 @@ public class ModuleAutoCrafting extends Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.crafting",
-                EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled"));
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.crafting").processPlaceholder("enabled",
+                EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled").getMessage()).getMessage();
     }
 
     public ItemStack getAutoCrafting(Hopper hopper) {

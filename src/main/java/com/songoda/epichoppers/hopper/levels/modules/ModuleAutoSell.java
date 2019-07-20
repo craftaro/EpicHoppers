@@ -89,7 +89,9 @@ public class ModuleAutoSell extends Module {
                 HopTask.updateAdjacentComparators(hopper.getLocation());
 
             if (totalValue != 0 && player.isOnline()) {
-                player.getPlayer().sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.autosell", amountSold, Methods.formatEconomy(totalValue)));
+                plugin.getLocale().getMessage("event.hopper.autosell")
+                        .processPlaceholder("items", amountSold)
+                        .processPlaceholder("amount", Methods.formatEconomy(totalValue)).sendPrefixedMessage(player.getPlayer());
             }
 
             modifyDataCache(hopper, "time", timeOut);
@@ -103,9 +105,11 @@ public class ModuleAutoSell extends Module {
     public ItemStack getGUIButton(Hopper hopper) {
         ItemStack sell = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? Material.SUNFLOWER : Material.valueOf("DOUBLE_PLANT"), 1);
         ItemMeta sellmeta = sell.getItemMeta();
-        sellmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle"));
+        sellmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle").getMessage());
         ArrayList<String> loreSell = new ArrayList<>();
-        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selllore", getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20), isNotifying(hopper)).split("\\|");
+        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selllore")
+                .processPlaceholder("timeleft", getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20))
+                .processPlaceholder("state", isNotifying(hopper)).getMessage().split("\\|");
         for (String line : parts) {
             loreSell.add(Methods.formatText(line));
         }
@@ -134,7 +138,8 @@ public class ModuleAutoSell extends Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.autosell", (int) Math.floor(timeOut / 20));
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.autosell")
+                .processPlaceholder("seconds", (int) Math.floor(timeOut / 20)).getMessage();
     }
 
     private boolean isNotifying(Hopper hopper) {

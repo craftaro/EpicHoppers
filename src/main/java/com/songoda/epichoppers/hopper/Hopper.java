@@ -49,31 +49,30 @@ public class Hopper {
 
     public void upgrade(Player player, CostType type) {
         EpicHoppers plugin = EpicHoppers.getInstance();
-        if (plugin.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) {
+        if (!plugin.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) return;
 
-            Level level = plugin.getLevelManager().getLevel(this.level.getLevel() + 1);
-            int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
+        Level level = plugin.getLevelManager().getLevel(this.level.getLevel() + 1);
+        int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
 
-            if (type == CostType.ECONOMY) {
-                if (plugin.getEconomy() == null) {
-                    player.sendMessage("Economy not enabled.");
-                    return;
+        if (type == CostType.ECONOMY) {
+            if (plugin.getEconomy() == null) {
+                player.sendMessage("Economy not enabled.");
+                return;
+            }
+            if (!plugin.getEconomy().hasBalance(player, cost)) {
+                plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
+                return;
+            }
+            plugin.getEconomy().withdrawBalance(player, cost);
+            upgradeFinal(level, player);
+        } else if (type == CostType.EXPERIENCE) {
+            if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
+                if (player.getGameMode() != GameMode.CREATIVE) {
+                    player.setLevel(player.getLevel() - cost);
                 }
-                if (!plugin.getEconomy().hasBalance(player, cost)) {
-                    player.sendMessage(plugin.references.getPrefix() + plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford"));
-                    return;
-                }
-                plugin.getEconomy().withdrawBalance(player, cost);
                 upgradeFinal(level, player);
-            } else if (type == CostType.EXPERIENCE) {
-                if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
-                    if (player.getGameMode() != GameMode.CREATIVE) {
-                        player.setLevel(player.getLevel() - cost);
-                    }
-                    upgradeFinal(level, player);
-                } else {
-                    player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.upgrade.cannotafford"));
-                }
+            } else {
+                plugin.getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
             }
         }
     }
@@ -83,9 +82,11 @@ public class Hopper {
         this.level = level;
         syncName();
         if (plugin.getLevelManager().getHighestLevel() != level) {
-            player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.upgrade.success", level.getLevel()));
+            plugin.getLocale().getMessage("event.upgrade.success")
+                    .processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
         } else {
-            player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.upgrade.maxed", level.getLevel()));
+            plugin.getLocale().getMessage("event.upgrade.maxed")
+                    .processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
         }
         Location loc = location.clone().add(.5, .5, .5);
 
@@ -118,7 +119,7 @@ public class Hopper {
         Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
             PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
             if (playerData.getSyncType() != null) {
-                player.sendMessage(instance.getLocale().getMessage("event.hopper.synctimeout"));
+                instance.getLocale().getMessage("event.hopper.synctimeout").sendPrefixedMessage(player);
                 playerData.setSyncType(null);
             }
         }, instance.getConfig().getLong("Main.Timeout When Syncing Hoppers"));
@@ -131,12 +132,12 @@ public class Hopper {
                 && !player.hasPermission("EpicHoppers.Override")
                 && !player.hasPermission("EpicHoppers.Admin")
                 && location.distance(toLink.getLocation()) > level.getRange()) {
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncoutofrange"));
+            instance.getLocale().getMessage("event.hopper.syncoutofrange").sendPrefixedMessage(player);
             return;
         }
 
         if (linkedBlocks.contains(toLink)) {
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.already"));
+            instance.getLocale().getMessage("event.hopper.already").sendPrefixedMessage(player);
             return;
         }
 
@@ -144,7 +145,7 @@ public class Hopper {
             this.linkedBlocks.add(toLink.getLocation());
         else {
             this.filter.setEndPoint(toLink.getLocation());
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
+            instance.getLocale().getMessage("event.hopper.syncsuccess").sendPrefixedMessage(player);
             instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
             return;
         }
@@ -152,13 +153,15 @@ public class Hopper {
 
         if (level.getLinkAmount() > 1) {
             if (getLinkedBlocks().size() == level.getLinkAmount()) {
-                player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncdone"));
+                instance.getLocale().getMessage("event.hopper.syncdone").sendPrefixedMessage(player);
                 return;
             }
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccessmore", level.getLinkAmount() - getLinkedBlocks().size()));
+            instance.getLocale().getMessage("event.hopper.syncsuccessmore")
+                    .processPlaceholder("amount", level.getLinkAmount() - getLinkedBlocks().size())
+                    .sendPrefixedMessage(player);
             return;
         }
-        player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
+        instance.getLocale().getMessage("event.hopper.syncsuccess").sendPrefixedMessage(player);
         instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
 

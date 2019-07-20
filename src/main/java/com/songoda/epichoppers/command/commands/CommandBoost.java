@@ -22,10 +22,10 @@ public class CommandBoost extends AbstractCommand {
             return ReturnType.SYNTAX_ERROR;
         }
         if (Bukkit.getPlayer(args[1]) == null) {
-            sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&cThat player does not exist..."));
+            instance.getLocale().newMessage("&cThat player does not exist...").sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else if (!Methods.isInt(args[2])) {
-            sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&6" + args[2] + " &7is not a number..."));
+            instance.getLocale().newMessage("&6" + args[2] + " &7is not a number...").sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else {
             Calendar c = Calendar.getInstance();
@@ -52,7 +52,7 @@ public class CommandBoost extends AbstractCommand {
                     c.add(Calendar.YEAR, Integer.parseInt(arr2[1]));
                     time = " &7for &6" + arr2[1] + " years&7.";
                 } else {
-                    sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7" + args[3] + " &7is invalid."));
+                    instance.getLocale().newMessage("&7" + args[3] + " &7is invalid.").sendPrefixedMessage(sender);
                     return ReturnType.SUCCESS;
                 }
             } else {
@@ -61,7 +61,7 @@ public class CommandBoost extends AbstractCommand {
 
             BoostData boostData = new BoostData(Integer.parseInt(args[2]), c.getTime().getTime(), Bukkit.getPlayer(args[1]).getUniqueId());
             instance.getBoostManager().addBoostToPlayer(boostData);
-            sender.sendMessage(Methods.formatText(instance.references.getPrefix() + "&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName() + "'s &7hoppers transfer rates by &6" + args[2] + "x" + time));
+            instance.getLocale().newMessage("&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName() + "'s &7hoppers transfer rates by &6" + args[2] + "x" + time).sendPrefixedMessage(sender);
         }
         return ReturnType.FAILURE;
     }
