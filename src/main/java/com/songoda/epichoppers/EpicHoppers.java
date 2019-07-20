@@ -113,15 +113,15 @@ public class EpicHoppers extends JavaPlugin {
         this.references = new References();
         this.commandManager = new CommandManager(this);
 
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
         // Setup Economy
-        if (Setting.VAULT_ECONOMY.getBoolean()
-                && getServer().getPluginManager().getPlugin("Vault") != null)
+        if (Setting.VAULT_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Vault"))
             this.economy = new VaultEconomy(this);
-        else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean()
-                && getServer().getPluginManager().getPlugin("PlayerPoints") != null)
-            this.economy = new PlayerPointsEconomy(this);
-        else if (Setting.RESERVE_ECONOMY.getBoolean() && getServer().getPluginManager().isPluginEnabled("Reserve"))
+        else if (Setting.RESERVE_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Reserve"))
             this.economy = new ReserveEconomy(this);
+        else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("PlayerPoints"))
+            this.economy = new PlayerPointsEconomy(this);
 
         this.loadLevelManager();
         this.checkStorage();
@@ -131,8 +131,6 @@ public class EpicHoppers extends JavaPlugin {
 
         new HopTask(this);
         this.teleportHandler = new TeleportHandler(this);
-
-        PluginManager pluginManager = Bukkit.getPluginManager();
 
         // Register Listeners
         pluginManager.registerEvents(new HopperListeners(this), this);
