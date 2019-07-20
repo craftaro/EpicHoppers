@@ -172,6 +172,7 @@ public class ModuleAutoCrafting extends Module {
 
     public void setAutoCrafting(Hopper hopper, Player player, ItemStack autoCrafting) {
         saveData(hopper, "autocrafting", autoCrafting == null ? null : encode(autoCrafting), autoCrafting);
+        if (autoCrafting == null) return;
         int excess = autoCrafting.getAmount() - 1;
         autoCrafting.setAmount(1);
         if (excess > 0 && player != null) {
