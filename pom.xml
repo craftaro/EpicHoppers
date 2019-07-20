@@ -56,6 +56,10 @@
             <id>private</id>
             <url>http://repo.songoda.com/artifactory/private/</url>
         </repository>
+        <repository>
+            <id>reserve-repo</id>
+            <url>https://dl.bintray.com/theneweconomy/java/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -112,6 +116,12 @@
             <groupId>net.brcdev</groupId>
             <artifactId>ShopGUIPlus</artifactId>
             <version>1.19.5</version>
+        </dependency>
+        <dependency>
+            <groupId>net.tnemc</groupId>
+            <artifactId>Reserve</artifactId>
+            <version>0.1.3.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

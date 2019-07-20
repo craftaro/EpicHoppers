@@ -5,6 +5,7 @@ import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.command.CommandManager;
 import com.songoda.epichoppers.economy.Economy;
 import com.songoda.epichoppers.economy.PlayerPointsEconomy;
+import com.songoda.epichoppers.economy.ReserveEconomy;
 import com.songoda.epichoppers.economy.VaultEconomy;
 import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.TeleportHandler;
@@ -119,6 +120,8 @@ public class EpicHoppers extends JavaPlugin {
         else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean()
                 && getServer().getPluginManager().getPlugin("PlayerPoints") != null)
             this.economy = new PlayerPointsEconomy(this);
+        else if (Setting.RESERVE_ECONOMY.getBoolean() && getServer().getPluginManager().isPluginEnabled("Reserve"))
+            this.economy = new ReserveEconomy(this);
 
         this.loadLevelManager();
         this.checkStorage();
