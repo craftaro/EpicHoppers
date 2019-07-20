@@ -8,6 +8,9 @@ import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.settings.Setting;
+import me.goodandevil.skyblock.SkyBlock;
+import me.goodandevil.skyblock.stackable.Stackable;
+import me.goodandevil.skyblock.stackable.StackableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -119,7 +122,8 @@ public class HopTask extends BukkitRunnable {
 
                 // Add linked container that the hopper is attached to physically.
                 HopperDirection hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
-                linkedContainers.add(hopperDirection.getLocation(location));
+                Location pointingLocation = hopperDirection.getLocation(location);
+                linkedContainers.add(pointingLocation);
 
                 // Amount to be moved.
                 BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
@@ -234,9 +238,33 @@ public class HopTask extends BukkitRunnable {
 
                 // Add storage/hopper minecarts the hopper is pointing into to the list if there aren't any destinations
                 if (destinationContainers.size() < 2) {
-                    destinationContainers.addAll(block.getWorld().getNearbyEntities(hopperDirection.getLocation(location).clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)
+                    destinationContainers.addAll(block.getWorld().getNearbyEntities(pointingLocation.clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)
                             .stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
                             .map(e -> (InventoryHolder) e).collect(Collectors.toSet()));
+                }
+
+                // Support for FabledSkyBlock stackables.
+                if (Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock")) {
+                    StackableManager stackableManager = SkyBlock.getInstance().getStackableManager();
+                    if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
+                        Stackable stackable = stackableManager.getStack(pointingLocation, pointingLocation.getBlock().getType());
+
+                        for (int i = 0; i < 5; i++) {
+                            if (hopperContents[i] == null) continue;
+                            ItemStack item = hopperContents[i].clone();
+
+                            if (item.getType() == stackable.getMaterial()) {
+                                stackable.addOne();
+                                if (item.getAmount() == 1) {
+                                    hopperState.getInventory().setItem(i, null);
+                                } else {
+                                    item.setAmount(item.getAmount() - 1);
+                                    hopperState.getInventory().setItem(i, item);
+                                }
+                                return;
+                            }
+                        }
+                    }
                 }
 
                 // Loop through our destination list.
