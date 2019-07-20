@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.economy;
 
-import com.songoda.epichoppers.EpicHoppers;
 import net.tnemc.core.Reserve;
 import net.tnemc.core.economy.EconomyAPI;
 import org.bukkit.OfflinePlayer;
@@ -9,13 +8,9 @@ import java.math.BigDecimal;
 
 public class ReserveEconomy implements Economy {
 
-    private final EpicHoppers plugin;
-
     EconomyAPI economyAPI;
 
-    public ReserveEconomy(EpicHoppers plugin) {
-        this.plugin = plugin;
-
+    public ReserveEconomy() {
         if (Reserve.instance().economyProvided())
             economyAPI = Reserve.instance().economy();
     }

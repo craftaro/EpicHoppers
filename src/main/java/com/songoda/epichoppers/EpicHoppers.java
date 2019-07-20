@@ -117,11 +117,11 @@ public class EpicHoppers extends JavaPlugin {
 
         // Setup Economy
         if (Setting.VAULT_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Vault"))
-            this.economy = new VaultEconomy(this);
+            this.economy = new VaultEconomy();
         else if (Setting.RESERVE_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Reserve"))
-            this.economy = new ReserveEconomy(this);
+            this.economy = new ReserveEconomy();
         else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("PlayerPoints"))
-            this.economy = new PlayerPointsEconomy(this);
+            this.economy = new PlayerPointsEconomy();
 
         this.loadLevelManager();
         this.checkStorage();
