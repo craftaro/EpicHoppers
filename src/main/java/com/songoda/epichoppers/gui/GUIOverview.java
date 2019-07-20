@@ -256,10 +256,10 @@ public class GUIOverview extends AbstractGUI {
                 module.runButtonPress(player, hopper, type);
             }
             if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.filtertitle"))) {
+                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.filtertitle").getMessage())) {
                 new GUIFilter(plugin, hopper, player);
             } else if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.perltitle"))) {
+                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.perltitle").getMessage())) {
                 if (type == ClickType.LEFT) {
                     if (hopper.getLinkedBlocks() != null) {
                         plugin.getTeleportHandler().tpEntity(player, hopper);
@@ -276,7 +276,7 @@ public class GUIOverview extends AbstractGUI {
                     constructGUI();
                 }
             } else if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.synchopper"))) {
+                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.synchopper").getMessage())) {
                 if (type == ClickType.RIGHT) {
                     plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
                     hopper.clearLinkedBlocks();
