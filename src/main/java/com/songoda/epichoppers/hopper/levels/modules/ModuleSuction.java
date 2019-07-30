@@ -54,6 +54,11 @@ public class ModuleSuction extends Module {
         for (Item item : itemsToSuck) {
             ItemStack itemStack = item.getItemStack().clone();
 
+            if (item.getPickupDelay() == 0) {
+                item.setPickupDelay(25);
+                continue;
+            }
+
             if (itemStack.getType().name().contains("SHULKER_BOX"))
                 return;
 
