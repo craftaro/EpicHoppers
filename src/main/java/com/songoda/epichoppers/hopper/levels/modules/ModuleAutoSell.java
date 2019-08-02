@@ -88,7 +88,7 @@ public class ModuleAutoSell extends Module {
             if (updateComparators)
                 HopTask.updateAdjacentComparators(hopper.getLocation());
 
-            if (totalValue != 0 && player.isOnline()) {
+            if (totalValue != 0 && player.isOnline() && isNotifying(hopper)) {
                 plugin.getLocale().getMessage("event.hopper.autosell")
                         .processPlaceholder("items", amountSold)
                         .processPlaceholder("amount", Methods.formatEconomy(totalValue)).sendPrefixedMessage(player.getPlayer());
