@@ -179,7 +179,7 @@ public class Methods {
      * @return The serialized data.
      */
     public static String serializeLocation(Location location) {
-        if (location == null)
+        if (location == null || location.getWorld() == null)
             return "";
         String w = location.getWorld().getName();
         double x = location.getBlockX();
