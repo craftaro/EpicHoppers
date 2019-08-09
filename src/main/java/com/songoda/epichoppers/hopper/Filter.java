@@ -3,21 +3,20 @@ package com.songoda.epichoppers.hopper;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Filter {
 
-    private List<ItemStack> whiteList = new ArrayList<>();
-    private List<ItemStack> blackList = new ArrayList<>();
-    private List<ItemStack> voidList = new ArrayList<>();
+    private List<ItemStack> whiteList;
+    private List<ItemStack> blackList;
+    private List<ItemStack> voidList;
 
     private Location endPoint;
 
 
     public List<ItemStack> getWhiteList() {
-        if (whiteList == null) return new ArrayList<>();
-        return whiteList;
+        return whiteList != null ? whiteList : Collections.EMPTY_LIST;
     }
 
 
@@ -27,8 +26,7 @@ public class Filter {
 
 
     public List<ItemStack> getBlackList() {
-        if (blackList == null) return new ArrayList<>();
-        return blackList;
+        return blackList != null ? blackList : Collections.EMPTY_LIST;
     }
 
 
@@ -38,8 +36,7 @@ public class Filter {
 
 
     public List<ItemStack> getVoidList() {
-        if (voidList == null) return new ArrayList<>();
-        return voidList;
+        return voidList != null ? voidList : Collections.EMPTY_LIST;
     }
 
 

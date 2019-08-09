@@ -45,10 +45,10 @@ public class HopperManager {
 
 
     public Hopper getHopper(Location location) {
-        if (!registeredHoppers.containsKey(roundLocation(location))) {
+        if (!registeredHoppers.containsKey(location = roundLocation(location))) {
             addHopper(new Hopper(location));
         }
-        return registeredHoppers.get(roundLocation(location));
+        return registeredHoppers.get(location);
     }
 
 
@@ -75,6 +75,7 @@ public class HopperManager {
         }
         return null;
     }
+
 
     private Location roundLocation(Location location) {
         location = location.clone();

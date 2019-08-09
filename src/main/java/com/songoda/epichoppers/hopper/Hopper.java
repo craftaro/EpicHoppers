@@ -8,11 +8,19 @@ import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.TeleportTrigger;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -23,12 +31,12 @@ public class Hopper {
     private Level level = EpicHoppers.getInstance().getLevelManager().getLowestLevel();
     private UUID lastPlayerOpened = null;
     private UUID placedBy = null;
-    private List<Location> linkedBlocks = new ArrayList<>();
+    private final List<Location> linkedBlocks = new ArrayList<>();
     private Filter filter = new Filter();
     private TeleportTrigger teleportTrigger = TeleportTrigger.DISABLED;
     private int transferTick = 0;
 
-    private Map<String, Object> moduleCache = new HashMap<>();
+    private final Map<String, Object> moduleCache = new HashMap<>();
 
     public Hopper(Location location) {
         this.location = location;
@@ -136,7 +144,7 @@ public class Hopper {
             return;
         }
 
-        if (linkedBlocks.contains(toLink)) {
+        if (linkedBlocks.contains(toLink.getLocation())) {
             instance.getLocale().getMessage("event.hopper.already").sendPrefixedMessage(player);
             return;
         }
@@ -189,6 +197,10 @@ public class Hopper {
         return location.clone();
     }
 
+    public Block getBlock() {
+        return location.getBlock();
+    }
+
     public World getWorld() {
         return location.getWorld();
     }
@@ -232,7 +244,6 @@ public class Hopper {
     public TeleportTrigger getTeleportTrigger() {
         return teleportTrigger;
     }
-
 
     public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
         this.teleportTrigger = teleportTrigger;

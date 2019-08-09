@@ -6,9 +6,7 @@ import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.gui.AbstractGUI;
 import com.songoda.epichoppers.utils.gui.Range;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public class GUICrafting extends AbstractGUI {
 
@@ -24,7 +22,6 @@ public class GUICrafting extends AbstractGUI {
 
         init(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Crafting", 27);
     }
-
 
     @Override
     protected void constructGUI() {
@@ -51,8 +48,7 @@ public class GUICrafting extends AbstractGUI {
         inventory.setItem(25, Methods.getBackgroundGlass(true));
         inventory.setItem(26, Methods.getBackgroundGlass(true));
 
-        inventory.setItem(13, module.getAutoCrafting(hopper) == null
-                ? new ItemStack(Material.AIR) : module.getAutoCrafting(hopper));
+        inventory.setItem(13, module.getAutoCrafting(hopper));
 
         addDraggable(new Range(13, 13, null, false), true);
     }

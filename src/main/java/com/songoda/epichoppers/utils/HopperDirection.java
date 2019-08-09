@@ -1,6 +1,7 @@
 package com.songoda.epichoppers.utils;
 
 import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
 
 public enum HopperDirection {
 
@@ -36,6 +37,23 @@ public enum HopperDirection {
 
     public Location getLocation(Location location) {
         return location.clone().add(getX(), getY(), getZ());
+    }
+
+    public BlockFace getDirection() {
+        switch (this) {
+            case DOWN:
+                return BlockFace.DOWN;
+            case NORTH:
+                return BlockFace.NORTH;
+            case SOUTH:
+                return BlockFace.SOUTH;
+            case WEST:
+                return BlockFace.WEST;
+            case EAST:
+                return BlockFace.EAST;
+        }
+        // really shouldn't happen, tbh
+        return BlockFace.DOWN;
     }
 
     public int getX() {

@@ -4,22 +4,19 @@ import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.ConfigWrapper;
 import com.songoda.epichoppers.utils.Methods;
-import org.bukkit.Location;
+import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class Module {
 
     protected final EpicHoppers plugin;
-    private ConfigWrapper config;
+    private final ConfigWrapper config;
 
     public Module(EpicHoppers plugin) {
         this.plugin = plugin;
@@ -28,7 +25,7 @@ public abstract class Module {
 
     public abstract String getName();
 
-    public abstract void run(Hopper hopper, Inventory hopperInventory);
+    public abstract void run(Hopper hopper, StorageContainerCache.Cache hopperCache);
 
     public abstract ItemStack getGUIButton(Hopper hopper);
 

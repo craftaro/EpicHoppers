@@ -1,10 +1,16 @@
 package com.songoda.epichoppers.utils;
 
 import com.songoda.epichoppers.EpicHoppers;
-import org.bukkit.*;
+import java.lang.reflect.Method;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -20,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Methods {
 
-    private static Map<String, Location> serializeCache = new HashMap<>();
+    private static final Map<String, Location> serializeCache = new HashMap<>();
 
     public static boolean isLegacyFuel(Material material) {
         if (material == null) return false;
@@ -97,16 +103,16 @@ public class Methods {
     }
 
     public static boolean isSync(Player p) {
-            if (p.getItemInHand().hasItemMeta()
-                    && p.getItemInHand().getType() != Material.AIR
-                    && p.getItemInHand().getType() != Material.ENCHANTED_BOOK
-                    && p.getItemInHand().getItemMeta().hasLore()) {
-                for (String str : p.getItemInHand().getItemMeta().getLore()) {
-                    if (str.equals(Methods.formatText("&7Sync Touch")) || str.equals(Methods.formatText("&aSync Touch"))) {
-                        return true;
-                    }
+        if (p.getItemInHand().hasItemMeta()
+                && p.getItemInHand().getType() != Material.AIR
+                && p.getItemInHand().getType() != Material.ENCHANTED_BOOK
+                && p.getItemInHand().getItemMeta().hasLore()) {
+            for (String str : p.getItemInHand().getItemMeta().getLore()) {
+                if (str.equals(Methods.formatText("&7Sync Touch")) || str.equals(Methods.formatText("&aSync Touch"))) {
+                    return true;
                 }
             }
+        }
         return false;
     }
 
@@ -137,6 +143,78 @@ public class Methods {
         glassmeta.setDisplayName("§l");
         glass.setItemMeta(glassmeta);
         return glass;
+    }
+
+    public static boolean isSimilar(ItemStack is1, ItemStack is2) {
+        if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)) {
+            return is1.getType() == is2.getType();
+        } else {
+            return is1.getType() == is2.getType() && is1.getDurability() == is2.getDurability();
+        }
+    }
+
+    public static boolean canMove(Inventory inventory, ItemStack item) {
+        if (inventory.firstEmpty() != -1) return true;
+
+        final ItemMeta itemMeta = item.getItemMeta();
+        for (ItemStack stack : inventory) {
+            final ItemMeta stackMeta;
+            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+                    && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
+                    && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean canMove(ItemStack[] contents, ItemStack item) {
+        final ItemMeta itemMeta = item.getItemMeta();
+        for (int i = 0; i < contents.length - 2; i++) {
+            final ItemStack stack = contents[i];
+            if (stack == null || stack.getAmount() == 0)
+                return true;
+            final ItemMeta stackMeta;
+            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+                    && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
+                    && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean canMoveReserved(Inventory inventory, ItemStack item) {
+        if (inventory.firstEmpty() != inventory.getSize() - 1) return true;
+
+        final ItemMeta itemMeta = item.getItemMeta();
+        final ItemStack[] contents = inventory.getContents();
+        for (int i = 0; i < 4; i++) {
+            final ItemStack stack = contents[i];
+            final ItemMeta stackMeta;
+            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+                    && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
+                    && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean canMoveReserved(ItemStack[] contents, ItemStack item) {
+        final ItemMeta itemMeta = item.getItemMeta();
+        for (int i = 0; i < contents.length - 2; i++) {
+            final ItemStack stack = contents[i];
+            if (stack == null || stack.getAmount() == 0)
+                return true;
+            final ItemMeta stackMeta;
+            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+                    && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
+                    && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String formatName(int level, boolean full) {
@@ -213,6 +291,41 @@ public class Methods {
         return location;
     }
 
+    private static Class<?> clazzCraftWorld, clazzCraftBlock, clazzBlockPosition;
+    private static Method getHandle, updateAdjacentComparators, getNMSBlock;
+
+    public static void updateAdjacentComparators(Location location) {
+        try {
+            // Cache reflection.
+            if (clazzCraftWorld == null) {
+                String ver = Bukkit.getServer().getClass().getPackage().getName().substring(23);
+                clazzCraftWorld = Class.forName("org.bukkit.craftbukkit." + ver + ".CraftWorld");
+                clazzCraftBlock = Class.forName("org.bukkit.craftbukkit." + ver + ".block.CraftBlock");
+                clazzBlockPosition = Class.forName("net.minecraft.server." + ver + ".BlockPosition");
+                Class<?> clazzWorld = Class.forName("net.minecraft.server." + ver + ".World");
+                Class<?> clazzBlock = Class.forName("net.minecraft.server." + ver + ".Block");
+
+                getHandle = clazzCraftWorld.getMethod("getHandle");
+                updateAdjacentComparators = clazzWorld.getMethod("updateAdjacentComparators", clazzBlockPosition, clazzBlock);
+                getNMSBlock = clazzCraftBlock.getDeclaredMethod("getNMSBlock");
+                getNMSBlock.setAccessible(true);
+            }
+
+            // invoke and cast objects.
+            Object craftWorld = clazzCraftWorld.cast(location.getWorld());
+            Object world = getHandle.invoke(craftWorld);
+            Object craftBlock = clazzCraftBlock.cast(location.getBlock());
+
+            // Invoke final method.
+            updateAdjacentComparators
+                    .invoke(world, clazzBlockPosition.getConstructor(double.class, double.class, double.class)
+                                    .newInstance(location.getX(), location.getY(), location.getZ()),
+                            getNMSBlock.invoke(craftBlock));
+
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static String convertToInvisibleString(String s) {
         if (s == null || s.equals(""))

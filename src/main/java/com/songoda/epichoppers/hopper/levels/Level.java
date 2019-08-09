@@ -110,5 +110,10 @@ public class Level {
         buildDescription();
     }
 
+
+    public Module getModule(String name) {
+        return registeredModules == null ? null :
+                registeredModules.stream().filter(module -> module.getName().equals(name)).findFirst().orElse(null);
+    }
 }
 
