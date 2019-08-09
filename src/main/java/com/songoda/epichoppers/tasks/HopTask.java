@@ -46,16 +46,17 @@ public class HopTask extends BukkitRunnable {
     private static EpicHoppers plugin;
 
     private final int hopTicks;
+    private final boolean hasFabledSkyBlock;
 
     public HopTask(EpicHoppers plug) {
         plugin = plug;
         this.hopTicks = Math.max(1, Setting.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
+        this.hasFabledSkyBlock = Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock");
     }
 
     @Override
     public void run() {
-        final boolean hasFabledSkyBlock = Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock");
         Set<Location> toRemove = new HashSet<>();
 
         main:
@@ -142,7 +143,7 @@ public class HopTask extends BukkitRunnable {
                     continue;
 
                 // Support for FabledSkyBlock stackables.
-                if (hasFabledSkyBlock) {
+                if (this.hasFabledSkyBlock) {
                     StackableManager stackableManager = SkyBlock.getInstance().getStackableManager();
                     if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
                         Stackable stackable = stackableManager.getStack(pointingLocation, pointingLocation.getBlock().getType());
