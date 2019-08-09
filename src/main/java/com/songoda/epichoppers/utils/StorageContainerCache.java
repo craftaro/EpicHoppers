@@ -55,6 +55,7 @@ public class StorageContainerCache {
         public final Block block;
         public ItemStack[] cachedInventory;
         public boolean[] cacheChanged;
+        public int[] cacheAdded;
         public boolean dirty;
 
         public Cache(Material type, ItemStack[] cachedInventory) {
@@ -68,6 +69,7 @@ public class StorageContainerCache {
             this.type = b.getType();
             this.cachedInventory = cachedInventory;
             this.cacheChanged = new boolean[cachedInventory.length];
+            this.cacheAdded = new int[cachedInventory.length];
         }
 
         public void setDirty(boolean dirty) {
@@ -139,7 +141,7 @@ public class StorageContainerCache {
             if (type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
                 return 0;
             
-            int added = 0;
+            int totalAdded = 0;
             if (cachedInventory != null && item != null) {
                 final int maxStack = item.getMaxStackSize();
                 for (int i = 0; amountToAdd > 0 && i < cachedInventory.length; i++) {
@@ -150,28 +152,24 @@ public class StorageContainerCache {
                         cachedInventory[i] = item.clone();
                         cachedInventory[i].setAmount(toAdd);
                         cacheChanged[i] = true;
-                        added += toAdd;
+                        cacheAdded[i] = toAdd;
+                        totalAdded += toAdd;
                         amountToAdd -= toAdd;
                     } else if (maxStack > cacheItem.getAmount() && Methods.isSimilar(item, cacheItem)) {
                         // free space!
                         int toAdd = Math.min(maxStack - cacheItem.getAmount(), amountToAdd);
-                        added += toAdd;
-                        if (toAdd == amountToAdd) {
-                            cachedInventory[i].setAmount(toAdd + cacheItem.getAmount());
-                            cacheChanged[i] = true;
-                            break;
-                        } else {
-                            cachedInventory[i].setAmount(maxStack);
-                            cacheChanged[i] = true;
-                            amountToAdd -= toAdd;
-                        }
+                        cachedInventory[i].setAmount(toAdd + cacheItem.getAmount());
+                        cacheChanged[i] = true;
+                        cacheAdded[i] += toAdd;
+                        totalAdded += toAdd;
+                        amountToAdd -= toAdd;
                     }
                 }
-                if (added != 0) {
+                if (totalAdded != 0) {
                     dirty = true;
                 }
             }
-            return added;
+            return totalAdded;
         }
 
         /**
@@ -264,20 +262,16 @@ public class StorageContainerCache {
                         cachedInventory[i] = item.clone();
                         cachedInventory[i].setAmount(adding);
                         cacheChanged[i] = true;
+                        cacheAdded[i] = adding;
                         toAdd -= adding;
                     } else if (maxStack > cacheItem.getAmount()) {
                         // free space!
                         // (no need to check item.isSimilar(cacheItem), since we have that cached in check[])
                         int adding = Math.min(maxStack - cacheItem.getAmount(), toAdd);
-                        if (adding == toAdd) {
-                            cachedInventory[i].setAmount(adding + cacheItem.getAmount());
-                            cacheChanged[i] = true;
-                            break;
-                        } else {
-                            cachedInventory[i].setAmount(maxStack);
-                            cacheChanged[i] = true;
-                            toAdd -= adding;
-                        }
+                        cachedInventory[i].setAmount(adding + cacheItem.getAmount());
+                        cacheChanged[i] = true;
+                        cacheAdded[i] += adding;
+                        toAdd -= adding;
                     }
                 }
                 dirty = true;

@@ -102,18 +102,17 @@ public class HopTask extends BukkitRunnable {
                 List<Material> blockedMaterials = new ArrayList<>();
 
                 // Cycle through modules.
-                for (Module module : hopper.getLevel().getRegisteredModules()) {
+                hopper.getLevel().getRegisteredModules().stream()
+                        .filter(module -> module != null)
+                        .forEach(module -> {
+                            // Run Module
+                            module.run(hopper, hopperCache);
 
-                    // Run Module
-                    module.run(hopper, hopperCache);
-
-                    // Add banned materials to list.
-                    List<Material> materials = module.getBlockedItems(hopper);
-                    if (materials == null || materials.isEmpty())
-                        continue;
-
-                    blockedMaterials.addAll(materials);
-                }
+                            // Add banned materials to list.
+                            List<Material> materials = module.getBlockedItems(hopper);
+                            if (materials != null && !materials.isEmpty())
+                                blockedMaterials.addAll(materials);
+                        });
 
                 // Process extra hopper pull
                 pullItemsFromContainers(hopper, hopperCache, maxToMove);
@@ -124,11 +123,11 @@ public class HopTask extends BukkitRunnable {
                 // don't proccess any further if the hopper is empty or if all items are blocked
                 boolean doProcess = false;
                 for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
-                    // Don't try to move items that we've added this round
-                    if (hopperCache.cacheChanged[i])
-                        continue;
-
                     final ItemStack item = hopperCache.cachedInventory[i];
+
+                    // Don't try to move items that we've added this round
+                    if (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
+                        continue;
 
                     // Skip if slot empty, blocked, or voidlisted
                     if (item == null || item.getAmount() == 0
@@ -398,15 +397,15 @@ public class HopTask extends BukkitRunnable {
 
         // Loop through all of our hopper's item slots.
         for (int i = 0; i < 5; i++) {
-            // Don't try to move items that we've added this round
-            if (hopperCache.cacheChanged[i])
-                continue;
-
             // Get potential item to move.
             ItemStack item = hopperCache.cachedInventory[i];
 
-            // Skip if slot empty, blocked, or voidlisted
-            if (item == null
+            // Can we check this item?
+            if (    // Ignore this one if the slot is empty
+                    item == null
+                    // Don't try to move items that we've added this round
+                    || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
+                    // skip if blocked or voidlisted
                     || blockedMaterials.contains(item.getType())
                     || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilar(itemStack, item)))
                 continue;
