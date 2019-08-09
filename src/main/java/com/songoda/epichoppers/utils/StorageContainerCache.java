@@ -6,6 +6,7 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
@@ -32,7 +33,17 @@ public class StorageContainerCache {
         inventoryCache.entrySet().stream()
                 .filter(e -> e.getValue().dirty)
                 .forEach(e -> {
-                    ((InventoryHolder) e.getKey().getState()).getInventory().setContents(e.getValue().cachedInventory);
+                    // setContents makes a copy of every item whether it's needed or not
+                    //((InventoryHolder) e.getKey().getState()).getInventory().setContents(e.getValue().cachedInventory);
+                    // so let's only update what needs to be updated.
+                    final ItemStack[] cachedInventory = e.getValue().cachedInventory;
+                    final boolean[] cacheChanged = e.getValue().cacheChanged;
+                    Inventory inventory = ((InventoryHolder) e.getKey().getState()).getInventory();//.setContents();
+                    for (int i = 0; i < cachedInventory.length; i++) {
+                        if (cacheChanged[i]) {
+                            inventory.setItem(i, cachedInventory[i]);
+                        }
+                    }
                     Methods.updateAdjacentComparators(e.getKey().getLocation());
                 });
         inventoryCache.clear();
