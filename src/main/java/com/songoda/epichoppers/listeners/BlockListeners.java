@@ -1,12 +1,11 @@
 package com.songoda.epichoppers.listeners;
 
 import com.songoda.epichoppers.EpicHoppers;
-import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
-import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,7 +23,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-import java.util.ArrayList;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -52,14 +50,18 @@ public class BlockListeners implements Listener {
         int max = maxHoppers(player);
 
         if (max != -1 && amt > max) {
-            player.sendMessage(instance.getLocale().getMessage("event.hopper.toomany", max));
+            player.sendMessage(instance.getLocale().getMessage("event.hopper.toomany").processPlaceholder("amount", max).getMessage());
             e.setCancelled(true);
             return;
         }
 
         ItemStack item = e.getItemInHand().clone();
 
-        instance.getHopperManager().addHopper(e.getBlock().getLocation(), new Hopper(e.getBlock(), instance.getLevelManager().getLevel(item), player.getUniqueId(), player.getUniqueId(), new ArrayList<>(), new Filter(), TeleportTrigger.DISABLED, null));
+        instance.getHopperManager().addHopper(
+                new HopperBuilder(e.getBlock())
+                        .setLevel(instance.getLevelManager().getLevel(item))
+                        .setPlacedBy(player)
+                        .setLastPlayerOpened(player).build());
     }
 
     private int maxHoppers(Player player) {
@@ -108,19 +110,16 @@ public class BlockListeners implements Listener {
             event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
         }
 
-        for (ItemStack m : hopper.getFilter().getWhiteList()) {
-            if (m != null)
-                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
-        }
+        hopper.getFilter().getWhiteList().stream()
+                .filter(m -> m != null)
+                .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
+        hopper.getFilter().getBlackList().stream()
+                .filter(m -> m != null)
+                .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
+        hopper.getFilter().getVoidList().stream().
+                filter(m -> m != null)
+                .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
 
-        for (ItemStack m : hopper.getFilter().getBlackList()) {
-            if (m != null)
-                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
-        }
-        for (ItemStack m : hopper.getFilter().getVoidList()) {
-            if (m != null)
-                event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), m);
-        }
         instance.getHopperManager().removeHopper(block.getLocation());
 
         instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);

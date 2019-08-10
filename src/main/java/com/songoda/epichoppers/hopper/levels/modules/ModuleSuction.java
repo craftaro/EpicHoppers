@@ -3,8 +3,9 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
-import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.ServerVersion;
+import com.songoda.epichoppers.utils.StorageContainerCache;
+import com.songoda.ultimatestacker.utils.Methods;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,62 +13,53 @@ import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class ModuleSuction implements Module {
+public class ModuleSuction extends Module {
 
-    private final int amount;
+    private final int searchRadius;
 
     public static List<UUID> blacklist = new ArrayList<>();
 
-    private boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
-    private boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
+    private final static boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
+    private final static boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
 
-    private Class<?> clazzItemStack, clazzItem, clazzCraftItemStack;
-    private Method methodGetItem, methodAsNMSCopy;
-    private Field fieldMaxStackSize;
-
-    public ModuleSuction(int amount) {
-        this.amount = amount;
-        try {
-            String ver = Bukkit.getServer().getClass().getPackage().getName().substring(23);
-            clazzCraftItemStack = Class.forName("org.bukkit.craftbukkit." + ver + ".inventory.CraftItemStack");
-            clazzItemStack = Class.forName("net.minecraft.server." + ver + ".ItemStack");
-            clazzItem = Class.forName("net.minecraft.server." + ver + ".Item");
-
-            methodAsNMSCopy = clazzCraftItemStack.getMethod("asNMSCopy", ItemStack.class);
-            methodGetItem = clazzItemStack.getDeclaredMethod("getItem");
-
-            fieldMaxStackSize = clazzItem.getDeclaredField("maxStackSize");
-            fieldMaxStackSize.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-        }
+    public ModuleSuction(EpicHoppers plugin, int amount) {
+        super(plugin);
+        this.searchRadius = amount;
     }
 
-
+    @Override
     public String getName() {
         return "Suction";
     }
 
+    @Override
+    public void run(Hopper hopper, StorageContainerCache.Cache hopperCache) {
+        double radius = searchRadius + .5;
 
-    public void run(Hopper hopper, Inventory hopperInventory) {
-        double radius = amount + .5;
-
-        hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius).stream()
+        Set<Item> itemsToSuck = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
+                .stream()
                 .filter(entity -> entity.getType() == EntityType.DROPPED_ITEM
-                        && entity.getTicksLived() >= ((Item)entity).getPickupDelay()
-                        && entity.getLocation().getBlock().getType() != Material.HOPPER).forEach(entity -> {
+                        && entity.getTicksLived() >= ((Item) entity).getPickupDelay()
+                        && entity.getLocation().getBlock().getType() != Material.HOPPER)
+                .map(entity -> (Item) entity)
+                .collect(Collectors.toSet());
 
-            Item item = (Item) entity;
-            ItemStack itemStack = setMax(item.getItemStack().clone(), 0, true);
+        for (Item item : itemsToSuck) {
+            ItemStack itemStack = item.getItemStack();
+
+            if (item.getPickupDelay() == 0) {
+                item.setPickupDelay(25);
+                continue;
+            }
 
             if (itemStack.getType().name().contains("SHULKER_BOX"))
                 return;
@@ -77,75 +69,77 @@ public class ModuleSuction implements Module {
                 return; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
             }
 
-            if (wildStacker)
-                itemStack.setAmount(WildStackerAPI.getItemAmount((Item) entity));
-
-            if (ultimateStacker && item.hasMetadata("US_AMT"))
-                itemStack.setAmount(item.getMetadata("US_AMT").get(0).asInt());
-
-            if (!canMove(hopperInventory, itemStack) || blacklist.contains(item.getUniqueId()))
+            if (blacklist.contains(item.getUniqueId()))
                 return;
 
-            blacklist.add(item.getUniqueId());
+            // try to add the items to the hopper
+            int toAdd, added = hopperCache.addAny(itemStack, toAdd = getActualItemAmount(item));
+            if (added == 0)
+                return;
 
-            float xx = (float) (0 + (Math.random() * .1));
-            float yy = (float) (0 + (Math.random() * .1));
-            float zz = (float) (0 + (Math.random() * .1));
+            // items added ok!
+            if (added == toAdd)
+                item.remove();
+            else {
+                // update the item's total
+                updateAmount(item, toAdd - added);
 
-            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9))
-                entity.getLocation().getWorld().spawnParticle(Particle.FLAME, entity.getLocation(), 5, xx, yy, zz, 0);
-
-            for (ItemStack is : hopperInventory.addItem(itemStack).values()) {
-                entity.getWorld().dropItemNaturally(entity.getLocation(), is);
+                // wait before trying to add again
+                blacklist.add(item.getUniqueId());
+                Bukkit.getScheduler().runTaskLater(EpicHoppers.getInstance(),
+                        () -> blacklist.remove(item.getUniqueId()), 10L);
             }
-            HopTask.updateAdjacentComparators(hopper.getLocation());
-            entity.remove();
-        });
+
+            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9)) {
+                float xx = (float) (0 + (Math.random() * .1));
+                float yy = (float) (0 + (Math.random() * .1));
+                float zz = (float) (0 + (Math.random() * .1));
+                item.getLocation().getWorld().spawnParticle(Particle.FLAME, item.getLocation(), 5, xx, yy, zz, 0);
+            }
+        }
+    }
+
+    private int getActualItemAmount(Item item) {
+        if (ultimateStacker) {
+            return Methods.getActualItemAmount(item);
+        } else if (wildStacker)
+            return WildStackerAPI.getItemAmount(item);
+        else
+            return item.getItemStack().getAmount();
+
+    }
+
+    private void updateAmount(Item item, int amount) {
+        if (ultimateStacker)
+            Methods.updateItemAmount(item, amount);
+        else if (wildStacker)
+            WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
+        else
+            item.getItemStack().setAmount(amount > item.getItemStack().getMaxStackSize()
+                    ? item.getItemStack().getMaxStackSize() : amount);
     }
 
     public static boolean isBlacklisted(UUID uuid) {
         return blacklist.contains(uuid);
     }
 
-    public static boolean addToBlacklist(UUID uuid) {
-        return blacklist.add(uuid);
-    }
-
+    @Override
     public ItemStack getGUIButton(Hopper hopper) {
         return null;
     }
 
-    public void runButtonPress(Player player, Hopper hopper) {
-
+    @Override
+    public void runButtonPress(Player player, Hopper hopper, ClickType type) {
     }
 
+    @Override
     public List<Material> getBlockedItems(Hopper hopper) {
         return null;
     }
 
-
+    @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction", amount);
-    }
-
-    private boolean canMove(Inventory inventory, ItemStack item) {
-            if (inventory.firstEmpty() != -1) return true;
-
-            for (ItemStack stack : inventory.getContents()) {
-                if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()) {
-                    return true;
-                }
-            }
-        return false;
-    }
-
-    public ItemStack setMax(ItemStack item, int max, boolean reset) {
-        try {
-            Object objItemStack = methodGetItem.invoke(methodAsNMSCopy.invoke(null, item));
-            fieldMaxStackSize.set(objItemStack, reset ? new ItemStack(item.getType()).getMaxStackSize() : max);
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-        }
-        return item;
+        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction")
+                .processPlaceholder("suction", searchRadius).getMessage();
     }
 }

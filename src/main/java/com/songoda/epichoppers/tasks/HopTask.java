@@ -4,37 +4,33 @@ import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
+import com.songoda.epichoppers.utils.StorageContainerCache;
 import com.songoda.epichoppers.utils.settings.Setting;
+import me.goodandevil.skyblock.SkyBlock;
+import me.goodandevil.skyblock.stackable.Stackable;
+import me.goodandevil.skyblock.stackable.StackableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.minecart.StorageMinecart;
-import org.bukkit.inventory.BrewerInventory;
-import org.bukkit.inventory.DoubleChestInventory;
-import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -49,31 +45,28 @@ public class HopTask extends BukkitRunnable {
 
     private static EpicHoppers plugin;
 
-    private final Map<InventoryHolder, ItemStack> blacklist = new HashMap<>();
     private final int hopTicks;
+    private final boolean hasFabledSkyBlock;
 
     public HopTask(EpicHoppers plug) {
         plugin = plug;
         this.hopTicks = Math.max(1, Setting.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
+        this.hasFabledSkyBlock = Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock");
     }
 
     @Override
     public void run() {
-        Collection<com.songoda.epichoppers.hopper.Hopper> hoppers = plugin.getHopperManager().getHoppers().values();
-        Iterator<com.songoda.epichoppers.hopper.Hopper> itr = hoppers.iterator();
-
         Set<Location> toRemove = new HashSet<>();
 
         main:
-        while (itr.hasNext()) {
-            com.songoda.epichoppers.hopper.Hopper hopper = itr.next();
+        for (final com.songoda.epichoppers.hopper.Hopper hopper : plugin.getHopperManager().getHoppers().values()) {
 
             try {
                 // Get this hoppers location.
                 Location location = hopper.getLocation();
 
-                // Skip is chunk not loaded.
+                // Skip if chunk is not loaded.
                 if (location.getWorld() == null || !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4))
                     continue;
 
@@ -86,8 +79,8 @@ public class HopTask extends BukkitRunnable {
                     continue;
                 }
 
-                // If hopper block is powered continue.
-                if (block.isBlockPowered() || block.isBlockIndirectlyPowered()) {
+                // If hopper block is powered, update its redstone state and continue.
+                if (block.getBlockPower() > 0) {
                     hopper.tryTick(this.hopTicks, false);
                     continue;
                 }
@@ -95,312 +88,97 @@ public class HopTask extends BukkitRunnable {
                 if (!hopper.tryTick(this.hopTicks, true))
                     continue;
 
-                // Get hopper state.
+                // Amount to be moved.
+                BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
+                int maxToMove = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
+
+                // Get hopper state data.
                 Hopper hopperState = (Hopper) block.getState();
+                HopperDirection hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
+                Location pointingLocation = hopperDirection.getLocation(location);
+                final StorageContainerCache.Cache hopperCache = StorageContainerCache.getCachedInventory(block);
 
                 // Create list to hold blocked materials.
                 List<Material> blockedMaterials = new ArrayList<>();
 
                 // Cycle through modules.
-                for (Module module : hopper.getLevel().getRegisteredModules()) {
-                    // Run Module
-                    module.run(hopper, hopperState.getInventory());
+                hopper.getLevel().getRegisteredModules().stream()
+                        .filter(module -> module != null)
+                        .forEach(module -> {
+                            // Run Module
+                            module.run(hopper, hopperCache);
 
-                    // Add banned materials to list.
-                    List<Material> materials = module.getBlockedItems(hopper);
-                    if (materials == null || materials.isEmpty())
+                            // Add banned materials to list.
+                            List<Material> materials = module.getBlockedItems(hopper);
+                            if (materials != null && !materials.isEmpty())
+                                blockedMaterials.addAll(materials);
+                        });
+
+                // Process extra hopper pull
+                pullItemsFromContainers(hopper, hopperCache, maxToMove);
+
+                // Void out items
+                processVoidFilter(hopper, hopperCache, maxToMove);
+
+                // don't proccess any further if the hopper is empty or if all items are blocked
+                boolean doProcess = false;
+                for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
+                    final ItemStack item = hopperCache.cachedInventory[i];
+
+                    // Can we check this item?
+                    if (    // Ignore this one if the slot is empty
+                            item == null
+                            // Don't try to move items that we've added this round
+                            || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
+                            // skip if blocked or voidlisted
+                            || blockedMaterials.contains(item.getType())
+                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilar(itemStack, item)))
                         continue;
 
-                    blockedMaterials.addAll(materials);
+                    doProcess = true;
+                    break;
                 }
+                if (!doProcess)
+                    continue;
 
-                // Get remote linked containers.
-                List<Location> linkedContainers = hopper.getLinkedBlocks();
+                // Support for FabledSkyBlock stackables.
+                if (this.hasFabledSkyBlock) {
+                    StackableManager stackableManager = SkyBlock.getInstance().getStackableManager();
+                    if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
+                        Stackable stackable = stackableManager.getStack(pointingLocation, pointingLocation.getBlock().getType());
 
-                // Add linked container that the hopper is attached to physically.
-                HopperDirection hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
-                linkedContainers.add(hopperDirection.getLocation(location));
+                        for (int i = 0; i < 5; i++) {
+                            final ItemStack item = hopperCache.cachedInventory[i];
+                            if (item == null) continue;
 
-                // Amount to be moved.
-                BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
-                int amount = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
-
-                // Grab items from the container above (includes storage/hopper minecarts and EpicFarming farm items)
-                // If the container above is a hopper, ignore it if it's pointing down
-                Block above = block.getRelative(BlockFace.UP);
-                boolean isFarmItem = false;
-                Collection<Entity> nearbyEntities = null;
-                outer:
-                if ((above.getState() instanceof InventoryHolder
-                        && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN))
-                        || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)).isEmpty()
-                        || (isFarmItem = this.isFarmItem(above))) {
-
-                    // Get the inventory holder. Special check for EpicFarming.
-                    // Get the slots that we can pull items from.
-                    InventoryHolder aboveInvHolder;
-                    int[] pullableSlots;
-                    if (isFarmItem) {
-                        aboveInvHolder = this.getEpicFarmingItemWrapped(above);
-                        pullableSlots = IntStream.rangeClosed(27, 53).toArray();
-                    } else if (nearbyEntities != null) {
-                        if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null)
-                            break outer;
-                        if (aboveInvHolder instanceof StorageMinecart) {
-                            pullableSlots = IntStream.rangeClosed(0, 26).toArray();
-                        } else {
-                            pullableSlots = IntStream.rangeClosed(0, 4).toArray();
-                        }
-                    } else {
-                        aboveInvHolder = (InventoryHolder) above.getState();
-                        pullableSlots = this.getPullableSlots(aboveInvHolder, above.getType());
-                    }
-
-                    ItemStack[] contents = aboveInvHolder.getInventory().getContents();
-
-                    // Loop over the pullable slots and try to pull something.
-                    for (int i : pullableSlots) {
-                        // Get the item
-                        ItemStack item = contents[i];
-
-                        // If item is invalid, try the next slot.
-                        if (item == null)
-                            continue;
-
-                        // Get amount to move.
-                        int amountToMove = item.getAmount() < amount ? item.getAmount() : amount;
-
-                        // Create item that will be moved.
-                        ItemStack itemToMove = item.clone();
-                        itemToMove.setAmount(amountToMove);
-
-                        // Add item to container and break on success.
-                        if (this.addItem(hopper, aboveInvHolder, hopperState, block.getType(), item, itemToMove, amountToMove))
-                            break;
-                    }
-                }
-
-                // Fetch all hopper contents.
-                ItemStack[] hopperContents = hopperState.getInventory().getContents();
-
-                // Loop over hopper inventory to process void filtering.
-                if (!hopper.getFilter().getVoidList().isEmpty()) {
-                    for (ItemStack item : hopperContents) {
-                        // Skip if slot empty.
-                        if (item == null)
-                            continue;
-
-                        // Try to void it out
-                        int amountToVoid = item.getAmount() < amount ? item.getAmount() : amount;
-                        if (hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> itemStack.isSimilar(item))) {
-                            item.setAmount(item.getAmount() - amountToVoid);
-                            break;
+                            if (item.getType() == stackable.getMaterial()) {
+                                stackable.addOne();
+                                if (item.getAmount() == 1) {
+                                    hopperCache.removeItem(i);
+                                } else {
+                                    item.setAmount(item.getAmount() - 1);
+                                    hopperCache.dirty = hopperCache.cacheChanged[i] = true;
+                                }
+                                break;
+                            }
                         }
                     }
                 }
 
-                // Get filter endpoint
-                InventoryHolder filterEndpoint = this.getFilterEndpoint(hopper);
+                // Move items into destination containers
+                pushItemsIntoContainers(hopper, hopperCache, maxToMove, blockedMaterials, hopperDirection);
 
-                // Keep track of any destination containers
-                List<InventoryHolder> destinationContainers = new ArrayList<>();
-
-                // Add linked containers to the destinations
-                for (Location linkedContainerLocation : linkedContainers) {
-                    // Make sure the destination chunk is loaded.
-                    if (!linkedContainerLocation.getWorld().isChunkLoaded(linkedContainerLocation.getBlockX() >> 4,
-                            linkedContainerLocation.getBlockZ() >> 4))
-                        continue;
-
-                    // Get the destination block.
-                    Block destinationBlock = linkedContainerLocation.getBlock();
-
-                    // Get the destination state.
-                    BlockState blockState = destinationBlock.getState();
-
-                    // Remove if destination is not a inventory holder.
-                    if (!(blockState instanceof InventoryHolder)) {
-                        hopper.removeLinkedBlock(linkedContainerLocation);
-                        continue;
-                    }
-
-                    // Add to the destination containers list
-                    destinationContainers.add((InventoryHolder) blockState);
-                }
-
-                // Add storage/hopper minecarts the hopper is pointing into to the list if there aren't any destinations
-                if (destinationContainers.size() < 2) {
-                    destinationContainers.addAll(block.getWorld().getNearbyEntities(hopperDirection.getLocation(location).clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)
-                            .stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
-                            .map(e -> (InventoryHolder) e).collect(Collectors.toSet()));
-                }
-
-                // Loop through our destination list.
-                for (InventoryHolder currentDestination : destinationContainers) {
-
-                    // Loop through all of our hoppers item slots.
-                    for (int i = 0; i < 5; i++) {
-
-                        // Get potential item to move.
-                        ItemStack item = hopperContents[i];
-
-                        // Skip if slot empty.
-                        if (item == null)
-                            continue;
-
-                        // Skip if item blacklisted or void.
-                        if ((this.blacklist.containsKey(hopperState) && this.blacklist.get(hopperState).isSimilar(item))
-                                || blockedMaterials.contains(item.getType())
-                                || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> itemStack.isSimilar(item)))
-                            continue;
-
-                        // Get amount to move.
-                        int amountToMove = item.getAmount() < amount ? item.getAmount() : amount;
-
-                        // Create item that will be moved.
-                        ItemStack itemToMove = item.clone();
-                        itemToMove.setAmount(amountToMove);
-
-                        // Process whitelist and blacklist.
-                        boolean blocked = (!hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getWhiteList().stream().noneMatch(itemStack -> itemStack.isSimilar(item))
-                                || hopper.getFilter().getBlackList().stream().anyMatch(itemStack -> itemStack.isSimilar(item)));
-
-                        // If blocked check to see if a movement can be made if blacklist skip to the next slot
-                        // otherwise set the current destination to the endpoint.
-                        if (blocked) {
-                            if (filterEndpoint == null || !this.canMove(filterEndpoint.getInventory(), itemToMove))
-                                continue;
-                            currentDestination = filterEndpoint;
-                        }
-
-                        // Get the material of the destination
-                        Material destinationMaterial = currentDestination instanceof BlockState ? ((BlockState) currentDestination).getType() : Material.AIR;
-
-                        // Add item to container and continue on success.
-                        if (this.addItem(hopper, hopperState, currentDestination, destinationMaterial, item, itemToMove, amountToMove))
-                            continue main;
-                    }
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
+        // push out inventory changes
+        StorageContainerCache.update();
+
         // Clear out invalid hoppers
         HopperManager hopperManager = plugin.getHopperManager();
         toRemove.forEach(hopperManager::removeHopper);
-
-        // Empty blacklist in preparation for next cycle.
-        this.blacklist.clear();
-    }
-
-    private boolean addItem(com.songoda.epichoppers.hopper.Hopper hopper, InventoryHolder currentHolder, InventoryHolder currentDestination,
-                            Material destinationType, ItemStack item, ItemStack itemToMove, int amountToMove) {
-
-        Inventory destinationInventory = currentDestination.getInventory();
-
-        // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
-        if (destinationType.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
-            return false;
-
-        switch (destinationType.name()) {
-            case "ENDER_CHEST":
-                OfflinePlayer op = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
-
-                if (op.isOnline())
-                    destinationInventory = op.getPlayer().getEnderChest();
-                break;
-            case "BREWING_STAND": {
-                BrewerInventory brewerInventory = (BrewerInventory) destinationInventory;
-
-                int maxSize = itemToMove.getMaxStackSize();
-
-                String typeStr = item.getType().name().toUpperCase();
-                boolean isBottle = typeStr.contains("POTION") || typeStr.contains("BOTTLE");
-                boolean isLeft = item.getType() == Material.BLAZE_POWDER;
-
-                Map<Integer, ItemStack> output = new HashMap<>();
-                if (isBottle) {
-                    output.put(0, brewerInventory.getItem(0));
-                    output.put(1, brewerInventory.getItem(1));
-                    output.put(2, brewerInventory.getItem(2));
-                } else if (isLeft) {
-                    output.put(4, brewerInventory.getItem(4));
-                } else {
-                    output.put(3, brewerInventory.getItem(3));
-                }
-
-                for (Map.Entry<Integer, ItemStack> entry : output.entrySet()) {
-                    ItemStack currentOutput = entry.getValue();
-                    int currentOutputAmount = currentOutput == null ? 0 : currentOutput.getAmount();
-                    if (currentOutput != null && (!currentOutput.isSimilar(itemToMove))
-                            || currentOutputAmount + amountToMove > maxSize) continue;
-
-                    if (currentOutput != null) {
-                        currentOutput.setAmount(currentOutputAmount + amountToMove);
-                    } else {
-                        currentOutput = itemToMove;
-                    }
-
-                    brewerInventory.setItem(entry.getKey(), currentOutput);
-                }
-                this.debt(item, amountToMove, currentHolder);
-                return true;
-            }
-            case "SMOKER":
-            case "BLAST_FURNACE":
-            case "BURNING_FURNACE":
-            case "FURNACE": {
-                FurnaceInventory furnaceInventory = (FurnaceInventory) destinationInventory;
-
-                boolean isFuel = (plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? item.getType().isFuel() : Methods.isLegacyFuel(item.getType())) && !item.getType().name().contains("LOG");
-                ItemStack output = isFuel ? furnaceInventory.getFuel() : furnaceInventory.getSmelting();
-                if (output != null && !output.isSimilar(itemToMove)) return false;
-                int maxSize = itemToMove.getMaxStackSize();
-                int currentOutputAmount = output == null ? 0 : output.getAmount();
-
-                if (currentOutputAmount + amountToMove <= maxSize) {
-                    if (output != null) {
-                        output.setAmount(currentOutputAmount + amountToMove);
-                    } else {
-                        output = itemToMove;
-                    }
-                    if (isFuel) {
-                        furnaceInventory.setFuel(output);
-                    } else {
-                        furnaceInventory.setSmelting(output);
-                    }
-                    this.debt(item, amountToMove, currentHolder);
-                }
-                return true;
-            }
-        }
-
-        // Continue if move would fail.
-        if (!this.canMove(destinationInventory, itemToMove))
-            return false;
-
-        // Prevent item from being moved again during this cycle.
-        // Only block if the hopper being transfered into doesn't already contain the same item.
-        // Don't blacklist if the block is transfering items into itself
-        if (!destinationInventory.contains(itemToMove) && currentDestination != currentHolder && currentHolder instanceof Hopper)
-            this.blacklist.put(currentDestination, itemToMove);
-
-        // Move item to destination.
-        destinationInventory.addItem(itemToMove);
-
-        // Debt hopper
-        this.debt(item, amountToMove, currentHolder);
-
-        // Update comparators for destination block.
-        if (currentDestination instanceof BlockState)
-            updateAdjacentComparators(((BlockState) currentDestination).getLocation());
-
-        // Update comparators for current hopper.
-        updateAdjacentComparators(hopper.getLocation());
-
-        // Continue to next hopper.
-        return true;
     }
 
     private void debt(ItemStack item, int amountToMove, InventoryHolder currentHolder) {
@@ -410,82 +188,280 @@ public class HopTask extends BukkitRunnable {
             currentHolder.getInventory().removeItem(item);
     }
 
-    private InventoryHolder getFilterEndpoint(com.songoda.epichoppers.hopper.Hopper hopper) {
+    private StorageContainerCache.Cache getFilterEndpoint(com.songoda.epichoppers.hopper.Hopper hopper) {
         // Get endpoint location.
         Location endPoint = hopper.getFilter().getEndPoint();
 
         // Check for null.
-        if (hopper.getFilter().getEndPoint() == null) return null;
+        if (endPoint == null) return null;
 
         // Make sure chunk is loaded.
         if (!endPoint.getWorld().isChunkLoaded(endPoint.getBlockX() >> 4, endPoint.getBlockZ() >> 4))
             return null;
 
-        // Cast to state.
-        BlockState state = endPoint.getBlock().getState();
+        // Fetch Cache
+        StorageContainerCache.Cache cache = StorageContainerCache.getCachedInventory(endPoint.getBlock());
 
-        //Remove if not a container.
-        if (!(state instanceof InventoryHolder)) {
+        // Remove if not a container.
+        if (cache == null) {
             hopper.getFilter().setEndPoint(null);
             return null;
         }
 
-        // Cast and return as InventoryHolder.
-        return (InventoryHolder) state;
+        return cache;
     }
 
-    private static Class<?> clazzCraftWorld, clazzCraftBlock, clazzBlockPosition;
-    private static Method getHandle, updateAdjacentComparators, getNMSBlock;
-
-    public static void updateAdjacentComparators(Location location) {
-        try {
-            // Cache reflection.
-            if (clazzCraftWorld == null) {
-                String ver = Bukkit.getServer().getClass().getPackage().getName().substring(23);
-                clazzCraftWorld = Class.forName("org.bukkit.craftbukkit." + ver + ".CraftWorld");
-                clazzCraftBlock = Class.forName("org.bukkit.craftbukkit." + ver + ".block.CraftBlock");
-                clazzBlockPosition = Class.forName("net.minecraft.server." + ver + ".BlockPosition");
-                Class<?> clazzWorld = Class.forName("net.minecraft.server." + ver + ".World");
-                Class<?> clazzBlock = Class.forName("net.minecraft.server." + ver + ".Block");
-
-                getHandle = clazzCraftWorld.getMethod("getHandle");
-                updateAdjacentComparators = clazzWorld.getMethod("updateAdjacentComparators", clazzBlockPosition, clazzBlock);
-                getNMSBlock = clazzCraftBlock.getDeclaredMethod("getNMSBlock");
-                getNMSBlock.setAccessible(true);
+    private void pullItemsFromContainers(com.songoda.epichoppers.hopper.Hopper toHopper, StorageContainerCache.Cache hopperCache, int maxToMove) {
+        // Grab items from the container above (includes storage/hopper minecarts and EpicFarming farm items)
+        // If the container above is a hopper, ignore it if it's pointing down
+        Block above = toHopper.getBlock().getRelative(BlockFace.UP);
+        boolean isFarmItem = false;
+        Collection<Entity> nearbyEntities = null;
+        StorageContainerCache.Cache aboveCache = null;
+        if ((above.getType() != Material.AIR
+                && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
+                && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null)
+                || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()
+                || (isFarmItem = this.isFarmItem(above))) {
+            // Get the inventory holder. Special check for EpicFarming.
+            // Get the slots that we can pull items from.
+            InventoryHolder aboveInvHolder;
+            final int[] pullableSlots;
+            final ItemStack[] contents;
+            if (aboveCache != null) {
+                pullableSlots = this.getPullableSlots(above.getType(), aboveCache.cachedInventory.length - 1);
+                contents = aboveCache.cachedInventory;
+                aboveInvHolder = null;
+            } else if (isFarmItem) {
+                aboveInvHolder = this.getEpicFarmingItemWrapped(above);
+                pullableSlots = IntStream.rangeClosed(27, 53).toArray();
+                contents = aboveInvHolder.getInventory().getContents();
+            } else {
+                if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null)
+                    return;
+                if (aboveInvHolder instanceof StorageMinecart) {
+                    pullableSlots = IntStream.rangeClosed(0, 26).toArray();
+                } else {
+                    pullableSlots = IntStream.rangeClosed(0, 4).toArray();
+                }
+                contents = aboveInvHolder.getInventory().getContents();
             }
 
-            // invoke and cast objects.
-            Object craftWorld = clazzCraftWorld.cast(location.getWorld());
-            Object world = getHandle.invoke(craftWorld);
-            Object craftBlock = clazzCraftBlock.cast(location.getBlock());
+            // Don't fill the last inventory slot on crafting hoppers (fixes crafters getting stuck)
+            Module crafting = toHopper.getLevel().getModule("AutoCrafting");
+            ItemStack toCraft = crafting instanceof ModuleAutoCrafting ? ((ModuleAutoCrafting) crafting).getAutoCrafting(toHopper) : null;
 
-            // Invoke final method.
-            updateAdjacentComparators
-                    .invoke(world, clazzBlockPosition.getConstructor(double.class, double.class, double.class)
-                                    .newInstance(location.getX(), location.getY(), location.getZ()),
-                            getNMSBlock.invoke(craftBlock));
+            // Loop over the pullable slots and try to pull something.
+            for (int i : pullableSlots) {
+                // Get the item
+                final ItemStack toMove = contents[i];
 
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
+                // If item is invalid, try the next slot.
+                if (toMove == null)
+                    continue;
+
+                // if we're not moving the item that we're trying to craft, we need to verify that we're not trying to fill the last slot
+                // (filling every slot leaves no room for the crafter to function)
+                if (toCraft != null && !Methods.isSimilar(toMove, toCraft) && !Methods.canMoveReserved(hopperCache.cachedInventory, toMove))
+                    continue;
+
+                // respect whitelist/blacklist filters
+                if (toHopper.getFilter().getEndPoint() == null
+                    && !(toHopper.getFilter().getWhiteList().isEmpty() && toHopper.getFilter().getBlackList().isEmpty())) {
+                    // this hopper has a filter with no rejection endpoint, so don't absorb disalowed items
+                    // whitelist has priority
+                    if (!toHopper.getFilter().getWhiteList().isEmpty()) {
+                        // is this item on the whitelist?
+                        if (!toHopper.getFilter().getWhiteList().stream().anyMatch(item -> Methods.isSimilar(toMove, item))) {
+                            // nope!
+                            continue;
+                        }
+                    } else {
+                        // check the blacklist
+                        if (toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilar(toMove, item))) {
+                            // don't grab this, then
+                            continue;
+                        }
+                    }
+                }
+
+                // Get amount to move.
+                int amountToMove = toMove.getAmount() < maxToMove ? toMove.getAmount() : maxToMove;
+
+                // Create item that will be moved.
+                ItemStack itemToMove = toMove.clone();
+                itemToMove.setAmount(amountToMove);
+
+                // Add item to container and break on success.
+                //if (this.addItem(toHopper, aboveInvHolder, hopperState, hopperState.getBlock().getType(), toMove, itemToMove, amountToMove))
+                if (hopperCache.addItem(itemToMove)) {
+                    // remove item from the container
+                    if (aboveCache != null) {
+                        aboveCache.removeItems(itemToMove);
+                    } else {
+                        this.debt(itemToMove, amountToMove, aboveInvHolder);
+                    }
+                    break;
+                }
+            }
         }
     }
 
-    private boolean canMove(Inventory inventory, ItemStack item) {
-        if (inventory.firstEmpty() != -1) return true;
-        for (ItemStack stack : inventory.getContents()) {
-            if (stack.isSimilar(item) && (stack.getAmount() + item.getAmount()) - 1 < stack.getMaxStackSize()) {
+    private void pushItemsIntoContainers(com.songoda.epichoppers.hopper.Hopper hopper, StorageContainerCache.Cache hopperCache, int maxToMove, Collection<Material> blockedMaterials, HopperDirection hopperDirection) {
+
+        // Filter target, if any
+        StorageContainerCache.Cache filterCache = getFilterEndpoint(hopper);
+
+        // Get remote linked containers.
+        List<Location> linkedContainers = hopper.getLinkedBlocks();
+        boolean checkForMinecarts = false;
+
+        // Add container that the hopper is attached to physically.
+        final Location pointingLocation = hopper.getLocation().add(hopperDirection.getX(), hopperDirection.getY(), hopperDirection.getZ());
+        if (!linkedContainers.contains(pointingLocation)
+                && pointingLocation.getWorld().isChunkLoaded(
+                pointingLocation.getBlockX() >> 4,
+                pointingLocation.getBlockZ() >> 4)) {
+            switch (pointingLocation.getBlock().getType()) {
+                case AIR:
+                case RAIL:
+                case POWERED_RAIL:
+                case DETECTOR_RAIL:
+                    // Add storage/hopper minecarts the hopper is pointing into if there aren't any destinations
+                    checkForMinecarts = linkedContainers.size() < 2;
+                    break;
+                default:
+                    linkedContainers.add(pointingLocation);
+            }
+        }
+
+        // Loop through targets until we can move stuff into one of them
+        for (Location targetLocation : linkedContainers) {
+
+            // Don't check if it's not in a loaded chunk
+            if (!targetLocation.getWorld().isChunkLoaded(targetLocation.getBlockX() >> 4, targetLocation.getBlockZ() >> 4))
+                continue;
+
+            // special case for ender chests
+            final Block targetBlock = targetLocation.getBlock();
+            if (targetBlock.getType() == Material.ENDER_CHEST) {
+                // Use the ender storage of whoever owns the hopper if they're online
+                OfflinePlayer op = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
+                if (op.isOnline()) {
+                    Inventory destinationInventory = op.getPlayer().getEnderChest();
+                    StorageContainerCache.Cache cache = new StorageContainerCache.Cache(targetBlock.getType(), destinationInventory.getContents());
+                    if (tryPush(hopper, hopperCache, cache, filterCache, maxToMove, blockedMaterials)) {
+                        // update inventory and exit
+                        if(cache.isDirty())
+                            destinationInventory.setContents(cache.cachedInventory);
+                        return;
+                    }
+                }
+                // Can't put anything in there, so keep looking for targets
+                continue;
+            }
+
+            // Is this a storage container?
+            StorageContainerCache.Cache targetCache = StorageContainerCache.getCachedInventory(targetBlock);
+            if (targetCache == null) {
+                // if it's not, we need to unlink it
+                hopper.removeLinkedBlock(targetLocation);
+                continue;
+            }
+
+            // Now attempt to push items into this container and exit on success
+            if (tryPush(hopper, hopperCache, targetCache, filterCache, maxToMove, blockedMaterials))
+                return;
+        }
+
+        // if we've gotten this far, check if we can push into a minecart
+        if (checkForMinecarts) {
+            for (InventoryHolder minecartInventory : hopper.getWorld().getNearbyEntities(pointingLocation.clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)
+                                .stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
+                                .map(e -> (InventoryHolder) e).collect(Collectors.toSet())) {
+                StorageContainerCache.Cache cache = new StorageContainerCache.Cache(Material.CHEST, minecartInventory.getInventory().getContents());
+                if (tryPush(hopper, hopperCache, cache, filterCache, maxToMove, blockedMaterials)) {
+                    if (cache.isDirty())
+                        minecartInventory.getInventory().setContents(cache.cachedInventory);
+                    return;
+                }
+            }
+        }
+    }
+
+    private boolean tryPush(com.songoda.epichoppers.hopper.Hopper hopper,
+            StorageContainerCache.Cache hopperCache,
+            StorageContainerCache.Cache targetCache,
+            StorageContainerCache.Cache filterCache,
+            int maxToMove, Collection<Material> blockedMaterials) {
+
+        // Loop through all of our hopper's item slots.
+        for (int i = 0; i < 5; i++) {
+            // Get potential item to move.
+            ItemStack item = hopperCache.cachedInventory[i];
+
+            // Can we check this item?
+            if (    // Ignore this one if the slot is empty
+                    item == null
+                    // Don't try to move items that we've added this round
+                    || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
+                    // skip if blocked or voidlisted
+                    || blockedMaterials.contains(item.getType())
+                    || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilar(itemStack, item)))
+                continue;
+
+            // Create item that will be moved.
+            ItemStack itemToMove = item.clone();
+            itemToMove.setAmount(item.getAmount() < maxToMove ? item.getAmount() : maxToMove);
+
+            // Process whitelist and blacklist.
+            boolean blocked = (!hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getWhiteList().stream().noneMatch(itemStack -> itemStack.isSimilar(item))
+                    || hopper.getFilter().getBlackList().stream().anyMatch(itemStack -> itemStack.isSimilar(item)));
+
+            // If blocked check to see if a movement can be made
+            if (blocked) {
+                if (filterCache != null && filterCache.addItem(itemToMove)) {
+                    hopperCache.removeItems(itemToMove);
+                    return true;
+                }
+                // can't move into a filter chest, so keep looking for something else to move
+                continue;
+            }
+
+            // Add item to container and return on success.
+            if (targetCache.addItem(itemToMove)) {
+                hopperCache.removeItems(itemToMove);
                 return true;
             }
         }
         return false;
     }
 
+    private void processVoidFilter(com.songoda.epichoppers.hopper.Hopper hopper, StorageContainerCache.Cache hopperCache, int maxToMove) {
+        // Loop over hopper inventory to process void filtering.
+        if (!hopper.getFilter().getVoidList().isEmpty()) {
+            ItemStack[] hopperContents = hopperCache.cachedInventory;
+            for (int i = 0; i < hopperContents.length; i++) {
+                final ItemStack item = hopperContents[i];
+                if (item != null && hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilar(itemStack, item))) {
+                    int amt = Math.min(0, item.getAmount() - maxToMove);
+                    if (amt == 0) {
+                        hopperCache.removeItem(i);
+                    } else {
+                        item.setAmount(amt);
+                    }
+                    hopperCache.setDirty(hopperCache.cacheChanged[i] = true);
+                    break;
+                }
+            }
+        }
+    }
     /**
      * Gets a set of slots that can be pulled from based on the given material
      * @param material The material to get pullable slots for
      * @return A set of valid pullable slots
      */
-    private int[] getPullableSlots(InventoryHolder inventoryHolder, Material material) {
+    private int[] getPullableSlots(Material material, int contentsLength) {
         if (material.name().contains("SHULKER_BOX"))
             return IntStream.rangeClosed(0, 26).toArray();
 
@@ -493,9 +469,7 @@ public class HopTask extends BukkitRunnable {
             case "BARREL":
             case "CHEST":
             case "TRAPPED_CHEST":
-                if (inventoryHolder.getInventory() instanceof DoubleChestInventory)
-                    return IntStream.rangeClosed(0, 53).toArray();
-                return IntStream.rangeClosed(0, 26).toArray();
+                return IntStream.rangeClosed(0, contentsLength).toArray();
             case "BREWING_STAND":
                 return IntStream.rangeClosed(0, 2).toArray();
             case "HOPPER":

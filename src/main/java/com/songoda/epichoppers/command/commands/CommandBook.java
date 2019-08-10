@@ -23,7 +23,8 @@ public class CommandBook extends AbstractCommand {
                 return ReturnType.SUCCESS;
             }
         } else if (Bukkit.getPlayerExact(args[1]) == null) {
-            sender.sendMessage(instance.references.getPrefix() + Methods.formatText("&cThat username does not exist, or the user is not online!"));
+            instance.getLocale().newMessage("&cThat username does not exist, or the user is not online!")
+                    .sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else {
             Bukkit.getPlayerExact(args[1]).getInventory().addItem(instance.enchantmentHandler.getbook());

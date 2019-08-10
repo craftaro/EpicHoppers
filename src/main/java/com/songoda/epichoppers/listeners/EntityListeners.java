@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -56,10 +57,9 @@ public class EntityListeners implements Listener {
         event.getDrops().clear();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerPickup(PlayerPickupItemEvent event) {
         if (ModuleSuction.isBlacklisted(event.getItem().getUniqueId()))
             event.setCancelled(true);
-        ModuleSuction.addToBlacklist(event.getItem().getUniqueId());
     }
 }

@@ -1,12 +1,12 @@
 package com.songoda.epichoppers.hopper;
 
 import com.songoda.epichoppers.EpicHoppers;
-import com.songoda.epichoppers.utils.TeleportTrigger;
+import com.songoda.epichoppers.hopper.levels.Level;
+import com.songoda.epichoppers.hopper.levels.modules.Module;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,13 +15,18 @@ public class HopperManager {
 
     private final Map<Location, Hopper> registeredHoppers = new HashMap<>();
 
+    public void addHopper(Hopper hopper) {
+        registeredHoppers.put(roundLocation(hopper.getLocation()), hopper);
+    }
 
+    @Deprecated
     public void addHopper(Location location, Hopper hopper) {
         registeredHoppers.put(roundLocation(location), hopper);
     }
 
     /**
      * Removes a hopper and unlinks it from any other hoppers
+     *
      * @param location The location of the hopper to remove
      * @return The removed hopper, or null if none was removed
      */
@@ -31,15 +36,19 @@ public class HopperManager {
         for (Hopper hopper : this.registeredHoppers.values())
             hopper.removeLinkedBlock(location);
 
+        for (Level level : EpicHoppers.getInstance().getLevelManager().getLevels().values())
+            for (Module module : level.getRegisteredModules())
+                module.clearData(removed);
+
         return removed;
     }
 
 
     public Hopper getHopper(Location location) {
-        if (!registeredHoppers.containsKey(roundLocation(location))) {
-            addHopper(location, new Hopper(location, EpicHoppers.getInstance().getLevelManager().getLowestLevel(), null, null, new ArrayList<>(), new Filter(), TeleportTrigger.DISABLED, null));
+        if (!registeredHoppers.containsKey(location = roundLocation(location))) {
+            addHopper(new Hopper(location));
         }
-        return registeredHoppers.get(roundLocation(location));
+        return registeredHoppers.get(location);
     }
 
 
@@ -60,12 +69,13 @@ public class HopperManager {
 
     public Hopper getHopperFromPlayer(Player player) {
         for (Hopper hopper : registeredHoppers.values()) {
-            if (hopper.getLastPlayer() == player.getUniqueId()) {
+            if (hopper.getLastPlayerOpened() == player.getUniqueId()) {
                 return hopper;
             }
         }
         return null;
     }
+
 
     private Location roundLocation(Location location) {
         location = location.clone();

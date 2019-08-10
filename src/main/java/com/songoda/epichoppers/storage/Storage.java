@@ -43,13 +43,12 @@ public abstract class Storage {
                     new StorageItem("level", hopper.getLevel().getLevel()),
                     new StorageItem("block", true, hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty() ? new ArrayList<>() : hopper.getLinkedBlocks()),
                     new StorageItem("placedby", hopper.getPlacedBy() == null ? null : hopper.getPlacedBy().toString()),
-                    new StorageItem("player", hopper.getLastPlayer() == null ? null : hopper.getLastPlayer().toString()),
+                    new StorageItem("player", hopper.getLastPlayerOpened() == null ? null : hopper.getLastPlayerOpened().toString()),
                     new StorageItem("teleporttrigger", hopper.getTeleportTrigger().toString()),
 
-                    new StorageItem("autocrafting", hopper.getAutoCrafting() == null || hopper.getAutoCrafting().getType() == Material.AIR ? null : hopper.getAutoCrafting().getType().name() + (hopper.getAutoCrafting().getDurability() == 0 ? "" : ":" + hopper.getAutoCrafting().getDurability())),                    new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
+                    new StorageItem("whitelist", hopper.getFilter().getWhiteList()),
                     new StorageItem("blacklist", hopper.getFilter().getBlackList()),
                     new StorageItem("void", hopper.getFilter().getVoidList()),
-                    new StorageItem("autobreak", hopper.isAutoBreaking()),
                     new StorageItem("black", hopper.getFilter().getEndPoint() == null ? null : Methods.serializeLocation(hopper.getFilter().getEndPoint())));
         }
 

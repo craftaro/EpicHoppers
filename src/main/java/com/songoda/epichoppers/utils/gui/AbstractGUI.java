@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.event.EventPriority;
 
 public abstract class AbstractGUI implements Listener {
 
@@ -88,7 +89,7 @@ public abstract class AbstractGUI implements Listener {
                 }
             }
 
-            @EventHandler
+            @EventHandler(priority = EventPriority.LOW)
             public void onCloseGUI(InventoryCloseEvent event) {
                 Inventory inventory = event.getInventory();
                 AbstractGUI gui = getGUIFromInventory(inventory);

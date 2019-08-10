@@ -106,6 +106,6 @@ public class TeleportHandler {
         entity.teleport(location);
 
         if (this.instance.isServerVersionAtLeast(ServerVersion.V1_12))
-            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
+            entity.getWorld().playSound(entity.getLocation(), this.instance.isServerVersion(ServerVersion.V1_12) ? Sound.valueOf("ENTITY_ENDERMEN_TELEPORT") : Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
     }
 }

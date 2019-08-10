@@ -15,10 +15,11 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -26,41 +27,26 @@ import java.util.UUID;
  */
 public class Hopper {
 
-    private Location location;
-    private Level level;
-    private UUID lastPlayer;
-    private UUID placedBy;
-    private List<Location> linkedBlocks;
-    private Filter filter;
-    private TeleportTrigger teleportTrigger;
-    private ItemStack autoCrafting;
-    private int autoSellTimer;
-    private boolean autoBreaking;
-    private int transferTick;
+    private final Location location;
+    private Level level = EpicHoppers.getInstance().getLevelManager().getLowestLevel();
+    private UUID lastPlayerOpened = null;
+    private UUID placedBy = null;
+    private final List<Location> linkedBlocks = new ArrayList<>();
+    private Filter filter = new Filter();
+    private TeleportTrigger teleportTrigger = TeleportTrigger.DISABLED;
+    private int transferTick = 0;
 
-    public Hopper(Location location, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
+    private final Map<String, Object> moduleCache = new HashMap<>();
+
+    public Hopper(Location location) {
         this.location = location;
-        this.level = level;
-        this.linkedBlocks = linkedBlocks;
-        this.filter = filter;
-        this.lastPlayer = lastPlayer;
-        this.placedBy = placedBy;
-        this.teleportTrigger = teleportTrigger;
-        this.autoCrafting = autoCrafting;
-        this.autoSellTimer = 0;
-        this.autoBreaking = false;
-        this.transferTick = 0;
-    }
-
-    public Hopper(Block block, Level level, UUID lastPlayer, UUID placedBy, List<Location> linkedBlocks, Filter filter, TeleportTrigger teleportTrigger, ItemStack autoCrafting) {
-        this(block.getLocation(), level, lastPlayer, placedBy, linkedBlocks, filter, teleportTrigger, autoCrafting);
     }
 
     public void overview(Player player) {
-        if (lastPlayer != null
-                && lastPlayer != player.getUniqueId()
-                && Bukkit.getPlayer(lastPlayer) != null) {
-            Bukkit.getPlayer(lastPlayer).closeInventory();
+        if (lastPlayerOpened != null
+                && lastPlayerOpened != player.getUniqueId()
+                && Bukkit.getPlayer(lastPlayerOpened) != null) {
+            Bukkit.getPlayer(lastPlayerOpened).closeInventory();
         }
         if (placedBy == null) placedBy = player.getUniqueId();
 
@@ -71,60 +57,61 @@ public class Hopper {
 
     public void upgrade(Player player, CostType type) {
         EpicHoppers plugin = EpicHoppers.getInstance();
-        if (plugin.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) {
+        if (!plugin.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) return;
 
-            Level level = plugin.getLevelManager().getLevel(this.level.getLevel() + 1);
-            int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
+        Level level = plugin.getLevelManager().getLevel(this.level.getLevel() + 1);
+        int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
 
-            if (type == CostType.ECONOMY) {
-                if (plugin.getEconomy() == null) {
-                    player.sendMessage("Economy not enabled.");
-                    return;
+        if (type == CostType.ECONOMY) {
+            if (plugin.getEconomy() == null) {
+                player.sendMessage("Economy not enabled.");
+                return;
+            }
+            if (!plugin.getEconomy().hasBalance(player, cost)) {
+                plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
+                return;
+            }
+            plugin.getEconomy().withdrawBalance(player, cost);
+            upgradeFinal(level, player);
+        } else if (type == CostType.EXPERIENCE) {
+            if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
+                if (player.getGameMode() != GameMode.CREATIVE) {
+                    player.setLevel(player.getLevel() - cost);
                 }
-                if (!plugin.getEconomy().hasBalance(player, cost)) {
-                    player.sendMessage(plugin.references.getPrefix() + plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford"));
-                    return;
-                }
-                plugin.getEconomy().withdrawBalance(player, cost);
                 upgradeFinal(level, player);
-            } else if (type == CostType.EXPERIENCE) {
-                if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
-                    if (player.getGameMode() != GameMode.CREATIVE) {
-                        player.setLevel(player.getLevel() - cost);
-                    }
-                    upgradeFinal(level, player);
-                } else {
-                    player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.upgrade.cannotafford"));
-                }
+            } else {
+                plugin.getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
             }
         }
     }
 
     private void upgradeFinal(Level level, Player player) {
-        EpicHoppers instance = EpicHoppers.getInstance();
+        EpicHoppers plugin = EpicHoppers.getInstance();
         this.level = level;
         syncName();
-        if (instance.getLevelManager().getHighestLevel() != level) {
-            player.sendMessage(instance.getLocale().getMessage("event.upgrade.success", level.getLevel()));
+        if (plugin.getLevelManager().getHighestLevel() != level) {
+            plugin.getLocale().getMessage("event.upgrade.success")
+                    .processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
         } else {
-            player.sendMessage(instance.getLocale().getMessage("event.upgrade.maxed", level.getLevel()));
+            plugin.getLocale().getMessage("event.upgrade.maxed")
+                    .processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
         }
         Location loc = location.clone().add(.5, .5, .5);
 
-        if (!instance.isServerVersionAtLeast(ServerVersion.V1_12)) return;
+        if (!plugin.isServerVersionAtLeast(ServerVersion.V1_12)) return;
 
-        player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
+        player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(plugin.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
 
-        if (instance.getLevelManager().getHighestLevel() != level) {
+        if (plugin.getLevelManager().getHighestLevel() != level) {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
         } else {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
 
-            if (!instance.isServerVersionAtLeast(ServerVersion.V1_13)) return;
+            if (!plugin.isServerVersionAtLeast(ServerVersion.V1_13)) return;
 
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2F, 25.0F);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
         }
     }
 
@@ -140,7 +127,7 @@ public class Hopper {
         Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
             PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
             if (playerData.getSyncType() != null) {
-                player.sendMessage(instance.getLocale().getMessage("event.hopper.synctimeout"));
+                instance.getLocale().getMessage("event.hopper.synctimeout").sendPrefixedMessage(player);
                 playerData.setSyncType(null);
             }
         }, instance.getConfig().getLong("Main.Timeout When Syncing Hoppers"));
@@ -153,12 +140,12 @@ public class Hopper {
                 && !player.hasPermission("EpicHoppers.Override")
                 && !player.hasPermission("EpicHoppers.Admin")
                 && location.distance(toLink.getLocation()) > level.getRange()) {
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncoutofrange"));
+            instance.getLocale().getMessage("event.hopper.syncoutofrange").sendPrefixedMessage(player);
             return;
         }
 
-        if (linkedBlocks.contains(toLink)) {
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.already"));
+        if (linkedBlocks.contains(toLink.getLocation())) {
+            instance.getLocale().getMessage("event.hopper.already").sendPrefixedMessage(player);
             return;
         }
 
@@ -166,28 +153,30 @@ public class Hopper {
             this.linkedBlocks.add(toLink.getLocation());
         else {
             this.filter.setEndPoint(toLink.getLocation());
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
+            instance.getLocale().getMessage("event.hopper.syncsuccess").sendPrefixedMessage(player);
             instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
             return;
         }
-        this.lastPlayer = player.getUniqueId();
+        this.lastPlayerOpened = player.getUniqueId();
 
         if (level.getLinkAmount() > 1) {
             if (getLinkedBlocks().size() == level.getLinkAmount()) {
-                player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncdone"));
+                instance.getLocale().getMessage("event.hopper.syncdone").sendPrefixedMessage(player);
                 return;
             }
-            player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccessmore", level.getLinkAmount() - getLinkedBlocks().size()));
+            instance.getLocale().getMessage("event.hopper.syncsuccessmore")
+                    .processPlaceholder("amount", level.getLinkAmount() - getLinkedBlocks().size())
+                    .sendPrefixedMessage(player);
             return;
         }
-        player.sendMessage(instance.references.getPrefix() + instance.getLocale().getMessage("event.hopper.syncsuccess"));
+        instance.getLocale().getMessage("event.hopper.syncsuccess").sendPrefixedMessage(player);
         instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
 
     /**
      * Ticks a hopper to determine when it can transfer items next
      *
-     * @param maxTick The maximum amount the hopper can be ticked before next transferring items
+     * @param maxTick      The maximum amount the hopper can be ticked before next transferring items
      * @param allowLooping If true, the hopper is allowed to transfer items if the tick is also valid
      * @return true if the hopper should transfer an item, otherwise false
      */
@@ -206,6 +195,10 @@ public class Hopper {
 
     public Location getLocation() {
         return location.clone();
+    }
+
+    public Block getBlock() {
+        return location.getBlock();
     }
 
     public World getWorld() {
@@ -228,58 +221,32 @@ public class Hopper {
         return level;
     }
 
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
     public UUID getPlacedBy() {
         return placedBy;
     }
 
-    public UUID getLastPlayer() {
-        return lastPlayer;
+    public void setPlacedBy(UUID placedBy) {
+        this.placedBy = placedBy;
     }
 
-    public void setLastPlayer(UUID uuid) {
-        lastPlayer = uuid;
+    public UUID getLastPlayerOpened() {
+        return lastPlayerOpened;
     }
 
-    public ItemStack getAutoCrafting() {
-        return autoCrafting;
-    }
-
-    public void setAutoCrafting(Player player, ItemStack autoCrafting) {
-        this.autoCrafting = autoCrafting;
-        if (autoCrafting != null) {
-            int excess = autoCrafting.getAmount() - 1;
-            autoCrafting.setAmount(1);
-            if (excess > 0 && player != null) {
-                ItemStack item = autoCrafting.clone();
-                item.setAmount(excess);
-                player.getInventory().addItem(item);
-            }
-        }
+    public void setLastPlayerOpened(UUID uuid) {
+        lastPlayerOpened = uuid;
     }
 
     public TeleportTrigger getTeleportTrigger() {
         return teleportTrigger;
     }
 
-
     public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
         this.teleportTrigger = teleportTrigger;
-    }
-
-    public int getAutoSellTimer() {
-        return autoSellTimer;
-    }
-
-    public void setAutoSellTimer(int autoSellTimer) {
-        this.autoSellTimer = autoSellTimer;
-    }
-
-    public boolean isAutoBreaking() {
-        return autoBreaking;
-    }
-
-    public void toggleAutoBreaking() {
-        this.autoBreaking = !autoBreaking;
     }
 
     public List<Location> getLinkedBlocks() {
@@ -302,4 +269,27 @@ public class Hopper {
         return filter;
     }
 
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
+    public Object getDataFromModuleCache(String key) {
+        return this.moduleCache.getOrDefault(key, null);
+    }
+
+    public void addDataToModuleCache(String key, Object data) {
+        this.moduleCache.put(key, data);
+    }
+
+    public boolean isDataCachedInModuleCache(String key) {
+        return this.moduleCache.containsKey(key);
+    }
+
+    public void removeDataFromModuleCache(String key) {
+        this.moduleCache.remove(key);
+    }
+
+    public void clearModuleCache() {
+        this.moduleCache.clear();
+    }
 }

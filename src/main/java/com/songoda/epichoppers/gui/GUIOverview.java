@@ -55,9 +55,12 @@ public class GUIOverview extends AbstractGUI {
 
         ItemStack perl = new ItemStack(Material.ENDER_PEARL, 1);
         ItemMeta perlmeta = perl.getItemMeta();
-        perlmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.perltitle"));
+        perlmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.perltitle").getMessage());
         ArrayList<String> loreperl = new ArrayList<>();
-        String[] parts = plugin.getLocale().getMessage("interface.hopper.perllore2", hopper.getTeleportTrigger() == TeleportTrigger.DISABLED ? plugin.getLocale().getMessage("general.word.disabled") : hopper.getTeleportTrigger().name()).split("\\|");
+        String[] parts = plugin.getLocale().getMessage("interface.hopper.perllore2")
+                .processPlaceholder("type", hopper.getTeleportTrigger() == TeleportTrigger.DISABLED
+                        ? plugin.getLocale().getMessage("general.word.disabled").getMessage()
+                        : hopper.getTeleportTrigger().name()).getMessage().split("\\|");
         for (String line : parts) {
             loreperl.add(Methods.formatText(line));
         }
@@ -66,9 +69,9 @@ public class GUIOverview extends AbstractGUI {
 
         ItemStack filter = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.COMPARATOR : Material.valueOf("REDSTONE_COMPARATOR"), 1);
         ItemMeta filtermeta = filter.getItemMeta();
-        filtermeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.filtertitle"));
+        filtermeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.filtertitle").getMessage());
         ArrayList<String> lorefilter = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.filterlore").split("\\|");
+        parts = plugin.getLocale().getMessage("interface.hopper.filterlore").getMessage().split("\\|");
         for (String line : parts) {
             lorefilter.add(Methods.formatText(line));
         }
@@ -78,20 +81,23 @@ public class GUIOverview extends AbstractGUI {
 
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
-        itemmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.currentlevel", level.getLevel()));
+        itemmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.currentlevel").processPlaceholder("level", level.getLevel()).getMessage());
         List<String> lore = level.getDescription();
         if (plugin.getConfig().getBoolean("Main.Allow hopper Upgrading")) {
             lore.add("");
-            if (nextLevel == null) lore.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed"));
+            if (nextLevel == null) lore.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage());
             else {
-                lore.add(plugin.getLocale().getMessage("interface.hopper.nextlevel", nextLevel.getLevel()));
+                lore.add(plugin.getLocale().getMessage("interface.hopper.nextlevel").processPlaceholder("level", nextLevel.getLevel()).getMessage());
                 lore.addAll(nextLevel.getDescription());
             }
         }
 
         BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
         if (boostData != null) {
-            parts = plugin.getLocale().getMessage("interface.hopper.boostedstats", Integer.toString(boostData.getMultiplier()), Methods.makeReadable(boostData.getEndTime() - System.currentTimeMillis())).split("\\|");
+            parts = plugin.getLocale().getMessage("interface.hopper.boostedstats")
+                    .processPlaceholder("amount", Integer.toString(boostData.getMultiplier()))
+                    .processPlaceholder("time", Methods.makeReadable(boostData.getEndTime() - System.currentTimeMillis()))
+                    .getMessage().split("\\|");
             lore.add("");
             for (String line : parts)
                 lore.add(Methods.formatText(line));
@@ -102,9 +108,11 @@ public class GUIOverview extends AbstractGUI {
 
         ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
         ItemMeta hookmeta = hook.getItemMeta();
-        hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.synchopper"));
+        hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.synchopper").getMessage());
         ArrayList<String> lorehook = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.synclore", hopper.getLinkedBlocks().stream().distinct().count()).split("\\|");
+        parts = plugin.getLocale().getMessage("interface.hopper.synclore")
+                .processPlaceholder("amount", hopper.getLinkedBlocks().stream().distinct().count())
+                .getMessage().split("\\|");
         for (String line : parts) {
             lorehook.add(Methods.formatText(line));
         }
@@ -163,23 +171,27 @@ public class GUIOverview extends AbstractGUI {
         if (plugin.getConfig().getBoolean("Main.Allow hopper Upgrading")) {
             ItemStack itemXP = new ItemStack(Material.valueOf(plugin.getConfig().getString("Interfaces.XP Icon")), 1);
             ItemMeta itemmetaXP = itemXP.getItemMeta();
-            itemmetaXP.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewithxp"));
+            itemmetaXP.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewithxp").getMessage());
             ArrayList<String> loreXP = new ArrayList<>();
             if (nextLevel != null)
-                loreXP.add(plugin.getLocale().getMessage("interface.hopper.upgradewithxplore", nextLevel.getCostExperience()));
+                loreXP.add(plugin.getLocale().getMessage("interface.hopper.upgradewithxplore")
+                        .processPlaceholder("cost", nextLevel.getCostExperience()).getMessage());
             else
-                loreXP.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed"));
+                loreXP.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage());
             itemmetaXP.setLore(loreXP);
             itemXP.setItemMeta(itemmetaXP);
 
             ItemStack itemECO = new ItemStack(Material.valueOf(plugin.getConfig().getString("Interfaces.Economy Icon")), 1);
             ItemMeta itemmetaECO = itemECO.getItemMeta();
-            itemmetaECO.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy"));
+            itemmetaECO.setDisplayName(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy")
+                    .getMessage());
             ArrayList<String> loreECO = new ArrayList<>();
             if (nextLevel != null)
-                loreECO.add(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomylore", Methods.formatEconomy(nextLevel.getCostEconomy())));
+                loreECO.add(plugin.getLocale().getMessage("interface.hopper.upgradewitheconomylore")
+                        .processPlaceholder("cost", Methods.formatEconomy(nextLevel.getCostEconomy()))
+                        .getMessage());
             else
-                loreECO.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed"));
+                loreECO.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage());
             itemmetaECO.setLore(loreECO);
             itemECO.setItemMeta(itemmetaECO);
 
@@ -225,7 +237,7 @@ public class GUIOverview extends AbstractGUI {
         inventory.setItem(25, Methods.getBackgroundGlass(true));
         inventory.setItem(26, Methods.getBackgroundGlass(true));
 
-        hopper.setLastPlayer(player.getUniqueId());
+        hopper.setLastPlayerOpened(player.getUniqueId());
     }
 
     private void runTask() {
@@ -241,13 +253,13 @@ public class GUIOverview extends AbstractGUI {
                         .getDisplayName().equalsIgnoreCase(inventory.getItem(slot).getItemMeta().getDisplayName()))
                     continue;
 
-                module.runButtonPress(player, hopper);
+                module.runButtonPress(player, hopper, type);
             }
             if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.filtertitle"))) {
+                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.filtertitle").getMessage())) {
                 new GUIFilter(plugin, hopper, player);
             } else if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.perltitle"))) {
+                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.perltitle").getMessage())) {
                 if (type == ClickType.LEFT) {
                     if (hopper.getLinkedBlocks() != null) {
                         plugin.getTeleportHandler().tpEntity(player, hopper);
@@ -264,18 +276,18 @@ public class GUIOverview extends AbstractGUI {
                     constructGUI();
                 }
             } else if (inventory.getItem(slot).getItemMeta()
-                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.synchopper"))) {
+                    .getDisplayName().equals(plugin.getLocale().getMessage("interface.hopper.synchopper").getMessage())) {
                 if (type == ClickType.RIGHT) {
-                    player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.desync"));
+                    plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
                     hopper.clearLinkedBlocks();
                 } else {
-                    if (hopper.getLastPlayer() != null && !hopper.getLastPlayer().equals(player.getUniqueId())) {
-                        player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.syncdidnotplace"));
+                    if (hopper.getLastPlayerOpened() != null && !hopper.getLastPlayerOpened().equals(player.getUniqueId())) {
+                        plugin.getLocale().getMessage("event.hopper.syncdidnotplace").sendPrefixedMessage(player);
                         return;
                     }
                     plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.REGULAR);
                     hopper.clearLinkedBlocks();
-                    player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.syncnext"));
+                    plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
                     hopper.timeout(player);
                 }
                 player.closeInventory();

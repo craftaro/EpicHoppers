@@ -10,10 +10,10 @@ public class Level {
 
     private final ArrayList<Module> registeredModules;
     private final List<String> description = new ArrayList<>();
-    private int level, costExperience, costEconomy, range, amount, linkAmount, autoSell;
+    private int level, costExperience, costEconomy, range, amount, linkAmount;
     private boolean filter, teleport;
 
-    Level(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, int autoSell, ArrayList<Module> registeredModules) {
+    Level(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, ArrayList<Module> registeredModules) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
@@ -22,7 +22,6 @@ public class Level {
         this.filter = filter;
         this.teleport = teleport;
         this.linkAmount = linkAmount;
-        this.autoSell = autoSell;
         this.registeredModules = registeredModules;
 
         buildDescription();
@@ -34,14 +33,21 @@ public class Level {
 
         description.clear();
 
-        description.add(instance.getLocale().getMessage("interface.hopper.range", range));
-        description.add(instance.getLocale().getMessage("interface.hopper.amount", amount));
+        description.add(instance.getLocale().getMessage("interface.hopper.range")
+                .processPlaceholder("range", range).getMessage());
+        description.add(instance.getLocale().getMessage("interface.hopper.amount")
+                .processPlaceholder("amount", amount).getMessage());
         if (linkAmount != 1)
-            description.add(instance.getLocale().getMessage("interface.hopper.linkamount", linkAmount));
+            description.add(instance.getLocale().getMessage("interface.hopper.linkamount")
+                    .processPlaceholder("amount", linkAmount).getMessage());
         if (filter)
-            description.add(instance.getLocale().getMessage("interface.hopper.filter", EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled")));
+            description.add(instance.getLocale().getMessage("interface.hopper.filter")
+                    .processPlaceholder("enabled", EpicHoppers.getInstance().getLocale()
+                            .getMessage("general.word.enabled").getMessage()).getMessage());
         if (teleport)
-            description.add(instance.getLocale().getMessage("interface.hopper.teleport", EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled")));
+            description.add(instance.getLocale().getMessage("interface.hopper.teleport")
+                    .processPlaceholder("enabled", EpicHoppers.getInstance()
+                            .getLocale().getMessage("general.word.enabled").getMessage()).getMessage());
 
         for (Module module : registeredModules) {
             description.add(module.getDescription());
@@ -71,11 +77,6 @@ public class Level {
 
     public boolean isTeleport() {
         return teleport;
-    }
-
-
-    public int getAutoSell() {
-        return autoSell;
     }
 
 
@@ -109,5 +110,10 @@ public class Level {
         buildDescription();
     }
 
+
+    public Module getModule(String name) {
+        return registeredModules == null ? null :
+                registeredModules.stream().filter(module -> module.getName().equals(name)).findFirst().orElse(null);
+    }
 }
 

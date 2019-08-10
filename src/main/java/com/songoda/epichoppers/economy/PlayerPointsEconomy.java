@@ -1,20 +1,15 @@
 package com.songoda.epichoppers.economy;
 
-import com.songoda.epichoppers.EpicHoppers;
 import org.black_ixx.playerpoints.PlayerPoints;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 public class PlayerPointsEconomy implements Economy {
 
-    private final EpicHoppers plugin;
-
     private final PlayerPoints playerPoints;
 
-    public PlayerPointsEconomy(EpicHoppers plugin) {
-        this.plugin = plugin;
-
-        this.playerPoints = (PlayerPoints) plugin.getServer().getPluginManager().getPlugin("PlayerPoints");
+    public PlayerPointsEconomy() {
+        this.playerPoints = (PlayerPoints) Bukkit.getServer().getPluginManager().getPlugin("PlayerPoints");
     }
 
     private int convertAmount(double amount) {

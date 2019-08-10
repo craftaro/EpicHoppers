@@ -5,11 +5,12 @@ import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.command.CommandManager;
 import com.songoda.epichoppers.economy.Economy;
 import com.songoda.epichoppers.economy.PlayerPointsEconomy;
+import com.songoda.epichoppers.economy.ReserveEconomy;
 import com.songoda.epichoppers.economy.VaultEconomy;
 import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hopper.Filter;
-import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
@@ -22,8 +23,12 @@ import com.songoda.epichoppers.storage.types.StorageMysql;
 import com.songoda.epichoppers.storage.types.StorageYaml;
 import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.*;
+import com.songoda.epichoppers.utils.locale.Locale;
 import com.songoda.epichoppers.utils.settings.Setting;
 import com.songoda.epichoppers.utils.settings.SettingsManager;
+import com.songoda.epichoppers.utils.updateModules.LocaleModule;
+import com.songoda.update.Plugin;
+import com.songoda.update.SongodaUpdate;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -34,15 +39,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +54,6 @@ public class EpicHoppers extends JavaPlugin {
 
     private ServerVersion serverVersion = ServerVersion.fromPackageName(Bukkit.getServer().getClass().getPackage().getName());
 
-    public References references = null;
     public Enchantment enchantmentHandler;
     private SettingsManager settingsManager;
     private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
@@ -93,28 +90,29 @@ public class EpicHoppers extends JavaPlugin {
         this.settingsManager.setupConfig();
 
         // Setup language
-        String langMode = getConfig().getString("System.Language Mode");
-        Locale.init(this);
-        Locale.saveDefaultLocale("en_US");
-        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
+        new Locale(this, "en_US");
+        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode"));
 
-        if (getConfig().getBoolean("System.Download Needed Data Files"))
-            this.update();
+        // Running Songoda Updater
+        Plugin plugin = new Plugin(this, 15);
+        plugin.addModule(new LocaleModule());
+        SongodaUpdate.load(plugin);
 
         this.enchantmentHandler = new Enchantment();
         this.hopperManager = new HopperManager();
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
-        this.references = new References();
         this.commandManager = new CommandManager(this);
 
+        PluginManager pluginManager = Bukkit.getPluginManager();
+
         // Setup Economy
-        if (Setting.VAULT_ECONOMY.getBoolean()
-                && getServer().getPluginManager().getPlugin("Vault") != null)
-            this.economy = new VaultEconomy(this);
-        else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean()
-                && getServer().getPluginManager().getPlugin("PlayerPoints") != null)
-            this.economy = new PlayerPointsEconomy(this);
+        if (Setting.VAULT_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Vault"))
+            this.economy = new VaultEconomy();
+        else if (Setting.RESERVE_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Reserve"))
+            this.economy = new ReserveEconomy();
+        else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("PlayerPoints"))
+            this.economy = new PlayerPointsEconomy();
 
         this.loadLevelManager();
         this.checkStorage();
@@ -124,8 +122,6 @@ public class EpicHoppers extends JavaPlugin {
 
         new HopTask(this);
         this.teleportHandler = new TeleportHandler(this);
-
-        PluginManager pluginManager = Bukkit.getPluginManager();
 
         // Register Listeners
         pluginManager.registerEvents(new HopperListeners(this), this);
@@ -161,40 +157,6 @@ public class EpicHoppers extends JavaPlugin {
         console.sendMessage(Methods.formatText("&a============================="));
     }
 
-    private void update() {
-        try {
-            URL url = new URL("http://update.songoda.com/index.php?plugin=" + getDescription().getName() + "&version=" + getDescription().getVersion());
-            URLConnection urlConnection = url.openConnection();
-            InputStream is = urlConnection.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-
-            int numCharsRead;
-            char[] charArray = new char[1024];
-            StringBuffer sb = new StringBuffer();
-            while ((numCharsRead = isr.read(charArray)) > 0) {
-                sb.append(charArray, 0, numCharsRead);
-            }
-            String jsonString = sb.toString();
-            JSONObject json = (JSONObject) new JSONParser().parse(jsonString);
-
-            JSONArray files = (JSONArray) json.get("neededFiles");
-            for (Object o : files) {
-                JSONObject file = (JSONObject) o;
-
-                switch ((String) file.get("type")) {
-                    case "locale":
-                        InputStream in = new URL((String) file.get("link")).openStream();
-                        Locale.saveDefaultLocale(in, (String) file.get("name"));
-                        break;
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Failed to update.");
-            //e.printStackTrace();
-        }
-    }
-
-
     public ServerVersion getServerVersion() {
         return serverVersion;
     }
@@ -225,6 +187,10 @@ public class EpicHoppers extends JavaPlugin {
     private void saveToFile() {
         checkStorage();
 
+        for (Level level : EpicHoppers.getInstance().getLevelManager().getLevels().values())
+            for (Module module : level.getRegisteredModules())
+                module.saveDataToFile();
+
         storage.doSave();
     }
 
@@ -239,6 +205,12 @@ public class EpicHoppers extends JavaPlugin {
                     if (location == null) return;
 
                     int levelVal = row.get("level").asInt();
+                    Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
+
+                    String playerStr = row.get("player").asString();
+                    String placedByStr = row.get("placedby").asString();
+                    UUID lastPlayer = playerStr == null ? null : UUID.fromString(row.get("player").asString());
+                    UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
 
                     List<String> blockLoc = row.get("block").asStringList();
                     List<Location> blocks = new ArrayList<>();
@@ -248,42 +220,30 @@ public class EpicHoppers extends JavaPlugin {
                         }
                     }
 
-                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
-
-                    String playerStr = row.get("player").asString();
-                    String placedByStr = row.get("placedby").asString();
-                    UUID lastPlayer = playerStr == null ? null : UUID.fromString(playerStr);
-                    UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
+                    Filter filter = new Filter();
 
                     List<ItemStack> whiteList = row.get("whitelist").asItemStackList();
                     List<ItemStack> blackList = row.get("blacklist").asItemStackList();
                     List<ItemStack> voidList = row.get("void").asItemStackList();
 
-                    String autoCraftingStr = row.get("autocrafting").asString() == null ? "AIR" : row.get("autocrafting").asString();
-
-                    String[] autoCraftingParts = autoCraftingStr.split(":");
-
-                    ItemStack autoCrafting = new ItemStack(Material.valueOf(autoCraftingParts[0]), 1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
-
                     String blackLoc = row.get("black").asString();
                     Location black = blackLoc == null ? null : Methods.unserializeLocation(blackLoc);
-
-                    boolean autoBreak = row.get("autobreak").asBoolean();
-
-                    Filter filter = new Filter();
 
                     filter.setWhiteList(whiteList);
                     filter.setBlackList(blackList);
                     filter.setVoidList(voidList);
                     filter.setEndPoint(black);
 
-                    Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
+                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
 
-                    Hopper hopper = new Hopper(location, level, lastPlayer, placedBy, blocks, filter, teleportTrigger, autoCrafting);
-
-                    if (autoBreak) hopper.toggleAutoBreaking();
-
-                    hopperManager.addHopper(location, hopper);
+                    hopperManager.addHopper(new HopperBuilder(location)
+                            .setLevel(level)
+                            .setLastPlayerOpened(lastPlayer)
+                            .setPlacedBy(placedBy)
+                            .addLinkedBlocks(blocks.toArray(new Location[0]))
+                            .setFilter(filter)
+                            .setTeleportTrigger(teleportTrigger)
+                            .build());
                 }
             }
 
@@ -335,25 +295,23 @@ public class EpicHoppers extends JavaPlugin {
 
             for (String key : levels.getKeys(false)) {
                 if (key.equals("Suction") && levels.getInt("Suction") != 0) {
-                    modules.add(new ModuleSuction(levels.getInt("Suction")));
+                    modules.add(new ModuleSuction(this, levels.getInt("Suction")));
                 } else if (key.equals("BlockBreak") && levels.getInt("BlockBreak") != 0) {
-                    modules.add(new ModuleBlockBreak(levels.getInt("BlockBreak")));
+                    modules.add(new ModuleBlockBreak(this, levels.getInt("BlockBreak")));
                 } else if (key.equals("AutoCrafting")) {
-                    modules.add(new ModuleAutoCrafting());
+                    modules.add(new ModuleAutoCrafting(this));
                 } else if (key.equals("AutoSell")) {
-                    modules.add(new ModuleAutoSell(autoSell));
+                    modules.add(new ModuleAutoSell(this, autoSell));
                 }
 
             }
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, autoSell, modules);
+            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }
     }
 
     public void reload() {
-        String langMode = getConfig().getString("System.Language Mode");
-        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode", langMode));
+        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode"));
         this.locale.reloadMessages();
-        references = new References();
         this.settingsManager.reloadConfig();
         loadLevelManager();
     }
@@ -362,7 +320,7 @@ public class EpicHoppers extends JavaPlugin {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
         itemmeta.setDisplayName(Methods.formatText(Methods.formatName(level.getLevel(), true)));
-        String line = getLocale().getMessage("general.nametag.lore");
+        String line = getLocale().getMessage("general.nametag.lore").getMessage();
         if (!line.equals("")) {
             itemmeta.setLore(Arrays.asList(line.split("\n")));
         }

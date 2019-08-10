@@ -55,7 +55,7 @@ public class GUIFilter extends AbstractGUI {
 
         ItemStack it = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.WHITE_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1);
         ItemMeta itm = it.getItemMeta();
-        itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist"));
+        itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist").getMessage());
         it.setItemMeta(itm);
 
         int[] whiteSlots = {0, 1, 45, 46};
@@ -73,7 +73,7 @@ public class GUIFilter extends AbstractGUI {
 
         it = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.BLACK_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1, (short) 15);
         itm = it.getItemMeta();
-        itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.blacklist"));
+        itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.blacklist").getMessage());
         it.setItemMeta(itm);
 
         int[] blackSlots = {2, 3, 47, 48};
@@ -91,7 +91,7 @@ public class GUIFilter extends AbstractGUI {
 
         it = new ItemStack(Material.BARRIER);
         itm = it.getItemMeta();
-        itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.void"));
+        itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.void").getMessage());
         it.setItemMeta(itm);
 
         int[] avoid = {4, 5, 49, 50};
@@ -109,9 +109,9 @@ public class GUIFilter extends AbstractGUI {
 
         ItemStack itemInfo = new ItemStack(Material.PAPER, 1);
         ItemMeta itemmetaInfo = itemInfo.getItemMeta();
-        itemmetaInfo.setDisplayName(plugin.getLocale().getMessage("interface.filter.infotitle"));
+        itemmetaInfo.setDisplayName(plugin.getLocale().getMessage("interface.filter.infotitle").getMessage());
         ArrayList<String> loreInfo = new ArrayList<>();
-        String[] parts = plugin.getLocale().getMessage("interface.filter.infolore").split("\\|");
+        String[] parts = plugin.getLocale().getMessage("interface.filter.infolore").getMessage().split("\\|");
         for (String line : parts) {
             loreInfo.add(Methods.formatText(line));
         }
@@ -123,9 +123,11 @@ public class GUIFilter extends AbstractGUI {
 
         ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
         ItemMeta hookmeta = hook.getItemMeta();
-        hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.rejectsync"));
+        hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.rejectsync").getMessage());
         ArrayList<String> lorehook = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.synclore", filter.getEndPoint() != null ? 1 : 0).split("\\|");
+        parts = plugin.getLocale().getMessage("interface.hopper.synclore")
+                .processPlaceholder("amount", filter.getEndPoint() != null ? 1 : 0)
+                .getMessage().split("\\|");
         for (String line : parts) {
             lorehook.add(Methods.formatText(line));
         }
@@ -143,11 +145,11 @@ public class GUIFilter extends AbstractGUI {
     protected void registerClickables() {
         registerClickable(43, ((player, inventory, cursor, slot, type) -> {
             if (type == ClickType.RIGHT) {
-                player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.desync"));
+                plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
                 hopper.getFilter().setEndPoint(null);
             } else {
                 plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.FILTERED);
-                player.sendMessage(plugin.references.getPrefix() + plugin.getLocale().getMessage("event.hopper.syncnext"));
+                plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
                 hopper.timeout(player);
             }
             player.closeInventory();
@@ -175,7 +177,7 @@ public class GUIFilter extends AbstractGUI {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     owhite.add(item);
@@ -187,7 +189,7 @@ public class GUIFilter extends AbstractGUI {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     oblack.add(item);
@@ -199,7 +201,7 @@ public class GUIFilter extends AbstractGUI {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayer()).getInventory().addItem(item);
+                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     ovoid.add(item);
