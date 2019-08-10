@@ -199,13 +199,11 @@ public class ModuleAutoCrafting extends Module {
         }
 
         public void addRecipe(Recipe recipe) {
-            List<ItemStack> ingredientMap;
             if (recipe instanceof ShapelessRecipe) {
-                ingredientMap = ((ShapelessRecipe) recipe).getIngredientList();
-            } else {
-                ingredientMap = new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values());
+                addRecipe(((ShapelessRecipe) recipe).getIngredientList(), recipe.getResult());;
+            } else if (recipe instanceof ShapedRecipe) {
+                addRecipe(new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values()), recipe.getResult());
             }
-            addRecipe(ingredientMap, recipe.getResult());
         }
 
         public void addRecipe(Collection<ItemStack> ingredientMap, ItemStack result) {
