@@ -3,9 +3,9 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-import com.songoda.ultimatestacker.utils.Methods;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -53,6 +53,8 @@ public class ModuleSuction extends Module {
                 .map(entity -> (Item) entity)
                 .collect(Collectors.toSet());
 
+        boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
+
         for (Item item : itemsToSuck) {
             ItemStack itemStack = item.getItemStack();
 
@@ -71,6 +73,26 @@ public class ModuleSuction extends Module {
 
             if (blacklist.contains(item.getUniqueId()))
                 return;
+
+            // respect filter if no endpoint
+            if (!filterEndpoint
+                    && !(hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getBlackList().isEmpty())) {
+                // this hopper has a filter with no rejection endpoint, so don't absorb disalowed items
+                // whitelist has priority
+                if (!hopper.getFilter().getWhiteList().isEmpty()) {
+                    // is this item on the whitelist?
+                    if (!hopper.getFilter().getWhiteList().stream().anyMatch(filterItem -> Methods.isSimilar(itemStack, filterItem))) {
+                        // nope!
+                        continue;
+                    }
+                } else {
+                    // check the blacklist
+                    if (hopper.getFilter().getBlackList().stream().anyMatch(filterItem -> Methods.isSimilar(itemStack, filterItem))) {
+                        // don't grab this, then
+                        continue;
+                    }
+                }
+            }
 
             // try to add the items to the hopper
             int toAdd, added = hopperCache.addAny(itemStack, toAdd = getActualItemAmount(item));
@@ -101,7 +123,7 @@ public class ModuleSuction extends Module {
 
     private int getActualItemAmount(Item item) {
         if (ultimateStacker) {
-            return Methods.getActualItemAmount(item);
+            return com.songoda.ultimatestacker.utils.Methods.getActualItemAmount(item);
         } else if (wildStacker)
             return WildStackerAPI.getItemAmount(item);
         else
@@ -111,7 +133,7 @@ public class ModuleSuction extends Module {
 
     private void updateAmount(Item item, int amount) {
         if (ultimateStacker)
-            Methods.updateItemAmount(item, amount);
+            com.songoda.ultimatestacker.utils.Methods.updateItemAmount(item, amount);
         else if (wildStacker)
             WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
         else
