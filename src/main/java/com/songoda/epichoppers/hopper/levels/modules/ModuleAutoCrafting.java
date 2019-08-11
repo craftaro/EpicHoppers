@@ -119,7 +119,22 @@ public class ModuleAutoCrafting extends Module {
     Recipes getRecipes(ItemStack toCraft) {
         Recipes recipes = cachedRecipes.get(toCraft);
         if (recipes == null) {
-            recipes = new Recipes(Bukkit.getServer().getRecipesFor(toCraft));
+            try {
+                recipes = new Recipes(Bukkit.getServer().getRecipesFor(toCraft));
+            } catch (Throwable t) {
+                // extremely rare, but y'know - some plugins are dumb
+                recipes = new Recipes();
+                // how's about we try this manually?
+                java.util.Iterator<Recipe> recipeIterator = Bukkit.getServer().recipeIterator();
+                while (recipeIterator.hasNext()) {
+                    try {
+                        Recipe recipe = recipeIterator.next();
+                        ItemStack stack = recipe.getResult();
+                        if (Methods.isSimilar(stack, toCraft))
+                            recipes.addRecipe(recipe);
+                    } catch (Throwable ignored) {}
+                }
+            }
 
             // adding broken recipe for wood planks
             final String toType = toCraft.getType().name();
