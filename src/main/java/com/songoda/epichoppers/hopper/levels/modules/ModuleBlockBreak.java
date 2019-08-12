@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class ModuleBlockBreak extends Module {
 
@@ -55,6 +56,12 @@ public class ModuleBlockBreak extends Module {
 
         if (!isEnabled(hopper))
             return;
+
+        // don't try to break stuff if we can't grab stuff
+        // (for simplicity, just assume that no empty slots mean there's a good chance we won't be able to pick something new up)
+        if(Stream.of(hopperCache.cachedInventory)
+                .allMatch(item -> item != null && item.getAmount() > 0))
+           return;
 
         Integer tick = blockTick.get(hopper);
         if (tick == null) {
