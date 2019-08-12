@@ -185,6 +185,10 @@ public class EpicHoppers extends JavaPlugin {
      * Saves registered hoppers to file.
      */
     private void saveToFile() {
+        // double-check that we're ok to save
+        if(EpicHoppers.getInstance().getLevelManager() == null)
+            return;
+
         checkStorage();
 
         for (Level level : EpicHoppers.getInstance().getLevelManager().getLevels().values())

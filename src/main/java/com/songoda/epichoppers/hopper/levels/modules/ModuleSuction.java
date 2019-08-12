@@ -48,6 +48,7 @@ public class ModuleSuction extends Module {
         Set<Item> itemsToSuck = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
                 .stream()
                 .filter(entity -> entity.getType() == EntityType.DROPPED_ITEM
+                        && !entity.isDead()
                         && entity.getTicksLived() >= ((Item) entity).getPickupDelay()
                         && entity.getLocation().getBlock().getType() != Material.HOPPER)
                 .map(entity -> (Item) entity)
@@ -56,6 +57,7 @@ public class ModuleSuction extends Module {
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
         for (Item item : itemsToSuck) {
+
             ItemStack itemStack = item.getItemStack();
 
             if (item.getPickupDelay() == 0) {
