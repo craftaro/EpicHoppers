@@ -54,6 +54,11 @@ public enum Setting {
             Arrays.asList("BEDROCK", "END_PORTAL", "ENDER_PORTAL", "END_PORTAL_FRAME", "ENDER_PORTAL_FRAME", "PISTON_HEAD", "PISTON_EXTENSION", "RAIL", "RAILS", "ACTIVATOR_RAIL", "DETECTOR_RAIL", "POWERED_RAIL"),
             "Anything listed here will not be broken by the block break module."),
 
+    AUTOCRAFT_JAM_EJECT("Main.AutoCraft Jam Eject", false,
+            "AutoCraft module needs a free slot to craft items with.",
+            "Normally, crafting hoppers won't grab items that would fill that slot.",
+            "This option ejects items if that last slot is forcibly filled"),
+
     AUTOSELL_PRICES("Main.AutoSell Prices",
             Arrays.asList("STONE,0.50", "COBBLESTONE,0.20", "IRON_ORE,0.35", "COAL_ORE,0.20"),
             "These are the prices used by the auto sell module."),

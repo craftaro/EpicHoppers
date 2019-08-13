@@ -111,7 +111,7 @@ public class StorageContainerCache {
                 int toRemove = item.getAmount();
                 for (int i = 0; toRemove > 0 && i < cachedInventory.length; i++) {
                     final ItemStack cacheItem = cachedInventory[i];
-                    if (cacheItem != null && cacheItem.getAmount() != 0 && Methods.isSimilar(item, cacheItem)) {
+                    if (cacheItem != null && cacheItem.getAmount() != 0 && item.isSimilar(cacheItem)) {
                         int have = cacheItem.getAmount();
                         if (have > toRemove) {
                             cachedInventory[i].setAmount(have - toRemove);
@@ -155,7 +155,7 @@ public class StorageContainerCache {
                         cacheAdded[i] = toAdd;
                         totalAdded += toAdd;
                         amountToAdd -= toAdd;
-                    } else if (maxStack > cacheItem.getAmount() && Methods.isSimilar(item, cacheItem)) {
+                    } else if (maxStack > cacheItem.getAmount() && item.isSimilar(cacheItem)) {
                         // free space!
                         int toAdd = Math.min(maxStack - cacheItem.getAmount(), amountToAdd);
                         cachedInventory[i].setAmount(toAdd + cacheItem.getAmount());

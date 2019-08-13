@@ -6,6 +6,7 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.StorageContainerCache;
+import com.songoda.epichoppers.utils.settings.Setting;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,15 +24,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 public class ModuleAutoCrafting extends Module {
 
     private static final Map<ItemStack, Recipes> cachedRecipes = new ConcurrentHashMap<>();
     private static final Map<Hopper, ItemStack> cachedCrafting = new ConcurrentHashMap<>();
     static final ItemStack noCraft = new ItemStack(Material.AIR);
+    boolean crafterEjection;
 
     public ModuleAutoCrafting(EpicHoppers plugin) {
         super(plugin);
+        crafterEjection = Setting.AUTOCRAFT_JAM_EJECT.getBoolean();
     }
 
     @Override
@@ -45,6 +49,21 @@ public class ModuleAutoCrafting extends Module {
         if (hopper == null || (toCraft = getAutoCrafting(hopper)) == null || toCraft.getType() == Material.AIR)
             return;
 
+        // jam check: is this hopper gummed up?
+        if(crafterEjection) {
+            final List<Material> allMaterials = getRecipes(toCraft).getAllMaterials();
+            if(Stream.of(hopperCache.cachedInventory)
+                    .allMatch(item -> item != null && allMaterials.stream().anyMatch(mat -> mat == item.getType()))) {
+                // Crafter can't function if there's nowhere to put the output
+                // ¯\_(ツ)_/¯
+                // forcibly open the last slot
+                ItemStack last = hopperCache.cachedInventory[4];
+                hopperCache.setItem(4, null);
+                // and yeet into space!
+                hopper.getWorld().dropItemNaturally(hopper.getLocation(), last);
+            }
+        }
+
         top:
         for (SimpleRecipe recipe : getRecipes(toCraft).recipes) {
 
@@ -52,7 +71,7 @@ public class ModuleAutoCrafting extends Module {
             for(ItemStack item : recipe.recipe) {
                 int amountHave = 0;
                 for (ItemStack hopperItem : hopperCache.cachedInventory) {
-                    if (hopperItem != null && Methods.isSimilar(hopperItem, item))
+                    if (hopperItem != null && Methods.isSimilarMaterial(hopperItem, item))
                         amountHave += hopperItem.getAmount();
                 }
                 if (amountHave < item.getAmount()) {
@@ -119,7 +138,22 @@ public class ModuleAutoCrafting extends Module {
     Recipes getRecipes(ItemStack toCraft) {
         Recipes recipes = cachedRecipes.get(toCraft);
         if (recipes == null) {
-            recipes = new Recipes(Bukkit.getServer().getRecipesFor(toCraft));
+            try {
+                recipes = new Recipes(Bukkit.getServer().getRecipesFor(toCraft));
+            } catch (Throwable t) {
+                // extremely rare, but y'know - some plugins are dumb
+                recipes = new Recipes();
+                // how's about we try this manually?
+                java.util.Iterator<Recipe> recipeIterator = Bukkit.getServer().recipeIterator();
+                while (recipeIterator.hasNext()) {
+                    try {
+                        Recipe recipe = recipeIterator.next();
+                        ItemStack stack = recipe.getResult();
+                        if (Methods.isSimilarMaterial(stack, toCraft))
+                            recipes.addRecipe(recipe);
+                    } catch (Throwable ignored) {}
+                }
+            }
 
             // adding broken recipe for wood planks
             final String toType = toCraft.getType().name();

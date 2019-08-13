@@ -107,9 +107,11 @@ public class EpicHoppers extends JavaPlugin {
         PluginManager pluginManager = Bukkit.getPluginManager();
 
         // Setup Economy
-        if (Setting.VAULT_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Vault"))
-            this.economy = new VaultEconomy();
-        else if (Setting.RESERVE_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Reserve"))
+        if (Setting.VAULT_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Vault")) {
+            // try to load Vault for economy
+            if (!((VaultEconomy) (this.economy = new VaultEconomy())).isLoaded())
+                this.economy = null; // vault load error
+        } else if (Setting.RESERVE_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Reserve"))
             this.economy = new ReserveEconomy();
         else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("PlayerPoints"))
             this.economy = new PlayerPointsEconomy();
@@ -185,6 +187,10 @@ public class EpicHoppers extends JavaPlugin {
      * Saves registered hoppers to file.
      */
     private void saveToFile() {
+        // double-check that we're ok to save
+        if(EpicHoppers.getInstance().getLevelManager() == null)
+            return;
+
         checkStorage();
 
         for (Level level : EpicHoppers.getInstance().getLevelManager().getLevels().values())
