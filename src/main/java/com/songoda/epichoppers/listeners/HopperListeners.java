@@ -32,6 +32,8 @@ public class HopperListeners implements Listener {
         this.instance = instance;
     }
 
+    // todo: InventoryMoveItemEvent for filters
+
     @EventHandler(ignoreCancelled = true)
     public void onHop(InventoryMoveItemEvent event) {
         Inventory source = event.getSource();
@@ -63,7 +65,8 @@ public class HopperListeners implements Listener {
 
         // Special cases when a hopper is picking up items
         if (destination.getHolder() instanceof org.bukkit.block.Hopper) {
-            Hopper toHopper = instance.getHopperManager().getHopper(destination.getLocation());
+            // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
+            Hopper toHopper = instance.getHopperManager().getHopper(((org.bukkit.block.Hopper) destination.getHolder()).getLocation());
             final ItemStack toMove = event.getItem();
 
             // Don't fill the last inventory slot on crafting hoppers (fixes crafters getting stuck)
