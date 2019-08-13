@@ -83,13 +83,13 @@ public class ModuleSuction extends Module {
                 // whitelist has priority
                 if (!hopper.getFilter().getWhiteList().isEmpty()) {
                     // is this item on the whitelist?
-                    if (!hopper.getFilter().getWhiteList().stream().anyMatch(filterItem -> Methods.isSimilar(itemStack, filterItem))) {
+                    if (!hopper.getFilter().getWhiteList().stream().anyMatch(filterItem -> Methods.isSimilarMaterial(itemStack, filterItem))) {
                         // nope!
                         continue;
                     }
                 } else {
                     // check the blacklist
-                    if (hopper.getFilter().getBlackList().stream().anyMatch(filterItem -> Methods.isSimilar(itemStack, filterItem))) {
+                    if (hopper.getFilter().getBlackList().stream().anyMatch(filterItem -> Methods.isSimilarMaterial(itemStack, filterItem))) {
                         // don't grab this, then
                         continue;
                     }

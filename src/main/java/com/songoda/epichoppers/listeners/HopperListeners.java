@@ -72,7 +72,7 @@ public class HopperListeners implements Listener {
             // if we're not moving the item that we're trying to craft, we need to verify that we're not trying to fill the last slot
             // (filling every slot leaves no room for the crafter to function)
             if (toCraft != null && toCraft.getType() != Material.AIR
-                    && !Methods.isSimilar(toMove, toCraft)
+                    && !Methods.isSimilarMaterial(toMove, toCraft)
                     && !Methods.canMoveReserved(destination, toMove)) {
                 event.setCancelled(true);
                 return;
@@ -88,14 +88,14 @@ public class HopperListeners implements Listener {
                 // whitelist has priority
                 if (!toHopper.getFilter().getWhiteList().isEmpty()) {
                     // is this item on the whitelist?
-                    allowItem = toHopper.getFilter().getWhiteList().stream().anyMatch(item -> Methods.isSimilar(toMove, item));
+                    allowItem = toHopper.getFilter().getWhiteList().stream().anyMatch(item -> Methods.isSimilarMaterial(toMove, item));
                     if(!allowItem) {
                         // can we change the item to something else?
                         searchReplacement:
                         for(ItemStack sourceItem : source.getContents()) {
                             if(sourceItem != null && Methods.canMove(destination, sourceItem)) {
                                 for(ItemStack item : toHopper.getFilter().getWhiteList()) {
-                                    if(Methods.isSimilar(sourceItem, item)) {
+                                    if(Methods.isSimilarMaterial(sourceItem, item)) {
                                         moveInstead = new ItemStack(sourceItem);
                                         moveInstead.setAmount(1);
                                         break searchReplacement;
@@ -106,13 +106,13 @@ public class HopperListeners implements Listener {
                     }
                 } else {
                     // check the blacklist
-                    allowItem = !toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilar(toMove, item));
+                    allowItem = !toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(toMove, item));
                     if (!allowItem) {
                         // can we change the item to something else?
                         searchReplacement:
                         for (ItemStack sourceItem : source.getContents()) {
                             if (sourceItem != null && Methods.canMove(destination, sourceItem)) {
-                                boolean blacklisted = toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilar(sourceItem, item));
+                                boolean blacklisted = toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(sourceItem, item));
                                 if (!blacklisted) {
                                     moveInstead = new ItemStack(sourceItem);
                                     moveInstead.setAmount(1);

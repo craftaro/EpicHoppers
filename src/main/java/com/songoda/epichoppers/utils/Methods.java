@@ -145,7 +145,7 @@ public class Methods {
         return glass;
     }
 
-    public static boolean isSimilar(ItemStack is1, ItemStack is2) {
+    public static boolean isSimilarMaterial(ItemStack is1, ItemStack is2) {
         if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)) {
             return is1.getType() == is2.getType();
         } else {
@@ -159,7 +159,7 @@ public class Methods {
         final ItemMeta itemMeta = item.getItemMeta();
         for (ItemStack stack : inventory) {
             final ItemMeta stackMeta;
-            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+            if (isSimilarMaterial(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
                     && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
                     && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
                 return true;
@@ -175,7 +175,7 @@ public class Methods {
             if (stack == null || stack.getAmount() == 0)
                 return true;
             final ItemMeta stackMeta;
-            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+            if (isSimilarMaterial(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
                     && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
                     && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
                 return true;
@@ -192,7 +192,7 @@ public class Methods {
         for (int i = 0; i < 4; i++) {
             final ItemStack stack = contents[i];
             final ItemMeta stackMeta;
-            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+            if (isSimilarMaterial(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
                     && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
                     && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
                 return true;
@@ -208,7 +208,7 @@ public class Methods {
             if (stack == null || stack.getAmount() == 0)
                 return true;
             final ItemMeta stackMeta;
-            if (isSimilar(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
+            if (isSimilarMaterial(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
                     && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
                     && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
                 return true;

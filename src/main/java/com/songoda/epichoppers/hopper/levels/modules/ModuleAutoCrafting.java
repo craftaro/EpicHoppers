@@ -71,7 +71,7 @@ public class ModuleAutoCrafting extends Module {
             for(ItemStack item : recipe.recipe) {
                 int amountHave = 0;
                 for (ItemStack hopperItem : hopperCache.cachedInventory) {
-                    if (hopperItem != null && Methods.isSimilar(hopperItem, item))
+                    if (hopperItem != null && Methods.isSimilarMaterial(hopperItem, item))
                         amountHave += hopperItem.getAmount();
                 }
                 if (amountHave < item.getAmount()) {
@@ -149,7 +149,7 @@ public class ModuleAutoCrafting extends Module {
                     try {
                         Recipe recipe = recipeIterator.next();
                         ItemStack stack = recipe.getResult();
-                        if (Methods.isSimilar(stack, toCraft))
+                        if (Methods.isSimilarMaterial(stack, toCraft))
                             recipes.addRecipe(recipe);
                     } catch (Throwable ignored) {}
                 }

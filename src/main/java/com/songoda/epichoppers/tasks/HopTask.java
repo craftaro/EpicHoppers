@@ -132,7 +132,7 @@ public class HopTask extends BukkitRunnable {
                             || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
                             // skip if blocked or voidlisted
                             || blockedMaterials.contains(item.getType())
-                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilar(itemStack, item)))
+                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
                         continue;
 
                     doProcess = true;
@@ -262,7 +262,7 @@ public class HopTask extends BukkitRunnable {
 
                 // if we're not moving the item that we're trying to craft, we need to verify that we're not trying to fill the last slot
                 // (filling every slot leaves no room for the crafter to function)
-                if (toCraft != null && !Methods.isSimilar(toMove, toCraft) && !Methods.canMoveReserved(hopperCache.cachedInventory, toMove))
+                if (toCraft != null && !Methods.isSimilarMaterial(toMove, toCraft) && !Methods.canMoveReserved(hopperCache.cachedInventory, toMove))
                     continue;
 
                 // respect whitelist/blacklist filters
@@ -272,13 +272,13 @@ public class HopTask extends BukkitRunnable {
                     // whitelist has priority
                     if (!toHopper.getFilter().getWhiteList().isEmpty()) {
                         // is this item on the whitelist?
-                        if (!toHopper.getFilter().getWhiteList().stream().anyMatch(item -> Methods.isSimilar(toMove, item))) {
+                        if (!toHopper.getFilter().getWhiteList().stream().anyMatch(item -> Methods.isSimilarMaterial(toMove, item))) {
                             // nope!
                             continue;
                         }
                     } else {
                         // check the blacklist
-                        if (toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilar(toMove, item))) {
+                        if (toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(toMove, item))) {
                             // don't grab this, then
                             continue;
                         }
@@ -407,7 +407,7 @@ public class HopTask extends BukkitRunnable {
                     || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
                     // skip if blocked or voidlisted
                     || blockedMaterials.contains(item.getType())
-                    || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilar(itemStack, item)))
+                    || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
                 continue;
 
             // Create item that will be moved.
@@ -443,7 +443,7 @@ public class HopTask extends BukkitRunnable {
             ItemStack[] hopperContents = hopperCache.cachedInventory;
             for (int i = 0; i < hopperContents.length; i++) {
                 final ItemStack item = hopperContents[i];
-                if (item != null && hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilar(itemStack, item))) {
+                if (item != null && hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item))) {
                     int amt = Math.min(0, item.getAmount() - maxToMove);
                     if (amt == 0) {
                         hopperCache.removeItem(i);
