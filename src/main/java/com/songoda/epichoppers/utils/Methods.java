@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.bukkit.command.CommandSender;
 
 /**
  * Created by songoda on 2/24/2017.
@@ -29,6 +30,7 @@ public class Methods {
     private static final Map<String, Location> serializeCache = new HashMap<>();
 
     public static boolean isLegacyFuel(Material material) {
+        
         if (material == null) return false;
         switch(material.ordinal() + 1) {
             case 6:
@@ -70,6 +72,7 @@ public class Methods {
             case 191:
             case 192:
             case 193:
+            case 206:
             case 260:
             case 262:
             case 267:
