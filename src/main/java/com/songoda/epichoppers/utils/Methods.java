@@ -29,6 +29,7 @@ public class Methods {
     private static final Map<String, Location> serializeCache = new HashMap<>();
 
     public static boolean isLegacyFuel(Material material) {
+        
         if (material == null) return false;
         switch(material.ordinal() + 1) {
             case 6:
@@ -70,6 +71,7 @@ public class Methods {
             case 191:
             case 192:
             case 193:
+            case 206:
             case 260:
             case 262:
             case 267:
@@ -260,11 +262,11 @@ public class Methods {
         if (location == null || location.getWorld() == null)
             return "";
         String w = location.getWorld().getName();
-        double x = location.getBlockX();
-        double y = location.getBlockY();
-        double z = location.getBlockZ();
+        double x = location.getX();
+        double y = location.getY();
+        double z = location.getZ();
         String str = w + ":" + x + ":" + y + ":" + z;
-        str = str.replace(".0", "").replace("/", "");
+        str = str.replace(".0", "").replace(".", "/");
         return str;
     }
 
@@ -295,10 +297,14 @@ public class Methods {
     private static Method getHandle, updateAdjacentComparators, getNMSBlock;
 
     public static void updateAdjacentComparators(Location location) {
+        if(location == null || location.getWorld() == null) {
+            return;
+        }
         try {
             // Cache reflection.
             if (clazzCraftWorld == null) {
-                String ver = Bukkit.getServer().getClass().getPackage().getName().substring(23);
+                String serverPackagePath = Bukkit.getServer().getClass().getPackage().getName();
+                String ver = serverPackagePath.substring(serverPackagePath.lastIndexOf('.') + 1);
                 clazzCraftWorld = Class.forName("org.bukkit.craftbukkit." + ver + ".CraftWorld");
                 clazzCraftBlock = Class.forName("org.bukkit.craftbukkit." + ver + ".block.CraftBlock");
                 clazzBlockPosition = Class.forName("net.minecraft.server." + ver + ".BlockPosition");

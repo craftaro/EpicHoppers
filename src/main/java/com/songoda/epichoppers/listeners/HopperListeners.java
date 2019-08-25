@@ -4,12 +4,12 @@ import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
-import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Minecart;
@@ -38,6 +38,8 @@ public class HopperListeners implements Listener {
     public void onHop(InventoryMoveItemEvent event) {
         Inventory source = event.getSource();
         Inventory destination = event.getDestination();
+        Location sourceLocation = source.getHolder() instanceof BlockState ? ((BlockState) source.getHolder()).getLocation() : null;
+        Location destinationLocation = destination.getHolder() instanceof BlockState ? ((BlockState) destination.getHolder()).getLocation() : null;
 
         // Hopper minecarts should be able to take care of themselves
         // Let EpicHoppers take over if the hopper is pointing down though
@@ -47,26 +49,27 @@ public class HopperListeners implements Listener {
             return;
 
         // Shulker boxes have a mind of their own and relentlessly steal items from hoppers
-        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_11) && destination.getHolder() instanceof org.bukkit.block.ShulkerBox && destination.getHolder() instanceof org.bukkit.block.Hopper) {
+        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_11)
+                && destination.getHolder() instanceof org.bukkit.block.ShulkerBox
+                && source.getHolder() instanceof org.bukkit.block.Hopper) {
             event.setCancelled(true);
             return;
         }
 
         // Hopper going into minecarts
         if (destination.getHolder() instanceof Minecart && source.getHolder() instanceof org.bukkit.block.Hopper) {
-            instance.getHopperManager().getHopper(((org.bukkit.block.Hopper) source.getHolder()).getLocation());
             event.setCancelled(true);
             return;
         }
 
         // Don't touch liquid tank hoppers
-        if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getDestination().getLocation()))
+        if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(destinationLocation))
             return;
 
         // Special cases when a hopper is picking up items
         if (destination.getHolder() instanceof org.bukkit.block.Hopper) {
             // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
-            Hopper toHopper = instance.getHopperManager().getHopper(((org.bukkit.block.Hopper) destination.getHolder()).getLocation());
+            Hopper toHopper = instance.getHopperManager().getHopper(destinationLocation);
             final ItemStack toMove = event.getItem();
 
             // Don't fill the last inventory slot on crafting hoppers (fixes crafters getting stuck)
@@ -132,10 +135,10 @@ public class HopperListeners implements Listener {
                         //event.setItem(moveInstead);
                         // we need to instead cancel and manually remove the item to move
                         source.removeItem(moveInstead);
-                        Methods.updateAdjacentComparators(source.getLocation());
+                        Methods.updateAdjacentComparators(sourceLocation);
                         // now add it to the hopper
                         destination.addItem(moveInstead);
-                        Methods.updateAdjacentComparators(destination.getLocation());
+                        Methods.updateAdjacentComparators(destinationLocation);
                     }
                     return;
                 }
@@ -145,26 +148,8 @@ public class HopperListeners implements Listener {
         if (!(source.getHolder() instanceof org.bukkit.block.Hopper))
             return;
 
-        org.bukkit.block.Hopper sourceHopper = (org.bukkit.block.Hopper) source.getHolder();
-
-        Location destinationLocation;
-        if (destination.getHolder() instanceof org.bukkit.block.Hopper) {
-            destinationLocation = ((org.bukkit.block.Hopper) destination.getHolder()).getLocation();
-        } else if (destination.getHolder() instanceof Chest) {
-            destinationLocation = ((Chest) destination.getHolder()).getLocation();
-        } else if (destination.getHolder() instanceof DoubleChest) {
-            destinationLocation = ((DoubleChest) destination.getHolder()).getLocation();
-        } else {
+        if(destinationLocation == null)
             return;
-        }
-
-        if (!(destinationLocation.getBlock().getState() instanceof InventoryHolder))
-            return;
-
-        Hopper hopper = instance.getHopperManager().getHopper(sourceHopper.getLocation());
-
-        hopper.clearLinkedBlocks();
-        hopper.addLinkedBlock(destinationLocation);
 
         // Handle hopper push events elsewhere
         event.setCancelled(true);

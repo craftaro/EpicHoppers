@@ -56,7 +56,8 @@ public class ModuleAutoSell extends Module {
 
             OfflinePlayer player = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
 
-            for (int i = 0; i < hopperCache.cachedInventory.length - 1; i++) {
+                // -1
+            for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
                 final ItemStack itemStack = hopperCache.cachedInventory[i];
                 if (itemStack == null) continue;
 
