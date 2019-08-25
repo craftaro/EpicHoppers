@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.bukkit.command.CommandSender;
 
 /**
  * Created by songoda on 2/24/2017.
@@ -298,10 +297,14 @@ public class Methods {
     private static Method getHandle, updateAdjacentComparators, getNMSBlock;
 
     public static void updateAdjacentComparators(Location location) {
+        if(location == null || location.getWorld() == null) {
+            return;
+        }
         try {
             // Cache reflection.
             if (clazzCraftWorld == null) {
-                String ver = Bukkit.getServer().getClass().getPackage().getName().substring(23);
+                String serverPackagePath = Bukkit.getServer().getClass().getPackage().getName();
+                String ver = serverPackagePath.substring(serverPackagePath.lastIndexOf('.') + 1);
                 clazzCraftWorld = Class.forName("org.bukkit.craftbukkit." + ver + ".CraftWorld");
                 clazzCraftBlock = Class.forName("org.bukkit.craftbukkit." + ver + ".block.CraftBlock");
                 clazzBlockPosition = Class.forName("net.minecraft.server." + ver + ".BlockPosition");
