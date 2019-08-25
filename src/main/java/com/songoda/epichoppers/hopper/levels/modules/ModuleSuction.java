@@ -6,8 +6,6 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,12 +16,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class ModuleSuction extends Module {
