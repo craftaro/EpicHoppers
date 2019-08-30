@@ -257,7 +257,7 @@ public class HopTask extends BukkitRunnable {
                 final ItemStack toMove = contents[i];
 
                 // If item is invalid, try the next slot.
-                if (toMove == null)
+                if (toMove == null || toMove.getAmount() == 0)
                     continue;
 
                 // if we're not moving the item that we're trying to craft, we need to verify that we're not trying to fill the last slot
@@ -456,6 +456,7 @@ public class HopTask extends BukkitRunnable {
             }
         }
     }
+
     /**
      * Gets a set of slots that can be pulled from based on the given material
      * @param material The material to get pullable slots for
