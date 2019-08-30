@@ -63,7 +63,9 @@ public class StorageContainerCache {
             this.type = type;
             this.cachedInventory = cachedInventory;
             this.cacheChanged = new boolean[cachedInventory.length];
+            this.cacheAdded = new int[cachedInventory.length];
         }
+
         public Cache(Block b, ItemStack[] cachedInventory) {
             this.block = b;
             this.type = b.getType();
