@@ -444,7 +444,7 @@ public class HopTask extends BukkitRunnable {
             for (int i = 0; i < hopperContents.length; i++) {
                 final ItemStack item = hopperContents[i];
                 if (item != null && hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item))) {
-                    int amt = Math.min(0, item.getAmount() - maxToMove);
+                    int amt = Math.max(0, item.getAmount() - maxToMove);
                     if (amt == 0) {
                         hopperCache.removeItem(i);
                     } else {
