@@ -272,6 +272,7 @@ public class StorageContainerCache {
                     else
                         check[3] = true;
 
+                    break;
                 }
                 case "SMOKER":
                 case "BLAST_FURNACE":
