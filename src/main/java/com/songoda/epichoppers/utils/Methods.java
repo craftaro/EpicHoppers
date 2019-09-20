@@ -110,7 +110,7 @@ public class Methods {
                 && p.getItemInHand().getType() != Material.ENCHANTED_BOOK
                 && p.getItemInHand().getItemMeta().hasLore()) {
             for (String str : p.getItemInHand().getItemMeta().getLore()) {
-                if (str.equals(Methods.formatText("&7Sync Touch")) || str.equals(Methods.formatText("&aSync Touch"))) {
+                if (str.contains(Methods.formatText("&7Sync Touch")) || str.contains(Methods.formatText("&aSync Touch"))) {
                     return true;
                 }
             }
