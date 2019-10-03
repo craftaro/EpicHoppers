@@ -17,6 +17,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -52,7 +53,9 @@ public class EntityListeners implements Listener {
         if (location.getBlock().getType() != Material.CHEST) return;
         InventoryHolder ih = (InventoryHolder) location.getBlock().getState();
         for (ItemStack is : event.getDrops()) {
-            ih.getInventory().addItem(is);
+            Map<Integer, ItemStack> notDropped = ih.getInventory().addItem(is);
+            if (!notDropped.isEmpty())
+                location.getWorld().dropItemNaturally(event.getEntity().getLocation(), new ArrayList<>(notDropped.values()).get(0));
         }
         event.getDrops().clear();
     }

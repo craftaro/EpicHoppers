@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -18,21 +21,80 @@ public class StorageContainerCache {
 
     private final static Map<Block, Cache> inventoryCache = new HashMap<>();
 
+    // need to get the topmost inventory for a double chest, and save as that block
     public static Cache getCachedInventory(Block b) {
         Cache cache = inventoryCache.get(b);
         if (cache == null) {
+            Material type = b.getType();
+            if(type == Material.CHEST || type == Material.TRAPPED_CHEST) {
+                Block b2 = findAdjacentDoubleChest(b);
+                //System.out.println("Adjacent to " + b + " = " + b2);
+                if(b2 != null && (cache = inventoryCache.get(b2)) != null) {
+                    return cache;
+                }
+            }
             BlockState blockState = b.getState();
             if (blockState instanceof InventoryHolder) {
+                //System.out.println("Load " + b.getLocation());
                 inventoryCache.put(b, cache = new Cache(b, ((InventoryHolder) blockState).getInventory().getContents()));
             }
         }
         return cache;
     }
 
+    /**
+     * Look for a double chest adjacent to a chest
+     *
+     * @param block
+     * @return
+     */
+    public static Block findAdjacentDoubleChest(Block block) {
+        if(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)) {
+            final BlockData d = block.getBlockData();
+            if (d instanceof Chest) {
+                final Chest c = (Chest) d;
+                if(c.getType() != Chest.Type.SINGLE) {
+                    // this is a double chest - check the other chest for registration data
+                    Block other = null;
+                    switch(c.getFacing()) {
+                        case SOUTH:
+                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.WEST : BlockFace.EAST);
+                            break;
+                        case NORTH:
+                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.EAST : BlockFace.WEST);
+                            break;
+                        case EAST:
+                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.SOUTH : BlockFace.NORTH);
+                            break;
+                        case WEST:
+                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.NORTH : BlockFace.SOUTH);
+                    }
+                    // double-check
+                    if (other != null && other.getType() == block.getType()) {
+                        return other;
+                    }
+                }
+            }
+        } else {
+            // legacy check
+            Material material = block.getType();
+            BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
+            for (BlockFace face : faces) {
+                Block adjacentBlock = block.getRelative(face);
+
+                if (adjacentBlock.getType() == material) {
+                    return adjacentBlock;
+                }
+            }
+        }
+        return null;
+    }
+
     public static void update() {
         inventoryCache.entrySet().stream()
                 .filter(e -> e.getValue().dirty)
                 .forEach(e -> {
+                    //System.out.println("Update " + e.getKey().getLocation());
                     // setContents makes a copy of every item whether it's needed or not
                     //((InventoryHolder) e.getKey().getState()).getInventory().setContents(e.getValue().cachedInventory);
                     // so let's only update what needs to be updated.
@@ -63,7 +125,9 @@ public class StorageContainerCache {
             this.type = type;
             this.cachedInventory = cachedInventory;
             this.cacheChanged = new boolean[cachedInventory.length];
+            this.cacheAdded = new int[cachedInventory.length];
         }
+
         public Cache(Block b, ItemStack[] cachedInventory) {
             this.block = b;
             this.type = b.getType();
@@ -208,6 +272,7 @@ public class StorageContainerCache {
                     else
                         check[3] = true;
 
+                    break;
                 }
                 case "SMOKER":
                 case "BLAST_FURNACE":

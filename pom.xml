@@ -68,8 +68,8 @@
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.14.4-R0.1-SNAPSHOT</version>
+            <artifactId>spigot</artifactId>
+            <version>1.14.1</version>
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
@@ -106,14 +106,14 @@
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
-            <artifactId>fabledskyblock</artifactId>
-            <version>78.5</version>
+            <artifactId>abledskyblock</artifactId>
+            <version>79.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
-            <artifactId>epicfarming</artifactId>
-            <version>2.2.1</version>
+            <artifactId>EpicFarming</artifactId>
+            <version>2.3.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -19,51 +19,36 @@ public class CommandBoost extends AbstractCommand {
     @Override
     protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
         if (args.length < 3) {
+            instance.getLocale().newMessage("&7Syntax error...").sendPrefixedMessage(sender);
             return ReturnType.SYNTAX_ERROR;
         }
-        if (Bukkit.getPlayer(args[1]) == null) {
-            instance.getLocale().newMessage("&cThat player does not exist...").sendPrefixedMessage(sender);
-            return ReturnType.FAILURE;
-        } else if (!Methods.isInt(args[2])) {
+        if (!Methods.isInt(args[2])) {
             instance.getLocale().newMessage("&6" + args[2] + " &7is not a number...").sendPrefixedMessage(sender);
-            return ReturnType.FAILURE;
-        } else {
-            Calendar c = Calendar.getInstance();
-            Date currentDate = new Date();
-            c.setTime(currentDate);
-
-            String time = "&7.";
-
-            if (args.length > 3) {
-                if (args[3].contains("m:")) {
-                    String[] arr2 = (args[3]).split(":");
-                    c.add(Calendar.MINUTE, Integer.parseInt(arr2[1]));
-                    time = " &7for &6" + arr2[1] + " minutes&7.";
-                } else if (args[3].contains("h:")) {
-                    String[] arr2 = (args[3]).split(":");
-                    c.add(Calendar.HOUR, Integer.parseInt(arr2[1]));
-                    time = " &7for &6" + arr2[1] + " hours&7.";
-                } else if (args[3].contains("d:")) {
-                    String[] arr2 = (args[3]).split(":");
-                    c.add(Calendar.HOUR, Integer.parseInt(arr2[1]) * 24);
-                    time = " &7for &6" + arr2[1] + " days&7.";
-                } else if (args[3].contains("y:")) {
-                    String[] arr2 = (args[3]).split(":");
-                    c.add(Calendar.YEAR, Integer.parseInt(arr2[1]));
-                    time = " &7for &6" + arr2[1] + " years&7.";
-                } else {
-                    instance.getLocale().newMessage("&7" + args[3] + " &7is invalid.").sendPrefixedMessage(sender);
-                    return ReturnType.SUCCESS;
-                }
-            } else {
-                c.add(Calendar.YEAR, 10);
-            }
-
-            BoostData boostData = new BoostData(Integer.parseInt(args[2]), c.getTime().getTime(), Bukkit.getPlayer(args[1]).getUniqueId());
-            instance.getBoostManager().addBoostToPlayer(boostData);
-            instance.getLocale().newMessage("&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName() + "'s &7hoppers transfer rates by &6" + args[2] + "x" + time).sendPrefixedMessage(sender);
+            return ReturnType.SYNTAX_ERROR;
         }
-        return ReturnType.FAILURE;
+
+        long duration = 0L;
+
+        if (args.length > 3) {
+            for (int i = 1; i < args.length; i++) {
+                String line = args[i];
+                long time = Methods.parseTime(line);
+                duration += time;
+
+            }
+        }
+
+        Player player = Bukkit.getPlayer(args[1]);
+        if (player == null) {
+            instance.getLocale().newMessage("&cThat player does not exist or is not online...").sendPrefixedMessage(sender);
+            return ReturnType.FAILURE;
+        }
+
+        BoostData boostData = new BoostData(Integer.parseInt(args[2]), duration == 0L ? Long.MAX_VALUE : System.currentTimeMillis() + duration, player.getUniqueId());
+        instance.getBoostManager().addBoostToPlayer(boostData);
+        instance.getLocale().newMessage("&7Successfully boosted &6" + Bukkit.getPlayer(args[1]).getName()
+                + "'s &7hopper transfer rates by &6" + args[2] + "x" + (duration == 0L ? "" : (" for " + Methods.makeReadable(duration))) + "&7.").sendPrefixedMessage(sender);
+        return ReturnType.SUCCESS;
     }
 
     @Override
@@ -77,7 +62,7 @@ public class CommandBoost extends AbstractCommand {
         } else if (args.length == 3) {
             return Arrays.asList("1", "2", "3", "4", "5");
         } else if (args.length == 4) {
-            return Arrays.asList("m:", "h:", "d:", "y:");
+            return Arrays.asList("1m", "1h", "1d");
         }
         return null;
     }
@@ -89,7 +74,7 @@ public class CommandBoost extends AbstractCommand {
 
     @Override
     public String getSyntax() {
-        return "/eh boost <player> <multiplier> [m:minute, h:hour, d:day, y:year]";
+        return "/eh boost <player> <amount> [duration]";
     }
 
     @Override

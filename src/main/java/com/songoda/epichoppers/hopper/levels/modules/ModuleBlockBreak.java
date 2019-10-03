@@ -77,7 +77,7 @@ public class ModuleBlockBreak extends Module {
         Block above = hopper.getLocation().getBlock().getRelative(0, 1, 0);
 
         // Don't break farm items from EpicFarming
-        if (plugin.isEpicFarming() && com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(above) != null)
+        if (plugin.isEpicFarming() && com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(above) != null)
             return;
 
         // don't break blacklisted blocks, fluids, or containers

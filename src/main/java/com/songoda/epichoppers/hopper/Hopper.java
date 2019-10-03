@@ -126,7 +126,7 @@ public class Hopper {
         EpicHoppers instance = EpicHoppers.getInstance();
         Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
             PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
-            if (playerData.getSyncType() != null) {
+            if (playerData.getSyncType() != null && playerData.getLastHopper() == this) {
                 instance.getLocale().getMessage("event.hopper.synctimeout").sendPrefixedMessage(player);
                 playerData.setSyncType(null);
             }

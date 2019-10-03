@@ -11,16 +11,22 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Module {
+
+    private static final Map<String, ConfigWrapper> configs = new HashMap<>();
 
     protected final EpicHoppers plugin;
     private final ConfigWrapper config;
 
     public Module(EpicHoppers plugin) {
         this.plugin = plugin;
-        this.config = new ConfigWrapper(plugin, File.separator + "modules", getName() + ".yml");
+        if (!configs.containsKey(getName()))
+            configs.put(getName(), new ConfigWrapper(plugin, File.separator + "modules", getName() + ".yml"));
+        this.config = configs.get(getName());
     }
 
     public abstract String getName();
