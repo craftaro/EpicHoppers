@@ -25,11 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -52,7 +48,7 @@ public class HopTask extends BukkitRunnable {
         plugin = plug;
         this.hopTicks = Math.max(1, Setting.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
-        if((this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null)) {
+        if ((this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null)) {
             try {
                 Class.forName("me.goodandevil.skyblock.SkyBlock");
                 legacyFabledSkyblock = true;
@@ -134,11 +130,11 @@ public class HopTask extends BukkitRunnable {
                     // Can we check this item?
                     if (    // Ignore this one if the slot is empty
                             item == null
-                            // Don't try to move items that we've added this round
-                            || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
-                            // skip if blocked or voidlisted
-                            || blockedMaterials.contains(item.getType())
-                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
+                                    // Don't try to move items that we've added this round
+                                    || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
+                                    // skip if blocked or voidlisted
+                                    || blockedMaterials.contains(item.getType())
+                                    || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
                         continue;
 
                     doProcess = true;
@@ -269,9 +265,9 @@ public class HopTask extends BukkitRunnable {
                 contents = aboveCache.cachedInventory;
                 aboveInvHolder = null;
             } else if (isFarmItem) {
-                aboveInvHolder = this.getEpicFarmingItemWrapped(above);
-                pullableSlots = IntStream.rangeClosed(27, 53).toArray();
-                contents = aboveInvHolder.getInventory().getContents();
+                aboveInvHolder = null;
+                contents = getFarmContents(above);
+                pullableSlots = IntStream.rangeClosed(0, contents.length - 1).toArray();
             } else {
                 if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null)
                     return;
@@ -303,12 +299,12 @@ public class HopTask extends BukkitRunnable {
 
                 // respect whitelist/blacklist filters
                 if (toHopper.getFilter().getEndPoint() == null
-                    && !(toHopper.getFilter().getWhiteList().isEmpty() && toHopper.getFilter().getBlackList().isEmpty())) {
+                        && !(toHopper.getFilter().getWhiteList().isEmpty() && toHopper.getFilter().getBlackList().isEmpty())) {
                     // this hopper has a filter with no rejection endpoint, so don't absorb disalowed items
                     // whitelist has priority
                     if (!toHopper.getFilter().getWhiteList().isEmpty()) {
                         // is this item on the whitelist?
-                        if (!toHopper.getFilter().getWhiteList().stream().anyMatch(item -> Methods.isSimilarMaterial(toMove, item))) {
+                        if (toHopper.getFilter().getWhiteList().stream().noneMatch(item -> Methods.isSimilarMaterial(toMove, item))) {
                             // nope!
                             continue;
                         }
@@ -322,7 +318,7 @@ public class HopTask extends BukkitRunnable {
                 }
 
                 // Get amount to move.
-                int amountToMove = toMove.getAmount() < maxToMove ? toMove.getAmount() : maxToMove;
+                int amountToMove = Math.min(toMove.getAmount(), maxToMove);
 
                 // Create item that will be moved.
                 ItemStack itemToMove = toMove.clone();
@@ -335,7 +331,10 @@ public class HopTask extends BukkitRunnable {
                     if (aboveCache != null) {
                         aboveCache.removeItems(itemToMove);
                     } else {
-                        this.debt(itemToMove, amountToMove, aboveInvHolder);
+                        if (isFarmItem)
+                            com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(above).removeMaterial(itemToMove.getType(), amountToMove);
+                        else
+                            this.debt(itemToMove, amountToMove, aboveInvHolder);
                     }
                     break;
                 }
@@ -388,7 +387,7 @@ public class HopTask extends BukkitRunnable {
                     StorageContainerCache.Cache cache = new StorageContainerCache.Cache(targetBlock.getType(), destinationInventory.getContents());
                     if (tryPush(hopper, hopperCache, cache, filterCache, maxToMove, blockedMaterials)) {
                         // update inventory and exit
-                        if(cache.isDirty())
+                        if (cache.isDirty())
                             destinationInventory.setContents(cache.cachedInventory);
                         return;
                     }
@@ -413,8 +412,8 @@ public class HopTask extends BukkitRunnable {
         // if we've gotten this far, check if we can push into a minecart
         if (checkForMinecarts) {
             for (InventoryHolder minecartInventory : hopper.getWorld().getNearbyEntities(pointingLocation.clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)
-                                .stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
-                                .map(e -> (InventoryHolder) e).collect(Collectors.toSet())) {
+                    .stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
+                    .map(e -> (InventoryHolder) e).collect(Collectors.toSet())) {
                 StorageContainerCache.Cache cache = new StorageContainerCache.Cache(Material.CHEST, minecartInventory.getInventory().getContents());
                 if (tryPush(hopper, hopperCache, cache, filterCache, maxToMove, blockedMaterials)) {
                     if (cache.isDirty())
@@ -426,10 +425,10 @@ public class HopTask extends BukkitRunnable {
     }
 
     private boolean tryPush(com.songoda.epichoppers.hopper.Hopper hopper,
-            StorageContainerCache.Cache hopperCache,
-            StorageContainerCache.Cache targetCache,
-            StorageContainerCache.Cache filterCache,
-            int maxToMove, Collection<Material> blockedMaterials) {
+                            StorageContainerCache.Cache hopperCache,
+                            StorageContainerCache.Cache targetCache,
+                            StorageContainerCache.Cache filterCache,
+                            int maxToMove, Collection<Material> blockedMaterials) {
 
         // Loop through all of our hopper's item slots.
         for (int i = 0; i < 5; i++) {
@@ -439,11 +438,11 @@ public class HopTask extends BukkitRunnable {
             // Can we check this item?
             if (    // Ignore this one if the slot is empty
                     item == null
-                    // Don't try to move items that we've added this round
-                    || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
-                    // skip if blocked or voidlisted
-                    || blockedMaterials.contains(item.getType())
-                    || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
+                            // Don't try to move items that we've added this round
+                            || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
+                            // skip if blocked or voidlisted
+                            || blockedMaterials.contains(item.getType())
+                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
                 continue;
 
             // Create item that will be moved.
@@ -495,6 +494,7 @@ public class HopTask extends BukkitRunnable {
 
     /**
      * Gets a set of slots that can be pulled from based on the given material
+     *
      * @param material The material to get pullable slots for
      * @return A set of valid pullable slots
      */
@@ -527,6 +527,7 @@ public class HopTask extends BukkitRunnable {
     /**
      * Gets a random InventoryHolder from a collection of entities
      * Only grabs InventoryHolders from StorageMinecarts and HopperMinecarts
+     *
      * @param entities The collection of entities
      * @return A random InventoryHolder if one exists, otherwise null
      */
@@ -543,22 +544,17 @@ public class HopTask extends BukkitRunnable {
 
     /**
      * Checks if a given block is an EpicFarming farm item
+     *
      * @param block The block to check
      * @return true if the block is a farm item, otherwise false
      */
     private boolean isFarmItem(Block block) {
-        return EpicHoppers.getInstance().isEpicFarming() && com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(block) != null;
+        return EpicHoppers.getInstance().isEpicFarming() && com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(block) != null;
     }
 
-    /**
-     * Gets an EpicFarming block as an InventoryHolder
-     * Needed because EpicFarming doesn't natively support having an InventoryHolder for the farm item
-     *
-     * @param block The block to effectively attach an InventoryHolder to
-     * @return An InventoryHolder wrapping the EpicFarming inventory
-     */
-    private InventoryHolder getEpicFarmingItemWrapped(Block block) {
-        return () -> com.songoda.epicfarming.EpicFarmingPlugin.getInstance().getFarmManager().getFarm(block).getInventory();
+    private ItemStack[] getFarmContents(Block block) {
+        return com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager()
+                .getFarm(block).getItems().toArray(new ItemStack[0]);
     }
 
 }
