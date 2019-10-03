@@ -24,6 +24,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -169,8 +171,11 @@ public class BlockListeners implements Listener {
                     for (ItemStack is : event.getBlock().getDrops()) ih.getInventory().addItem(is);
                 }
             } else {
-                for (ItemStack is : event.getBlock().getDrops())
-                    ih.getInventory().addItem(is);
+                for (ItemStack is : event.getBlock().getDrops()) {
+                    Map<Integer, ItemStack> notDropped = ih.getInventory().addItem(is);
+                    if (!notDropped.isEmpty())
+                        location.getWorld().dropItemNaturally(event.getBlock().getLocation(), new ArrayList<>(notDropped.values()).get(0));
+                }
             }
         }
 
