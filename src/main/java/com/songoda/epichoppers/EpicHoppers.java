@@ -1,12 +1,16 @@
 package com.songoda.epichoppers;
 
+import com.songoda.core.SongodaCore;
+import com.songoda.core.SongodaPlugin;
+import com.songoda.core.commands.CommandManager;
+import com.songoda.core.compatibility.CompatibleMaterial;
+import com.songoda.core.configuration.Config;
+import com.songoda.core.gui.GuiManager;
+import com.songoda.core.hooks.EconomyManager;
+import com.songoda.core.locale.Locale;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
-import com.songoda.epichoppers.command.CommandManager;
-import com.songoda.epichoppers.economy.Economy;
-import com.songoda.epichoppers.economy.PlayerPointsEconomy;
-import com.songoda.epichoppers.economy.ReserveEconomy;
-import com.songoda.epichoppers.economy.VaultEconomy;
+import com.songoda.epichoppers.commands.*;
 import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hopper.Filter;
@@ -14,62 +18,42 @@ import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
-import com.songoda.epichoppers.hopper.levels.modules.Module;
-import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
-import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSell;
-import com.songoda.epichoppers.hopper.levels.modules.ModuleBlockBreak;
-import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
+import com.songoda.epichoppers.hopper.levels.modules.*;
 import com.songoda.epichoppers.listeners.*;
 import com.songoda.epichoppers.player.PlayerDataManager;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.storage.Storage;
 import com.songoda.epichoppers.storage.StorageRow;
-import com.songoda.epichoppers.storage.types.StorageMysql;
 import com.songoda.epichoppers.storage.types.StorageYaml;
 import com.songoda.epichoppers.tasks.HopTask;
-import com.songoda.epichoppers.utils.*;
-import com.songoda.epichoppers.utils.locale.Locale;
-import com.songoda.epichoppers.utils.settings.Setting;
-import com.songoda.epichoppers.utils.settings.SettingsManager;
-import com.songoda.epichoppers.utils.updateModules.LocaleModule;
-import com.songoda.update.Plugin;
-import com.songoda.update.SongodaUpdate;
-import org.apache.commons.lang.ArrayUtils;
+import com.songoda.epichoppers.utils.Methods;
+import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
-public class EpicHoppers extends JavaPlugin {
-    private static CommandSender console = Bukkit.getConsoleSender();
+public class EpicHoppers extends SongodaPlugin {
 
     private static EpicHoppers INSTANCE;
 
-    private ServerVersion serverVersion = ServerVersion.fromPackageName(Bukkit.getServer().getClass().getPackage().getName());
+    private Config levelsConfig = new Config(this, "levels.yml");
 
     public Enchantment enchantmentHandler;
-    private SettingsManager settingsManager;
-    private ConfigWrapper levelsFile = new ConfigWrapper(this, "", "levels.yml");
-    private Locale locale;
 
+    private final GuiManager guiManager = new GuiManager(this);
     private HopperManager hopperManager;
     private CommandManager commandManager;
     private LevelManager levelManager;
     private BoostManager boostManager;
     private PlayerDataManager playerDataManager;
-
-    private Economy economy;
 
     private TeleportHandler teleportHandler;
 
@@ -83,42 +67,46 @@ public class EpicHoppers extends JavaPlugin {
     }
 
     @Override
-    public void onEnable() {
+    public void onPluginLoad() {
         INSTANCE = this;
+    }
 
-        console.sendMessage(Methods.formatText("&a============================="));
-        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3&7!"));
-        console.sendMessage(Methods.formatText("&7Action: &aEnabling&7..."));
+    @Override
+    public void onPluginDisable() {
+        this.saveToFile();
+        this.storage.closeConnection();
+    }
 
-        this.settingsManager = new SettingsManager(this);
-        this.settingsManager.setupConfig();
+    @Override
+    public void onPluginEnable() {
+        // Run Songoda Updater
+        SongodaCore.registerPlugin(this, 22, CompatibleMaterial.HOPPER);
 
-        // Setup language
-        new Locale(this, "en_US");
-        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode"));
+        // Load Economy
+        EconomyManager.load();
 
-        // Running Songoda Updater
-        Plugin plugin = new Plugin(this, 15);
-        plugin.addModule(new LocaleModule());
-        SongodaUpdate.load(plugin);
+        // Setup Config
+        Settings.setupConfig();
+        this.setLocale(Settings.LANGUGE_MODE.getString(), false);
+
+        // Set Economy & Hologram preference
+        EconomyManager.getManager().setPreferredHook(Settings.ECONOMY_PLUGIN.getString());
+
+        // Register commands
+        this.commandManager = new CommandManager(this);
+        this.commandManager.addCommand(new CommandEpicHoppers(this))
+                .addSubCommands(
+                        new CommandBook(this),
+                        new CommandBoost(this),
+                        new CommandGive(this),
+                        new CommandReload(this),
+                        new CommandSettings(this)
+                );
 
         this.enchantmentHandler = new Enchantment();
         this.hopperManager = new HopperManager();
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
-        this.commandManager = new CommandManager(this);
-
-        PluginManager pluginManager = Bukkit.getPluginManager();
-
-        // Setup Economy
-        if (Setting.VAULT_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Vault")) {
-            // try to load Vault for economy
-            if (!((VaultEconomy) (this.economy = new VaultEconomy())).isLoaded())
-                this.economy = null; // vault load error
-        } else if (Setting.RESERVE_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("Reserve"))
-            this.economy = new ReserveEconomy();
-        else if (Setting.PLAYER_POINTS_ECONOMY.getBoolean() && pluginManager.isPluginEnabled("PlayerPoints"))
-            this.economy = new PlayerPointsEconomy();
 
         this.loadLevelManager();
         this.checkStorage();
@@ -130,6 +118,8 @@ public class EpicHoppers extends JavaPlugin {
         this.teleportHandler = new TeleportHandler(this);
 
         // Register Listeners
+        guiManager.init();
+        PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new HopperListeners(this), this);
         pluginManager.registerEvents(new EntityListeners(this), this);
         pluginManager.registerEvents(new BlockListeners(this), this);
@@ -143,48 +133,24 @@ public class EpicHoppers extends JavaPlugin {
         if (pluginManager.isPluginEnabled("EpicFarming")) epicfarming = true;
 
         // Start auto save
-        int saveInterval = Setting.AUTOSAVE.getInt() * 60 * 20;
+        int saveInterval = Settings.AUTOSAVE.getInt() * 60 * 20;
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, saveInterval, saveInterval);
-
-        // Start Metrics
-        new Metrics(this);
-
-        console.sendMessage(Methods.formatText("&a============================="));
     }
 
     @Override
-    public void onDisable() {
-        this.saveToFile();
-        this.storage.closeConnection();
-
-        console.sendMessage(Methods.formatText("&a============================="));
-        console.sendMessage(Methods.formatText("&7EpicHoppers " + this.getDescription().getVersion() + " by &5Songoda <3!"));
-        console.sendMessage(Methods.formatText("&7Action: &cDisabling&7..."));
-        console.sendMessage(Methods.formatText("&a============================="));
+    public void onConfigReload() {
+        this.setLocale(getConfig().getString("System.Language Mode"), true);
+        this.locale.reloadMessages();
+        loadLevelManager();
     }
 
-    public ServerVersion getServerVersion() {
-        return serverVersion;
-    }
-
-    public boolean isServerVersion(ServerVersion version) {
-        return serverVersion == version;
-    }
-
-    public boolean isServerVersion(ServerVersion... versions) {
-        return ArrayUtils.contains(versions, serverVersion);
-    }
-
-    public boolean isServerVersionAtLeast(ServerVersion version) {
-        return serverVersion.ordinal() >= version.ordinal();
+    @Override
+    public List<Config> getExtraConfig() {
+        return Collections.singletonList(levelsConfig);
     }
 
     private void checkStorage() {
-        if (getConfig().getBoolean("Database.Activate Mysql Support")) {
-            this.storage = new StorageMysql(this);
-        } else {
-            this.storage = new StorageYaml(this);
-        }
+        this.storage = new StorageYaml(this);
     }
 
     /*
@@ -192,7 +158,7 @@ public class EpicHoppers extends JavaPlugin {
      */
     private void saveToFile() {
         // double-check that we're ok to save
-        if(EpicHoppers.getInstance().getLevelManager() == null)
+        if (EpicHoppers.getInstance().getLevelManager() == null)
             return;
 
         checkStorage();
@@ -280,6 +246,7 @@ public class EpicHoppers extends JavaPlugin {
     private void loadLevelManager() {
         if (!new File(this.getDataFolder(), "levels.yml").exists())
             this.saveResource("levels.yml", false);
+        levelsConfig.load();
 
         // Load an instance of LevelManager
         levelManager = new LevelManager();
@@ -287,10 +254,10 @@ public class EpicHoppers extends JavaPlugin {
          * Register Levels into LevelManager from configuration.
          */
         levelManager.clear();
-        for (String levelName : levelsFile.getConfig().getKeys(false)) {
+        for (String levelName : levelsConfig.getKeys(false)) {
             int level = Integer.valueOf(levelName.split("-")[1]);
 
-            ConfigurationSection levels = levelsFile.getConfig().getConfigurationSection(levelName);
+            ConfigurationSection levels = levelsConfig.getConfigurationSection(levelName);
 
             int radius = levels.getInt("Range");
             int amount = levels.getInt("Amount");
@@ -317,13 +284,6 @@ public class EpicHoppers extends JavaPlugin {
             }
             levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }
-    }
-
-    public void reload() {
-        this.locale = Locale.getLocale(getConfig().getString("System.Language Mode"));
-        this.locale.reloadMessages();
-        this.settingsManager.reloadConfig();
-        loadLevelManager();
     }
 
     public ItemStack newHopperItem(Level level) {
@@ -362,16 +322,12 @@ public class EpicHoppers extends JavaPlugin {
         return hopperManager;
     }
 
-    public SettingsManager getSettingsManager() {
-        return settingsManager;
-    }
-
-    public Economy getEconomy() {
-        return economy;
-    }
-
     public PlayerDataManager getPlayerDataManager() {
         return playerDataManager;
+    }
+
+    public GuiManager getGuiManager() {
+        return guiManager;
     }
 
     public boolean isLiquidtanks() {
@@ -381,5 +337,4 @@ public class EpicHoppers extends JavaPlugin {
     public boolean isEpicFarming() {
         return epicfarming;
     }
-
 }

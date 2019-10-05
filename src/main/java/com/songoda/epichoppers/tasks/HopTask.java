@@ -5,10 +5,10 @@ import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-import com.songoda.epichoppers.utils.settings.Setting;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,7 +46,7 @@ public class HopTask extends BukkitRunnable {
 
     public HopTask(EpicHoppers plug) {
         plugin = plug;
-        this.hopTicks = Math.max(1, Setting.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
+        this.hopTicks = Math.max(1, Settings.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
         if ((this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null)) {
             try {

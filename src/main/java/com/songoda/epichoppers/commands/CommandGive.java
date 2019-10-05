@@ -1,7 +1,7 @@
-package com.songoda.epichoppers.command.commands;
+package com.songoda.epichoppers.commands;
 
+import com.songoda.core.commands.AbstractCommand;
 import com.songoda.epichoppers.EpicHoppers;
-import com.songoda.epichoppers.command.AbstractCommand;
 import com.songoda.epichoppers.hopper.levels.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -13,36 +13,39 @@ import java.util.List;
 
 public class CommandGive extends AbstractCommand {
 
-    public CommandGive(AbstractCommand parent) {
-        super(parent, false, "give");
+    final EpicHoppers instance;
+
+    public CommandGive(EpicHoppers instance) {
+        super(false, "give");
+        this.instance = instance;
     }
 
     @Override
-    protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
-        if (args.length <= 2) {
+    protected ReturnType runCommand(CommandSender sender, String... args) {
+        if (args.length <= 1) {
             return ReturnType.SYNTAX_ERROR;
         }
-        if (Bukkit.getPlayerExact(args[1]) == null) {
+        if (Bukkit.getPlayerExact(args[0]) == null) {
             instance.getLocale().newMessage("&cThat username does not exist, or the user is not online!").sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         }
 
         Level level = instance.getLevelManager().getLowestLevel();
         Player player;
-        if (Bukkit.getPlayer(args[1]) == null) {
+        if (Bukkit.getPlayer(args[0]) == null) {
             instance.getLocale().newMessage("&cThat player does not exist or is currently offline.").sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else {
-            player = Bukkit.getPlayer(args[1]);
+            player = Bukkit.getPlayer(args[0]);
         }
 
 
-        if (!instance.getLevelManager().isLevel(Integer.parseInt(args[2]))) {
+        if (!instance.getLevelManager().isLevel(Integer.parseInt(args[1]))) {
             instance.getLocale().newMessage("&cNot a valid level... The current valid levels are: &4" + level.getLevel() + "-" + instance.getLevelManager().getHighestLevel().getLevel() + "&c.")
                     .sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else {
-            level = instance.getLevelManager().getLevel(Integer.parseInt(args[2]));
+            level = instance.getLevelManager().getLevel(Integer.parseInt(args[1]));
         }
         player.getInventory().addItem(instance.newHopperItem(level));
         instance.getLocale().getMessage("command.give.success").processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
@@ -51,14 +54,14 @@ public class CommandGive extends AbstractCommand {
     }
 
     @Override
-    protected List<String> onTab(EpicHoppers instance, CommandSender sender, String... args) {
-        if (args.length == 2) {
+    protected List<String> onTab(CommandSender sender, String... args) {
+        if (args.length == 1) {
             List<String> players = new ArrayList<>();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 players.add(player.getName());
             }
             return players;
-        } else if (args.length == 3) {
+        } else if (args.length == 2) {
             return Arrays.asList("1", "2", "3", "4", "5");
         }
         return null;

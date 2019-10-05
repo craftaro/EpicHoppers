@@ -1,12 +1,12 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUICrafting;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-import com.songoda.epichoppers.utils.settings.Setting;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,12 +17,7 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -35,7 +30,7 @@ public class ModuleAutoCrafting extends Module {
 
     public ModuleAutoCrafting(EpicHoppers plugin) {
         super(plugin);
-        crafterEjection = Setting.AUTOCRAFT_JAM_EJECT.getBoolean();
+        crafterEjection = Settings.AUTOCRAFT_JAM_EJECT.getBoolean();
     }
 
     @Override
@@ -50,9 +45,9 @@ public class ModuleAutoCrafting extends Module {
             return;
 
         // jam check: is this hopper gummed up?
-        if(crafterEjection) {
+        if (crafterEjection) {
             final List<Material> allMaterials = getRecipes(toCraft).getAllMaterials();
-            if(Stream.of(hopperCache.cachedInventory)
+            if (Stream.of(hopperCache.cachedInventory)
                     .allMatch(item -> item != null && allMaterials.stream().anyMatch(mat -> mat == item.getType()))) {
                 // Crafter can't function if there's nowhere to put the output
                 // ¯\_(ツ)_/¯
@@ -68,7 +63,7 @@ public class ModuleAutoCrafting extends Module {
         for (SimpleRecipe recipe : getRecipes(toCraft).recipes) {
 
             // Do we have enough to craft this recipe?
-            for(ItemStack item : recipe.recipe) {
+            for (ItemStack item : recipe.recipe) {
                 int amountHave = 0;
                 for (ItemStack hopperItem : hopperCache.cachedInventory) {
                     if (hopperItem != null && Methods.isSimilarMaterial(hopperItem, item))
@@ -86,7 +81,7 @@ public class ModuleAutoCrafting extends Module {
                 return;
 
             // We're good! Remove the items used to craft!
-            for(ItemStack item : recipe.recipe) {
+            for (ItemStack item : recipe.recipe) {
                 hopperCache.removeItems(item);
             }
         }
@@ -94,7 +89,7 @@ public class ModuleAutoCrafting extends Module {
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        ItemStack crafting = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? Material.CRAFTING_TABLE : Material.valueOf("WORKBENCH"), 1);
+        ItemStack crafting = CompatibleMaterial.CRAFTING_TABLE.getItem();
         ItemMeta craftingmeta = crafting.getItemMeta();
         craftingmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftingtitle")
                 .getMessage());
@@ -111,7 +106,7 @@ public class ModuleAutoCrafting extends Module {
 
     @Override
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
-        new GUICrafting(EpicHoppers.getInstance(), this, hopper, player);
+        EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUICrafting(this, hopper, player));
     }
 
     @Override
@@ -151,7 +146,8 @@ public class ModuleAutoCrafting extends Module {
                         ItemStack stack = recipe.getResult();
                         if (Methods.isSimilarMaterial(stack, toCraft))
                             recipes.addRecipe(recipe);
-                    } catch (Throwable ignored) {}
+                    } catch (Throwable ignored) {
+                    }
                 }
             }
 
@@ -167,7 +163,8 @@ public class ModuleAutoCrafting extends Module {
                 }
                 if (!fromLog) {
                     Material log = Material.getMaterial(toType.substring(0, toType.length() - 6) + "LOG");
-                    if(log != null) recipes.addRecipe(Collections.singletonList(new ItemStack(log)), new ItemStack(toCraft.getType(), 4));
+                    if (log != null)
+                        recipes.addRecipe(Collections.singletonList(new ItemStack(log)), new ItemStack(toCraft.getType(), 4));
                 }
             }
 
@@ -221,7 +218,7 @@ public class ModuleAutoCrafting extends Module {
         }
 
         public Recipes(Collection<Recipe> recipes) {
-             addRecipes(recipes);
+            addRecipes(recipes);
         }
 
         public List<SimpleRecipe> getRecipes() {
@@ -234,7 +231,8 @@ public class ModuleAutoCrafting extends Module {
 
         public void addRecipe(Recipe recipe) {
             if (recipe instanceof ShapelessRecipe) {
-                addRecipe(((ShapelessRecipe) recipe).getIngredientList(), recipe.getResult());;
+                addRecipe(((ShapelessRecipe) recipe).getIngredientList(), recipe.getResult());
+                ;
             } else if (recipe instanceof ShapedRecipe) {
                 addRecipe(new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values()), recipe.getResult());
             }
@@ -244,22 +242,22 @@ public class ModuleAutoCrafting extends Module {
             // consense the recipe into a list of materials and how many of each
             Map<Material, ItemStack> mergedRecipe = new HashMap<>();
             ingredientMap.stream()
-                .filter(item -> item != null)
-                .forEach(item -> {
-                    ItemStack mergedItem = mergedRecipe.get(item.getType());
-                    if (mergedItem == null) {
-                        mergedRecipe.put(item.getType(), item);
-                    } else {
-                        mergedItem.setAmount(mergedItem.getAmount() + 1);
-                    }
-                });
+                    .filter(item -> item != null)
+                    .forEach(item -> {
+                        ItemStack mergedItem = mergedRecipe.get(item.getType());
+                        if (mergedItem == null) {
+                            mergedRecipe.put(item.getType(), item);
+                        } else {
+                            mergedItem.setAmount(mergedItem.getAmount() + 1);
+                        }
+                    });
             this.recipes.add(new SimpleRecipe(mergedRecipe.values(), result));
             // Also keep a tally of what materials are possible for this craftable
             mergedRecipe.keySet().stream()
-                .filter(itemType -> itemType != null && !allTypes.contains(itemType))
-                .forEach(itemType -> {
-                    allTypes.add(itemType);
-                });
+                    .filter(itemType -> itemType != null && !allTypes.contains(itemType))
+                    .forEach(itemType -> {
+                        allTypes.add(itemType);
+                    });
         }
 
         public void addRecipes(Collection<Recipe> recipes) {

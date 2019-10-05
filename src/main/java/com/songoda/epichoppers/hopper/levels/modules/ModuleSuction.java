@@ -1,10 +1,10 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
+import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -33,6 +33,7 @@ public class ModuleSuction extends Module {
     private final static boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
     private static boolean oldUltimateStacker;
     private static Method oldUltimateStacker_updateItemAmount;
+
     static {
         if (ultimateStacker) {
             try {
@@ -128,7 +129,7 @@ public class ModuleSuction extends Module {
                         () -> blacklist.remove(item.getUniqueId()), 10L);
             }
 
-            if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_9)) {
+            if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_9)) {
                 float xx = (float) (0 + (Math.random() * .1));
                 float yy = (float) (0 + (Math.random() * .1));
                 float zz = (float) (0 + (Math.random() * .1));

@@ -1,8 +1,7 @@
 package com.songoda.epichoppers.utils;
 
-import com.songoda.epichoppers.EpicHoppers;
-import java.util.HashMap;
-import java.util.Map;
+import com.songoda.core.compatibility.CompatibleMaterial;
+import com.songoda.core.compatibility.ServerVersion;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -12,6 +11,9 @@ import org.bukkit.block.data.type.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Persistent storage intended for streamlining read/write for storage
@@ -26,10 +28,10 @@ public class StorageContainerCache {
         Cache cache = inventoryCache.get(b);
         if (cache == null) {
             Material type = b.getType();
-            if(type == Material.CHEST || type == Material.TRAPPED_CHEST) {
+            if (type == Material.CHEST || type == Material.TRAPPED_CHEST) {
                 Block b2 = findAdjacentDoubleChest(b);
                 //System.out.println("Adjacent to " + b + " = " + b2);
-                if(b2 != null && (cache = inventoryCache.get(b2)) != null) {
+                if (b2 != null && (cache = inventoryCache.get(b2)) != null) {
                     return cache;
                 }
             }
@@ -49,14 +51,14 @@ public class StorageContainerCache {
      * @return
      */
     public static Block findAdjacentDoubleChest(Block block) {
-        if(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)) {
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)) {
             final BlockData d = block.getBlockData();
             if (d instanceof Chest) {
                 final Chest c = (Chest) d;
-                if(c.getType() != Chest.Type.SINGLE) {
+                if (c.getType() != Chest.Type.SINGLE) {
                     // this is a double chest - check the other chest for registration data
                     Block other = null;
-                    switch(c.getFacing()) {
+                    switch (c.getFacing()) {
                         case SOUTH:
                             other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.WEST : BlockFace.EAST);
                             break;
@@ -195,16 +197,16 @@ public class StorageContainerCache {
         /**
          * Add a number of items to this container's inventory later.
          *
-         * @param item item to add
+         * @param item        item to add
          * @param amountToAdd how many of this item to attempt to add
          * @return how many items were added
          */
         public int addAny(ItemStack item, int amountToAdd) {
-            
+
             // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
             if (type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
                 return 0;
-            
+
             int totalAdded = 0;
             if (cachedInventory != null && item != null) {
                 final int maxStack = item.getMaxStackSize();
@@ -245,11 +247,11 @@ public class StorageContainerCache {
         public boolean addItem(ItemStack item) {
             if (cachedInventory == null || item == null || item.getAmount() <= 0)
                 return false;
-            
+
             // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
             if (type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
                 return false;
-            
+
             // grab the amount to move and the max item stack size
             int toAdd = item.getAmount();
             final int maxStack = item.getMaxStackSize();
@@ -278,12 +280,12 @@ public class StorageContainerCache {
                 case "BLAST_FURNACE":
                 case "BURNING_FURNACE":
                 case "FURNACE": {
-                    
+
                     check = new boolean[3];
-                    
-                    boolean isFuel = !item.getType().name().contains("LOG") && (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? item.getType().isFuel() : Methods.isLegacyFuel(item.getType()));
+
+                    boolean isFuel = !item.getType().name().contains("LOG") && CompatibleMaterial.getMaterial(item.getType()).isFuel();
                     // fuel is 2nd slot, input is first
-                    if (isFuel) 
+                    if (isFuel)
                         check[1] = true;
                     else
                         check[0] = true;
@@ -310,7 +312,7 @@ public class StorageContainerCache {
                         // free space!
                         toAdd -= Math.min(maxStack - cacheItem.getAmount(), toAdd);
                         check[i] = true;
-                    } else 
+                    } else
                         check[i] = false;
                 }
             }

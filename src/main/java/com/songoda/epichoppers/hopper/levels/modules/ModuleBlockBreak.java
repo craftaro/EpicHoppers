@@ -1,9 +1,9 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -37,7 +37,7 @@ public class ModuleBlockBreak extends Module {
         if (cachedBlacklistTypes.isEmpty()) {
             cachedBlacklistTypes.addAll(plugin.getConfig().getStringList("Main.BlockBreak Blacklisted Blocks"));
         }
-        if (plugin.isServerVersionAtLeast(ServerVersion.V1_9) && cachedParticleEffectType == null) {
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_9) && cachedParticleEffectType == null) {
             try {
                 cachedParticleEffectType = Particle.valueOf(plugin.getConfig().getString("Main.BlockBreak Particle Type"));
             } catch (Exception e) {
@@ -59,9 +59,9 @@ public class ModuleBlockBreak extends Module {
 
         // don't try to break stuff if we can't grab stuff
         // (for simplicity, just assume that no empty slots mean there's a good chance we won't be able to pick something new up)
-        if(Stream.of(hopperCache.cachedInventory)
+        if (Stream.of(hopperCache.cachedInventory)
                 .allMatch(item -> item != null && item.getAmount() > 0))
-           return;
+            return;
 
         Integer tick = blockTick.get(hopper);
         if (tick == null) {
@@ -89,13 +89,13 @@ public class ModuleBlockBreak extends Module {
             return;
 
         // Let's break the block!
-        if (plugin.isServerVersionAtLeast(ServerVersion.V1_9))
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_9))
             above.getWorld().playSound(above.getLocation(), Sound.BLOCK_STONE_BREAK, 1F, 1F);
         Location locationAbove = above.getLocation();
         locationAbove.add(.5, .5, .5);
 
         // fancy break particle effects :}
-        if (plugin.isServerVersionAtLeast(ServerVersion.V1_9)) {
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_9)) {
             float xx = (float) (0 + (Math.random() * .5));
             float yy = (float) (0 + (Math.random() * .5));
             float zz = (float) (0 + (Math.random() * .5));
@@ -103,9 +103,9 @@ public class ModuleBlockBreak extends Module {
         }
 
         boolean waterlogged = false;
-        if (plugin.isServerVersionAtLeast(ServerVersion.V1_13)
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)
                 && above.getBlockData() instanceof org.bukkit.block.data.Waterlogged
-                && ((org.bukkit.block.data.Waterlogged)above.getBlockData()).isWaterlogged()) {
+                && ((org.bukkit.block.data.Waterlogged) above.getBlockData()).isWaterlogged()) {
             waterlogged = true;
         }
 
