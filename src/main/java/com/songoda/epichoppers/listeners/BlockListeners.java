@@ -1,11 +1,11 @@
 package com.songoda.epichoppers.listeners;
 
+import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -154,7 +154,7 @@ public class BlockListeners implements Listener {
         if (location.getBlock().getType() != Material.CHEST) return;
 
         if (event.getBlock().getType().name().contains("SHULKER")
-                || (instance.isServerVersionAtLeast(ServerVersion.V1_13) ? event.getBlock().getType() == Material.SPAWNER : event.getBlock().getType() == Material.valueOf("MOB_SPAWNER"))
+                || (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) ? event.getBlock().getType() == Material.SPAWNER : event.getBlock().getType() == Material.valueOf("MOB_SPAWNER"))
                 || event.getBlock().getType() == Material.HOPPER
                 || event.getBlock().getType() == Material.DISPENSER) {
             return;
@@ -179,7 +179,7 @@ public class BlockListeners implements Listener {
             }
         }
 
-        if (instance.isServerVersionAtLeast(ServerVersion.V1_12)) {
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_12)) {
             event.setDropItems(false);
             return;
         }

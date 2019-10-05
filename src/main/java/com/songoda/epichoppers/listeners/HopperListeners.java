@@ -1,24 +1,21 @@
 package com.songoda.epichoppers.listeners;
 
+import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Minecart;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -45,11 +42,11 @@ public class HopperListeners implements Listener {
         // Let EpicHoppers take over if the hopper is pointing down though
         if (destination.getHolder() instanceof HopperMinecart
                 && source.getHolder() instanceof org.bukkit.block.Hopper
-                && HopperDirection.getDirection(((org.bukkit.block.Hopper)source.getHolder()).getRawData()) != HopperDirection.DOWN)
+                && HopperDirection.getDirection(((org.bukkit.block.Hopper) source.getHolder()).getRawData()) != HopperDirection.DOWN)
             return;
 
         // Shulker boxes have a mind of their own and relentlessly steal items from hoppers
-        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_11)
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_11)
                 && destination.getHolder() instanceof org.bukkit.block.ShulkerBox
                 && source.getHolder() instanceof org.bukkit.block.Hopper) {
             event.setCancelled(true);
@@ -95,13 +92,13 @@ public class HopperListeners implements Listener {
                 if (!toHopper.getFilter().getWhiteList().isEmpty()) {
                     // is this item on the whitelist?
                     allowItem = toHopper.getFilter().getWhiteList().stream().anyMatch(item -> Methods.isSimilarMaterial(toMove, item));
-                    if(!allowItem) {
+                    if (!allowItem) {
                         // can we change the item to something else?
                         searchReplacement:
-                        for(ItemStack sourceItem : source.getContents()) {
-                            if(sourceItem != null && Methods.canMove(destination, sourceItem)) {
-                                for(ItemStack item : toHopper.getFilter().getWhiteList()) {
-                                    if(Methods.isSimilarMaterial(sourceItem, item)) {
+                        for (ItemStack sourceItem : source.getContents()) {
+                            if (sourceItem != null && Methods.canMove(destination, sourceItem)) {
+                                for (ItemStack item : toHopper.getFilter().getWhiteList()) {
+                                    if (Methods.isSimilarMaterial(sourceItem, item)) {
                                         moveInstead = new ItemStack(sourceItem);
                                         moveInstead.setAmount(1);
                                         break searchReplacement;
@@ -148,7 +145,7 @@ public class HopperListeners implements Listener {
         if (!(source.getHolder() instanceof org.bukkit.block.Hopper))
             return;
 
-        if(destinationLocation == null)
+        if (destinationLocation == null)
             return;
 
         // Handle hopper push events elsewhere

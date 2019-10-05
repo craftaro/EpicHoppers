@@ -91,7 +91,7 @@ public class InteractListeners implements Listener {
                 Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
                 playerData.setLastHopper(hopper);
                 if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
-                    hopper.overview(player);
+                    hopper.overview(instance.getGuiManager(), player);
                     e.setCancelled(true);
                     return;
                 }

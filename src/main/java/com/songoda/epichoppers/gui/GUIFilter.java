@@ -1,13 +1,14 @@
 package com.songoda.epichoppers.gui;
 
+import com.songoda.core.compatibility.CompatibleMaterial;
+import com.songoda.core.gui.Gui;
+import com.songoda.core.gui.GuiUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.player.SyncType;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
-import com.songoda.epichoppers.utils.gui.AbstractGUI;
-import com.songoda.epichoppers.utils.gui.Range;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,74 +19,67 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GUIFilter extends AbstractGUI {
+public class GUIFilter extends Gui {
 
-    private final EpicHoppers plugin;
     private final Hopper hopper;
 
     public GUIFilter(EpicHoppers plugin, Hopper hopper, Player player) {
-        super(player);
-        this.plugin = plugin;
         this.hopper = hopper;
 
-        init(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Filter"), 54);
-    }
+        setRows(6);
+        setTitle(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Filter"));
+        setDefaultItem(null);
+        setAcceptsItems(true);
 
-    @Override
-    protected void constructGUI() {
+        setOnClose((event) -> compile());
 
         Filter filter = hopper.getFilter();
 
-        inventory.setItem(6, Methods.getBackgroundGlass(true));
-        inventory.setItem(7, Methods.getBackgroundGlass(true));
-        inventory.setItem(8, Methods.getBackgroundGlass(true));
-        inventory.setItem(15, Methods.getBackgroundGlass(true));
-        inventory.setItem(17, Methods.getBackgroundGlass(true));
-        inventory.setItem(24, Methods.getBackgroundGlass(true));
-        inventory.setItem(25, Methods.getGlass());
-        inventory.setItem(26, Methods.getBackgroundGlass(true));
-        inventory.setItem(33, Methods.getBackgroundGlass(true));
-        inventory.setItem(34, Methods.getGlass());
-        inventory.setItem(35, Methods.getBackgroundGlass(true));
-        inventory.setItem(42, Methods.getBackgroundGlass(true));
-        inventory.setItem(44, Methods.getBackgroundGlass(true));
-        inventory.setItem(51, Methods.getBackgroundGlass(true));
-        inventory.setItem(52, Methods.getBackgroundGlass(true));
-        inventory.setItem(53, Methods.getBackgroundGlass(true));
+        ItemStack glass1 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_1.getMaterial());
+        ItemStack glass2 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_2.getMaterial());
 
-        ItemStack it = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.WHITE_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1);
+        GuiUtils.mirrorFill(this, 0, 6, true, false, glass2);
+        GuiUtils.mirrorFill(this, 0, 7, true, false, glass2);
+        GuiUtils.mirrorFill(this, 0, 8, true, false, glass2);
+        GuiUtils.mirrorFill(this, 1, 6, true, false, glass2);
+        GuiUtils.mirrorFill(this, 1, 8, true, false, glass2);
+        GuiUtils.mirrorFill(this, 2, 6, true, false, glass2);
+        GuiUtils.mirrorFill(this, 2, 7, true, false, glass1);
+        GuiUtils.mirrorFill(this, 2, 8, true, false, glass2);
+
+        ItemStack it = CompatibleMaterial.WHITE_STAINED_GLASS_PANE.getItem();
         ItemMeta itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist").getMessage());
         it.setItemMeta(itm);
 
         int[] whiteSlots = {0, 1, 45, 46};
         for (int nu : whiteSlots) {
-            inventory.setItem(nu, it);
+            setItem(nu, it);
         }
 
         int[] awhite = {9, 10, 18, 19, 27, 28, 36, 37};
         int num = 0;
         for (ItemStack m : filter.getWhiteList()) {
             if (num >= filter.getWhiteList().size()) break;
-            inventory.setItem(awhite[num], new ItemStack(m));
+            setItem(awhite[num], new ItemStack(m));
             num++;
         }
 
-        it = new ItemStack(plugin.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.BLACK_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1, (short) 15);
+        it = CompatibleMaterial.BLACK_STAINED_GLASS_PANE.getItem();
         itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.blacklist").getMessage());
         it.setItemMeta(itm);
 
         int[] blackSlots = {2, 3, 47, 48};
         for (int nu : blackSlots) {
-            inventory.setItem(nu, it);
+            setItem(nu, it);
         }
 
         int[] ablack = {11, 12, 20, 21, 29, 30, 38, 39};
         num = 0;
         for (ItemStack m : filter.getBlackList()) {
             if (num >= filter.getBlackList().size()) break;
-            inventory.setItem(ablack[num], new ItemStack(m));
+            setItem(ablack[num], new ItemStack(m));
             num++;
         }
 
@@ -96,14 +90,14 @@ public class GUIFilter extends AbstractGUI {
 
         int[] avoid = {4, 5, 49, 50};
         for (int nu : avoid) {
-            inventory.setItem(nu, it);
+            setItem(nu, it);
         }
 
         int[] voidSlots = {13, 14, 22, 23, 31, 32, 40, 41};
         num = 0;
         for (ItemStack m : filter.getVoidList()) {
             if (num >= filter.getVoidList().size()) break;
-            inventory.setItem(voidSlots[num], new ItemStack(m));
+            setItem(voidSlots[num], new ItemStack(m));
             num++;
         }
 
@@ -118,7 +112,7 @@ public class GUIFilter extends AbstractGUI {
         itemmetaInfo.setLore(loreInfo);
         itemInfo.setItemMeta(itemmetaInfo);
 
-        inventory.setItem(16, itemInfo);
+        setItem(16, itemInfo);
 
 
         ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
@@ -133,32 +127,28 @@ public class GUIFilter extends AbstractGUI {
         }
         hookmeta.setLore(lorehook);
         hook.setItemMeta(hookmeta);
-        inventory.setItem(43, hook);
+        setButton(43, hook,
+                (event) -> {
+                    if (event.clickType == ClickType.RIGHT) {
+                        plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
+                        hopper.getFilter().setEndPoint(null);
+                    } else {
+                        plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.FILTERED);
+                        plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
+                        hopper.timeout(player);
+                    }
+                    player.closeInventory();
+                });
 
-        addDraggable(new Range(9, 14, null, false), true);
-        addDraggable(new Range(18, 23, null, false), true);
-        addDraggable(new Range(27, 32, null, false), true);
-        addDraggable(new Range(36, 41, null, false), true);
-    }
-
-    @Override
-    protected void registerClickables() {
-        registerClickable(43, ((player, inventory, cursor, slot, type) -> {
-            if (type == ClickType.RIGHT) {
-                plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
-                hopper.getFilter().setEndPoint(null);
-            } else {
-                plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.FILTERED);
-                plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
-                hopper.timeout(player);
-            }
-            player.closeInventory();
-        }));
+        setUnlockedRange(9, 14);
+        setUnlockedRange(18, 23);
+        setUnlockedRange(27, 32);
+        setUnlockedRange(36, 41);
     }
 
 
-    private void compile(Player p) {
-        ItemStack[] items = p.getOpenInventory().getTopInventory().getContents();
+    private void compile() {
+        ItemStack[] items = inventory.getContents();
 
         Filter filter = hopper.getFilter();
 
@@ -211,10 +201,5 @@ public class GUIFilter extends AbstractGUI {
         filter.setWhiteList(owhite);
         filter.setBlackList(oblack);
         filter.setVoidList(ovoid);
-    }
-
-    @Override
-    protected void registerOnCloses() {
-        registerOnClose(((player, inventory) -> compile(player)));
     }
 }

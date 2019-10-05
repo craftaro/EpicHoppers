@@ -1,9 +1,9 @@
 package com.songoda.epichoppers.handlers;
 
+import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -74,7 +74,8 @@ public class TeleportHandler {
 
     /**
      * Recursively gets the next hopper in the linked hopper chain
-     * @param lastHopper The previous hopper found in the chain
+     *
+     * @param lastHopper         The previous hopper found in the chain
      * @param currentChainLength The current length of the chain, used to cap the search length
      * @return The hopper at the end of the chain (or up to 15 in depth)
      */
@@ -98,14 +99,14 @@ public class TeleportHandler {
         location.setPitch(entity.getLocation().getPitch());
         location.setDirection(entity.getLocation().getDirection());
 
-        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_12)) {
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_12)) {
             Methods.doParticles(entity, location);
             Methods.doParticles(entity, entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation());
         }
 
         entity.teleport(location);
 
-        if (this.instance.isServerVersionAtLeast(ServerVersion.V1_12))
-            entity.getWorld().playSound(entity.getLocation(), this.instance.isServerVersion(ServerVersion.V1_12) ? Sound.valueOf("ENTITY_ENDERMEN_TELEPORT") : Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_12))
+            entity.getWorld().playSound(entity.getLocation(), ServerVersion.isServerVersion(ServerVersion.V1_12) ? Sound.valueOf("ENTITY_ENDERMEN_TELEPORT") : Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
     }
 }

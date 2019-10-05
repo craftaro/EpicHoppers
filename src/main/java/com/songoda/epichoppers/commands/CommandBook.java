@@ -1,8 +1,7 @@
-package com.songoda.epichoppers.command.commands;
+package com.songoda.epichoppers.commands;
 
+import com.songoda.core.commands.AbstractCommand;
 import com.songoda.epichoppers.EpicHoppers;
-import com.songoda.epichoppers.command.AbstractCommand;
-import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,30 +10,33 @@ import java.util.List;
 
 public class CommandBook extends AbstractCommand {
 
-    public CommandBook(AbstractCommand parent) {
-        super(parent, false, "book");
+    final EpicHoppers instance;
+
+    public CommandBook(EpicHoppers instance) {
+        super(false, "book");
+        this.instance = instance;
     }
 
     @Override
-    protected ReturnType runCommand(EpicHoppers instance, CommandSender sender, String... args) {
-        if (args.length == 1) {
+    protected ReturnType runCommand(CommandSender sender, String... args) {
+        if (args.length == 0) {
             if (sender instanceof Player) {
                 ((Player) sender).getInventory().addItem(instance.enchantmentHandler.getbook());
                 return ReturnType.SUCCESS;
             }
-        } else if (Bukkit.getPlayerExact(args[1]) == null) {
+        } else if (Bukkit.getPlayerExact(args[0]) == null) {
             instance.getLocale().newMessage("&cThat username does not exist, or the user is not online!")
                     .sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else {
-            Bukkit.getPlayerExact(args[1]).getInventory().addItem(instance.enchantmentHandler.getbook());
+            Bukkit.getPlayerExact(args[0]).getInventory().addItem(instance.enchantmentHandler.getbook());
             return ReturnType.SUCCESS;
         }
         return ReturnType.FAILURE;
     }
 
     @Override
-    protected List<String> onTab(EpicHoppers instance, CommandSender sender, String... args) {
+    protected List<String> onTab(CommandSender sender, String... args) {
         return null;
     }
 

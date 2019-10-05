@@ -1,11 +1,12 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.songoda.core.compatibility.CompatibleMaterial;
+import com.songoda.core.hooks.EconomyManager;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-import com.songoda.epichoppers.utils.settings.Setting;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -29,7 +30,7 @@ public class ModuleAutoSell extends Module {
     public ModuleAutoSell(EpicHoppers plugin, int timeOut) {
         super(plugin);
         this.timeOut = timeOut * 20;
-        this.hopperTickRate = Setting.HOP_TICKS.getInt();
+        this.hopperTickRate = Settings.HOP_TICKS.getInt();
         if (cachedSellPrices == null)
             cachedSellPrices = plugin.getConfig().getStringList("Main.AutoSell Prices");
     }
@@ -52,17 +53,17 @@ public class ModuleAutoSell extends Module {
             int amountSold = 0;
             double totalValue = 0;
 
-            if (plugin.getEconomy() == null) return;
+            if (!EconomyManager.isEnabled()) return;
 
             OfflinePlayer player = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
 
-                // -1
+            // -1
             for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
                 final ItemStack itemStack = hopperCache.cachedInventory[i];
                 if (itemStack == null) continue;
 
                 double value;
-                if (Setting.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline()) {
+                if (Settings.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline()) {
                     try {
                         ItemStack clone = itemStack.clone();
                         clone.setAmount(1);
@@ -84,7 +85,7 @@ public class ModuleAutoSell extends Module {
             }
 
             if (totalValue != 0)
-                plugin.getEconomy().deposit(player, totalValue);
+                EconomyManager.deposit(player, totalValue);
             if (totalValue != 0 && player.isOnline() && isNotifying(hopper)) {
                 plugin.getLocale().getMessage("event.hopper.autosell")
                         .processPlaceholder("items", amountSold)
@@ -100,7 +101,7 @@ public class ModuleAutoSell extends Module {
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        ItemStack sell = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ? Material.SUNFLOWER : Material.valueOf("DOUBLE_PLANT"), 1);
+        ItemStack sell = CompatibleMaterial.SUNFLOWER.getItem();
         ItemMeta sellmeta = sell.getItemMeta();
         sellmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle").getMessage());
         ArrayList<String> loreSell = new ArrayList<>();

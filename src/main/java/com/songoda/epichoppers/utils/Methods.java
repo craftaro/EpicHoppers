@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.utils;
 
+import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
@@ -28,82 +29,6 @@ public class Methods {
 
     private static final Map<String, Location> serializeCache = new HashMap<>();
 
-    public static boolean isLegacyFuel(Material material) {
-        
-        if (material == null) return false;
-        switch(material.ordinal() + 1) {
-            case 6:
-            case 7:
-            case 18:
-            case 26:
-            case 36:
-            case 48:
-            case 54:
-            case 55:
-            case 59:
-            case 66:
-            case 73:
-            case 85:
-            case 86:
-            case 97:
-            case 100:
-            case 101:
-            case 108:
-            case 127:
-            case 135:
-            case 136:
-            case 137:
-            case 144:
-            case 147:
-            case 152:
-            case 163:
-            case 164:
-            case 165:
-            case 172:
-            case 174:
-            case 184:
-            case 185:
-            case 186:
-            case 187:
-            case 188:
-            case 189:
-            case 190:
-            case 191:
-            case 192:
-            case 193:
-            case 206:
-            case 260:
-            case 262:
-            case 267:
-            case 268:
-            case 269:
-            case 270:
-            case 279:
-            case 280:
-            case 289:
-            case 322:
-            case 323:
-            case 326:
-            case 332:
-            case 345:
-            case 368:
-            case 424:
-            case 426:
-            case 427:
-            case 428:
-            case 429:
-            case 430:
-            case 443:
-            case 444:
-            case 445:
-            case 446:
-            case 447:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     public static boolean isSync(Player p) {
         if (p.getItemInHand().hasItemMeta()
                 && p.getItemInHand().getType() != Material.AIR
@@ -118,37 +43,8 @@ public class Methods {
         return false;
     }
 
-    public static ItemStack getGlass() {
-        EpicHoppers instance = EpicHoppers.getInstance();
-        return Methods.getGlass(instance.getConfig().getBoolean("Interfaces.Replace Glass Type 1 With Rainbow Glass"), instance.getConfig().getInt("Interfaces.Glass Type 1"));
-    }
-
-    public static ItemStack getBackgroundGlass(boolean type) {
-        EpicHoppers instance = EpicHoppers.getInstance();
-        if (type)
-            return getGlass(false, instance.getConfig().getInt("Interfaces.Glass Type 2"));
-        else
-            return getGlass(false, instance.getConfig().getInt("Interfaces.Glass Type 3"));
-    }
-
-    private static ItemStack getGlass(Boolean rainbow, int type) {
-        int randomNum = 1 + (int) (Math.random() * 6);
-        ItemStack glass;
-        if (rainbow) {
-            glass = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ?
-                    Material.LEGACY_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1, (short) randomNum);
-        } else {
-            glass = new ItemStack(EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13) ?
-                    Material.LEGACY_STAINED_GLASS_PANE : Material.valueOf("STAINED_GLASS_PANE"), 1, (short) type);
-        }
-        ItemMeta glassmeta = glass.getItemMeta();
-        glassmeta.setDisplayName("§l");
-        glass.setItemMeta(glassmeta);
-        return glass;
-    }
-
     public static boolean isSimilarMaterial(ItemStack is1, ItemStack is2) {
-        if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_13)) {
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)) {
             return is1.getType() == is2.getType();
         } else {
             return is1.getType() == is2.getType() && (is1.getDurability() == -1 || is2.getDurability() == -1 || is1.getDurability() == is2.getDurability());

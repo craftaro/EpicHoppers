@@ -1,26 +1,23 @@
 package com.songoda.epichoppers.storage;
 
+import com.songoda.core.configuration.Config;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.Hopper;
-import com.songoda.epichoppers.utils.ConfigWrapper;
 import com.songoda.epichoppers.utils.Methods;
-import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Storage {
 
-    protected final EpicHoppers instance;
-    protected final ConfigWrapper dataFile;
+    protected final EpicHoppers plugin;
+    protected final Config dataFile;
 
-    public Storage(EpicHoppers instance) {
-        this.instance = instance;
-        this.dataFile = new ConfigWrapper(instance, "", "data.yml");
-        this.dataFile.createNewFile(null, "EpicHoppers Data File");
-        this.dataFile.getConfig().options().copyDefaults(true);
-        this.dataFile.saveConfig();
+    public Storage(EpicHoppers plugin) {
+        this.plugin = plugin;
+        this.dataFile = new Config(plugin, "data.yml");
+        this.dataFile.load();
     }
 
     public abstract boolean containsGroup(String group);

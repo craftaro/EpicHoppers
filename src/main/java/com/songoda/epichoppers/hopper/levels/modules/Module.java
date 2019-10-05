@@ -1,8 +1,8 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.songoda.core.configuration.Config;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
-import com.songoda.epichoppers.utils.ConfigWrapper;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Material;
@@ -17,15 +17,19 @@ import java.util.Map;
 
 public abstract class Module {
 
-    private static final Map<String, ConfigWrapper> configs = new HashMap<>();
+    private static final Map<String, Config> configs = new HashMap<>();
 
     protected final EpicHoppers plugin;
-    private final ConfigWrapper config;
+    private final Config config;
 
     public Module(EpicHoppers plugin) {
         this.plugin = plugin;
-        if (!configs.containsKey(getName()))
-            configs.put(getName(), new ConfigWrapper(plugin, File.separator + "modules", getName() + ".yml"));
+        if (!configs.containsKey(getName())) {
+            Config config = new Config(plugin, File.separator + "modules", getName() + ".yml");
+            configs.put(getName(), config);
+            config.load();
+
+        }
         this.config = configs.get(getName());
     }
 
@@ -46,7 +50,7 @@ public abstract class Module {
     }
 
     public void saveData(Hopper hopper, String setting, Object value, Object toCache) {
-        config.getConfig().set("data." + Methods.serializeLocation(hopper.getLocation()) + "." + setting, value);
+        config.set("data." + Methods.serializeLocation(hopper.getLocation()) + "." + setting, value);
         modifyDataCache(hopper, setting, toCache);
     }
 
@@ -59,17 +63,17 @@ public abstract class Module {
         if (hopper.isDataCachedInModuleCache(cacheStr))
             return hopper.getDataFromModuleCache(cacheStr);
 
-        Object data = config.getConfig().get("data." + Methods.serializeLocation(hopper.getLocation()) + "." + setting);
+        Object data = config.get("data." + Methods.serializeLocation(hopper.getLocation()) + "." + setting);
         modifyDataCache(hopper, setting, data);
         return data;
     }
 
     public void clearData(Hopper hopper) {
-        config.getConfig().set("data." + Methods.serializeLocation(hopper.getLocation()), null);
+        config.set("data." + Methods.serializeLocation(hopper.getLocation()), null);
         hopper.clearModuleCache();
     }
 
     public void saveDataToFile() {
-        config.saveConfig();
+        config.save();
     }
 }

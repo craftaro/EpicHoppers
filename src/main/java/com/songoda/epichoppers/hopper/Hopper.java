@@ -1,26 +1,20 @@
 package com.songoda.epichoppers.hopper;
 
+import com.songoda.core.compatibility.ServerVersion;
+import com.songoda.core.gui.GuiManager;
+import com.songoda.core.hooks.EconomyManager;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUIOverview;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.ServerVersion;
 import com.songoda.epichoppers.utils.TeleportTrigger;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by songoda on 3/14/2017.
@@ -42,7 +36,7 @@ public class Hopper {
         this.location = location;
     }
 
-    public void overview(Player player) {
+    public void overview(GuiManager guiManager, Player player) {
         if (lastPlayerOpened != null
                 && lastPlayerOpened != player.getUniqueId()
                 && Bukkit.getPlayer(lastPlayerOpened) != null) {
@@ -52,7 +46,7 @@ public class Hopper {
 
         EpicHoppers instance = EpicHoppers.getInstance();
         if (!player.hasPermission("epichoppers.overview")) return;
-        new GUIOverview(instance, this, player);
+        guiManager.showGUI(player, new GUIOverview(instance, this, player));
     }
 
     public void upgrade(Player player, CostType type) {
@@ -63,15 +57,15 @@ public class Hopper {
         int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
 
         if (type == CostType.ECONOMY) {
-            if (plugin.getEconomy() == null) {
+            if (!EconomyManager.isEnabled()) {
                 player.sendMessage("Economy not enabled.");
                 return;
             }
-            if (!plugin.getEconomy().hasBalance(player, cost)) {
+            if (!EconomyManager.hasBalance(player, cost)) {
                 plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
                 return;
             }
-            plugin.getEconomy().withdrawBalance(player, cost);
+            EconomyManager.withdrawBalance(player, cost);
             upgradeFinal(level, player);
         } else if (type == CostType.EXPERIENCE) {
             if (player.getLevel() >= cost || player.getGameMode() == GameMode.CREATIVE) {
@@ -98,7 +92,7 @@ public class Hopper {
         }
         Location loc = location.clone().add(.5, .5, .5);
 
-        if (!plugin.isServerVersionAtLeast(ServerVersion.V1_12)) return;
+        if (!ServerVersion.isServerVersionAtLeast(ServerVersion.V1_12)) return;
 
         player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(plugin.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
 
@@ -107,7 +101,7 @@ public class Hopper {
         } else {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
 
-            if (!plugin.isServerVersionAtLeast(ServerVersion.V1_13)) return;
+            if (!ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)) return;
 
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2F, 25.0F);
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
@@ -117,7 +111,7 @@ public class Hopper {
 
     private void syncName() {
         org.bukkit.block.Hopper hopper = (org.bukkit.block.Hopper) location.getBlock().getState();
-        if (EpicHoppers.getInstance().isServerVersionAtLeast(ServerVersion.V1_10))
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_10))
             hopper.setCustomName(Methods.formatName(level.getLevel(), false));
         hopper.update(true);
     }
