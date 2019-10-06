@@ -80,7 +80,7 @@ public class EpicHoppers extends SongodaPlugin {
     @Override
     public void onPluginEnable() {
         // Run Songoda Updater
-        SongodaCore.registerPlugin(this, 22, CompatibleMaterial.HOPPER);
+        SongodaCore.registerPlugin(this, 15, CompatibleMaterial.HOPPER);
 
         // Load Economy
         EconomyManager.load();
