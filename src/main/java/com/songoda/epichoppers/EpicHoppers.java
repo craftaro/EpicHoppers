@@ -158,14 +158,11 @@ public class EpicHoppers extends SongodaPlugin {
      */
     private void saveToFile() {
         // double-check that we're ok to save
-        if (EpicHoppers.getInstance().getLevelManager() == null)
-            return;
-
-        checkStorage();
-
-        for (Level level : EpicHoppers.getInstance().getLevelManager().getLevels().values())
-            for (Module module : level.getRegisteredModules())
-                module.saveDataToFile();
+        if (levelManager != null) {
+            for (Level level : levelManager.getLevels().values())
+                for (Module module : level.getRegisteredModules())
+                    module.saveDataToFile();
+        }
 
         storage.doSave();
     }
@@ -178,7 +175,7 @@ public class EpicHoppers extends SongodaPlugin {
             if (storage.containsGroup("sync")) {
                 for (StorageRow row : storage.getRowsByGroup("sync")) {
                     Location location = Methods.unserializeLocation(row.getKey());
-                    if (location == null) return;
+                    if (location == null) continue;
 
                     int levelVal = row.get("level").asInt();
                     Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
@@ -255,7 +252,7 @@ public class EpicHoppers extends SongodaPlugin {
          */
         levelManager.clear();
         for (String levelName : levelsConfig.getKeys(false)) {
-            int level = Integer.valueOf(levelName.split("-")[1]);
+            int level = Integer.parseInt(levelName.split("-")[1]);
 
             ConfigurationSection levels = levelsConfig.getConfigurationSection(levelName);
 
