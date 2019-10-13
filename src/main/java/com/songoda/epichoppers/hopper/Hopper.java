@@ -30,6 +30,8 @@ public class Hopper {
     private TeleportTrigger teleportTrigger = TeleportTrigger.DISABLED;
     private int transferTick = 0;
 
+    private int syncId = -1;
+
     private final Map<String, Object> moduleCache = new HashMap<>();
 
     public Hopper(Location location) {
@@ -118,7 +120,7 @@ public class Hopper {
 
     public void timeout(Player player) {
         EpicHoppers instance = EpicHoppers.getInstance();
-        Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
+        syncId = Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
             PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
             if (playerData.getSyncType() != null && playerData.getLastHopper() == this) {
                 instance.getLocale().getMessage("event.hopper.synctimeout").sendPrefixedMessage(player);
@@ -164,7 +166,7 @@ public class Hopper {
             return;
         }
         instance.getLocale().getMessage("event.hopper.syncsuccess").sendPrefixedMessage(player);
-        instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
+        cancelSync(player);
     }
 
     /**
@@ -285,5 +287,10 @@ public class Hopper {
 
     public void clearModuleCache() {
         this.moduleCache.clear();
+    }
+
+    public void cancelSync(Player player) {
+        Bukkit.getScheduler().cancelTask(syncId);
+        EpicHoppers.getInstance().getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
 }

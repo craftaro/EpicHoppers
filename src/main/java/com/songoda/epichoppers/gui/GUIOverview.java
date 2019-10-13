@@ -174,6 +174,12 @@ public class GUIOverview extends Gui {
                                 plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.REGULAR);
                                 hopper.clearLinkedBlocks();
                                 plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
+
+                                if (level.getLinkAmount() > 1)
+                                    plugin.getLocale().getMessage("event.hopper.syncstart")
+                                            .processPlaceholder("amount", level.getLinkAmount())
+                                            .sendPrefixedMessage(player);
+
                                 hopper.timeout(player);
                             }
                             player.closeInventory();
