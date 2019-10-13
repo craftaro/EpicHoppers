@@ -142,6 +142,8 @@ public class GUIOverview extends Gui {
         layouts.put(6, new Integer[]{23, 3, 4, 5, 21, 22});
         layouts.put(7, new Integer[]{23, 3, 4, 5, 21, 22, 12});
         layouts.put(8, new Integer[]{23, 3, 4, 5, 21, 22, 12, 14});
+        layouts.put(9, new Integer[]{23, 3, 4, 5, 21, 22, 12, 14, 20});
+        layouts.put(10, new Integer[]{23, 3, 4, 5, 21, 22, 12, 14, 20, 24});
 
         int amount = 1;
 
@@ -174,6 +176,12 @@ public class GUIOverview extends Gui {
                                 plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.REGULAR);
                                 hopper.clearLinkedBlocks();
                                 plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
+
+                                if (level.getLinkAmount() > 1)
+                                    plugin.getLocale().getMessage("event.hopper.syncstart")
+                                            .processPlaceholder("amount", level.getLinkAmount())
+                                            .sendPrefixedMessage(player);
+
                                 hopper.timeout(player);
                             }
                             player.closeInventory();

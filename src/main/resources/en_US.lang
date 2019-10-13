@@ -1,4 +1,4 @@
-#General Messages
+# General Messages
 
 general.nametag.prefix = "&7[&6EpicHoppers&7]"
 general.nametag.next = "&9Next"
@@ -8,7 +8,7 @@ general.nametag.lore = ""
 general.word.disabled = "DISABLED"
 general.word.enabled = "ENABLED"
 
-#Interface Messages
+# Interface Messages
 
 interface.hopper.boostedstats = "&a&lCurrently boosted!|&7Item transfer rate multiplied by &6%amount%x&7.|&7Expires in &6%time%&7."
 interface.hopper.upgradewithxp = "&aUpgrade with XP"
@@ -38,6 +38,8 @@ interface.hopper.selltitle = "&6Left-Click to Toggle AutoSelling"
 interface.hopper.selllore = "&6Right-Click to Toggle Notifications||&7Selling in &6%timeleft%s&7.|&7Notifications: &6%state%&7."
 interface.hopper.blocktitle = "&6Click to Toggle BlockBreak"
 interface.hopper.blocklore = "|&7BlockBreak is set to &6%enabled%&7."
+interface.hopper.suctiontitle = "&6Suction"
+interface.hopper.suctionlore = "|&7Left-Click to toggle suction |&7(&6%status%&7).||&7Right-Click to set radius |&7(&6%radius%&7)."
 interface.hopper.synchopper = "&6Click to Link This hopper"
 interface.hopper.rejectsync = "&6Click to Link Rejected Items"
 interface.filter.infotitle = "&aFilter Guide"
@@ -46,11 +48,11 @@ interface.filter.whitelist = "&f&lWhite List"
 interface.filter.blacklist = "&8&lBlack List"
 interface.filter.void = "&c&lVoid"
 
-#Command Messages
+# Command Messages
 
 command.give.success = "&7You have been given a &6level %level% &7Hopper."
 
-#Event Messages
+# Event Messages
 
 event.general.nopermission = "&cYou do not have permission to do that."
 event.upgrade.cannotafford = "&cYou cannot afford this upgrade."
@@ -61,10 +63,12 @@ event.hopper.syncsuccess = "&aLink Successful."
 event.hopper.syncsuccessmore = "&7You have &6%amount% &7more link(s) left."
 event.hopper.desync = "&7You have unlinked this hopper."
 event.hopper.syncnext = "&7Click another hopper or container to link."
-event.hopper.syncself = "&cYou can't link a hopper to itself."
 event.hopper.syncdone = "&aYou have maxed out your links."
 event.hopper.already = "&cThis hopper is already linked."
 event.hopper.synctimeout = "&cLinking timed out."
+event.hopper.synccanceled = "&cLinking canceled."
+event.hopper.syncstart = "&7You have &6%amount% &7links available. When finished click the original hopper."
+event.hopper.syncfinish = "&7Linking completed."
 event.hopper.syncoutofrange = "&cThis block is out of your hoppers range."
 event.hopper.syncdidnotplace = "&cSorry! You need to have placed this hopper to link things to it."
 event.hopper.toomany = "&cYou can only place %amount% hoppers per chunk..."
@@ -73,5 +77,4 @@ event.hopper.walkteledisabled = "Walk on teleporting has been disabled for this 
 event.hopper.onlyone = "&cYou may only place a single item at a time."
 event.hopper.syncchest = "&7You have linked your &9%name% &7with this chest."
 event.hopper.desyncchest = "&7You have unlinked your &9%name% &7with this chest."
-
 event.hopper.autosell = "&7Your hopper sold &6%items% &7item(s) worth &6$%amount%&7."
