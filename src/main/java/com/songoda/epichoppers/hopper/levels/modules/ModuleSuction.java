@@ -1,7 +1,9 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
+import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.ServerVersion;
+import com.songoda.core.locale.Locale;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.Methods;
@@ -15,6 +17,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,9 +28,9 @@ import java.util.stream.Collectors;
 
 public class ModuleSuction extends Module {
 
-    private final int searchRadius;
+    private final int maxSearchRadius;
 
-    public static List<UUID> blacklist = new ArrayList<>();
+    private static List<UUID> blacklist = new ArrayList<>();
 
     private final static boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
     private final static boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
@@ -48,7 +51,7 @@ public class ModuleSuction extends Module {
 
     public ModuleSuction(EpicHoppers plugin, int amount) {
         super(plugin);
-        this.searchRadius = amount;
+        this.maxSearchRadius = amount;
     }
 
     @Override
@@ -58,7 +61,9 @@ public class ModuleSuction extends Module {
 
     @Override
     public void run(Hopper hopper, StorageContainerCache.Cache hopperCache) {
-        double radius = searchRadius + .5;
+        double radius = getRadius(hopper) + .5;
+
+        if (!isEnabled(hopper)) return;
 
         Set<Item> itemsToSuck = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
                 .stream()
@@ -162,8 +167,7 @@ public class ModuleSuction extends Module {
         } else if (wildStacker)
             WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
         else
-            item.getItemStack().setAmount(amount > item.getItemStack().getMaxStackSize()
-                    ? item.getItemStack().getMaxStackSize() : amount);
+            item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
     }
 
     public static boolean isBlacklisted(UUID uuid) {
@@ -172,11 +176,53 @@ public class ModuleSuction extends Module {
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        return null;
+        Locale locale = EpicHoppers.getInstance().getLocale();
+        ItemStack item = CompatibleMaterial.CAULDRON.getItem();
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(locale.getMessage("interface.hopper.suctiontitle").getMessage());
+        List<String> lore = new ArrayList<>();
+        String[] parts = locale.getMessage("interface.hopper.suctionlore")
+                .processPlaceholder("status", isEnabled(hopper) ? locale.getMessage("general.word.enabled").getMessage() : locale.getMessage("general.word.disabled"))
+                .processPlaceholder("radius", getRadius(hopper)).getMessage().split("\\|");
+        for (String line : parts) {
+            lore.add(Methods.formatText(line));
+        }
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
     }
 
     @Override
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
+        if (type == ClickType.LEFT) {
+            toggleEnabled(hopper);
+        } else if (type == ClickType.RIGHT) {
+            int setRadius = getRadius(hopper);
+            if (setRadius >= maxSearchRadius) {
+                setRadius(hopper, 1);
+            } else {
+                setRadius(hopper, ++setRadius);
+            }
+        }
+    }
+
+
+    private boolean isEnabled(Hopper hopper) {
+        Object obj = getData(hopper, "enabled");
+        return obj == null || (boolean) obj;
+    }
+
+    private void toggleEnabled(Hopper hopper) {
+        saveData(hopper, "enabled", !isEnabled(hopper));
+    }
+
+    private int getRadius(Hopper hopper) {
+        Object foundRadius = getData(hopper, "radius");
+        return foundRadius == null ? maxSearchRadius :  (int) foundRadius;
+    }
+
+    private void setRadius(Hopper hopper, int radius) {
+        saveData(hopper, "radius", radius);
     }
 
     @Override
@@ -187,6 +233,6 @@ public class ModuleSuction extends Module {
     @Override
     public String getDescription() {
         return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction")
-                .processPlaceholder("suction", searchRadius).getMessage();
+                .processPlaceholder("suction", maxSearchRadius).getMessage();
     }
 }

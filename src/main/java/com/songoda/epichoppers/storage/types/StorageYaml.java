@@ -94,7 +94,6 @@ public class StorageYaml extends Storage {
             }
 
             for (Map.Entry<String, Object> entry : toSave.entrySet()) {
-                System.out.println(entry.getKey());
                 dataFile.set(entry.getKey(), entry.getValue());
             }
 
