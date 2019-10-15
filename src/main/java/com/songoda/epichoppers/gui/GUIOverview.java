@@ -165,16 +165,15 @@ public class GUIOverview extends Gui {
             if (ii == 0) {
                 setButton(slot, hook,
                         (event) -> {
+                            hopper.clearLinkedBlocks();
                             if (event.clickType == ClickType.RIGHT) {
                                 plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
-                                hopper.clearLinkedBlocks();
                             } else {
                                 if (hopper.getLastPlayerOpened() != null && !hopper.getLastPlayerOpened().equals(player.getUniqueId())) {
                                     plugin.getLocale().getMessage("event.hopper.syncdidnotplace").sendPrefixedMessage(player);
                                     return;
                                 }
                                 plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.REGULAR);
-                                hopper.clearLinkedBlocks();
                                 plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
 
                                 if (level.getLinkAmount() > 1)
