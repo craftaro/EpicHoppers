@@ -156,12 +156,13 @@ public class Hopper {
         this.lastPlayerOpened = player.getUniqueId();
 
         if (level.getLinkAmount() > 1) {
-            if (getLinkedBlocks().size() == level.getLinkAmount()) {
+            if (linkedBlocks.size() >= level.getLinkAmount()) {
                 instance.getLocale().getMessage("event.hopper.syncdone").sendPrefixedMessage(player);
+                cancelSync(player);
                 return;
             }
             instance.getLocale().getMessage("event.hopper.syncsuccessmore")
-                    .processPlaceholder("amount", level.getLinkAmount() - getLinkedBlocks().size())
+                    .processPlaceholder("amount", level.getLinkAmount() - linkedBlocks.size())
                     .sendPrefixedMessage(player);
             return;
         }
