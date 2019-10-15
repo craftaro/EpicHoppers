@@ -126,7 +126,7 @@ public class Hopper {
                 instance.getLocale().getMessage("event.hopper.synctimeout").sendPrefixedMessage(player);
                 playerData.setSyncType(null);
             }
-        }, instance.getConfig().getLong("Main.Timeout When Syncing Hoppers"));
+        }, instance.getConfig().getLong("Main.Timeout When Syncing Hoppers") * level.getLinkAmount());
     }
 
     public void link(Block toLink, boolean filtered, Player player) {
