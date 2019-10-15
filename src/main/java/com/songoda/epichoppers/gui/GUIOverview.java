@@ -259,6 +259,9 @@ public class GUIOverview extends Gui {
     }
 
     private void runTask() {
-        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::constructGUI, 5L, 5L);
+        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (inventory.getViewers().size() != 0)
+                this.constructGUI();
+        }, 5L, 5L);
     }
 }

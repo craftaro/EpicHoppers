@@ -6,6 +6,7 @@ import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -49,18 +50,18 @@ public class InteractListeners implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onBlockInteract(PlayerInteractEvent e) {
-        Player player = e.getPlayer();
-        if (e.getAction() != Action.LEFT_CLICK_BLOCK
-                || e.getClickedBlock() == null
+    public void onBlockInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        if (event.getAction() != Action.LEFT_CLICK_BLOCK
+                || event.getClickedBlock() == null
                 || player.isSneaking()
                 || !player.hasPermission("EpicHoppers.overview")
-                || !(e.getClickedBlock().getState() instanceof InventoryHolder || e.getClickedBlock().getType().equals(Material.ENDER_CHEST))) {
+                || !(event.getClickedBlock().getState() instanceof InventoryHolder || event.getClickedBlock().getType().equals(Material.ENDER_CHEST))) {
             return;
         }
 
-        if (e.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
-            ItemStack item = e.getPlayer().getInventory().getItemInHand();
+        if (event.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
+            ItemStack item = event.getPlayer().getInventory().getItemInHand();
             boolean isLinked = false;
 
             for (String lore : item.getItemMeta().getLore()) {
@@ -76,41 +77,40 @@ public class InteractListeners implements Listener {
             } else {
                 instance.getLocale().getMessage("event.hopper.syncchest")
                         .processPlaceholder("name", item.getType().toString()).sendPrefixedMessage(player);
-                instance.enchantmentHandler.createSyncTouch(item, e.getClickedBlock());
+                instance.enchantmentHandler.createSyncTouch(item, event.getClickedBlock());
             }
-            e.setCancelled(true);
+            event.setCancelled(true);
             return;
         }
 
         PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
 
         if (playerData.getSyncType() == null) {
-            if (e.getClickedBlock().getType() == Material.HOPPER) {
-                if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getClickedBlock().getLocation()))
+            if (event.getClickedBlock().getType() == Material.HOPPER) {
+                if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getClickedBlock().getLocation()))
                     return;
-                Hopper hopper = instance.getHopperManager().getHopper(e.getClickedBlock());
-                playerData.setLastHopper(hopper);
+                Hopper hopper = instance.getHopperManager().getHopper(event.getClickedBlock());
                 if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
                     hopper.overview(instance.getGuiManager(), player);
-                    e.setCancelled(true);
+                    event.setCancelled(true);
                     return;
                 }
             }
             return;
         }
 
-        if (e.getClickedBlock().getState() instanceof InventoryHolder || (e.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests"))) {
+        if (event.getClickedBlock().getState() instanceof InventoryHolder || (event.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests"))) {
             Hopper hopper = playerData.getLastHopper();
-            if (playerData.getSyncType() != null && e.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
+            if (event.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
                 if (hopper.getLinkedBlocks().size() != 0)
                     instance.getLocale().getMessage("event.hopper.syncfinish").sendPrefixedMessage(player);
                 else
                     instance.getLocale().getMessage("event.hopper.synccanceled").sendPrefixedMessage(player);
                 hopper.cancelSync(player);
             } else if (playerData.getSyncType() != null) {
-                hopper.link(e.getClickedBlock(), playerData.getSyncType() == SyncType.FILTERED, player);
+                hopper.link(event.getClickedBlock(), playerData.getSyncType() == SyncType.FILTERED, player);
             }
-            e.setCancelled(true);
+            event.setCancelled(true);
             int amountLinked = hopper.getLevel().getLinkAmount();
             if (hopper.getLinkedBlocks().size() >= amountLinked) {
                 playerData.setSyncType(null);
