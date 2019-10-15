@@ -4,7 +4,7 @@ stages:
 variables:
   name: "EpicHoppers"
   path: "/builds/$CI_PROJECT_PATH"
-  version: "4.3.3"
+  version: "4.3.4"
 
 build:
   stage: build
