@@ -165,14 +165,16 @@ public class GUIOverview extends Gui {
             if (ii == 0) {
                 setButton(slot, hook,
                         (event) -> {
+                            if (hopper.getLastPlayerOpened() != null && !hopper.getLastPlayerOpened().equals(player.getUniqueId())) {
+                                plugin.getLocale().getMessage("event.hopper.syncdidnotplace").sendPrefixedMessage(player);
+                                return;
+                            }
                             hopper.clearLinkedBlocks();
                             if (event.clickType == ClickType.RIGHT) {
                                 plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
+                                constructGUI();
+                                return;
                             } else {
-                                if (hopper.getLastPlayerOpened() != null && !hopper.getLastPlayerOpened().equals(player.getUniqueId())) {
-                                    plugin.getLocale().getMessage("event.hopper.syncdidnotplace").sendPrefixedMessage(player);
-                                    return;
-                                }
                                 plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.REGULAR);
                                 plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
 
@@ -257,6 +259,9 @@ public class GUIOverview extends Gui {
     }
 
     private void runTask() {
-        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::constructGUI, 5L, 5L);
+        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (inventory.getViewers().size() != 0)
+                this.constructGUI();
+        }, 5L, 5L);
     }
 }
