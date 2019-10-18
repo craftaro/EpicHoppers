@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.listeners;
 
+import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -196,6 +197,11 @@ public class BlockListeners implements Listener {
     }
 
     private int calculateFortuneDrops(Material material, int level, Random random) {
+        if (material != CompatibleMaterial.COAL_ORE.getMaterial()
+                && material != CompatibleMaterial.DIAMOND_ORE.getMaterial()
+                && material != CompatibleMaterial.EMERALD_ORE.getMaterial()
+                && material != CompatibleMaterial.NETHER_QUARTZ_ORE.getMaterial()
+                && material != CompatibleMaterial.LAPIS_ORE.getMaterial()) return 1;
         if (level <= 0) return 1;
         int drops = random.nextInt(level + 2) - 1;
         if (drops < 0) drops = 0;
