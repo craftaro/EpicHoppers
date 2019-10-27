@@ -4,6 +4,7 @@ import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.core.hooks.EconomyManager;
 import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.api.events.HopperAccessEvent;
 import com.songoda.epichoppers.gui.GUIOverview;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.player.PlayerData;
@@ -44,6 +45,13 @@ public class Hopper {
                 && Bukkit.getPlayer(lastPlayerOpened) != null) {
             Bukkit.getPlayer(lastPlayerOpened).closeInventory();
         }
+
+        HopperAccessEvent accessEvent = new HopperAccessEvent(player, this);
+        Bukkit.getPluginManager().callEvent(accessEvent);
+        if (accessEvent.isCancelled()) {
+            return;
+        }
+
         if (placedBy == null) placedBy = player.getUniqueId();
 
         EpicHoppers instance = EpicHoppers.getInstance();
