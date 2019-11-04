@@ -1,80 +1,93 @@
 # General Messages
 
-general.nametag.prefix = "&7[&6EpicHoppers&7]"
-general.nametag.next = "&9Next"
-general.nametag.back = "&9Back"
-general.nametag.nameformat = "&eLevel %level% &fHopper"
-general.nametag.lore = ""
-general.word.disabled = "DISABLED"
-general.word.enabled = "ENABLED"
+general:
+  nametag:
+    prefix: '&7[&6EpicHoppers&7]'
+    next: '&9Next'
+    back: '&9Back'
+    nameformat: '&eLevel %level% &fHopper'
+    lore: ''
+  word:
+    disabled: DISABLED
+    enabled: ENABLED
 
 # Interface Messages
 
-interface.hopper.boostedstats = "&a&lCurrently boosted!|&7Item transfer rate multiplied by &6%amount%x&7.|&7Expires in &6%time%&7."
-interface.hopper.upgradewithxp = "&aUpgrade with XP"
-interface.hopper.upgradewithxplore = "&7Cost: &a%cost% Levels"
-interface.hopper.upgradewitheconomy = "&aUpgrade with ECO"
-interface.hopper.upgradewitheconomylore = "&7Cost: &a$%cost%"
-interface.hopper.currentlevel = "&6Hopper Level &7%level%"
-interface.hopper.nextlevel = "&6Next Level &7%level%"
-interface.hopper.range = "&7Range: &6%range%"
-interface.hopper.amount = "&7Amount: &6%amount%"
-interface.hopper.teleport = "&7Teleport: &6%enabled%"
-interface.hopper.filter = "&7Filter: &6%enabled%"
-interface.hopper.crafting = "&7AutoCrafting: &6%enabled%"
-interface.hopper.suction = "&7Suction: &6%suction%"
-interface.hopper.autosell = "&7AutoSell: Every &6%seconds%s"
-interface.hopper.linkamount = "&7Link Overflow: &6%amount%"
-interface.hopper.blockbreak = "&7Block Break: &6Every %ticks% ticks"
-interface.hopper.alreadymaxed = "&7This hopper is already maxed out!"
-interface.hopper.synclore = "|&7Left-Click then click a another|&7hopper or chest to link!||&7Right-Click to unlink.|&7Currently linked to &6%amount% container(s)&7."
-interface.hopper.perltitle = "&6Click to Teleport"
-interface.hopper.perllore2 = "|&7Left-Click to teleport to|&7the end of the chain.||&7Right-Click to switch the|&7teleport trigger mode.|&7Currently set to: &a%type%&7."
-interface.hopper.filtertitle = "&cClick to Filter"
-interface.hopper.filterlore = "|&7This allows you to choose|&7which items go where."
-interface.hopper.craftingtitle = "&cClick to Setup AutoCrafting"
-interface.hopper.craftinglore = "|&7This allows you to choose|&7which item this hopper|&7will automatically craft."
-interface.hopper.selltitle = "&6Left-Click to Toggle AutoSelling"
-interface.hopper.selllore = "&6Right-Click to Toggle Notifications||&7Selling in &6%timeleft%s&7.|&7Notifications: &6%state%&7."
-interface.hopper.blocktitle = "&6Click to Toggle BlockBreak"
-interface.hopper.blocklore = "|&7BlockBreak is set to &6%enabled%&7."
-interface.hopper.suctiontitle = "&6Suction"
-interface.hopper.suctionlore = "|&7Left-Click to toggle suction |&7(&6%status%&7).||&7Right-Click to set radius |&7(&6%radius%&7)."
-interface.hopper.synchopper = "&6Click to Link This hopper"
-interface.hopper.rejectsync = "&6Click to Link Rejected Items"
-interface.filter.infotitle = "&aFilter Guide"
-interface.filter.infolore = "&7Items placed in the leftmost column|&7space will be whitelisted.||&7Items placed in the rightmost column|&7will be void.||&7Items placed in the middle column|&7will be blacklisted."
-interface.filter.whitelist = "&f&lWhite List"
-interface.filter.blacklist = "&8&lBlack List"
-interface.filter.void = "&c&lVoid"
+interface:
+  hopper:
+    boostedstats: '&a&lCurrently boosted!|&7Item transfer rate multiplied by &6%amount%x&7.|&7Expires in &6%time%&7.'
+    upgradewithxp: '&aUpgrade with XP'
+    upgradewithxplore: '&7Cost: &a%cost% Levels'
+    upgradewitheconomy: '&aUpgrade with ECO'
+    upgradewitheconomylore: '&7Cost: &a$%cost%'
+    currentlevel: '&6Hopper Level &7%level%'
+    nextlevel: '&6Next Level &7%level%'
+    range: '&7Range: &6%range%'
+    amount: '&7Amount: &6%amount%'
+    teleport: '&7Teleport: &6%enabled%'
+    filter: '&7Filter: &6%enabled%'
+    crafting: '&7AutoCrafting: &6%enabled%'
+    suction: '&7Suction: &6%suction%'
+    autosell: '&7AutoSell: Every &6%seconds%s'
+    linkamount: '&7Link Overflow: &6%amount%'
+    blockbreak: '&7Block Break: &6Every %ticks% ticks'
+    alreadymaxed: '&7This hopper is already maxed out!'
+    synclore: '|&7Left-Click then click a another|&7hopper or chest to link!||&7Right-Click to unlink.|&7Currently linked to &6%amount% container(s)&7.'
+    perltitle: '&6Click to Teleport'
+    perllore2: '|&7Left-Click to teleport to|&7the end of the chain.||&7Right-Click to switch the|&7teleport trigger mode.|&7Currently set to: &a%type%&7.'
+    filtertitle: '&cClick to Filter'
+    filterlore: '|&7This allows you to choose|&7which items go where.'
+    craftingtitle: '&cClick to Setup AutoCrafting'
+    craftinglore: '|&7This allows you to choose|&7which item this hopper|&7will automatically craft.'
+    selltitle: '&6Left-Click to Toggle AutoSelling'
+    selllore: '&6Right-Click to Toggle Notifications||&7Selling in &6%timeleft%s&7.|&7Notifications: &6%state%&7.'
+    blocktitle: '&6Click to Toggle BlockBreak'
+    blocklore: '|&7BlockBreak is set to &6%enabled%&7.'
+    suctiontitle: '&6Suction'
+    suctionlore: '|&7Left-Click to toggle suction |&7(&6%status%&7).||&7Right-Click to set radius |&7(&6%radius%&7).'
+    synchopper: '&6Click to Link This hopper'
+    rejectsync: '&6Click to Link Rejected Items'
+  filter:
+    infotitle: '&aFilter Guide'
+    infolore: '&7Items placed in the leftmost column|&7space will be whitelisted.||&7Items placed in the rightmost column|&7will be void.||&7Items placed in the middle column|&7will be blacklisted.'
+    whitelist: '&f&lWhite List'
+    blacklist: '&8&lBlack List'
+    void: '&c&lVoid'
 
 # Command Messages
 
-command.give.success = "&7You have been given a &6level %level% &7Hopper."
+command:
+  give:
+    success: '&7You have been given a &6level %level% &7Hopper.'
 
 # Event Messages
 
-event.general.nopermission = "&cYou do not have permission to do that."
-event.upgrade.cannotafford = "&cYou cannot afford this upgrade."
-event.upgrade.success = "&7You successfully upgraded this hopper to &6level %level%&7!"
-event.upgrade.maxed = "&7You maxed out this hopper at &6level %level%&7."
-event.inventory.noroom = "&7You do not have space in your inventory for this."
-event.hopper.syncsuccess = "&aLink Successful."
-event.hopper.syncsuccessmore = "&7You have &6%amount% &7more link(s) left."
-event.hopper.desync = "&7You have unlinked this hopper."
-event.hopper.syncnext = "&7Click another hopper or container to link."
-event.hopper.syncdone = "&aYou have maxed out your links."
-event.hopper.already = "&cThis hopper is already linked."
-event.hopper.synctimeout = "&cLinking timed out."
-event.hopper.synccanceled = "&cLinking canceled."
-event.hopper.syncstart = "&7You have &6%amount% &7links available. When finished click the original hopper."
-event.hopper.syncfinish = "&7Linking completed."
-event.hopper.syncoutofrange = "&cThis block is out of your hoppers range."
-event.hopper.syncdidnotplace = "&cSorry! You need to have placed this hopper to link things to it."
-event.hopper.toomany = "&cYou can only place %amount% hoppers per chunk..."
-event.hopper.walkteleenabled = "The teleport  has been enabled for this hopper."
-event.hopper.walkteledisabled = "Walk on teleporting has been disabled for this hopper."
-event.hopper.onlyone = "&cYou may only place a single item at a time."
-event.hopper.syncchest = "&7You have linked your &9%name% &7with this chest."
-event.hopper.desyncchest = "&7You have unlinked your &9%name% &7with this chest."
-event.hopper.autosell = "&7Your hopper sold &6%items% &7item(s) worth &6$%amount%&7."
+event:
+  general:
+    nopermission: '&cYou do not have permission to do that.'
+  upgrade:
+    cannotafford: '&cYou cannot afford this upgrade.'
+    success: '&7You successfully upgraded this hopper to &6level %level%&7!'
+    maxed: '&7You maxed out this hopper at &6level %level%&7.'
+  inventory:
+    noroom: '&7You do not have space in your inventory for this.'
+  hopper:
+    syncsuccess: '&aLink Successful.'
+    syncsuccessmore: '&7You have &6%amount% &7more link(s) left.'
+    desync: '&7You have unlinked this hopper.'
+    syncnext: '&7Click another hopper or container to link.'
+    syncdone: '&aYou have maxed out your links.'
+    already: '&cThis hopper is already linked.'
+    synctimeout: '&cLinking timed out.'
+    synccanceled: '&cLinking canceled.'
+    syncstart: '&7You have &6%amount% &7links available. When finished click the original hopper.'
+    syncfinish: '&7Linking completed.'
+    syncoutofrange: '&cThis block is out of your hoppers range.'
+    syncdidnotplace: '&cSorry! You need to have placed this hopper to link things to it.'
+    toomany: '&cYou can only place %amount% hoppers per chunk...'
+    walkteleenabled: The teleport  has been enabled for this hopper.
+    walkteledisabled: Walk on teleporting has been disabled for this hopper.
+    onlyone: '&cYou may only place a single item at a time.'
+    syncchest: '&7You have linked your &9%name% &7with this chest.'
+    desyncchest: '&7You have unlinked your &9%name% &7with this chest.'
+    autosell: '&7Your hopper sold &6%items% &7item(s) worth &6$%amount%&7.'
