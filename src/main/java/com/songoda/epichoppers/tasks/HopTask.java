@@ -18,6 +18,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -269,7 +270,8 @@ public class HopTask extends BukkitRunnable {
                 contents = getFarmContents(above);
                 pullableSlots = IntStream.rangeClosed(0, contents.length - 1).toArray();
             } else {
-                if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null)
+                if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null
+                || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY())
                     return;
                 if (aboveInvHolder instanceof StorageMinecart) {
                     pullableSlots = IntStream.rangeClosed(0, 26).toArray();
