@@ -18,6 +18,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -269,7 +270,8 @@ public class HopTask extends BukkitRunnable {
                 contents = getFarmContents(above);
                 pullableSlots = IntStream.rangeClosed(0, contents.length - 1).toArray();
             } else {
-                if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null)
+                if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null
+                || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY())
                     return;
                 if (aboveInvHolder instanceof StorageMinecart) {
                     pullableSlots = IntStream.rangeClosed(0, 26).toArray();
@@ -357,11 +359,12 @@ public class HopTask extends BukkitRunnable {
                 && pointingLocation.getWorld().isChunkLoaded(
                 pointingLocation.getBlockX() >> 4,
                 pointingLocation.getBlockZ() >> 4)) {
-            switch (pointingLocation.getBlock().getType()) {
-                case AIR:
-                case RAIL:
-                case POWERED_RAIL:
-                case DETECTOR_RAIL:
+            switch (pointingLocation.getBlock().getType().name()) {
+                case "AIR":
+                case "RAILS":
+                case "RAIL":
+                case "POWERED_RAIL":
+                case "DETECTOR_RAIL":
                     // Add storage/hopper minecarts the hopper is pointing into if there aren't any destinations
                     checkForMinecarts = linkedContainers.size() < 2;
                     break;
