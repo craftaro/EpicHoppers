@@ -3,6 +3,7 @@ package com.songoda.epichoppers.listeners;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
 import com.songoda.epichoppers.utils.Methods;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
@@ -49,7 +50,10 @@ public class EntityListeners implements Listener {
 
         ItemStack item = p.getItemInHand();
         ItemMeta meta = item.getItemMeta();
-        Location location = Methods.unserializeLocation(meta.getLore().get(1).replaceAll("§", ""));
+        if (!meta.hasLore()) return;
+        String str = meta.getLore().get(0).split("~")[0].replaceAll("§", "");
+        if (!str.contains(":")) return;
+        Location location = Methods.unserializeLocation(str);
         if (location.getBlock().getType() != Material.CHEST) return;
         InventoryHolder ih = (InventoryHolder) location.getBlock().getState();
         for (ItemStack is : event.getDrops()) {
