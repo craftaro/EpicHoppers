@@ -30,7 +30,7 @@ public abstract class Storage {
         /*
          * Dump HopperManager to file.
          */
-        for (Hopper hopper : instance.getHopperManager().getHoppers().values()) {
+        for (Hopper hopper : new ArrayList<>(instance.getHopperManager().getHoppers().values())) {
             if (hopper.getLevel() == null || hopper.getLocation() == null)
                 continue;
 
