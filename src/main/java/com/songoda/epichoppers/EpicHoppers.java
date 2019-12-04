@@ -108,7 +108,6 @@ public class EpicHoppers extends SongodaPlugin {
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
 
-        this.loadLevelManager();
         this.checkStorage();
 
         // Load from file
@@ -172,6 +171,7 @@ public class EpicHoppers extends SongodaPlugin {
          * Register hoppers into HopperManger from configuration
          */
         Bukkit.getScheduler().runTaskLater(this, () -> {
+            this.loadLevelManager();
             if (storage.containsGroup("sync")) {
                 for (StorageRow row : storage.getRowsByGroup("sync")) {
                     Location location = Methods.unserializeLocation(row.getKey());
