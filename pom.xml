@@ -2,7 +2,7 @@
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <version>maven-version-number</version>
+    <version>4.4</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <finalName>EpicHoppers-${project.version}</finalName>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
-            <version>1.14.1</version>
+            <version>1.15</version>
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
