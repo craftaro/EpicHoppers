@@ -31,7 +31,7 @@ public abstract class Storage {
          * Dump HopperManager to file.
          */
         for (Hopper hopper : new ArrayList<>(instance.getHopperManager().getHoppers().values())) {
-            if (hopper.getLevel() == null || hopper.getLocation() == null)
+            if (hopper.getLevel() == null || hopper.getLocation() == null || hopper.getLevel() == instance.getLevelManager().getLowestLevel())
                 continue;
 
             String locationStr = Methods.serializeLocation(hopper.getLocation());
