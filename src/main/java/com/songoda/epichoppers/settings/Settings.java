@@ -63,6 +63,9 @@ public class Settings {
             "Normally, crafting hoppers won't grab items that would fill that slot.",
             "This option ejects items if that last slot is forcibly filled");
 
+    public static final ConfigSetting AUTOCRAFT_BLACKLIST = new ConfigSetting(config, "Main.AutoCraft Blacklist", Arrays.asList("BEDROCK", "EGG"),
+            "Anything listed here will not be able to be auto crafted.");
+
     public static final ConfigSetting AUTOSELL_PRICES = new ConfigSetting(config, "Main.AutoSell Prices",
             Arrays.asList("STONE,0.50", "COBBLESTONE,0.20", "IRON_ORE,0.35", "COAL_ORE,0.20"),
             "These are the prices used by the auto sell module.");
