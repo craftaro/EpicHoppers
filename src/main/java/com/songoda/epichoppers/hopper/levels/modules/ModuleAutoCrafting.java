@@ -132,8 +132,11 @@ public class ModuleAutoCrafting extends Module {
         cachedCrafting.remove(hopper);
     }
 
-    Recipes getRecipes(ItemStack toCraft) {
+    private Recipes getRecipes(ItemStack toCraft) {
         Recipes recipes = cachedRecipes.get(toCraft);
+        if (Settings.AUTOCRAFT_BLACKLIST.getStringList().stream()
+                .anyMatch(r -> r.equalsIgnoreCase(toCraft.getType().name())))
+            return new Recipes();
         if (recipes == null) {
             try {
                 recipes = new Recipes(Bukkit.getServer().getRecipesFor(toCraft));
@@ -145,6 +148,7 @@ public class ModuleAutoCrafting extends Module {
                 while (recipeIterator.hasNext()) {
                     try {
                         Recipe recipe = recipeIterator.next();
+
                         ItemStack stack = recipe.getResult();
                         if (Methods.isSimilarMaterial(stack, toCraft))
                             recipes.addRecipe(recipe);

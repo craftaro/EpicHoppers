@@ -22,6 +22,9 @@ public class Settings {
     public static final ConfigSetting UPGRADE_WITH_XP = new ConfigSetting(config, "Main.Upgrade With XP", true,
             "Should you be able to upgrade hoppers with experience?");
 
+    public static final ConfigSetting ALLOW_NORMAL_HOPPERS = new ConfigSetting(config, "Main.Allow Normal Hoppers", false,
+            "Should natural hoppers not be epic hoppers?");
+
     public static final ConfigSetting TELEPORT = new ConfigSetting(config, "Main.Allow Players To Teleport Through Hoppers", true,
             "Should players be able to teleport through hoppers?");
 
@@ -62,6 +65,9 @@ public class Settings {
             "AutoCraft module needs a free slot to craft items with.",
             "Normally, crafting hoppers won't grab items that would fill that slot.",
             "This option ejects items if that last slot is forcibly filled");
+
+    public static final ConfigSetting AUTOCRAFT_BLACKLIST = new ConfigSetting(config, "Main.AutoCraft Blacklist", Arrays.asList("BEDROCK", "EGG"),
+            "Anything listed here will not be able to be auto crafted.");
 
     public static final ConfigSetting AUTOSELL_PRICES = new ConfigSetting(config, "Main.AutoSell Prices",
             Arrays.asList("STONE,0.50", "COBBLESTONE,0.20", "IRON_ORE,0.35", "COAL_ORE,0.20"),

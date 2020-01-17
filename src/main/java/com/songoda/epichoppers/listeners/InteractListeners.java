@@ -4,6 +4,7 @@ import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
@@ -89,6 +90,10 @@ public class InteractListeners implements Listener {
             if (event.getClickedBlock().getType() == Material.HOPPER) {
                 if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getClickedBlock().getLocation()))
                     return;
+
+                if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(event.getClickedBlock().getLocation()))
+                    return;
+
                 Hopper hopper = instance.getHopperManager().getHopper(event.getClickedBlock());
                 if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
                     hopper.overview(instance.getGuiManager(), player);

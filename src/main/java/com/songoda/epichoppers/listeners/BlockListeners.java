@@ -6,6 +6,7 @@ import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
@@ -65,6 +66,9 @@ public class BlockListeners implements Listener {
 
         ItemStack item = e.getItemInHand().clone();
 
+        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getLevelManager().isEpicHopper(item))
+            return;
+
         instance.getHopperManager().addHopper(
                 new HopperBuilder(e.getBlock())
                         .setLevel(instance.getLevelManager().getLevel(item))
@@ -106,6 +110,9 @@ public class BlockListeners implements Listener {
         if (event.getBlock().getType() != Material.HOPPER) return;
 
         if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(block.getLocation()))
+            return;
+
+        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(block.getLocation()))
             return;
 
         Hopper hopper = instance.getHopperManager().getHopper(block);

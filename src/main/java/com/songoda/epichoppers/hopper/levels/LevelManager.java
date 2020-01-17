@@ -29,6 +29,14 @@ public class LevelManager {
         }
     }
 
+    public boolean isEpicHopper(ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().getDisplayName().contains(":")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     
     public Level getLowestLevel() {
         return registeredLevels.firstEntry().getValue();
