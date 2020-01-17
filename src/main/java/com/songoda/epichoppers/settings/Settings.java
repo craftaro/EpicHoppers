@@ -22,6 +22,9 @@ public class Settings {
     public static final ConfigSetting UPGRADE_WITH_XP = new ConfigSetting(config, "Main.Upgrade With XP", true,
             "Should you be able to upgrade hoppers with experience?");
 
+    public static final ConfigSetting ALLOW_NORMAL_HOPPERS = new ConfigSetting(config, "Main.Allow Normal Hoppers", false,
+            "Should natural hoppers not be epic hoppers?");
+
     public static final ConfigSetting TELEPORT = new ConfigSetting(config, "Main.Allow Players To Teleport Through Hoppers", true,
             "Should players be able to teleport through hoppers?");
 
