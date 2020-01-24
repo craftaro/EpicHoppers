@@ -450,7 +450,7 @@ public class HopTask extends BukkitRunnable {
 
             // Create item that will be moved.
             ItemStack itemToMove = item.clone();
-            itemToMove.setAmount(item.getAmount() < maxToMove ? item.getAmount() : maxToMove);
+            itemToMove.setAmount(Math.min(item.getAmount(), maxToMove));
 
             // Process whitelist and blacklist.
             boolean blocked = (!hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getWhiteList().stream().noneMatch(itemStack -> itemStack.isSimilar(item))
