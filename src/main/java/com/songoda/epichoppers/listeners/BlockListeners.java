@@ -157,14 +157,13 @@ public class BlockListeners implements Listener {
             break;
         }
 
-        if (location == null) return;
+        if (location == null
+                || location.getBlock().getType() != Material.CHEST
+                || Settings.SYNC_TOUCH_BLACKLIST.getStringList().contains(event.getBlock().getType().name())
 
-        if (location.getBlock().getType() != Material.CHEST) return;
-
-        if (event.getBlock().getType().name().contains("SHULKER")
-                || (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) ? event.getBlock().getType() == Material.SPAWNER : event.getBlock().getType() == Material.valueOf("MOB_SPAWNER"))
-                || event.getBlock().getType() == Material.HOPPER
-                || event.getBlock().getType() == Material.DISPENSER) {
+                || event.getBlock().getType().name().contains("SHULKER")
+                || (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) ? event.getBlock().getType() == Material.SPAWNER
+                : event.getBlock().getType() == Material.valueOf("MOB_SPAWNER"))) {
             return;
         }
 

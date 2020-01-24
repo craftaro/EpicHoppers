@@ -51,6 +51,11 @@ public class Settings {
             "The amount of time in ticks a player has between hitting the hopper",
             "Link button and performing the link. When the time is up the link event is canceled.");
 
+    public static final ConfigSetting SYNC_TOUCH_BLACKLIST = new ConfigSetting(config, "Main.Sync Touch Blacklist",
+            Arrays.asList("CHEST", "FURNACE", "HOPPER"),
+            "Items that shouldn't work with Sync touch. You should put items in here",
+            "that other plugins use to store data with.");
+
     public static final ConfigSetting MAX_CHUNK = new ConfigSetting(config, "Main.Max Hoppers Per Chunk", -1,
             "The maximum amount of hoppers per chunk.");
 
