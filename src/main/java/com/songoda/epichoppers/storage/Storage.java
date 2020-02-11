@@ -4,6 +4,7 @@ import com.songoda.core.configuration.Config;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public abstract class Storage {
             if (hopper.getLevel() == null
                     || hopper.getLocation() == null
                     || hopper.getLevel() == instance.getLevelManager().getLowestLevel()
+                    && !Settings.ALLOW_NORMAL_HOPPERS.getBoolean()
                     && (hopper.getLinkedBlocks() == null || hopper.getLinkedBlocks().isEmpty()))
                 continue;
 
