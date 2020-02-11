@@ -39,7 +39,7 @@ public class HopperListeners implements Listener {
         Location sourceLocation = source.getHolder() instanceof BlockState ? ((BlockState) source.getHolder()).getLocation() : null;
         Location destinationLocation = destination.getHolder() instanceof BlockState ? ((BlockState) destination.getHolder()).getLocation() : null;
 
-        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(sourceLocation))
+        if (sourceLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(sourceLocation))
             return;
 
         // Hopper minecarts should be able to take care of themselves
@@ -69,7 +69,7 @@ public class HopperListeners implements Listener {
 
         // Special cases when a hopper is picking up items
         if (destination.getHolder() instanceof org.bukkit.block.Hopper) {
-            if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(destinationLocation))
+            if (destinationLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(destinationLocation))
                 return;
             // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
             Hopper toHopper = instance.getHopperManager().getHopper(destinationLocation);
