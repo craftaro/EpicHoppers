@@ -85,6 +85,10 @@
             <url>https://repo.songoda.com/artifactory/private/</url>
         </repository>
         <repository>
+            <id>public</id>
+            <url>https://repo.songoda.com/artifactory/public/</url>
+        </repository>
+        <repository>
             <id>reserve-repo</id>
             <url>https://dl.bintray.com/theneweconomy/java/</url>
         </repository>
