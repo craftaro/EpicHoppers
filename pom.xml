@@ -2,7 +2,7 @@
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
     <modelVersion>4.0.0</modelVersion> 
-    <version>4.4.4</version>
+    <version>4.4.5</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <finalName>EpicHoppers-${project.version}</finalName>
@@ -85,6 +85,10 @@
             <url>https://repo.songoda.com/artifactory/private/</url>
         </repository>
         <repository>
+            <id>public</id>
+            <url>https://repo.songoda.com/artifactory/public/</url>
+        </repository>
+        <repository>
             <id>reserve-repo</id>
             <url>https://dl.bintray.com/theneweconomy/java/</url>
         </repository>
@@ -113,8 +117,8 @@
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
-            <artifactId>abledskyblock</artifactId>
-            <version>79.1</version>
+            <artifactId>skyblock</artifactId>
+            <version>2.1.2</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

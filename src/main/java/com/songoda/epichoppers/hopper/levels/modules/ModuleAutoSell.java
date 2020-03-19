@@ -3,6 +3,8 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.hooks.EconomyManager;
 import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.gui.GUIAutoSellFilter;
+import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
@@ -24,15 +26,12 @@ public class ModuleAutoSell extends Module {
 
     private final int timeOut;
     private final int hopperTickRate;
-    private static List<String> cachedSellPrices = null;
     private static final Map<Hopper, Boolean> cachedNotifications = new ConcurrentHashMap<>();
 
     public ModuleAutoSell(EpicHoppers plugin, int timeOut) {
         super(plugin);
         this.timeOut = timeOut * 20;
         this.hopperTickRate = Settings.HOP_TICKS.getInt();
-        if (cachedSellPrices == null)
-            cachedSellPrices = plugin.getConfig().getStringList("Main.AutoSell Prices");
     }
 
     @Override
@@ -60,8 +59,22 @@ public class ModuleAutoSell extends Module {
             // -1
             for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
                 final ItemStack itemStack = hopperCache.cachedInventory[i];
+
                 if (itemStack == null) continue;
 
+                Filter filter = hopper.getFilter();
+
+                if (filter.getAutoSellWhiteList().isEmpty()) {
+                    // Check blacklist
+                    if (filter.getAutoSellBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(itemStack, item)))
+                        continue;
+                } else {
+                    // Check whitelist
+                    if (filter.getAutoSellWhiteList().stream().noneMatch(item -> Methods.isSimilarMaterial(itemStack, item)))
+                        continue;
+                }
+
+                // Get the value from config or ShopGuiPlus
                 double value;
                 if (Settings.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline()) {
                     try {
@@ -72,8 +85,8 @@ public class ModuleAutoSell extends Module {
                         value = 0;
                     }
                 } else
-                    value = cachedSellPrices.stream().filter(line -> Material.valueOf(line.split(",")[0])
-                            == itemStack.getType()).findFirst().map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
+                    value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> Material.valueOf(line.split(",")[0]) == itemStack.getType()).findFirst()
+                            .map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
 
                 if (value == 0) continue;
 
@@ -101,19 +114,23 @@ public class ModuleAutoSell extends Module {
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        ItemStack sell = CompatibleMaterial.SUNFLOWER.getItem();
-        ItemMeta sellmeta = sell.getItemMeta();
-        sellmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle").getMessage());
+        ItemStack sellItem = CompatibleMaterial.SUNFLOWER.getItem();
+        ItemMeta sellMeta = sellItem.getItemMeta();
+
+        sellMeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle").getMessage());
         ArrayList<String> loreSell = new ArrayList<>();
+
         String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selllore")
                 .processPlaceholder("timeleft", getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20))
                 .processPlaceholder("state", isNotifying(hopper)).getMessage().split("\\|");
+
         for (String line : parts) {
             loreSell.add(Methods.formatText(line));
         }
-        sellmeta.setLore(loreSell);
-        sell.setItemMeta(sellmeta);
-        return sell;
+
+        sellMeta.setLore(loreSell);
+        sellItem.setItemMeta(sellMeta);
+        return sellItem;
     }
 
     @Override
@@ -126,6 +143,9 @@ public class ModuleAutoSell extends Module {
             }
         } else if (type == ClickType.RIGHT) {
             setNotifying(hopper, !isNotifying(hopper));
+        } else if (type == ClickType.SHIFT_LEFT || type == ClickType.SHIFT_RIGHT) {
+            // Any shift click opens AutoSell filter configuration GUI
+            EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUIAutoSellFilter(EpicHoppers.getInstance(), hopper));
         }
     }
 

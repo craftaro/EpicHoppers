@@ -3,6 +3,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Location;
@@ -28,22 +29,10 @@ public class ModuleBlockBreak extends Module {
     private final int ticksPerBreak;
     private final Map<Hopper, Integer> blockTick = new HashMap<>();
     private static final Map<Hopper, Boolean> cachedBlocks = new ConcurrentHashMap<>();
-    private static Particle cachedParticleEffectType = null;
-    private static final List<String> cachedBlacklistTypes = new ArrayList<>();
 
     public ModuleBlockBreak(EpicHoppers plugin, int amount) {
         super(plugin);
         this.ticksPerBreak = amount;
-        if (cachedBlacklistTypes.isEmpty()) {
-            cachedBlacklistTypes.addAll(plugin.getConfig().getStringList("Main.BlockBreak Blacklisted Blocks"));
-        }
-        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_9) && cachedParticleEffectType == null) {
-            try {
-                cachedParticleEffectType = Particle.valueOf(plugin.getConfig().getString("Main.BlockBreak Particle Type"));
-            } catch (Exception e) {
-                cachedParticleEffectType = Particle.LAVA;
-            }
-        }
     }
 
     @Override
@@ -81,7 +70,7 @@ public class ModuleBlockBreak extends Module {
             return;
 
         // don't break blacklisted blocks, fluids, or containers
-        if (cachedBlacklistTypes.contains(above.getType().name())
+        if (Settings.BLOCKBREAK_BLACKLIST.getStringList().contains(above.getType().name())
                 || above.getType() == Material.WATER
                 || above.getType() == Material.LAVA
                 || above.getType() == Material.AIR
@@ -99,7 +88,15 @@ public class ModuleBlockBreak extends Module {
             float xx = (float) (0 + (Math.random() * .5));
             float yy = (float) (0 + (Math.random() * .5));
             float zz = (float) (0 + (Math.random() * .5));
-            above.getWorld().spawnParticle(cachedParticleEffectType, locationAbove, 15, xx, yy, zz);
+
+            Particle particle;
+            try {
+                particle = Particle.valueOf(Settings.BLOCKBREAK_PARTICLE.getString());
+            } catch (Exception e) {
+                particle = Particle.LAVA;
+            }
+
+            above.getWorld().spawnParticle(particle, locationAbove, 15, xx, yy, zz);
         }
 
         boolean waterlogged = false;

@@ -19,6 +19,7 @@ import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
 import com.songoda.epichoppers.hopper.levels.modules.*;
+import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.listeners.*;
 import com.songoda.epichoppers.player.PlayerDataManager;
 import com.songoda.epichoppers.settings.Settings;
@@ -199,12 +200,19 @@ public class EpicHoppers extends SongodaPlugin {
                     List<ItemStack> blackList = row.get("blacklist").asItemStackList();
                     List<ItemStack> voidList = row.get("void").asItemStackList();
 
+                    List<ItemStack> autoSellWhiteList = row.get("autosell-whitelist").asItemStackList();
+                    List<ItemStack> autoSellBlackList = row.get("autosell-blacklist").asItemStackList();
+
                     String blackLoc = row.get("black").asString();
                     Location black = blackLoc == null ? null : Methods.unserializeLocation(blackLoc);
 
                     filter.setWhiteList(whiteList);
                     filter.setBlackList(blackList);
                     filter.setVoidList(voidList);
+
+                    filter.setAutoSellWhiteList(autoSellWhiteList);
+                    filter.setAutoSellBlackList(autoSellBlackList);
+
                     filter.setEndPoint(black);
 
                     TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
