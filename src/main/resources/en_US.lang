@@ -40,7 +40,7 @@ interface:
     craftingtitle: '&cClick to Setup AutoCrafting'
     craftinglore: '|&7This allows you to choose|&7which item this hopper|&7will automatically craft.'
     selltitle: '&6Left-Click to Toggle AutoSelling'
-    selllore: '&6Right-Click to Toggle Notifications||&7Selling in &6%timeleft%s&7.|&7Notifications: &6%state%&7.'
+    selllore: '&6Right-Click to Toggle Notifications|&6Shift-Click to Open AutoSell filter||&7Selling in &6%timeleft%s&7.|&7Notifications: &6%state%&7.'
     blocktitle: '&6Click to Toggle BlockBreak'
     blocklore: '|&7BlockBreak is set to &6%enabled%&7.'
     suctiontitle: '&6Suction'
@@ -53,6 +53,11 @@ interface:
     whitelist: '&f&lWhite List'
     blacklist: '&8&lBlack List'
     void: '&c&lVoid'
+  autosell-filter:
+    infotitle: '&aFilter Guide'
+    infolore: '&7Items placed in the left column|&7space will be whitelisted for Auto Sell.||&7Items placed in the right column|&7will be blacklisted from Auto Sell.'
+    whitelist: '&f&lWhite List'
+    blacklist: '&8&lBlack List'
 
 # Command Messages
 
