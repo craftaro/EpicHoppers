@@ -9,6 +9,8 @@ import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
+import com.songoda.skyblock.utils.version.Materials;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -174,8 +176,14 @@ public class HopTask extends BukkitRunnable {
                     } else {
                         com.songoda.skyblock.stackable.StackableManager stackableManager = ((com.songoda.skyblock.SkyBlock) fabledSkyblockPlugin).getStackableManager();
                         if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
-                            Material mat = pointingLocation.getBlock().getType();
-                            com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, mat);
+                            Block pointingBlock = pointingLocation.getBlock();
+                            
+                            Material mat = pointingBlock.getType();
+                            byte data = pointingBlock.getData();
+                            
+                            Materials materials = Materials.getMaterials(mat, data);
+                            
+                            com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, materials);
 
                             for (int i = 0; i < 5; i++) {
                                 final ItemStack item = hopperCache.cachedInventory[i];
@@ -183,7 +191,7 @@ public class HopTask extends BukkitRunnable {
                                     continue;
                                 }
 
-                                if (item.getType() == mat) {
+                                if (Materials.getMaterials(item.getType(), (byte) item.getDurability()) == materials) {
                                     stackable.addOne();
                                     if (item.getAmount() == 1) {
                                         hopperCache.removeItem(i);
