@@ -26,16 +26,12 @@ public class ModuleAutoSell extends Module {
 
     private final int timeOut;
     private final int hopperTickRate;
-    // TODO: Cached Sell prices are not updated on plugin reload, same with any other module
-    private static List<String> cachedSellPrices = null;
     private static final Map<Hopper, Boolean> cachedNotifications = new ConcurrentHashMap<>();
 
     public ModuleAutoSell(EpicHoppers plugin, int timeOut) {
         super(plugin);
         this.timeOut = timeOut * 20;
         this.hopperTickRate = Settings.HOP_TICKS.getInt();
-        if (cachedSellPrices == null)
-            cachedSellPrices = plugin.getConfig().getStringList("Main.AutoSell Prices");
     }
 
     @Override
@@ -89,7 +85,7 @@ public class ModuleAutoSell extends Module {
                         value = 0;
                     }
                 } else
-                    value = cachedSellPrices.stream().filter(line -> Material.valueOf(line.split(",")[0]) == itemStack.getType()).findFirst()
+                    value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> Material.valueOf(line.split(",")[0]) == itemStack.getType()).findFirst()
                             .map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
 
                 if (value == 0) continue;
