@@ -27,7 +27,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Random;
 
 
@@ -157,32 +157,37 @@ public class BlockListeners implements Listener {
             break;
         }
 
+        Material material = event.getBlock().getType();
+
         if (location == null
-                || location.getBlock().getType() != Material.CHEST
+                || material == Material.CHEST
                 || Settings.SYNC_TOUCH_BLACKLIST.getStringList().contains(event.getBlock().getType().name())
 
-                || event.getBlock().getType().name().contains("SHULKER")
-                || (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) ? event.getBlock().getType() == Material.SPAWNER
-                : event.getBlock().getType() == Material.valueOf("MOB_SPAWNER"))) {
+                || material.name().contains("SHULKER")
+                || material == CompatibleMaterial.SPAWNER.getMaterial()) {
             return;
         }
 
         InventoryHolder ih = (InventoryHolder) location.getBlock().getState();
-        if (event.getPlayer().getInventory().getItemInHand().getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
+        Player player = event.getPlayer();
+        Collection<ItemStack> drops = event.getBlock().getDrops();
+        if (drops.isEmpty()) {
+            drops = new ArrayList<>();
+            ItemStack itemStack = getOreDrop(CompatibleMaterial.getMaterial(material), random);
+            if (itemStack != null)
+                drops.add(getOreDrop(CompatibleMaterial.getMaterial(material), random));
+        }
+        if (meta.hasEnchant(Enchantment.SILK_TOUCH)) {
             ih.getInventory().addItem(new ItemStack(event.getBlock().getType(), 1, event.getBlock().getData()));
         } else {
-            if (event.getPlayer().getInventory().getItemInHand().getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
-                int level = event.getPlayer().getInventory().getItemInHand().getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
-                int dropAmount = calculateFortuneDrops(event.getBlock().getType(), level, random);
+            if (meta.hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
+                int level = meta.getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+                int dropAmount = calculateFortuneDrops(material, level, random);
                 for (int i = 0; i < dropAmount; i++) {
-                    for (ItemStack is : event.getBlock().getDrops()) ih.getInventory().addItem(is);
+                    for (ItemStack is : drops) ih.getInventory().addItem(is);
                 }
             } else {
-                for (ItemStack is : event.getBlock().getDrops()) {
-                    Map<Integer, ItemStack> notDropped = ih.getInventory().addItem(is);
-                    if (!notDropped.isEmpty())
-                        location.getWorld().dropItemNaturally(event.getBlock().getLocation(), new ArrayList<>(notDropped.values()).get(0));
-                }
+                for (ItemStack is : drops) ih.getInventory().addItem(is);
             }
         }
 
@@ -192,12 +197,12 @@ public class BlockListeners implements Listener {
         }
 
         event.isCancelled();
-        event.getPlayer().getItemInHand().setDurability((short) (event.getPlayer().getItemInHand().getDurability() + 1));
-        if (event.getPlayer().getItemInHand().getDurability() >= event.getPlayer().getItemInHand().getType().getMaxDurability()) {
-            event.getPlayer().getItemInHand().setType(null);
+        player.getItemInHand().setDurability((short) (player.getItemInHand().getDurability() + 1));
+        if (player.getItemInHand().getDurability() >= player.getItemInHand().getType().getMaxDurability()) {
+            player.getItemInHand().setType(null);
         }
         if (event.getExpToDrop() > 0)
-            event.getPlayer().getWorld().spawn(event.getBlock().getLocation(), ExperienceOrb.class).setExperience(event.getExpToDrop());
+            player.getWorld().spawn(event.getBlock().getLocation(), ExperienceOrb.class).setExperience(event.getExpToDrop());
         event.getBlock().setType(Material.AIR);
 
     }
@@ -216,5 +221,45 @@ public class BlockListeners implements Listener {
 
     private int applyLapisDrops(Material material, Random random) {
         return material == Material.LAPIS_ORE ? 4 + random.nextInt(5) : 1;
+    }
+
+    private ItemStack getOreDrop(CompatibleMaterial material, Random random) {
+        ItemStack item = null;
+        switch (material) {
+            case COAL_ORE:
+                item = CompatibleMaterial.COAL.getItem();
+                break;
+            case DIAMOND_ORE:
+                item = CompatibleMaterial.DIAMOND.getItem();
+                break;
+            case EMERALD_ORE:
+                item = CompatibleMaterial.EMERALD.getItem();
+                break;
+            case GOLD_ORE:
+                item = CompatibleMaterial.GOLD_ORE.getItem();
+                break;
+            case IRON_ORE:
+                item = CompatibleMaterial.IRON_ORE.getItem();
+                break;
+            case LAPIS_ORE:
+                item = CompatibleMaterial.LAPIS_LAZULI.getItem();
+                break;
+            case NETHER_QUARTZ_ORE:
+                item = CompatibleMaterial.QUARTZ.getItem();
+                break;
+            case REDSTONE_ORE:
+                item = CompatibleMaterial.REDSTONE.getItem();
+                break;
+        }
+
+        switch (material) {
+            case LAPIS_ORE:
+                item.setAmount(random.nextInt((9 - 4) + 1) + 4);
+                break;
+            case REDSTONE_ORE:
+                item.setAmount(random.nextInt((5 - 4) + 1) + 4);
+                break;
+        }
+        return item;
     }
 }
