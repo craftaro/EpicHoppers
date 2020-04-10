@@ -1,7 +1,9 @@
 package com.songoda.epichoppers.gui;
 
+import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.gui.Gui;
 import com.songoda.core.gui.GuiUtils;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.settings.Settings;
@@ -28,6 +30,10 @@ public class GUICrafting extends Gui {
         GuiUtils.mirrorFill(this, 0, 2, true, true, glass3);
         GuiUtils.mirrorFill(this, 1, 0, false, true, glass2);
         GuiUtils.mirrorFill(this, 1, 1, false, true, glass3);
+
+        setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+                EpicHoppers.getInstance().getLocale().getMessage("general.nametag.back").getMessage()),
+                (event) -> hopper.overview(guiManager, event.player));
 
         setButton(13, module.getAutoCrafting(hopper),
                 (event) -> module.setAutoCrafting(hopper, player, inventory.getItem(13)));

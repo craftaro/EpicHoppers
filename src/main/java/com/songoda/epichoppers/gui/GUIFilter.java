@@ -56,6 +56,10 @@ public class GUIFilter extends Gui {
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist").getMessage());
         it.setItemMeta(itm);
 
+        setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+                plugin.getLocale().getMessage("general.nametag.back").getMessage()),
+                (event) -> hopper.overview(guiManager, event.player));
+
         int[] whiteSlots = {0, 1, 45, 46};
         for (int nu : whiteSlots) {
             setItem(nu, it);

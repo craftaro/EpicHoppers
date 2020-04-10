@@ -52,6 +52,10 @@ public class GUIAutoSellFilter extends Gui {
         GuiUtils.mirrorFill(this, 2, 8, true, false, glass2);
         GuiUtils.mirrorFill(this, 4, 7, false, false, glass1);
 
+        setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+                plugin.getLocale().getMessage("general.nametag.back").getMessage()),
+                (event) -> hopper.overview(guiManager, event.player));
+
         // Whitelist
         ItemStack indicatorItem = CompatibleMaterial.WHITE_STAINED_GLASS_PANE.getItem();
         ItemMeta indicatorMeta = indicatorItem.getItemMeta();
