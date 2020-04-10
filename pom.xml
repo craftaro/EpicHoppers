@@ -117,8 +117,8 @@
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
-            <artifactId>skyblock</artifactId>
-            <version>2.1.2</version>
+            <artifactId>fabledskyblock</artifactId>
+            <version>LATEST</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

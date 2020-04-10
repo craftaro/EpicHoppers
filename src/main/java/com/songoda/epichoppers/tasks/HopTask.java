@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.tasks;
 
+import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.HopperManager;
@@ -9,7 +10,6 @@ import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-import com.songoda.skyblock.utils.version.Materials;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -177,13 +177,10 @@ public class HopTask extends BukkitRunnable {
                         com.songoda.skyblock.stackable.StackableManager stackableManager = ((com.songoda.skyblock.SkyBlock) fabledSkyblockPlugin).getStackableManager();
                         if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
                             Block pointingBlock = pointingLocation.getBlock();
+
+                            com.songoda.skyblock.core.compatibility.CompatibleMaterial compatibleMaterial = com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(pointingBlock);
                             
-                            Material mat = pointingBlock.getType();
-                            byte data = pointingBlock.getData();
-                            
-                            Materials materials = Materials.getMaterials(mat, data);
-                            
-                            com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, materials);
+                            com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, compatibleMaterial);
 
                             for (int i = 0; i < 5; i++) {
                                 final ItemStack item = hopperCache.cachedInventory[i];
@@ -191,7 +188,7 @@ public class HopTask extends BukkitRunnable {
                                     continue;
                                 }
 
-                                if (Materials.getMaterials(item.getType(), (byte) item.getDurability()) == materials) {
+                                if (com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(item) == compatibleMaterial) {
                                     stackable.addOne();
                                     if (item.getAmount() == 1) {
                                         hopperCache.removeItem(i);
