@@ -6,6 +6,7 @@ import com.songoda.core.gui.GuiUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.ItemType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
@@ -18,12 +19,14 @@ import java.util.List;
 
 public class GUIAutoSellFilter extends Gui {
 
-    public final Hopper hopper;
+    private final EpicHoppers plugin;
+    private final Hopper hopper;
 
     private final int[] whiteListSlots = {9, 10, 11, 18, 19, 20, 27, 28, 29, 36, 37, 38};
     private final int[] blackListSlots = {12, 13, 14, 21, 22, 23, 30, 31, 32, 39, 40, 41};
 
     public GUIAutoSellFilter(EpicHoppers plugin, Hopper hopper) {
+        this.plugin = plugin;
         this.hopper = hopper;
 
         setRows(6);
@@ -149,5 +152,7 @@ public class GUIAutoSellFilter extends Gui {
 
         filter.setAutoSellWhiteList(whiteListItems);
         filter.setAutoSellBlackList(blackListItems);
+        plugin.getDataManager().updateItems(hopper, ItemType.WHITELIST, whiteListItems);
+        plugin.getDataManager().updateItems(hopper, ItemType.BLACKLIST, blackListItems);
     }
 }

@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.tasks;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.HopperManager;
@@ -10,7 +9,6 @@ import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -179,7 +177,7 @@ public class HopTask extends BukkitRunnable {
                             Block pointingBlock = pointingLocation.getBlock();
 
                             com.songoda.skyblock.core.compatibility.CompatibleMaterial compatibleMaterial = com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(pointingBlock);
-                            
+
                             com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, compatibleMaterial);
 
                             for (int i = 0; i < 5; i++) {
@@ -216,7 +214,11 @@ public class HopTask extends BukkitRunnable {
 
         // Clear out invalid hoppers
         HopperManager hopperManager = plugin.getHopperManager();
-        toRemove.forEach(hopperManager::removeHopper);
+        toRemove.forEach(h -> {
+            com.songoda.epichoppers.hopper.Hopper
+                    hopper = hopperManager.removeHopper(h);
+            plugin.getDataManager().deleteHopper(hopper);
+        });
     }
 
     private void debt(ItemStack item, int amountToMove, InventoryHolder currentHolder) {
@@ -276,7 +278,7 @@ public class HopTask extends BukkitRunnable {
                 pullableSlots = IntStream.rangeClosed(0, contents.length - 1).toArray();
             } else {
                 if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null
-                || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY())
+                        || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY())
                     return;
                 if (aboveInvHolder instanceof StorageMinecart) {
                     pullableSlots = IntStream.rangeClosed(0, 26).toArray();

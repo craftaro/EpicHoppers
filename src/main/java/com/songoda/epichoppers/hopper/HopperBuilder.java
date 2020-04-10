@@ -20,14 +20,19 @@ public class HopperBuilder {
         this(block.getLocation());
     }
 
+    public HopperBuilder setId(int id) {
+        this.hopper.setId(id);
+        return this;
+    }
+
     public HopperBuilder setLevel(Level level) {
         this.hopper.setLevel(level);
         return this;
     }
 
-    public HopperBuilder addLinkedBlocks(Location... linkedBlocks) {
+    public HopperBuilder addLinkedBlocks(LinkType type, Location... linkedBlocks) {
         for (Location location : linkedBlocks)
-            hopper.addLinkedBlock(location);
+            hopper.addLinkedBlock(location, type);
         return this;
     }
 

@@ -170,6 +170,7 @@ public class GUIOverview extends Gui {
                                 return;
                             }
                             hopper.clearLinkedBlocks();
+                            plugin.getDataManager().deleteLinks(hopper);
                             if (event.clickType == ClickType.RIGHT) {
                                 plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
                                 constructGUI();
@@ -203,6 +204,7 @@ public class GUIOverview extends Gui {
                                 } else if (hopper.getTeleportTrigger() == TeleportTrigger.WALK_ON) {
                                     hopper.setTeleportTrigger(TeleportTrigger.DISABLED);
                                 }
+                                plugin.getDataManager().updateHopper(hopper);
                                 constructGUI();
                             }
                         });

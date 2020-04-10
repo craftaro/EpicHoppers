@@ -1,9 +1,6 @@
 package com.songoda.epichoppers.boost;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class BoostManager {
 
@@ -15,6 +12,10 @@ public class BoostManager {
 
     public void removeBoostFromPlayer(BoostData data) {
         this.registeredBoosts.remove(data);
+    }
+
+    public void addBoosts(List<BoostData> boosts) {
+        registeredBoosts.addAll(boosts);
     }
 
     public Set<BoostData> getBoosts() {

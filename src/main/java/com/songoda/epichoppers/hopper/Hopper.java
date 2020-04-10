@@ -22,6 +22,9 @@ import java.util.*;
  */
 public class Hopper {
 
+    // Id for database use.
+    private int id;
+
     private final Location location;
     private Level level = EpicHoppers.getInstance().getLevelManager().getLowestLevel();
     private UUID lastPlayerOpened = null;
@@ -92,6 +95,7 @@ public class Hopper {
     private void upgradeFinal(Level level, Player player) {
         EpicHoppers plugin = EpicHoppers.getInstance();
         this.level = level;
+        plugin.getDataManager().updateHopper(this);
         syncName();
         if (plugin.getLevelManager().getHighestLevel() != level) {
             plugin.getLocale().getMessage("event.upgrade.success")
@@ -153,10 +157,12 @@ public class Hopper {
             return;
         }
 
-        if (!filtered)
+        if (!filtered) {
             this.linkedBlocks.add(toLink.getLocation());
-        else {
+            instance.getDataManager().createLink(this, toLink.getLocation(), LinkType.REGULAR);
+        } else {
             this.filter.setEndPoint(toLink.getLocation());
+            instance.getDataManager().createLink(this, toLink.getLocation(), LinkType.REJECT);
             instance.getLocale().getMessage("event.hopper.syncsuccess").sendPrefixedMessage(player);
             instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
             return;
@@ -258,8 +264,11 @@ public class Hopper {
         return new ArrayList<>(linkedBlocks);
     }
 
-    public void addLinkedBlock(Location block) {
-        linkedBlocks.add(block);
+    public void addLinkedBlock(Location location, LinkType type) {
+        if (type == LinkType.REGULAR)
+            linkedBlocks.add(location);
+        else
+            filter.setEndPoint(location);
     }
 
     public void removeLinkedBlock(Location location) {
@@ -301,5 +310,13 @@ public class Hopper {
     public void cancelSync(Player player) {
         Bukkit.getScheduler().cancelTask(syncId);
         EpicHoppers.getInstance().getPlayerDataManager().getPlayerData(player).setSyncType(null);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

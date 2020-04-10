@@ -7,21 +7,25 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class HopperManager {
 
     private final Map<Location, Hopper> registeredHoppers = new HashMap<>();
 
-    public void addHopper(Hopper hopper) {
+    public Hopper addHopper(Hopper hopper) {
         registeredHoppers.put(roundLocation(hopper.getLocation()), hopper);
+        return hopper;
     }
 
     @Deprecated
     public void addHopper(Location location, Hopper hopper) {
         registeredHoppers.put(roundLocation(location), hopper);
+    }
+
+    public void addHoppers(Collection<Hopper> hoppers) {
+        for (Hopper hopper : hoppers)
+            registeredHoppers.put(hopper.getLocation(), hopper);
     }
 
     /**
@@ -46,7 +50,8 @@ public class HopperManager {
 
     public Hopper getHopper(Location location) {
         if (!registeredHoppers.containsKey(location = roundLocation(location))) {
-            addHopper(new Hopper(location));
+            Hopper hopper = addHopper(new Hopper(location));
+            EpicHoppers.getInstance().getDataManager().createHopper(hopper);
         }
         return registeredHoppers.get(location);
     }

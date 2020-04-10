@@ -69,11 +69,12 @@ public class BlockListeners implements Listener {
         if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getLevelManager().isEpicHopper(item))
             return;
 
-        instance.getHopperManager().addHopper(
+        Hopper hopper = instance.getHopperManager().addHopper(
                 new HopperBuilder(e.getBlock())
                         .setLevel(instance.getLevelManager().getLevel(item))
                         .setPlacedBy(player)
                         .setLastPlayerOpened(player).build());
+        EpicHoppers.getInstance().getDataManager().createHopper(hopper);
     }
 
     private int maxHoppers(Player player) {
@@ -138,6 +139,7 @@ public class BlockListeners implements Listener {
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
 
         instance.getHopperManager().removeHopper(block.getLocation());
+        instance.getDataManager().deleteHopper(hopper);
 
         instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
