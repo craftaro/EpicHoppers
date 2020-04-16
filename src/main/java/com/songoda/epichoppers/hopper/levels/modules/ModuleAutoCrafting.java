@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -59,32 +60,83 @@ public class ModuleAutoCrafting extends Module {
             }
         }
 
-        top:
-        for (SimpleRecipe recipe : getRecipes(toCraft).recipes) {
+        synchronized (hopperCache) {    //TODO: Check if this is required
+            ItemStack[] items = hopperCache.cachedInventory;
 
-            // Do we have enough to craft this recipe?
-            for (ItemStack item : recipe.recipe) {
-                int amountHave = 0;
-                for (ItemStack hopperItem : hopperCache.cachedInventory) {
-                    if (hopperItem != null
-                            && !(hopperItem.hasItemMeta() && hopperItem.getItemMeta().hasDisplayName())
-                            && Methods.isSimilarMaterial(hopperItem, item))
-                        amountHave += hopperItem.getAmount();
+            for (SimpleRecipe recipe : getRecipes(toCraft).recipes) {
+                // key=indexForItemsArray, value=amountAfterCrafting
+                Map<Integer, Integer> slotsToAlter = new HashMap<>();
+
+                for (SimpleRecipe.SimpleIngredient ingredient : recipe.ingredients) {
+                    int amount = ingredient.item.getAmount() + ingredient.getAdditionalAmount();
+
+                    for (int i = 0; i < items.length; i++) {
+                        ItemStack item = items[i];
+
+                        if (item == null) continue;
+                        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) continue;
+
+                        boolean sameMaterial = Methods.isSimilarMaterial(item, ingredient.item);
+
+                        // Check if any alternative Material matches
+                        if (!sameMaterial) {
+                            for (Material alternativeType : ingredient.alternativeTypes) {
+                                // Clone item to preserve metadata (pre 1.13)
+                                //TODO: Cache ItemStack instead of cloning on every request... Costly with many hoppers
+                                ItemStack alternativeItem = ingredient.item.clone();
+                                alternativeItem.setType(alternativeType);
+
+                                if (Methods.isSimilarMaterial(item, alternativeItem)) {
+                                    sameMaterial = true;
+                                    break;
+                                }
+                            }
+
+                            // Still doesn't not match --> Skip this item
+                            if (!sameMaterial) continue;
+                        }
+
+                        if (item.getAmount() >= amount) {
+                            slotsToAlter.put(i, item.getAmount() - amount);
+                            amount = 0;
+                        } else {
+                            slotsToAlter.put(i, 0);
+                            amount -= item.getAmount();
+                        }
+                    }
+
+                    // Not enough items for this recipe
+                    if (amount != 0) continue;
+
+                    for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
+                        if (entry.getValue() <= 0) {
+                            items[entry.getKey()] = null;
+                        } else {
+                            items[entry.getKey()].setAmount(entry.getValue());
+                        }
+                    }
+
+                    // Add the resulting item into the inventory - Just making sure there actually is enough space
+                    boolean success = false;
+                    for (int i = 0; i < items.length; i++) {
+                        if (items[i] == null ||
+                                (items[i].isSimilar(recipe.result)
+                                        && items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize())) {
+                            if (items[i] == null) {
+                                items[i] = recipe.result.clone();
+                            } else {
+                                items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
+                            }
+
+                            success = true;
+                            break;
+                        }
+                    }
+
+                    if (success) {
+                        hopperCache.setContents(items);
+                    }
                 }
-                if (amountHave < item.getAmount()) {
-                    // Nope! Try the other recipes, just to be sure.
-                    continue top;
-                }
-            }
-
-            // If we've gotten this far, then we have items to craft!
-            // first: can we push this crafted item down the line?
-            if (!hopperCache.addItem(recipe.result))
-                return;
-
-            // We're good! Remove the items used to craft!
-            for (ItemStack item : recipe.recipe) {
-                hopperCache.removeItems(item);
             }
         }
     }
@@ -157,22 +209,24 @@ public class ModuleAutoCrafting extends Module {
                 }
             }
 
+            //TODO: Check if below this is redundant code - Could not craft chest with other planks anyway ~-~
+
             // adding broken recipe for wood planks
-            final String toType = toCraft.getType().name();
-            if (toType.endsWith("_PLANKS")) {
-                boolean fromLog = false;
-                for (SimpleRecipe recipe : recipes.recipes) {
-                    if (recipe.recipe.length == 1 && recipe.recipe[0].getType().name().endsWith("_LOG")) {
-                        fromLog = true;
-                        break;
-                    }
-                }
-                if (!fromLog) {
-                    Material log = Material.getMaterial(toType.substring(0, toType.length() - 6) + "LOG");
-                    if (log != null)
-                        recipes.addRecipe(Collections.singletonList(new ItemStack(log)), new ItemStack(toCraft.getType(), 4));
-                }
-            }
+//            final String toType = toCraft.getType().name();
+//            if (toType.endsWith("_PLANKS")) {
+//                boolean fromLog = false;
+//                for (SimpleRecipe recipe : recipes.recipes) {
+//                    if (recipe.recipe.length == 1 && recipe.recipe[0].getType().name().endsWith("_LOG")) {
+//                        fromLog = true;
+//                        break;
+//                    }
+//                }
+//                if (!fromLog) {
+//                    Material log = Material.getMaterial(toType.substring(0, toType.length() - 6) + "LOG");
+//                    if (log != null)
+//                        recipes.addRecipe(Collections.singletonList(new ItemStack(log)), new ItemStack(toCraft.getType(), 4));
+//                }
+//            }
 
             cachedRecipes.put(toCraft, recipes);
         }
@@ -236,34 +290,32 @@ public class ModuleAutoCrafting extends Module {
         }
 
         public void addRecipe(Recipe recipe) {
-            if (recipe instanceof ShapelessRecipe) {
-                addRecipe(((ShapelessRecipe) recipe).getIngredientList(), recipe.getResult());
-                ;
-            } else if (recipe instanceof ShapedRecipe) {
-                addRecipe(new ArrayList<>(((ShapedRecipe) recipe).getIngredientMap().values()), recipe.getResult());
-            }
-        }
+            SimpleRecipe simpleRecipe = null;
 
-        public void addRecipe(Collection<ItemStack> ingredientMap, ItemStack result) {
-            // consense the recipe into a list of materials and how many of each
-            Map<Material, ItemStack> mergedRecipe = new HashMap<>();
-            ingredientMap.stream()
-                    .filter(item -> item != null)
-                    .forEach(item -> {
-                        ItemStack mergedItem = mergedRecipe.get(item.getType());
-                        if (mergedItem == null) {
-                            mergedRecipe.put(item.getType(), item);
-                        } else {
-                            mergedItem.setAmount(mergedItem.getAmount() + 1);
-                        }
-                    });
-            this.recipes.add(new SimpleRecipe(mergedRecipe.values(), result));
+            if (recipe instanceof ShapelessRecipe) {
+                simpleRecipe = new SimpleRecipe((ShapelessRecipe) recipe);
+            } else if (recipe instanceof ShapedRecipe) {
+                simpleRecipe = new SimpleRecipe((ShapedRecipe) recipe);
+            }
+
+            // Skip unsupported recipe type
+            if (simpleRecipe == null) return;
+
+            this.recipes.add(simpleRecipe);
+
+            // TODO: Find out what allTypes is actually for o.0
             // Also keep a tally of what materials are possible for this craftable
-            mergedRecipe.keySet().stream()
-                    .filter(itemType -> itemType != null && !allTypes.contains(itemType))
-                    .forEach(itemType -> {
-                        allTypes.add(itemType);
-                    });
+            for (SimpleRecipe.SimpleIngredient ingredient : simpleRecipe.ingredients) {
+                if (!allTypes.contains(ingredient.item.getType())) {
+                    allTypes.add(ingredient.item.getType());
+                }
+
+                for (Material material : ingredient.alternativeTypes) {
+                    if (!allTypes.contains(material)) {
+                        allTypes.add(material);
+                    }
+                }
+            }
         }
 
         public void addRecipes(Collection<Recipe> recipes) {
@@ -280,12 +332,113 @@ public class ModuleAutoCrafting extends Module {
     }
 
     final static class SimpleRecipe {
+        final SimpleIngredient[] ingredients;
         final ItemStack result;
-        final ItemStack[] recipe;
 
-        public SimpleRecipe(Collection<ItemStack> recipe, ItemStack result) {
-            this.result = result;
-            this.recipe = recipe.toArray(new ItemStack[0]);
+        SimpleRecipe(ShapelessRecipe recipe) {
+            this.result = recipe.getResult();
+
+            List<SimpleIngredient> ingredients = new ArrayList<>();
+
+            for (int i = 0; i < recipe.getIngredientList().size(); i++) {
+                ItemStack item = recipe.getIngredientList().get(i);
+                RecipeChoice rChoice = recipe.getChoiceList().get(i);
+
+                processIngredient(ingredients, item, rChoice);
+            }
+
+            this.ingredients = ingredients.toArray(new SimpleIngredient[0]);
+        }
+
+        SimpleRecipe(ShapedRecipe recipe) {
+            this.result = recipe.getResult();
+
+            List<SimpleIngredient> ingredients = new ArrayList<>();
+
+            for (Map.Entry<Character, ItemStack> entry : recipe.getIngredientMap().entrySet()) {
+                ItemStack item = entry.getValue();
+                RecipeChoice rChoice = recipe.getChoiceMap().get(entry.getKey());
+
+                if (item == null) continue;
+
+                processIngredient(ingredients, item, rChoice);
+            }
+
+            this.ingredients = ingredients.toArray(new SimpleIngredient[0]);
+        }
+
+        private void processIngredient(List<SimpleIngredient> ingredients, ItemStack item, RecipeChoice rChoice) {
+            List<Material> alternativeTypes = new LinkedList<>();
+
+            if (rChoice instanceof RecipeChoice.MaterialChoice) {
+                for (Material possType : ((RecipeChoice.MaterialChoice) rChoice).getChoices()) {
+                    if (item.getType() != possType) {
+                        alternativeTypes.add(possType);
+                    }
+                }
+            }
+
+            SimpleIngredient simpleIngredient = new SimpleIngredient(item, alternativeTypes);
+
+            // Search for existing ingredients
+            for (SimpleIngredient ingredient : ingredients) {
+                if (ingredient.isSimilar(simpleIngredient)) {
+                    ingredient.addAdditionalAmount(item.getAmount());
+                    simpleIngredient = null;
+                    break;
+                }
+            }
+
+            // No existing ingredient found?
+            if (simpleIngredient != null) {
+                ingredients.add(simpleIngredient);
+            }
+        }
+
+        static class SimpleIngredient {
+            final ItemStack item;
+            final Material[] alternativeTypes;
+
+            /**
+             * <b>Ignored by {@link #equals(Object)}!</b><br>
+             * This amount should be added to {@link #item} when crafting
+             * to consider the complete item costs
+             */
+            private int additionalAmount = 0;
+
+            /**
+             * @throws NullPointerException If any of the parameters is null
+             */
+            SimpleIngredient(ItemStack item, Collection<Material> alternativeTypes) {
+                Objects.requireNonNull(item);
+                Objects.requireNonNull(alternativeTypes);
+
+                this.item = item;
+                this.alternativeTypes = alternativeTypes.toArray(new Material[0]);
+            }
+
+            public int getAdditionalAmount() {
+                return additionalAmount;
+            }
+
+            public void addAdditionalAmount(int amountToAdd) {
+                additionalAmount += amountToAdd;
+            }
+
+            /**
+             * Like {@link #equals(Object)} but ignores {@link #additionalAmount} and {@link ItemStack#getAmount()}
+             *
+             * @return If two {@link SimpleIngredient} objects are equal
+             * while ignoring any item amounts, true otherwise false
+             */
+            public boolean isSimilar(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                SimpleIngredient that = (SimpleIngredient) o;
+                return item.isSimilar(that.item) &&
+                        Arrays.equals(alternativeTypes, that.alternativeTypes);
+            }
         }
     }
 }
