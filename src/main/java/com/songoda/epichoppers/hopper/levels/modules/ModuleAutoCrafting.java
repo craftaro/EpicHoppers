@@ -209,25 +209,6 @@ public class ModuleAutoCrafting extends Module {
                 }
             }
 
-            //TODO: Check if below this is redundant code - Could not craft chest with other planks anyway ~-~
-
-            // adding broken recipe for wood planks
-//            final String toType = toCraft.getType().name();
-//            if (toType.endsWith("_PLANKS")) {
-//                boolean fromLog = false;
-//                for (SimpleRecipe recipe : recipes.recipes) {
-//                    if (recipe.recipe.length == 1 && recipe.recipe[0].getType().name().endsWith("_LOG")) {
-//                        fromLog = true;
-//                        break;
-//                    }
-//                }
-//                if (!fromLog) {
-//                    Material log = Material.getMaterial(toType.substring(0, toType.length() - 6) + "LOG");
-//                    if (log != null)
-//                        recipes.addRecipe(Collections.singletonList(new ItemStack(log)), new ItemStack(toCraft.getType(), 4));
-//                }
-//            }
-
             cachedRecipes.put(toCraft, recipes);
         }
         return recipes;
