@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
-    <modelVersion>4.0.0</modelVersion> 
+    <modelVersion>4.0.0</modelVersion>
     <version>4.4.5</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
