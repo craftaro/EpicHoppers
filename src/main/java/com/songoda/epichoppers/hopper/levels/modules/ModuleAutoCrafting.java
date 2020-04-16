@@ -400,8 +400,8 @@ public class ModuleAutoCrafting extends Module {
             final Material[] alternativeTypes;
 
             /**
-             * <b>Ignored by {@link #equals(Object)}!</b><br>
-             * This amount should be added to {@link #item} when crafting
+             * <b>Ignored by {@link #isSimilar(Object)}!</b><br>
+             * This amount should be added to {@link #item} when crafting,
              * to consider the complete item costs
              */
             private int additionalAmount = 0;
