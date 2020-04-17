@@ -82,13 +82,8 @@ public class ModuleAutoCrafting extends Module {
 
                         // Check if any alternative Material matches
                         if (!sameMaterial) {
-                            for (Material alternativeType : ingredient.alternativeTypes) {
-                                // Clone item to preserve metadata (pre 1.13)
-                                //TODO: Cache ItemStack instead of cloning on every request... Costly with many hoppers
-                                ItemStack alternativeItem = ingredient.item.clone();
-                                alternativeItem.setType(alternativeType);
-
-                                if (Methods.isSimilarMaterial(item, alternativeItem)) {
+                            for (ItemStack alternativeType : ingredient.alternativeTypes) {
+                                if (Methods.isSimilarMaterial(item, alternativeType)) {
                                     sameMaterial = true;
                                     break;
                                 }
@@ -293,9 +288,9 @@ public class ModuleAutoCrafting extends Module {
                     allTypes.add(ingredient.item.getType());
                 }
 
-                for (Material material : ingredient.alternativeTypes) {
-                    if (!allTypes.contains(material)) {
-                        allTypes.add(material);
+                for (ItemStack material : ingredient.alternativeTypes) {
+                    if (!allTypes.contains(material.getType())) {
+                        allTypes.add(material.getType());
                     }
                 }
             }
@@ -380,7 +375,7 @@ public class ModuleAutoCrafting extends Module {
 
         static class SimpleIngredient {
             final ItemStack item;
-            final Material[] alternativeTypes;
+            final ItemStack[] alternativeTypes;
 
             /**
              * <b>Ignored by {@link #isSimilar(Object)}!</b><br>
@@ -392,12 +387,18 @@ public class ModuleAutoCrafting extends Module {
             /**
              * @throws NullPointerException If any of the parameters is null
              */
-            SimpleIngredient(ItemStack item, Collection<Material> alternativeTypes) {
+            SimpleIngredient(ItemStack item, List<Material> alternativeTypes) {
                 Objects.requireNonNull(item);
                 Objects.requireNonNull(alternativeTypes);
 
                 this.item = item;
-                this.alternativeTypes = alternativeTypes.toArray(new Material[0]);
+
+                this.alternativeTypes = new ItemStack[alternativeTypes.size()];
+
+                for (int i = 0; i < alternativeTypes.size(); i++) {
+                    this.alternativeTypes[i] = this.item.clone();
+                    this.alternativeTypes[i].setType(alternativeTypes.get(i));
+                }
             }
 
             public int getAdditionalAmount() {
