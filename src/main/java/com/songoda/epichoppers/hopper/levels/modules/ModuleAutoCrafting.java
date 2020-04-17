@@ -96,7 +96,7 @@ public class ModuleAutoCrafting extends Module {
                     if (crafterEjection && !freeSlotAfterRemovingIngredients) {
                         // TODO: Recode. Why specifically eject ingredients (allMaterials).
                         //       And why not eject when we checked crafting is possible
-                        final List<Material> allMaterials = getRecipes(toCraft).getAllMaterials();
+                        final List<Material> allMaterials = getRecipes(toCraft).getPossibleIngredientTypes();
                         if (Stream.of(hopperCache.cachedInventory)
                                 .allMatch(item -> item != null && allMaterials.stream().anyMatch(mat -> mat == item.getType()))) {
                             // Crafter can't function if there's nowhere to put the output
@@ -167,7 +167,7 @@ public class ModuleAutoCrafting extends Module {
     public List<Material> getBlockedItems(Hopper hopper) {
         ItemStack itemStack = getAutoCrafting(hopper);
         if (itemStack != null && itemStack.getType() != Material.AIR) {
-            return getRecipes(itemStack).getAllMaterials();
+            return getRecipes(itemStack).getPossibleIngredientTypes();
         }
         return Collections.EMPTY_LIST;
     }
@@ -250,10 +250,9 @@ public class ModuleAutoCrafting extends Module {
     }
 
     final static class Recipes {
-
-        // we don't actually care about the shape, just the materials used
         private final List<SimpleRecipe> recipes = new ArrayList<>();
-        private final List<Material> allTypes = new ArrayList<>();
+        // Used for the blacklist to ensure that items are not going to get transferred
+        private final List<Material> possibleIngredientTypes = new ArrayList<>();
 
         public Recipes() {
         }
@@ -266,8 +265,8 @@ public class ModuleAutoCrafting extends Module {
             return Collections.unmodifiableList(recipes);
         }
 
-        public List<Material> getAllMaterials() {
-            return Collections.unmodifiableList(allTypes);
+        public List<Material> getPossibleIngredientTypes() {
+            return Collections.unmodifiableList(possibleIngredientTypes);
         }
 
         public void addRecipe(Recipe recipe) {
@@ -284,16 +283,15 @@ public class ModuleAutoCrafting extends Module {
 
             this.recipes.add(simpleRecipe);
 
-            // TODO: Find out what allTypes is actually for o.0
-            // Also keep a tally of what materials are possible for this craftable
+            // Keep a list of all possible ingredients.
             for (SimpleRecipe.SimpleIngredient ingredient : simpleRecipe.ingredients) {
-                if (!allTypes.contains(ingredient.item.getType())) {
-                    allTypes.add(ingredient.item.getType());
+                if (!possibleIngredientTypes.contains(ingredient.item.getType())) {
+                    possibleIngredientTypes.add(ingredient.item.getType());
                 }
 
                 for (ItemStack material : ingredient.alternativeTypes) {
-                    if (!allTypes.contains(material.getType())) {
-                        allTypes.add(material.getType());
+                    if (!possibleIngredientTypes.contains(material.getType())) {
+                        possibleIngredientTypes.add(material.getType());
                     }
                 }
             }
