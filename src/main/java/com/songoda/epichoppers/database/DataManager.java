@@ -248,7 +248,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void deleteHopper(Hopper hopper) {
         this.async(() -> this.databaseConnector.connect(connection -> {
-            String deleteHopper = "DELETE FROM " + this.getTablePrefix() + "placed_hopper WHERE id = ?";
+            String deleteHopper = "DELETE FROM " + this.getTablePrefix() + "placed_hoppers WHERE id = ?";
             try (PreparedStatement statement = connection.prepareStatement(deleteHopper)) {
                 statement.setInt(1, hopper.getId());
                 statement.executeUpdate();
