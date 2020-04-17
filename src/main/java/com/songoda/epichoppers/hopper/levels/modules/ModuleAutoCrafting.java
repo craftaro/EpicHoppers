@@ -20,7 +20,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 public class ModuleAutoCrafting extends Module {
 
@@ -90,24 +89,50 @@ public class ModuleAutoCrafting extends Module {
 
                     boolean freeSlotAfterRemovingIngredients =
                             slotsToAlter.values().stream().anyMatch(iAmount -> iAmount <= 0) ||
-                                    Arrays.stream(items).anyMatch(Objects::isNull);
+                                    Arrays.stream(items).anyMatch(item -> item == null ||
+                                            (item.getAmount() + recipe.result.getAmount() <= item.getMaxStackSize() &&
+                                                    recipe.result.isSimilar(item)));
 
                     // jam check: is this hopper gummed up?
                     if (crafterEjection && !freeSlotAfterRemovingIngredients) {
-                        // TODO: Recode. Why specifically eject ingredients (allMaterials).
-                        //       And why not eject when we checked crafting is possible
-                        final List<Material> allMaterials = getRecipes(toCraft).getPossibleIngredientTypes();
-                        if (Stream.of(hopperCache.cachedInventory)
-                                .allMatch(item -> item != null && allMaterials.stream().anyMatch(mat -> mat == item.getType()))) {
-                            // Crafter can't function if there's nowhere to put the output
-                            // ¯\_(ツ)_/¯
-                            // forcibly open the last slot
-                            ItemStack last = items[4];
-                            items[4] = null;
-                            freeSlotAfterRemovingIngredients = true;
-                            // and yeet into space!
-                            hopper.getWorld().dropItemNaturally(hopper.getLocation(), last);
+                        // Crafter can't function if there's nowhere to put the output
+                        // ¯\_(ツ)_/¯
+
+                        for (int i = 0; i < items.length; i++) {
+                            if (!slotsToAlter.containsKey(i)) {
+                                // and yeet into space!
+                                hopper.getWorld().dropItemNaturally(hopper.getLocation(), items[i]);
+                                items[i] = null;
+
+                                freeSlotAfterRemovingIngredients = true;
+                                break;
+                            }
                         }
+
+                        // FIXME: In theory the code below should work. But if the last item is of the same type as the
+                        //        resulting item, the inventory won't update correctly
+                        //        (item is set correctly but reset to MaxStackSize)
+                        //        (CachedInventory doesn't like it's array to be edited?)
+                        /*
+                        // None of the slots can safely be freed. So we drop some leftover ingredients
+                        if (!freeSlotAfterRemovingIngredients) {
+
+                            int slot = items.length - 1;   // Last slot
+
+                            slotsToAlter.computeIfPresent(slot, (key, value) -> {
+                                items[slot].setAmount(value);
+
+                                return null;
+                            });
+
+                            // and yeet into space!
+                            items[slot].setAmount(slotsToAlter.getOrDefault(slot, items[slot].getAmount()));
+                            hopper.getWorld().dropItemNaturally(hopper.getLocation(), items[slot]);
+                            items[slot] = null;
+
+                            freeSlotAfterRemovingIngredients = true;
+                        }
+                        */
                     }
 
                     if (freeSlotAfterRemovingIngredients) {
