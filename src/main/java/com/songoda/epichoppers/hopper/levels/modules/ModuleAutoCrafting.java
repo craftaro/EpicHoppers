@@ -45,30 +45,8 @@ public class ModuleAutoCrafting extends Module {
         if (hopper == null || (toCraft = getAutoCrafting(hopper)) == null || toCraft.getType() == Material.AIR)
             return;
 
-        // jam check: is this hopper gummed up?
-        if (crafterEjection) {
-            // TODO: Recode. Why specifically eject ingredients (allMaterials).
-            //       And why not eject when we checked crafting is possible
-            final List<Material> allMaterials = getRecipes(toCraft).getAllMaterials();
-            if (Stream.of(hopperCache.cachedInventory)
-                    .allMatch(item -> item != null && allMaterials.stream().anyMatch(mat -> mat == item.getType()))) {
-                // Crafter can't function if there's nowhere to put the output
-                // ¯\_(ツ)_/¯
-                // forcibly open the last slot
-                ItemStack last = hopperCache.cachedInventory[4];
-                hopperCache.setItem(4, null);
-                // and yeet into space!
-                hopper.getWorld().dropItemNaturally(hopper.getLocation(), last);
-            }
-        }
-
         synchronized (hopperCache) {    //TODO: Check if this is required
-            ItemStack[] items = new ItemStack[hopperCache.cachedInventory.length];
-
-            // TODO: Don't use that hacky workaround. Just don't modify it, if not meant to
-            for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
-                items[i] = hopperCache.cachedInventory[i].clone();
-            }
+            ItemStack[] items = hopperCache.cachedInventory;
 
             for (SimpleRecipe recipe : getRecipes(toCraft).recipes) {
                 // key=indexForItemsArray, value=amountAfterCrafting
@@ -110,32 +88,52 @@ public class ModuleAutoCrafting extends Module {
                     // Not enough ingredients for this recipe
                     if (amount != 0) continue;
 
-                    for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
-                        if (entry.getValue() <= 0) {
-                            items[entry.getKey()] = null;
-                        } else {
-                            items[entry.getKey()].setAmount(entry.getValue());
+                    boolean freeSlotAfterRemovingIngredients =
+                            slotsToAlter.values().stream().anyMatch(iAmount -> iAmount <= 0) ||
+                                    Arrays.stream(items).anyMatch(Objects::isNull);
+
+                    // jam check: is this hopper gummed up?
+                    if (crafterEjection && !freeSlotAfterRemovingIngredients) {
+                        // TODO: Recode. Why specifically eject ingredients (allMaterials).
+                        //       And why not eject when we checked crafting is possible
+                        final List<Material> allMaterials = getRecipes(toCraft).getAllMaterials();
+                        if (Stream.of(hopperCache.cachedInventory)
+                                .allMatch(item -> item != null && allMaterials.stream().anyMatch(mat -> mat == item.getType()))) {
+                            // Crafter can't function if there's nowhere to put the output
+                            // ¯\_(ツ)_/¯
+                            // forcibly open the last slot
+                            ItemStack last = items[4];
+                            items[4] = null;
+                            freeSlotAfterRemovingIngredients = true;
+                            // and yeet into space!
+                            hopper.getWorld().dropItemNaturally(hopper.getLocation(), last);
                         }
                     }
 
-                    // Add the resulting item into the inventory - Just making sure there actually is enough space
-                    boolean success = false;
-                    for (int i = 0; i < items.length; i++) {
-                        if (items[i] == null ||
-                                (items[i].isSimilar(recipe.result)
-                                        && items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize())) {
-                            if (items[i] == null) {
-                                items[i] = recipe.result.clone();
+                    if (freeSlotAfterRemovingIngredients) {
+                        for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
+                            if (entry.getValue() <= 0) {
+                                items[entry.getKey()] = null;
                             } else {
-                                items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
+                                items[entry.getKey()].setAmount(entry.getValue());
                             }
-
-                            success = true;
-                            break;
                         }
-                    }
 
-                    if (success) {
+                        // Add the resulting item into the inventory - Just making sure there actually is enough space
+                        for (int i = 0; i < items.length; i++) {
+                            if (items[i] == null ||
+                                    (items[i].isSimilar(recipe.result)
+                                            && items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize())) {
+                                if (items[i] == null) {
+                                    items[i] = recipe.result.clone();
+                                } else {
+                                    items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
+                                }
+
+                                break;
+                            }
+                        }
+
                         hopperCache.setContents(items);
                     }
                 }
