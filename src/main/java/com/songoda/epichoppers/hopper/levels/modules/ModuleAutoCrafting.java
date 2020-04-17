@@ -63,7 +63,12 @@ public class ModuleAutoCrafting extends Module {
         }
 
         synchronized (hopperCache) {    //TODO: Check if this is required
-            ItemStack[] items = hopperCache.cachedInventory;
+            ItemStack[] items = new ItemStack[hopperCache.cachedInventory.length];
+
+            // TODO: Don't use that hacky workaround. Just don't modify it, if not meant to
+            for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
+                items[i] = hopperCache.cachedInventory[i].clone();
+            }
 
             for (SimpleRecipe recipe : getRecipes(toCraft).recipes) {
                 // key=indexForItemsArray, value=amountAfterCrafting
