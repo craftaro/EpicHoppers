@@ -47,6 +47,8 @@ public class ModuleAutoCrafting extends Module {
 
         // jam check: is this hopper gummed up?
         if (crafterEjection) {
+            // TODO: Recode. Why specifically eject ingredients (allMaterials).
+            //       And why not eject when we checked crafting is possible
             final List<Material> allMaterials = getRecipes(toCraft).getAllMaterials();
             if (Stream.of(hopperCache.cachedInventory)
                     .allMatch(item -> item != null && allMaterials.stream().anyMatch(mat -> mat == item.getType()))) {
@@ -105,7 +107,7 @@ public class ModuleAutoCrafting extends Module {
                         }
                     }
 
-                    // Not enough items for this recipe
+                    // Not enough ingredients for this recipe
                     if (amount != 0) continue;
 
                     for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
