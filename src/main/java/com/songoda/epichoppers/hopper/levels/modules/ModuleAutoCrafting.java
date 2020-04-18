@@ -47,6 +47,7 @@ public class ModuleAutoCrafting extends Module {
         synchronized (hopperCache) {    //TODO: Check if this is required
             ItemStack[] items = hopperCache.cachedInventory;
 
+            recipeLoop:
             for (SimpleRecipe recipe : getRecipes(toCraft).recipes) {
                 // key=indexForItemsArray, value=amountAfterCrafting
                 Map<Integer, Integer> slotsToAlter = new HashMap<>();
@@ -85,34 +86,35 @@ public class ModuleAutoCrafting extends Module {
                     }
 
                     // Not enough ingredients for this recipe
-                    if (amount != 0) continue;
+                    if (amount != 0) continue recipeLoop;
+                }
 
-                    boolean freeSlotAfterRemovingIngredients =
-                            slotsToAlter.values().stream().anyMatch(iAmount -> iAmount <= 0) ||
-                                    Arrays.stream(items).anyMatch(item -> item == null ||
-                                            (item.getAmount() + recipe.result.getAmount() <= item.getMaxStackSize() &&
-                                                    recipe.result.isSimilar(item)));
+                boolean freeSlotAfterRemovingIngredients =
+                        slotsToAlter.values().stream().anyMatch(iAmount -> iAmount <= 0) ||
+                                Arrays.stream(items).anyMatch(item -> item == null ||
+                                        (item.getAmount() + recipe.result.getAmount() <= item.getMaxStackSize() &&
+                                                recipe.result.isSimilar(item)));
 
-                    // jam check: is this hopper gummed up?
-                    if (crafterEjection && !freeSlotAfterRemovingIngredients) {
-                        // Crafter can't function if there's nowhere to put the output
-                        // ¯\_(ツ)_/¯
+                // jam check: is this hopper gummed up?
+                if (crafterEjection && !freeSlotAfterRemovingIngredients) {
+                    // Crafter can't function if there's nowhere to put the output
+                    // ¯\_(ツ)_/¯
 
-                        for (int i = 0; i < items.length; i++) {
-                            if (!slotsToAlter.containsKey(i)) {
-                                // and yeet into space!
-                                hopper.getWorld().dropItemNaturally(hopper.getLocation(), items[i]);
-                                items[i] = null;
+                    for (int i = 0; i < items.length; i++) {
+                        if (!slotsToAlter.containsKey(i)) {
+                            // and yeet into space!
+                            hopper.getWorld().dropItemNaturally(hopper.getLocation(), items[i]);
+                            items[i] = null;
 
-                                freeSlotAfterRemovingIngredients = true;
-                                break;
-                            }
+                            freeSlotAfterRemovingIngredients = true;
+                            break;
                         }
+                    }
 
-                        // FIXME: In theory the code below should work. But if the last item is of the same type as the
-                        //        resulting item, the inventory won't update correctly
-                        //        (item is set correctly but reset to MaxStackSize)
-                        //        (CachedInventory doesn't like it's array to be edited?)
+                    // FIXME: In theory the code below should work. But if the last item is of the same type as the
+                    //        resulting item, the inventory won't update correctly
+                    //        (item is set correctly but reset to MaxStackSize)
+                    //        (CachedInventory doesn't like it's array to be edited?)
                         /*
                         // None of the slots can safely be freed. So we drop some leftover ingredients
                         if (!freeSlotAfterRemovingIngredients) {
@@ -133,34 +135,33 @@ public class ModuleAutoCrafting extends Module {
                             freeSlotAfterRemovingIngredients = true;
                         }
                         */
+                }
+
+                if (freeSlotAfterRemovingIngredients) {
+                    for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
+                        if (entry.getValue() <= 0) {
+                            items[entry.getKey()] = null;
+                        } else {
+                            items[entry.getKey()].setAmount(entry.getValue());
+                        }
                     }
 
-                    if (freeSlotAfterRemovingIngredients) {
-                        for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
-                            if (entry.getValue() <= 0) {
-                                items[entry.getKey()] = null;
+                    // Add the resulting item into the inventory - Just making sure there actually is enough space
+                    for (int i = 0; i < items.length; i++) {
+                        if (items[i] == null ||
+                                (items[i].isSimilar(recipe.result)
+                                        && items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize())) {
+                            if (items[i] == null) {
+                                items[i] = recipe.result.clone();
                             } else {
-                                items[entry.getKey()].setAmount(entry.getValue());
+                                items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
                             }
+
+                            break;
                         }
-
-                        // Add the resulting item into the inventory - Just making sure there actually is enough space
-                        for (int i = 0; i < items.length; i++) {
-                            if (items[i] == null ||
-                                    (items[i].isSimilar(recipe.result)
-                                            && items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize())) {
-                                if (items[i] == null) {
-                                    items[i] = recipe.result.clone();
-                                } else {
-                                    items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
-                                }
-
-                                break;
-                            }
-                        }
-
-                        hopperCache.setContents(items);
                     }
+
+                    hopperCache.setContents(items);
                 }
             }
         }
