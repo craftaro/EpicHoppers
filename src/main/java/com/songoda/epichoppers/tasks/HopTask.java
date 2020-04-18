@@ -106,7 +106,7 @@ public class HopTask extends BukkitRunnable {
 
                 // Cycle through modules.
                 hopper.getLevel().getRegisteredModules().stream()
-                        .filter(module -> module != null)
+                        .filter(Objects::nonNull)
                         .forEach(module -> {
                             // Run Module
                             module.run(hopper, hopperCache);

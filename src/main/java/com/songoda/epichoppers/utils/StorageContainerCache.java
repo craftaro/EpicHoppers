@@ -80,7 +80,7 @@ public class StorageContainerCache {
         } else {
             // legacy check
             Material material = block.getType();
-            BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
+            BlockFace[] faces = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
             for (BlockFace face : faces) {
                 Block adjacentBlock = block.getRelative(face);
 
