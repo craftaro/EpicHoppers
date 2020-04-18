@@ -205,7 +205,7 @@ public class EpicHoppers extends SongodaPlugin {
             }
 
             final boolean convrted = converted;
-            getDataManager().sync(() -> {
+            getDataManager().queueAsync(() -> {
                 if (convrted)
                     console.sendMessage("[" + getDescription().getName() + "] " + ChatColor.GREEN + "Conversion complete :)");
                 // Load data from DB

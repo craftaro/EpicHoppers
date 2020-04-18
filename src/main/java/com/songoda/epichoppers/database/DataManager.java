@@ -146,7 +146,7 @@ public class DataManager extends DataManagerAbstract {
     }
 
     public void createHopper(Hopper hopper) {
-        this.sync(() -> this.databaseConnector.connect(connection -> {
+        this.queueAsync(() -> this.databaseConnector.connect(connection -> {
             String createHopper = "INSERT INTO " + this.getTablePrefix() + "placed_hoppers (level, placed_by, last_opened_by, teleport_trigger, world, x, y, z) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement statement = connection.prepareStatement(createHopper)) {
                 statement.setInt(1, hopper.getLevel().getLevel());
