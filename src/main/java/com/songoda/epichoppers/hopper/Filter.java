@@ -3,17 +3,18 @@ package com.songoda.epichoppers.hopper;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class Filter {
 
-    private List<ItemStack> whiteList;
-    private List<ItemStack> blackList;
-    private List<ItemStack> voidList;
+    private List<ItemStack> whiteList = new ArrayList<>();
+    private List<ItemStack> blackList = new ArrayList<>();
+    private List<ItemStack> voidList = new ArrayList<>();
 
-    private List<ItemStack> autoSellWhiteList;
-    private List<ItemStack> autoSellBlackList;
+    private List<ItemStack> autoSellWhiteList = new ArrayList<>();
+    private List<ItemStack> autoSellBlackList = new ArrayList<>();
 
 
     private Location endPoint;
@@ -76,5 +77,25 @@ public class Filter {
 
     public void setEndPoint(Location endPoint) {
         this.endPoint = endPoint;
+    }
+
+    public void addItem(ItemStack item, ItemType type) {
+        switch (type) {
+            case WHITELIST:
+                whiteList.add(item);
+                break;
+            case BLACKLIST:
+                blackList.add(item);
+                break;
+            case VOID:
+                voidList.add(item);
+                break;
+            case AUTO_SELL_WHITELIST:
+                autoSellWhiteList.add(item);
+                break;
+            case AUTO_SELL_BLACKLIST:
+                autoSellBlackList.add(item);
+                break;
+        }
     }
 }

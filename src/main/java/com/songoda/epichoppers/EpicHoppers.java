@@ -5,21 +5,23 @@ import com.songoda.core.SongodaPlugin;
 import com.songoda.core.commands.CommandManager;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.configuration.Config;
+import com.songoda.core.database.DataMigrationManager;
+import com.songoda.core.database.DatabaseConnector;
+import com.songoda.core.database.SQLiteConnector;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.core.hooks.EconomyManager;
 import com.songoda.core.locale.Locale;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.*;
+import com.songoda.epichoppers.database.DataManager;
+import com.songoda.epichoppers.database.migrations._1_InitialMigration;
 import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.TeleportHandler;
-import com.songoda.epichoppers.hopper.Filter;
-import com.songoda.epichoppers.hopper.HopperBuilder;
-import com.songoda.epichoppers.hopper.HopperManager;
+import com.songoda.epichoppers.hopper.*;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
 import com.songoda.epichoppers.hopper.levels.modules.*;
-import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.listeners.*;
 import com.songoda.epichoppers.player.PlayerDataManager;
 import com.songoda.epichoppers.settings.Settings;
@@ -30,6 +32,7 @@ import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -44,12 +47,9 @@ import java.util.*;
 public class EpicHoppers extends SongodaPlugin {
 
     private static EpicHoppers INSTANCE;
-
-    private Config levelsConfig = new Config(this, "levels.yml");
-
-    public Enchantment enchantmentHandler;
-
     private final GuiManager guiManager = new GuiManager(this);
+    public Enchantment enchantmentHandler;
+    private Config levelsConfig = new Config(this, "levels.yml");
     private HopperManager hopperManager;
     private CommandManager commandManager;
     private LevelManager levelManager;
@@ -58,7 +58,9 @@ public class EpicHoppers extends SongodaPlugin {
 
     private TeleportHandler teleportHandler;
 
-    private Storage storage;
+    private DatabaseConnector databaseConnector;
+    private DataMigrationManager dataMigrationManager;
+    private DataManager dataManager;
 
     private boolean liquidtanks = false;
     private boolean epicfarming = false;
@@ -74,8 +76,8 @@ public class EpicHoppers extends SongodaPlugin {
 
     @Override
     public void onPluginDisable() {
-        this.saveToFile();
-        this.storage.closeConnection();
+        this.databaseConnector.closeConnection();
+        saveModules();
     }
 
     @Override
@@ -109,10 +111,110 @@ public class EpicHoppers extends SongodaPlugin {
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
 
-        this.checkStorage();
+        // Database stuff, go!
+        this.databaseConnector = new SQLiteConnector(this);
+        this.getLogger().info("Data handler connected using SQLite.");
 
-        // Load from file
-        loadFromFile();
+        this.dataManager = new DataManager(this.databaseConnector, this);
+        this.dataMigrationManager = new DataMigrationManager(this.databaseConnector, this.dataManager,
+                new _1_InitialMigration());
+        this.dataMigrationManager.runMigrations();
+
+        this.loadLevelManager();
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, () -> {
+            // Legacy Data
+            File folder = getDataFolder();
+            File dataFile = new File(folder, "data.yml");
+
+            boolean converted = false;
+            if (dataFile.exists()) {
+                converted = true;
+                Storage storage = new StorageYaml(this);
+                if (storage.containsGroup("sync")) {
+                    console.sendMessage("[" + getDescription().getName() + "] " + ChatColor.RED + "Conversion process starting DO NOT turn off your server... " +
+                            "EpicHoppers hasn't fully loaded yet so its best users don't interact with the plugin until conversion completes.");
+                    List<Hopper> hoppers = new ArrayList<>();
+                    for (StorageRow row : storage.getRowsByGroup("sync")) {
+                        Location location = Methods.unserializeLocation(row.getKey());
+                        if (location == null) continue;
+
+                        int levelVal = row.get("level").asInt();
+                        Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
+
+                        String playerStr = row.get("player").asString();
+                        String placedByStr = row.get("placedby").asString();
+                        UUID lastPlayer = playerStr == null ? null : UUID.fromString(row.get("player").asString());
+                        UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
+
+                        List<String> blockLoc = row.get("block").asStringList();
+                        List<Location> blocks = new ArrayList<>();
+                        if (blockLoc != null) {
+                            for (String string : blockLoc) {
+                                blocks.add(Methods.unserializeLocation(string));
+                            }
+                        }
+
+                        Filter filter = new Filter();
+
+                        List<ItemStack> whiteList = row.get("whitelist").asItemStackList();
+                        List<ItemStack> blackList = row.get("blacklist").asItemStackList();
+                        List<ItemStack> voidList = row.get("void").asItemStackList();
+
+                        List<ItemStack> autoSellWhiteList = row.get("autosell-whitelist").asItemStackList();
+                        List<ItemStack> autoSellBlackList = row.get("autosell-blacklist").asItemStackList();
+
+                        String blackLoc = row.get("black").asString();
+                        Location black = blackLoc == null ? null : Methods.unserializeLocation(blackLoc);
+
+                        filter.setWhiteList(whiteList);
+                        filter.setBlackList(blackList);
+                        filter.setVoidList(voidList);
+
+                        filter.setAutoSellWhiteList(autoSellWhiteList);
+                        filter.setAutoSellBlackList(autoSellBlackList);
+
+                        filter.setEndPoint(black);
+
+                        TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
+
+                        hoppers.add(new HopperBuilder(location)
+                                .setLevel(level)
+                                .setLastPlayerOpened(lastPlayer)
+                                .setPlacedBy(placedBy)
+                                .addLinkedBlocks(LinkType.REGULAR, blocks.toArray(new Location[0]))
+                                .setFilter(filter)
+                                .setTeleportTrigger(teleportTrigger)
+                                .build());
+                    }
+                    dataManager.createHoppers(hoppers);
+                }
+
+                // Adding in Boosts
+                if (storage.containsGroup("boosts")) {
+                    for (StorageRow row : storage.getRowsByGroup("boosts")) {
+                        if (row.get("uuid").asObject() == null)
+                            continue;
+
+                        dataManager.createBoost(new BoostData(
+                                row.get("amount").asInt(),
+                                Long.parseLong(row.getKey()),
+                                UUID.fromString(row.get("uuid").asString())));
+                    }
+                }
+                dataFile.delete();
+            }
+
+            final boolean convrted = converted;
+            getDataManager().queueAsync(() -> {
+                if (convrted)
+                    console.sendMessage("[" + getDescription().getName() + "] " + ChatColor.GREEN + "Conversion complete :)");
+                // Load data from DB
+                this.dataManager.getHoppers((hoppers) -> {
+                    this.hopperManager.addHoppers(hoppers.values());
+                    this.dataManager.getBoosts((boosts) -> this.boostManager.addBoosts(boosts));
+                });
+            }, "create");
+        }, 20);
 
         new HopTask(this);
         this.teleportHandler = new TeleportHandler(this);
@@ -134,7 +236,7 @@ public class EpicHoppers extends SongodaPlugin {
 
         // Start auto save
         int saveInterval = Settings.AUTOSAVE.getInt() * 60 * 20;
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveToFile, saveInterval, saveInterval);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveModules, saveInterval, saveInterval);
     }
 
     @Override
@@ -147,105 +249,6 @@ public class EpicHoppers extends SongodaPlugin {
     @Override
     public List<Config> getExtraConfig() {
         return Collections.singletonList(levelsConfig);
-    }
-
-    private void checkStorage() {
-        this.storage = new StorageYaml(this);
-    }
-
-    /*
-     * Saves registered hoppers to file.
-     */
-    private void saveToFile() {
-        // double-check that we're ok to save
-        if (levelManager != null) {
-            for (Level level : levelManager.getLevels().values())
-                for (Module module : level.getRegisteredModules())
-                    module.saveDataToFile();
-        }
-
-        storage.doSave();
-    }
-
-    private void loadFromFile() {
-        /*
-         * Register hoppers into HopperManger from configuration
-         */
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            this.loadLevelManager();
-            if (storage.containsGroup("sync")) {
-                for (StorageRow row : storage.getRowsByGroup("sync")) {
-                    Location location = Methods.unserializeLocation(row.getKey());
-                    if (location == null) continue;
-
-                    int levelVal = row.get("level").asInt();
-                    Level level = levelManager.isLevel(levelVal) ? levelManager.getLevel(levelVal) : levelManager.getLowestLevel();
-
-                    String playerStr = row.get("player").asString();
-                    String placedByStr = row.get("placedby").asString();
-                    UUID lastPlayer = playerStr == null ? null : UUID.fromString(row.get("player").asString());
-                    UUID placedBy = placedByStr == null ? null : UUID.fromString(placedByStr);
-
-                    List<String> blockLoc = row.get("block").asStringList();
-                    List<Location> blocks = new ArrayList<>();
-                    if (blockLoc != null) {
-                        for (String string : blockLoc) {
-                            blocks.add(Methods.unserializeLocation(string));
-                        }
-                    }
-
-                    Filter filter = new Filter();
-
-                    List<ItemStack> whiteList = row.get("whitelist").asItemStackList();
-                    List<ItemStack> blackList = row.get("blacklist").asItemStackList();
-                    List<ItemStack> voidList = row.get("void").asItemStackList();
-
-                    List<ItemStack> autoSellWhiteList = row.get("autosell-whitelist").asItemStackList();
-                    List<ItemStack> autoSellBlackList = row.get("autosell-blacklist").asItemStackList();
-
-                    String blackLoc = row.get("black").asString();
-                    Location black = blackLoc == null ? null : Methods.unserializeLocation(blackLoc);
-
-                    filter.setWhiteList(whiteList);
-                    filter.setBlackList(blackList);
-                    filter.setVoidList(voidList);
-
-                    filter.setAutoSellWhiteList(autoSellWhiteList);
-                    filter.setAutoSellBlackList(autoSellBlackList);
-
-                    filter.setEndPoint(black);
-
-                    TeleportTrigger teleportTrigger = TeleportTrigger.valueOf(row.get("teleporttrigger").asString() == null ? "DISABLED" : row.get("teleporttrigger").asString());
-
-                    hopperManager.addHopper(new HopperBuilder(location)
-                            .setLevel(level)
-                            .setLastPlayerOpened(lastPlayer)
-                            .setPlacedBy(placedBy)
-                            .addLinkedBlocks(blocks.toArray(new Location[0]))
-                            .setFilter(filter)
-                            .setTeleportTrigger(teleportTrigger)
-                            .build());
-                }
-            }
-
-            // Adding in Boosts
-            if (storage.containsGroup("boosts")) {
-                for (StorageRow row : storage.getRowsByGroup("boosts")) {
-                    if (row.get("uuid").asObject() == null)
-                        continue;
-
-                    BoostData boostData = new BoostData(
-                            row.get("amount").asInt(),
-                            Long.parseLong(row.getKey()),
-                            UUID.fromString(row.get("uuid").asString()));
-
-                    this.boostManager.addBoostToPlayer(boostData);
-                }
-            }
-
-            // Save data initially so that if the person reloads again fast they don't lose all their data.
-            this.saveToFile();
-        }, 10);
     }
 
     private void loadLevelManager() {
@@ -291,6 +294,14 @@ public class EpicHoppers extends SongodaPlugin {
         }
     }
 
+    private void saveModules() {
+        if (levelManager != null) {
+            for (Level level : levelManager.getLevels().values())
+                for (Module module : level.getRegisteredModules())
+                    module.saveDataToFile();
+        }
+    }
+
     public ItemStack newHopperItem(Level level) {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
@@ -333,6 +344,14 @@ public class EpicHoppers extends SongodaPlugin {
 
     public GuiManager getGuiManager() {
         return guiManager;
+    }
+
+    public DataManager getDataManager() {
+        return dataManager;
+    }
+
+    public DatabaseConnector getDatabaseConnector() {
+        return databaseConnector;
     }
 
     public boolean isLiquidtanks() {

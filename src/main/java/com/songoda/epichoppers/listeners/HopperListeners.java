@@ -134,7 +134,7 @@ public class HopperListeners implements Listener {
                 if (!allowItem) {
                     event.setCancelled(true);
                     if (moveInstead != null) {
-                        // hopper code is a bit derpy - changing the item doesn't change what's removed 
+                        // hopper code is a bit derpy - changing the item doesn't change what's removed
                         //event.setItem(moveInstead);
                         // we need to instead cancel and manually remove the item to move
                         source.removeItem(moveInstead);

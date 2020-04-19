@@ -9,8 +9,6 @@ import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.HopperDirection;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
-import com.songoda.skyblock.utils.version.Materials;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -108,7 +106,7 @@ public class HopTask extends BukkitRunnable {
 
                 // Cycle through modules.
                 hopper.getLevel().getRegisteredModules().stream()
-                        .filter(module -> module != null)
+                        .filter(Objects::nonNull)
                         .forEach(module -> {
                             // Run Module
                             module.run(hopper, hopperCache);
@@ -177,13 +175,10 @@ public class HopTask extends BukkitRunnable {
                         com.songoda.skyblock.stackable.StackableManager stackableManager = ((com.songoda.skyblock.SkyBlock) fabledSkyblockPlugin).getStackableManager();
                         if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
                             Block pointingBlock = pointingLocation.getBlock();
-                            
-                            Material mat = pointingBlock.getType();
-                            byte data = pointingBlock.getData();
-                            
-                            Materials materials = Materials.getMaterials(mat, data);
-                            
-                            com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, materials);
+
+                            com.songoda.skyblock.core.compatibility.CompatibleMaterial compatibleMaterial = com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(pointingBlock);
+
+                            com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, compatibleMaterial);
 
                             for (int i = 0; i < 5; i++) {
                                 final ItemStack item = hopperCache.cachedInventory[i];
@@ -191,7 +186,7 @@ public class HopTask extends BukkitRunnable {
                                     continue;
                                 }
 
-                                if (Materials.getMaterials(item.getType(), (byte) item.getDurability()) == materials) {
+                                if (com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(item) == compatibleMaterial) {
                                     stackable.addOne();
                                     if (item.getAmount() == 1) {
                                         hopperCache.removeItem(i);
@@ -219,7 +214,11 @@ public class HopTask extends BukkitRunnable {
 
         // Clear out invalid hoppers
         HopperManager hopperManager = plugin.getHopperManager();
-        toRemove.forEach(hopperManager::removeHopper);
+        toRemove.forEach(h -> {
+            com.songoda.epichoppers.hopper.Hopper
+                    hopper = hopperManager.removeHopper(h);
+            plugin.getDataManager().deleteHopper(hopper);
+        });
     }
 
     private void debt(ItemStack item, int amountToMove, InventoryHolder currentHolder) {
@@ -279,7 +278,7 @@ public class HopTask extends BukkitRunnable {
                 pullableSlots = IntStream.rangeClosed(0, contents.length - 1).toArray();
             } else {
                 if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null
-                || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY())
+                        || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY())
                     return;
                 if (aboveInvHolder instanceof StorageMinecart) {
                     pullableSlots = IntStream.rangeClosed(0, 26).toArray();

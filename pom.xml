@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
-    <modelVersion>4.0.0</modelVersion> 
-    <version>4.4.5</version>
+    <modelVersion>4.0.0</modelVersion>
+    <version>4.6</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <finalName>EpicHoppers-${project.version}</finalName>
@@ -117,8 +117,8 @@
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
-            <artifactId>skyblock</artifactId>
-            <version>2.1.2</version>
+            <artifactId>fabledskyblock</artifactId>
+            <version>LATEST</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

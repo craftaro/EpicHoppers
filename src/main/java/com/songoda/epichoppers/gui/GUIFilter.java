@@ -6,6 +6,7 @@ import com.songoda.core.gui.GuiUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.ItemType;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
@@ -21,9 +22,12 @@ import java.util.List;
 
 public class GUIFilter extends Gui {
 
+    private final EpicHoppers plugin;
+
     private final Hopper hopper;
 
     public GUIFilter(EpicHoppers plugin, Hopper hopper, Player player) {
+        this.plugin = plugin;
         this.hopper = hopper;
 
         setRows(6);
@@ -51,6 +55,10 @@ public class GUIFilter extends Gui {
         ItemMeta itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist").getMessage());
         it.setItemMeta(itm);
+
+        setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+                plugin.getLocale().getMessage("general.nametag.back").getMessage()),
+                (event) -> hopper.overview(guiManager, event.player));
 
         int[] whiteSlots = {0, 1, 45, 46};
         for (int nu : whiteSlots) {
@@ -201,5 +209,8 @@ public class GUIFilter extends Gui {
         filter.setWhiteList(owhite);
         filter.setBlackList(oblack);
         filter.setVoidList(ovoid);
+        plugin.getDataManager().updateItems(hopper, ItemType.WHITELIST, owhite);
+        plugin.getDataManager().updateItems(hopper, ItemType.BLACKLIST, oblack);
+        plugin.getDataManager().updateItems(hopper, ItemType.VOID, ovoid);
     }
 }

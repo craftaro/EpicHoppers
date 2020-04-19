@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.listeners;
 
+import com.songoda.core.hooks.WorldGuardHook;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.player.PlayerData;
@@ -7,7 +8,6 @@ import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -60,6 +60,10 @@ public class InteractListeners implements Listener {
                 || !(event.getClickedBlock().getState() instanceof InventoryHolder || event.getClickedBlock().getType().equals(Material.ENDER_CHEST))) {
             return;
         }
+
+        Boolean flag;
+        if ((flag = WorldGuardHook.getBooleanFlag(event.getClickedBlock().getLocation(), "use")) != null && !flag)
+            return;
 
         if (event.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
             ItemStack item = event.getPlayer().getInventory().getItemInHand();
