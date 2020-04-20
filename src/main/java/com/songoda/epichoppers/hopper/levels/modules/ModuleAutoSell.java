@@ -88,7 +88,7 @@ public class ModuleAutoSell extends Module {
                     value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> Material.valueOf(line.split(",")[0]) == itemStack.getType()).findFirst()
                             .map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
 
-                if (value == 0) continue;
+                if (value <= 0) continue;
 
                 double sellingFor = value * itemStack.getAmount();
 
