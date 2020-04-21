@@ -272,7 +272,7 @@ public class EpicHoppers extends SongodaPlugin {
             int linkAmount = levels.getInt("Link-amount", 1);
             boolean filter = levels.getBoolean("Filter");
             boolean teleport = levels.getBoolean("Teleport");
-            int costExperiance = levels.getInt("Cost-xp", -1);
+            int costExperience = levels.getInt("Cost-xp", -1);
             int costEconomy = levels.getInt("Cost-eco", -1);
             int autoSell = levels.getInt("AutoSell");
 
@@ -290,7 +290,7 @@ public class EpicHoppers extends SongodaPlugin {
                 }
 
             }
-            levelManager.addLevel(level, costExperiance, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
+            levelManager.addLevel(level, costExperience, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }
     }
 
