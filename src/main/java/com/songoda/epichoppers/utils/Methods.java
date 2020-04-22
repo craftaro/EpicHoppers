@@ -188,47 +188,6 @@ public class Methods {
         serializeCache.put(cacheKey, location.clone());
         return location;
     }
-
-    private static Class<?> clazzCraftWorld, clazzCraftBlock, clazzBlockPosition;
-    private static Method getHandle, updateAdjacentComparators, getNMSBlock;
-
-    public static void updateAdjacentComparators(Location location) {
-        if(location == null || location.getWorld() == null) {
-            return;
-        }
-        try {
-            // Cache reflection.
-            if (clazzCraftWorld == null) {
-                String serverPackagePath = Bukkit.getServer().getClass().getPackage().getName();
-                String ver = serverPackagePath.substring(serverPackagePath.lastIndexOf('.') + 1);
-                clazzCraftWorld = Class.forName("org.bukkit.craftbukkit." + ver + ".CraftWorld");
-                clazzCraftBlock = Class.forName("org.bukkit.craftbukkit." + ver + ".block.CraftBlock");
-                clazzBlockPosition = Class.forName("net.minecraft.server." + ver + ".BlockPosition");
-                Class<?> clazzWorld = Class.forName("net.minecraft.server." + ver + ".World");
-                Class<?> clazzBlock = Class.forName("net.minecraft.server." + ver + ".Block");
-
-                getHandle = clazzCraftWorld.getMethod("getHandle");
-                updateAdjacentComparators = clazzWorld.getMethod("updateAdjacentComparators", clazzBlockPosition, clazzBlock);
-                getNMSBlock = clazzCraftBlock.getDeclaredMethod("getNMSBlock");
-                getNMSBlock.setAccessible(true);
-            }
-
-            // invoke and cast objects.
-            Object craftWorld = clazzCraftWorld.cast(location.getWorld());
-            Object world = getHandle.invoke(craftWorld);
-            Object craftBlock = clazzCraftBlock.cast(location.getBlock());
-
-            // Invoke final method.
-            updateAdjacentComparators
-                    .invoke(world, clazzBlockPosition.getConstructor(double.class, double.class, double.class)
-                                    .newInstance(location.getX(), location.getY(), location.getZ()),
-                            getNMSBlock.invoke(craftBlock));
-
-        } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static String convertToInvisibleString(String s) {
         if (s == null || s.equals(""))
             return "";
