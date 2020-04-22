@@ -61,8 +61,7 @@ public class InteractListeners implements Listener {
             return;
         }
 
-        Boolean flag;
-        if ((flag = WorldGuardHook.getBooleanFlag(event.getClickedBlock().getLocation(), "use")) != null && !flag)
+        if (WorldGuardHook.isInteractAllowed(event.getClickedBlock().getLocation()))
             return;
 
         if (event.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {

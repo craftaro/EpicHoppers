@@ -11,6 +11,8 @@ import com.songoda.core.database.SQLiteConnector;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.core.hooks.EconomyManager;
 import com.songoda.core.locale.Locale;
+import com.songoda.core.nms.NmsManager;
+import com.songoda.core.nms.nbt.NBTItem;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.*;
@@ -305,13 +307,16 @@ public class EpicHoppers extends SongodaPlugin {
     public ItemStack newHopperItem(Level level) {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
-        itemmeta.setDisplayName(Methods.formatText(Methods.formatName(level.getLevel(), true)));
+        itemmeta.setDisplayName(Methods.formatText(Methods.formatName(level.getLevel())));
         String line = getLocale().getMessage("general.nametag.lore").getMessage();
         if (!line.equals("")) {
             itemmeta.setLore(Arrays.asList(line.split("\n")));
         }
         item.setItemMeta(itemmeta);
-        return item;
+
+        NBTItem nbtItem = NmsManager.getNbt().of(item);
+        nbtItem.set("level", level.getLevel());
+        return nbtItem.finish();
     }
 
     public Locale getLocale() {

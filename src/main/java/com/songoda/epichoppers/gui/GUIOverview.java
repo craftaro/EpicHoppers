@@ -41,7 +41,7 @@ public class GUIOverview extends Gui {
         this.player = player;
 
         setRows(3);
-        setTitle(Methods.formatName(hopper.getLevel().getLevel(), false));
+        setTitle(Methods.formatName(hopper.getLevel().getLevel()));
         runTask();
         constructGUI();
         this.setOnClose(action -> Bukkit.getScheduler().cancelTask(task));
