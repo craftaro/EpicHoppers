@@ -15,7 +15,7 @@ public class GUICrafting extends Gui {
 
     public GUICrafting(ModuleAutoCrafting module, Hopper hopper, Player player) {
         setRows(3);
-        setTitle(Methods.formatName(hopper.getLevel().getLevel(), false) + Methods.formatText(" &8-&f Crafting"));
+        setTitle(Methods.formatName(hopper.getLevel().getLevel()) + Methods.formatText(" &8-&f Crafting"));
         setOnClose((event) -> module.setAutoCrafting(hopper, player, inventory.getItem(13)));
         setAcceptsItems(true);
 

@@ -126,7 +126,7 @@ public class Hopper {
     private void syncName() {
         org.bukkit.block.Hopper hopper = (org.bukkit.block.Hopper) location.getBlock().getState();
         if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_10))
-            hopper.setCustomName(Methods.formatName(level.getLevel(), false));
+            hopper.setCustomName(Methods.formatName(level.getLevel()));
         hopper.update(true);
     }
 

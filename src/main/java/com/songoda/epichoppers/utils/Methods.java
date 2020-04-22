@@ -115,17 +115,13 @@ public class Methods {
         return false;
     }
 
-    public static String formatName(int level, boolean full) {
+    public static String formatName(int level) {
             EpicHoppers instance = EpicHoppers.getInstance();
             String name = instance.getLocale().getMessage("general.nametag.nameformat")
                     .processPlaceholder("level", level).getMessage();
 
-            String info = "";
-            if (full) {
-                info += Methods.convertToInvisibleString(level + ":");
-            }
 
-            return info + Methods.formatText(name);
+            return Methods.formatText(name);
     }
 
     public static void doParticles(Entity entity, Location location) {

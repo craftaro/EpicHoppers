@@ -30,7 +30,7 @@ public class GUIAutoSellFilter extends Gui {
         this.hopper = hopper;
 
         setRows(6);
-        setTitle(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f AutoSell Filter"));
+        setTitle(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f AutoSell Filter"));
         setDefaultItem(null);
         setAcceptsItems(true);
 

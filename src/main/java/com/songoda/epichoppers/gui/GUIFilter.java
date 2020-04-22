@@ -31,7 +31,7 @@ public class GUIFilter extends Gui {
         this.hopper = hopper;
 
         setRows(6);
-        setTitle(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel(), false) + " &8-&f Filter"));
+        setTitle(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f Filter"));
         setDefaultItem(null);
         setAcceptsItems(true);
 
