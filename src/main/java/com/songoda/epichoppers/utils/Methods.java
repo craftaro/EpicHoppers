@@ -29,20 +29,6 @@ public class Methods {
 
     private static final Map<String, Location> serializeCache = new HashMap<>();
 
-    public static boolean isSync(Player p) {
-        if (p.getItemInHand().hasItemMeta()
-                && p.getItemInHand().getType() != Material.AIR
-                && p.getItemInHand().getType() != Material.ENCHANTED_BOOK
-                && p.getItemInHand().getItemMeta().hasLore()) {
-            for (String str : p.getItemInHand().getItemMeta().getLore()) {
-                if (str.contains(Methods.formatText("&7Sync Touch")) || str.contains(Methods.formatText("&aSync Touch"))) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public static boolean isSimilarMaterial(ItemStack is1, ItemStack is2) {
         if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)) {
             return is1.getType() == is2.getType();

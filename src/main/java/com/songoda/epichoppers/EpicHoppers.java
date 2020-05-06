@@ -18,7 +18,6 @@ import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.*;
 import com.songoda.epichoppers.database.DataManager;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
-import com.songoda.epichoppers.enchantment.Enchantment;
 import com.songoda.epichoppers.handlers.TeleportHandler;
 import com.songoda.epichoppers.hopper.*;
 import com.songoda.epichoppers.hopper.levels.Level;
@@ -50,8 +49,7 @@ public class EpicHoppers extends SongodaPlugin {
 
     private static EpicHoppers INSTANCE;
     private final GuiManager guiManager = new GuiManager(this);
-    public Enchantment enchantmentHandler;
-    private Config levelsConfig = new Config(this, "levels.yml");
+    private final Config levelsConfig = new Config(this, "levels.yml");
     private HopperManager hopperManager;
     private CommandManager commandManager;
     private LevelManager levelManager;
@@ -101,14 +99,12 @@ public class EpicHoppers extends SongodaPlugin {
         this.commandManager = new CommandManager(this);
         this.commandManager.addCommand(new CommandEpicHoppers(this))
                 .addSubCommands(
-                        new CommandBook(this),
                         new CommandBoost(this),
                         new CommandGive(this),
                         new CommandReload(this),
                         new CommandSettings(this)
                 );
 
-        this.enchantmentHandler = new Enchantment();
         this.hopperManager = new HopperManager();
         this.playerDataManager = new PlayerDataManager();
         this.boostManager = new BoostManager();
@@ -225,10 +221,10 @@ public class EpicHoppers extends SongodaPlugin {
         guiManager.init();
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new HopperListeners(this), this);
-        pluginManager.registerEvents(new EntityListeners(this), this);
+        pluginManager.registerEvents(new EntityListeners(), this);
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
-        pluginManager.registerEvents(new InventoryListeners(this), this);
+        pluginManager.registerEvents(new InventoryListeners(), this);
 
         // Check for liquid tanks
         if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
