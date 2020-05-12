@@ -64,29 +64,6 @@ public class InteractListeners implements Listener {
         if (WorldGuardHook.isInteractAllowed(event.getClickedBlock().getLocation()))
             return;
 
-        if (event.getClickedBlock().getType() == Material.CHEST && Methods.isSync(player)) {
-            ItemStack item = event.getPlayer().getInventory().getItemInHand();
-            boolean isLinked = false;
-
-            for (String lore : item.getItemMeta().getLore()) {
-                if (!lore.contains(Methods.formatText("&aSync Touch"))) continue;
-                isLinked = true;
-                break;
-            }
-
-            if (isLinked) {
-                instance.getLocale().getMessage("event.hopper.desyncchest")
-                        .processPlaceholder("name", item.getType().toString()).sendPrefixedMessage(player);
-                instance.enchantmentHandler.createSyncTouch(item, null);
-            } else {
-                instance.getLocale().getMessage("event.hopper.syncchest")
-                        .processPlaceholder("name", item.getType().toString()).sendPrefixedMessage(player);
-                instance.enchantmentHandler.createSyncTouch(item, event.getClickedBlock());
-            }
-            event.setCancelled(true);
-            return;
-        }
-
         PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
 
         if (playerData.getSyncType() == null) {

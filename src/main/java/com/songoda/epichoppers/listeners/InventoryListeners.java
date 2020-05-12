@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.epichoppers.EpicHoppers;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,31 +14,11 @@ import org.bukkit.inventory.ItemStack;
  */
 public class InventoryListeners implements Listener {
 
-    private final EpicHoppers instance;
-
-    public InventoryListeners(EpicHoppers instance) {
-        this.instance = instance;
-    }
-
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
         if (event.getCurrentItem() == null) return;
 
-        if (event.getCursor() != null && event.getCurrentItem() != null) {
-            ItemStack c = event.getCursor();
-            ItemStack item = event.getCurrentItem();
-            if (c.hasItemMeta()
-                    && c.getItemMeta().hasLore()
-                    && c.getType() == Material.ENCHANTED_BOOK
-                    && (item.getType().name().toUpperCase().contains("AXE") || item.getType().name().toUpperCase().contains("SHOVEL") || item.getType().name().toUpperCase().contains("SWORD"))
-                    && c.getItemMeta().getLore().equals(instance.enchantmentHandler.getbook().getItemMeta().getLore())) {
-                instance.enchantmentHandler.createSyncTouch(item, null);
-                event.setCancelled(true);
-                player.setItemOnCursor(new ItemStack(Material.AIR));
-                player.updateInventory();
-            }
-        }
         if (event.getRawSlot() > event.getView().getTopInventory().getSize() - 1) return;
 
         if (!event.getCurrentItem().hasItemMeta()) return;

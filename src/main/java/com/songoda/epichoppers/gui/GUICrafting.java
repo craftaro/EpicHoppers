@@ -16,7 +16,7 @@ public class GUICrafting extends Gui {
     public GUICrafting(ModuleAutoCrafting module, Hopper hopper, Player player) {
         setRows(3);
         setTitle(Methods.formatName(hopper.getLevel().getLevel()) + Methods.formatText(" &8-&f Crafting"));
-        setOnClose((event) -> module.setAutoCrafting(hopper, player, inventory.getItem(13)));
+        setOnClose((event) -> setItem(module, hopper, player));
         setAcceptsItems(true);
 
         ItemStack glass1 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_1.getMaterial());
@@ -33,11 +33,19 @@ public class GUICrafting extends Gui {
 
         setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
                 EpicHoppers.getInstance().getLocale().getMessage("general.nametag.back").getMessage()),
-                (event) -> hopper.overview(guiManager, event.player));
+                (event) -> {
+                    hopper.overview(guiManager, event.player);
+                    setItem(module, hopper, player);
+                }
+        );
 
         setButton(13, module.getAutoCrafting(hopper),
                 (event) -> module.setAutoCrafting(hopper, player, inventory.getItem(13)));
 
         setUnlocked(13);
+    }
+
+    public void setItem(ModuleAutoCrafting module, Hopper hopper, Player player) {
+        module.setAutoCrafting(hopper, player, inventory.getItem(13));
     }
 }
