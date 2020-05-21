@@ -58,7 +58,10 @@ public class GUIFilter extends Gui {
 
         setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
                 plugin.getLocale().getMessage("general.nametag.back").getMessage()),
-                (event) -> hopper.overview(guiManager, event.player));
+                (event) -> {
+                    hopper.overview(guiManager, event.player);
+                    compile();
+                });
 
         int[] whiteSlots = {0, 1, 45, 46};
         for (int nu : whiteSlots) {
