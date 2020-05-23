@@ -324,7 +324,7 @@ public class ModuleAutoCrafting extends Module {
         }
 
         public void addRecipes(Collection<Recipe> recipes) {
-            recipes.forEach(recipe -> this.addRecipe(recipe));
+            recipes.forEach(this::addRecipe);
         }
 
         public boolean hasRecipes() {
@@ -347,7 +347,12 @@ public class ModuleAutoCrafting extends Module {
 
             for (int i = 0; i < recipe.getIngredientList().size(); i++) {
                 ItemStack item = recipe.getIngredientList().get(i);
-                RecipeChoice rChoice = recipe.getChoiceList().get(i);
+                RecipeChoice rChoice = null;
+
+                try {
+                    rChoice = recipe.getChoiceList().get(i);
+                } catch (NoSuchMethodError ignore) {    // Method missing in Spigot 1.12.2
+                }
 
                 processIngredient(ingredients, item, rChoice);
             }
@@ -362,7 +367,12 @@ public class ModuleAutoCrafting extends Module {
 
             for (Map.Entry<Character, ItemStack> entry : recipe.getIngredientMap().entrySet()) {
                 ItemStack item = entry.getValue();
-                RecipeChoice rChoice = recipe.getChoiceMap().get(entry.getKey());
+                RecipeChoice rChoice = null;
+
+                try {
+                    rChoice = recipe.getChoiceMap().get(entry.getKey());
+                } catch (NoSuchMethodError ignore) {    // Method missing in Spigot 1.12.2
+                }
 
                 if (item == null) continue;
 

@@ -2,15 +2,12 @@ package com.songoda.epichoppers.utils;
 
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
-import java.lang.reflect.Method;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -30,7 +27,9 @@ public class Methods {
     private static final Map<String, Location> serializeCache = new HashMap<>();
 
     public static boolean isSimilarMaterial(ItemStack is1, ItemStack is2) {
-        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)) {
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) ||
+                is1.getDurability() == Short.MAX_VALUE || is2.getDurability() == Short.MAX_VALUE) {
+            // Durability of Short.MAX_VALUE is used in recipes if the durability should be ignored
             return is1.getType() == is2.getType();
         } else {
             return is1.getType() == is2.getType() && (is1.getDurability() == -1 || is2.getDurability() == -1 || is1.getDurability() == is2.getDurability());
@@ -102,20 +101,20 @@ public class Methods {
     }
 
     public static String formatName(int level) {
-            EpicHoppers instance = EpicHoppers.getInstance();
-            String name = instance.getLocale().getMessage("general.nametag.nameformat")
-                    .processPlaceholder("level", level).getMessage();
+        EpicHoppers instance = EpicHoppers.getInstance();
+        String name = instance.getLocale().getMessage("general.nametag.nameformat")
+                .processPlaceholder("level", level).getMessage();
 
 
-            return Methods.formatText(name);
+        return Methods.formatText(name);
     }
 
     public static void doParticles(Entity entity, Location location) {
-            EpicHoppers instance = EpicHoppers.getInstance();
-            location.setX(location.getX() + .5);
-            location.setY(location.getY() + .5);
-            location.setZ(location.getZ() + .5);
-            entity.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
+        EpicHoppers instance = EpicHoppers.getInstance();
+        location.setX(location.getX() + .5);
+        location.setY(location.getY() + .5);
+        location.setZ(location.getZ() + .5);
+        entity.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
     }
 
     /**
@@ -170,6 +169,7 @@ public class Methods {
         serializeCache.put(cacheKey, location.clone());
         return location;
     }
+
     public static String convertToInvisibleString(String s) {
         if (s == null || s.equals(""))
             return "";
