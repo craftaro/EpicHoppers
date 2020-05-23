@@ -62,7 +62,6 @@ public class HopTask extends BukkitRunnable {
     public void run() {
         Set<Location> toRemove = new HashSet<>();
 
-        main:
         for (final com.songoda.epichoppers.hopper.Hopper hopper : plugin.getHopperManager().getHoppers().values()) {
 
             try {
@@ -108,13 +107,17 @@ public class HopTask extends BukkitRunnable {
                 hopper.getLevel().getRegisteredModules().stream()
                         .filter(Objects::nonNull)
                         .forEach(module -> {
-                            // Run Module
-                            module.run(hopper, hopperCache);
+                            try {
+                                // Run Module
+                                module.run(hopper, hopperCache);
 
-                            // Add banned materials to list.
-                            List<Material> materials = module.getBlockedItems(hopper);
-                            if (materials != null && !materials.isEmpty())
-                                blockedMaterials.addAll(materials);
+                                // Add banned materials to list.
+                                List<Material> materials = module.getBlockedItems(hopper);
+                                if (materials != null && !materials.isEmpty())
+                                    blockedMaterials.addAll(materials);
+                            } catch (Throwable th) {
+                                th.printStackTrace();
+                            }
                         });
 
                 // Process extra hopper pull
