@@ -172,20 +172,20 @@ public class DataManager extends DataManagerAbstract {
             Map<ItemStack, ItemType> items = new HashMap<>();
             Filter filter = hopper.getFilter();
 
-                for (ItemStack item : filter.getWhiteList())
-                    items.put(item, ItemType.WHITELIST);
+            for (ItemStack item : filter.getWhiteList())
+                items.put(item, ItemType.WHITELIST);
 
-                for (ItemStack item : filter.getBlackList())
-                    items.put(item, ItemType.BLACKLIST);
+            for (ItemStack item : filter.getBlackList())
+                items.put(item, ItemType.BLACKLIST);
 
-                for (ItemStack item : filter.getVoidList())
-                    items.put(item, ItemType.VOID);
+            for (ItemStack item : filter.getVoidList())
+                items.put(item, ItemType.VOID);
 
-                for (ItemStack item : filter.getAutoSellWhiteList())
-                    items.put(item, ItemType.AUTO_SELL_WHITELIST);
+            for (ItemStack item : filter.getAutoSellWhiteList())
+                items.put(item, ItemType.AUTO_SELL_WHITELIST);
 
-                for (ItemStack item : filter.getAutoSellBlackList())
-                    items.put(item, ItemType.AUTO_SELL_BLACKLIST);
+            for (ItemStack item : filter.getAutoSellBlackList())
+                items.put(item, ItemType.AUTO_SELL_BLACKLIST);
 
             String createItem = "INSERT INTO " + this.getTablePrefix() + "items (hopper_id, item_type, item) VALUES (?, ?, ?)";
             try (PreparedStatement statement = connection.prepareStatement(createItem)) {
@@ -218,17 +218,17 @@ public class DataManager extends DataManagerAbstract {
                 for (Map.Entry<Location, LinkType> entry : links.entrySet()) {
                     statement.setInt(1, hopper.getId());
 
-                statement.setString(2,entry.getValue().name());
+                    statement.setString(2, entry.getValue().name());
 
-                Location location = entry.getKey();
-                statement.setString(3, location.getWorld().getName());
-                statement.setInt(4, location.getBlockX());
-                statement.setInt(5, location.getBlockY());
-                statement.setInt(6, location.getBlockZ());
-                statement.addBatch();
+                    Location location = entry.getKey();
+                    statement.setString(3, location.getWorld().getName());
+                    statement.setInt(4, location.getBlockX());
+                    statement.setInt(5, location.getBlockY());
+                    statement.setInt(6, location.getBlockZ());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
             }
-            statement.executeBatch();
-        }
         }), "create");
     }
 
@@ -327,8 +327,10 @@ public class DataManager extends DataManagerAbstract {
                     int z = result.getInt("z");
                     Location location = new Location(world, x, y, z);
 
+                    Hopper hopper = hoppers.get(id);
+                    if (hopper == null) break;
 
-                    hoppers.get(id).addLinkedBlock(location, type);
+                    hopper.addLinkedBlock(location, type);
                 }
             }
 
@@ -347,8 +349,11 @@ public class DataManager extends DataManagerAbstract {
                         e.printStackTrace();
                     }
 
+                    Hopper hopper = hoppers.get(id);
+                    if (hopper == null) break;
+
                     if (item != null)
-                        hoppers.get(id).getFilter().addItem(item, type);
+                        hopper.getFilter().addItem(item, type);
                 }
             }
             this.sync(() -> callback.accept(hoppers));

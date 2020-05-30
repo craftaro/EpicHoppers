@@ -2,7 +2,7 @@
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.6.5</version>
+    <version>4.6.6</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <finalName>EpicHoppers-${project.version}</finalName>
@@ -102,6 +102,11 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
             <version>1.15</version>
+        </dependency>
+        <dependency>
+            <groupId>com.songoda</groupId>
+            <artifactId>skyblock</artifactId>
+            <version>2.2.13</version>
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
