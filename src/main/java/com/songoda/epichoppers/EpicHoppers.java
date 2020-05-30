@@ -16,6 +16,7 @@ import com.songoda.core.nms.nbt.NBTItem;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.*;
+import com.songoda.epichoppers.compatiility.EpicHoppersPermission;
 import com.songoda.epichoppers.database.DataManager;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
 import com.songoda.epichoppers.handlers.TeleportHandler;
@@ -32,6 +33,7 @@ import com.songoda.epichoppers.storage.types.StorageYaml;
 import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
+import com.songoda.skyblock.SkyBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -225,6 +227,10 @@ public class EpicHoppers extends SongodaPlugin {
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(), this);
+
+        if (pluginManager.isPluginEnabled("FabledSkyBlock")) {
+            SkyBlock.getInstance().getPermissionManager().registerPermission(new EpicHoppersPermission());
+        }
 
         // Check for liquid tanks
         if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;

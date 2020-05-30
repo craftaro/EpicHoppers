@@ -8,6 +8,8 @@ import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
+import com.songoda.skyblock.SkyBlock;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -63,6 +65,16 @@ public class InteractListeners implements Listener {
 
         if (WorldGuardHook.isInteractAllowed(event.getClickedBlock().getLocation()))
             return;
+
+        if (Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock")) {
+            SkyBlock skyBlock = SkyBlock.getInstance();
+
+            if (skyBlock.getWorldManager().isIslandWorld(event.getPlayer().getWorld()))
+                if (!skyBlock.getPermissionManager().hasPermission(event.getPlayer(),
+                        skyBlock.getIslandManager().getIslandAtLocation(event.getClickedBlock().getLocation()),
+                        "EpicHoppers"))
+                    return;
+        }
 
         PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
 
