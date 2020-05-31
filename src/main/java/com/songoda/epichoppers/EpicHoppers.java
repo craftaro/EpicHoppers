@@ -34,6 +34,7 @@ import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
 import com.songoda.skyblock.SkyBlock;
+import com.songoda.skyblock.permission.BasicPermission;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -229,7 +230,12 @@ public class EpicHoppers extends SongodaPlugin {
         pluginManager.registerEvents(new InventoryListeners(), this);
 
         if (pluginManager.isPluginEnabled("FabledSkyBlock")) {
-            SkyBlock.getInstance().getPermissionManager().registerPermission(new EpicHoppersPermission());
+            try {
+                SkyBlock.getInstance().getPermissionManager().registerPermission(
+                        (BasicPermission) Class.forName("com.songoda.epichoppers.compatibility.EpicHoppersPermission").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
 
         // Check for liquid tanks
