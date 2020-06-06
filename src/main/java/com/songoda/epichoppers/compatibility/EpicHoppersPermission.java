@@ -1,4 +1,4 @@
-package com.songoda.epichoppers.compatiility;
+package com.songoda.epichoppers.compatibility;
 
 import com.songoda.skyblock.core.compatibility.CompatibleMaterial;
 import com.songoda.skyblock.permission.BasicPermission;
