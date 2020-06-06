@@ -16,7 +16,6 @@ import com.songoda.core.nms.nbt.NBTItem;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.*;
-import com.songoda.epichoppers.compatiility.EpicHoppersPermission;
 import com.songoda.epichoppers.database.DataManager;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
 import com.songoda.epichoppers.handlers.TeleportHandler;
