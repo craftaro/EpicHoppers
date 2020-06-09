@@ -51,11 +51,6 @@ public class Settings {
             "The amount of time in ticks a player has between hitting the hopper",
             "Link button and performing the link. When the time is up the link event is canceled.");
 
-    public static final ConfigSetting SYNC_TOUCH_BLACKLIST = new ConfigSetting(config, "Main.Sync Touch Blacklist",
-            Arrays.asList("CHEST", "FURNACE", "HOPPER"),
-            "Items that shouldn't work with Sync touch. You should put items in here",
-            "that other plugins use to store data with.");
-
     public static final ConfigSetting MAX_CHUNK = new ConfigSetting(config, "Main.Max Hoppers Per Chunk", -1,
             "The maximum amount of hoppers per chunk.");
 
@@ -65,6 +60,9 @@ public class Settings {
     public static final ConfigSetting BLOCKBREAK_BLACKLIST = new ConfigSetting(config, "Main.BlockBreak Blacklisted Blocks",
             Arrays.asList("BEDROCK", "END_PORTAL", "ENDER_PORTAL", "END_PORTAL_FRAME", "ENDER_PORTAL_FRAME", "PISTON_HEAD", "PISTON_EXTENSION", "RAIL", "RAILS", "ACTIVATOR_RAIL", "DETECTOR_RAIL", "POWERED_RAIL"),
             "Anything listed here will not be broken by the block break module.");
+
+    public static final ConfigSetting ALLOW_BLOCKBREAK_CONTAINERS = new ConfigSetting(config, "Main.Allow BlockBreak Containers", false,
+            "Allow BlockBreak to break containers.");
 
     public static final ConfigSetting AUTOCRAFT_JAM_EJECT = new ConfigSetting(config, "Main.AutoCraft Jam Eject", false,
             "AutoCraft module needs a free slot to craft items with.",

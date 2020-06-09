@@ -73,8 +73,11 @@ public class ModuleBlockBreak extends Module {
         if (Settings.BLOCKBREAK_BLACKLIST.getStringList().contains(above.getType().name())
                 || above.getType() == Material.WATER
                 || above.getType() == Material.LAVA
-                || above.getType() == Material.AIR
-                || above.getState() instanceof InventoryHolder)
+                || above.getType() == Material.AIR)
+            return;
+
+        if (Settings.ALLOW_BLOCKBREAK_CONTAINERS.getBoolean()
+                && above.getState() instanceof InventoryHolder)
             return;
 
         // Let's break the block!
