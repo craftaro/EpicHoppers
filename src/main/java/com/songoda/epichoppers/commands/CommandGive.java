@@ -74,7 +74,7 @@ public class CommandGive extends AbstractCommand {
 
     @Override
     public String getSyntax() {
-        return "/eh give [player] [level]";
+        return "give [player] [level]";
     }
 
     @Override

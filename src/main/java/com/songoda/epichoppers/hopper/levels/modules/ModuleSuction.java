@@ -182,7 +182,7 @@ public class ModuleSuction extends Module {
         meta.setDisplayName(locale.getMessage("interface.hopper.suctiontitle").getMessage());
         List<String> lore = new ArrayList<>();
         String[] parts = locale.getMessage("interface.hopper.suctionlore")
-                .processPlaceholder("status", isEnabled(hopper) ? locale.getMessage("general.word.enabled").getMessage() : locale.getMessage("general.word.disabled"))
+                .processPlaceholder("status", isEnabled(hopper) ? locale.getMessage("general.word.enabled").getMessage() : locale.getMessage("general.word.disabled").getMessage())
                 .processPlaceholder("radius", getRadius(hopper)).getMessage().split("\\|");
         for (String line : parts) {
             lore.add(Methods.formatText(line));

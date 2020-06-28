@@ -99,7 +99,7 @@ public class EpicHoppers extends SongodaPlugin {
 
         // Register commands
         this.commandManager = new CommandManager(this);
-        this.commandManager.addCommand(new CommandEpicHoppers(this))
+        this.commandManager.addMainCommand("eh")
                 .addSubCommands(
                         new CommandBoost(this),
                         new CommandGive(this),

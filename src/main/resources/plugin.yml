@@ -6,8 +6,8 @@ version: maven-version-number
 author: Songoda
 api-version: 1.13
 commands:
-  epichoppers:
+  eh:
     description: View information on this plugin.
     default: true
-    aliases: [eh]
+    aliases: [EpicHoppers]
     usage: /eh
