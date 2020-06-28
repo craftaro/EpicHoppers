@@ -19,7 +19,6 @@ public class CommandSettings extends AbstractCommand {
 
     @Override
     protected ReturnType runCommand(CommandSender sender, String... args) {
-        Player player = (Player) sender;
         instance.getGuiManager().showGUI((Player) sender, new PluginConfigGui(instance));
         return ReturnType.SUCCESS;
     }
@@ -36,7 +35,7 @@ public class CommandSettings extends AbstractCommand {
 
     @Override
     public String getSyntax() {
-        return "/eh settings";
+        return "settings";
     }
 
     @Override
