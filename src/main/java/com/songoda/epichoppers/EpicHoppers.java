@@ -23,6 +23,7 @@ import com.songoda.epichoppers.hopper.*;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
 import com.songoda.epichoppers.hopper.levels.modules.*;
+import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.listeners.*;
 import com.songoda.epichoppers.player.PlayerDataManager;
 import com.songoda.epichoppers.settings.Settings;
@@ -44,6 +45,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
@@ -61,7 +63,6 @@ public class EpicHoppers extends SongodaPlugin {
     private TeleportHandler teleportHandler;
 
     private DatabaseConnector databaseConnector;
-    private DataMigrationManager dataMigrationManager;
     private DataManager dataManager;
 
     private boolean liquidtanks = false;
@@ -116,9 +117,9 @@ public class EpicHoppers extends SongodaPlugin {
         this.getLogger().info("Data handler connected using SQLite.");
 
         this.dataManager = new DataManager(this.databaseConnector, this);
-        this.dataMigrationManager = new DataMigrationManager(this.databaseConnector, this.dataManager,
+        DataMigrationManager dataMigrationManager = new DataMigrationManager(this.databaseConnector, this.dataManager,
                 new _1_InitialMigration());
-        this.dataMigrationManager.runMigrations();
+        dataMigrationManager.runMigrations();
 
         this.loadLevelManager();
         Bukkit.getScheduler().runTaskLaterAsynchronously(this, () -> {
@@ -228,15 +229,6 @@ public class EpicHoppers extends SongodaPlugin {
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(), this);
 
-        if (pluginManager.isPluginEnabled("FabledSkyBlock")) {
-            try {
-                SkyBlock.getInstance().getPermissionManager().registerPermission(
-                        (BasicPermission) Class.forName("com.songoda.epichoppers.compatibility.EpicHoppersPermission").newInstance());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-
         // Check for liquid tanks
         if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
 
@@ -246,6 +238,18 @@ public class EpicHoppers extends SongodaPlugin {
         // Start auto save
         int saveInterval = Settings.AUTOSAVE.getInt() * 60 * 20;
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveModules, saveInterval, saveInterval);
+    
+        // Hotfix for EH loading before FSB
+        Bukkit.getScheduler().runTask(this, () -> {
+            if (pluginManager.isPluginEnabled("FabledSkyBlock")) {
+                try {
+                    SkyBlock.getInstance().getPermissionManager().registerPermission(
+                            (BasicPermission) Class.forName("com.songoda.epichoppers.compatibility.EpicHoppersPermission").getDeclaredConstructor().newInstance());
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
