@@ -2,7 +2,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.compatibility.ServerVersion;
+import com.songoda.core.compatibility.CompatibleParticleHandler;
 import com.songoda.core.locale.Locale;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -11,7 +11,6 @@ import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -134,12 +133,11 @@ public class ModuleSuction extends Module {
                         () -> blacklist.remove(item.getUniqueId()), 10L);
             }
 
-            if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_9)) {
-                float xx = (float) (0 + (Math.random() * .1));
-                float yy = (float) (0 + (Math.random() * .1));
-                float zz = (float) (0 + (Math.random() * .1));
-                item.getLocation().getWorld().spawnParticle(Particle.FLAME, item.getLocation(), 5, xx, yy, zz, 0);
-            }
+            float xx = (float) (0 + (Math.random() * .1));
+            float yy = (float) (0 + (Math.random() * .1));
+            float zz = (float) (0 + (Math.random() * .1));
+            CompatibleParticleHandler.spawnParticles(CompatibleParticleHandler.ParticleType.FLAME,
+                    item.getLocation(), 5, xx, yy, zz);
         }
     }
 
@@ -218,7 +216,7 @@ public class ModuleSuction extends Module {
 
     private int getRadius(Hopper hopper) {
         Object foundRadius = getData(hopper, "radius");
-        return foundRadius == null ? maxSearchRadius :  (int) foundRadius;
+        return foundRadius == null ? maxSearchRadius : (int) foundRadius;
     }
 
     private void setRadius(Hopper hopper, int radius) {
