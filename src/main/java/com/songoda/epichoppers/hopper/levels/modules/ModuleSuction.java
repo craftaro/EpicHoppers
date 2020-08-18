@@ -6,6 +6,7 @@ import com.songoda.core.compatibility.CompatibleParticleHandler;
 import com.songoda.core.locale.Locale;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.apache.commons.lang.StringUtils;
@@ -15,7 +16,11 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Method;
@@ -72,9 +77,19 @@ public class ModuleSuction extends Module {
                         && entity.getLocation().getBlock().getType() != Material.HOPPER)
                 .map(entity -> (Item) entity)
                 .collect(Collectors.toSet());
+        
+        if (itemsToSuck.isEmpty())
+            return;
 
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
+        InventoryHolder inventoryHolder = null;
+        Inventory hopperInventory = null;
+        if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
+            inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
+            hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
+        }
+        
         for (Item item : itemsToSuck) {
 
             ItemStack itemStack = item.getItemStack();
@@ -113,6 +128,14 @@ public class ModuleSuction extends Module {
                         continue;
                     }
                 }
+            }
+            
+            if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
+                hopperInventory.setContents(hopperCache.cachedInventory);
+                InventoryPickupItemEvent pickupevent = new InventoryPickupItemEvent(hopperInventory, item);
+                Bukkit.getPluginManager().callEvent(pickupevent);
+                if (pickupevent.isCancelled())
+                    continue;
             }
 
             // try to add the items to the hopper

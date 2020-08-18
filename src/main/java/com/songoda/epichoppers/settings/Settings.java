@@ -85,6 +85,11 @@ public class Settings {
             "Which economy plugin should be used?",
             "Supported plugins you have installed: \"" + EconomyManager.getManager().getRegisteredPlugins().stream().collect(Collectors.joining("\", \"")) + "\".");
 
+    public static final ConfigSetting EMIT_INVENTORYPICKUPITEMEVENT = new ConfigSetting(config, "Main.Emit InventoryPickupItemEvent", false,
+        "This event is used by other plugin to modify or monitor the behavior when a hopper picks up items on the ground.",
+        "However it is a high frequency event and may have an impact on your server performance which is why it is disabled by default.",
+        "If you absolutely need this enable it but be aware of the potential performance impact.");
+
     public static final ConfigSetting ECO_ICON = new ConfigSetting(config, "Interfaces.Economy Icon", "SUNFLOWER");
     public static final ConfigSetting XP_ICON = new ConfigSetting(config, "Interfaces.XP Icon", "EXPERIENCE_BOTTLE");
 
