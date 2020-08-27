@@ -253,6 +253,10 @@ public class EpicHoppers extends SongodaPlugin {
     }
 
     @Override
+    public void onDataLoad() {
+    }
+
+    @Override
     public void onConfigReload() {
         this.setLocale(getConfig().getString("System.Language Mode"), true);
         this.locale.reloadMessages();
