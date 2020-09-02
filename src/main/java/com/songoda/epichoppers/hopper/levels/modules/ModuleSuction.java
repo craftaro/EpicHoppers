@@ -2,21 +2,25 @@ package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.compatibility.ServerVersion;
+import com.songoda.core.compatibility.CompatibleParticleHandler;
 import com.songoda.core.locale.Locale;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Method;
@@ -73,9 +77,19 @@ public class ModuleSuction extends Module {
                         && entity.getLocation().getBlock().getType() != Material.HOPPER)
                 .map(entity -> (Item) entity)
                 .collect(Collectors.toSet());
+        
+        if (itemsToSuck.isEmpty())
+            return;
 
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
+        InventoryHolder inventoryHolder = null;
+        Inventory hopperInventory = null;
+        if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
+            inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
+            hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
+        }
+        
         for (Item item : itemsToSuck) {
 
             ItemStack itemStack = item.getItemStack();
@@ -115,6 +129,14 @@ public class ModuleSuction extends Module {
                     }
                 }
             }
+            
+            if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
+                hopperInventory.setContents(hopperCache.cachedInventory);
+                InventoryPickupItemEvent pickupevent = new InventoryPickupItemEvent(hopperInventory, item);
+                Bukkit.getPluginManager().callEvent(pickupevent);
+                if (pickupevent.isCancelled())
+                    continue;
+            }
 
             // try to add the items to the hopper
             int toAdd, added = hopperCache.addAny(itemStack, toAdd = getActualItemAmount(item));
@@ -134,12 +156,11 @@ public class ModuleSuction extends Module {
                         () -> blacklist.remove(item.getUniqueId()), 10L);
             }
 
-            if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_9)) {
-                float xx = (float) (0 + (Math.random() * .1));
-                float yy = (float) (0 + (Math.random() * .1));
-                float zz = (float) (0 + (Math.random() * .1));
-                item.getLocation().getWorld().spawnParticle(Particle.FLAME, item.getLocation(), 5, xx, yy, zz, 0);
-            }
+            float xx = (float) (0 + (Math.random() * .1));
+            float yy = (float) (0 + (Math.random() * .1));
+            float zz = (float) (0 + (Math.random() * .1));
+            CompatibleParticleHandler.spawnParticles(CompatibleParticleHandler.ParticleType.FLAME,
+                    item.getLocation(), 5, xx, yy, zz);
         }
     }
 
@@ -218,7 +239,7 @@ public class ModuleSuction extends Module {
 
     private int getRadius(Hopper hopper) {
         Object foundRadius = getData(hopper, "radius");
-        return foundRadius == null ? maxSearchRadius :  (int) foundRadius;
+        return foundRadius == null ? maxSearchRadius : (int) foundRadius;
     }
 
     private void setRadius(Hopper hopper, int radius) {
