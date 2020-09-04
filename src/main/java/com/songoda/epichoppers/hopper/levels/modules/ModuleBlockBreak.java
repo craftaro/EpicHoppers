@@ -109,7 +109,7 @@ public class ModuleBlockBreak extends Module {
             waterlogged = true;
         }
 
-        above.breakNaturally();
+        above.breakNaturally(new ItemStack(Material.DIAMOND_PICKAXE));
 
         if (waterlogged)
             above.setType(Material.WATER);
