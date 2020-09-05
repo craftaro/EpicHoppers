@@ -8,17 +8,17 @@ import java.util.List;
 
 public class CommandReload extends AbstractCommand {
 
-    final EpicHoppers instance;
+    private final EpicHoppers plugin;
 
-    public CommandReload(EpicHoppers instance) {
+    public CommandReload(EpicHoppers plugin) {
         super(false, "reload");
-        this.instance = instance;
+        this.plugin = plugin;
     }
 
     @Override
     protected ReturnType runCommand(CommandSender sender, String... args) {
-        instance.reloadConfig();
-        instance.getLocale().getMessage("&7Configuration and Language files reloaded.").sendPrefixedMessage(sender);
+        plugin.reloadConfig();
+        plugin.getLocale().getMessage("&7Configuration and Language files reloaded.").sendPrefixedMessage(sender);
         return ReturnType.SUCCESS;
     }
 
