@@ -1,6 +1,7 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUICrafting;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -33,8 +34,8 @@ public class ModuleAutoCrafting extends Module {
 
     private static final Map<ItemStack, Recipes> cachedRecipes = new ConcurrentHashMap<>();
     private static final Map<Hopper, ItemStack> cachedCrafting = new ConcurrentHashMap<>();
-    static final ItemStack noCraft = new ItemStack(Material.AIR);
-    boolean crafterEjection;
+    private static final ItemStack noCraft = new ItemStack(Material.AIR);
+    private boolean crafterEjection;
 
     public ModuleAutoCrafting(EpicHoppers plugin) {
         super(plugin);
@@ -185,7 +186,7 @@ public class ModuleAutoCrafting extends Module {
         String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftinglore")
                 .getMessage().split("\\|");
         for (String line : parts) {
-            lorecrafting.add(Methods.formatText(line));
+            lorecrafting.add(TextUtils.formatText(line));
         }
         craftingmeta.setLore(lorecrafting);
         crafting.setItemMeta(craftingmeta);
@@ -283,7 +284,7 @@ public class ModuleAutoCrafting extends Module {
                 1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
     }
 
-    final static class Recipes {
+    private final static class Recipes {
         private final List<SimpleRecipe> recipes = new ArrayList<>();
         // Used for the blacklist to ensure that items are not going to get transferred
         private final List<Material> possibleIngredientTypes = new ArrayList<>();
@@ -344,11 +345,11 @@ public class ModuleAutoCrafting extends Module {
         }
     }
 
-    final static class SimpleRecipe {
-        final SimpleIngredient[] ingredients;
-        final ItemStack result;
+    private final static class SimpleRecipe {
+        private final SimpleIngredient[] ingredients;
+        private final ItemStack result;
 
-        SimpleRecipe(ShapelessRecipe recipe) {
+        public SimpleRecipe(ShapelessRecipe recipe) {
             this.result = recipe.getResult();
 
             List<SimpleIngredient> ingredients = new ArrayList<>();
@@ -368,7 +369,7 @@ public class ModuleAutoCrafting extends Module {
             this.ingredients = ingredients.toArray(new SimpleIngredient[0]);
         }
 
-        SimpleRecipe(ShapedRecipe recipe) {
+        public SimpleRecipe(ShapedRecipe recipe) {
             this.result = recipe.getResult();
 
             List<SimpleIngredient> ingredients = new ArrayList<>();
@@ -418,9 +419,9 @@ public class ModuleAutoCrafting extends Module {
             }
         }
 
-        static class SimpleIngredient {
-            final ItemStack item;
-            final ItemStack[] alternativeTypes;
+        private static class SimpleIngredient {
+            private final ItemStack item;
+            private final ItemStack[] alternativeTypes;
 
             /**
              * <b>Ignored by {@link #isSimilar(Object)}!</b><br>

@@ -13,6 +13,7 @@ import com.songoda.core.hooks.EconomyManager;
 import com.songoda.core.locale.Locale;
 import com.songoda.core.nms.NmsManager;
 import com.songoda.core.nms.nbt.NBTItem;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.CommandBoost;
 import com.songoda.epichoppers.commands.CommandGive;
@@ -239,7 +240,7 @@ public class EpicHoppers extends SongodaPlugin {
     public ItemStack newHopperItem(Level level) {
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
-        itemmeta.setDisplayName(Methods.formatText(Methods.formatName(level.getLevel())));
+        itemmeta.setDisplayName(TextUtils.formatText(Methods.formatName(level.getLevel())));
         String line = getLocale().getMessage("general.nametag.lore").getMessage();
         if (!line.equals("")) {
             itemmeta.setLore(Arrays.asList(line.split("\n")));

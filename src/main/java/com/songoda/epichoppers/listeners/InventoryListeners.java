@@ -1,7 +1,6 @@
 package com.songoda.epichoppers.listeners;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
@@ -16,7 +15,6 @@ public class InventoryListeners implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        Player player = (Player) event.getWhoClicked();
         if (event.getCurrentItem() == null) return;
 
         if (event.getRawSlot() > event.getView().getTopInventory().getSize() - 1) return;

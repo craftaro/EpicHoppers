@@ -3,6 +3,7 @@ package com.songoda.epichoppers.gui;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.gui.Gui;
 import com.songoda.core.gui.GuiUtils;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -31,7 +32,7 @@ public class GUIFilter extends Gui {
         this.hopper = hopper;
 
         setRows(6);
-        setTitle(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f Filter"));
+        setTitle(TextUtils.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f Filter"));
         setDefaultItem(null);
         setAcceptsItems(true);
 
@@ -118,7 +119,7 @@ public class GUIFilter extends Gui {
         ArrayList<String> loreInfo = new ArrayList<>();
         String[] parts = plugin.getLocale().getMessage("interface.filter.infolore").getMessage().split("\\|");
         for (String line : parts) {
-            loreInfo.add(Methods.formatText(line));
+            loreInfo.add(TextUtils.formatText(line));
         }
         itemmetaInfo.setLore(loreInfo);
         itemInfo.setItemMeta(itemmetaInfo);
@@ -134,7 +135,7 @@ public class GUIFilter extends Gui {
                 .processPlaceholder("amount", filter.getEndPoint() != null ? 1 : 0)
                 .getMessage().split("\\|");
         for (String line : parts) {
-            lorehook.add(Methods.formatText(line));
+            lorehook.add(TextUtils.formatText(line));
         }
         hookmeta.setLore(lorehook);
         hook.setItemMeta(hookmeta);

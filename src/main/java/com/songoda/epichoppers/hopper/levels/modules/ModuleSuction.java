@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.CompatibleParticleHandler;
 import com.songoda.core.locale.Locale;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
@@ -206,7 +207,7 @@ public class ModuleSuction extends Module {
                 .processPlaceholder("status", isEnabled(hopper) ? locale.getMessage("general.word.enabled").getMessage() : locale.getMessage("general.word.disabled").getMessage())
                 .processPlaceholder("radius", getRadius(hopper)).getMessage().split("\\|");
         for (String line : parts) {
-            lore.add(Methods.formatText(line));
+            lore.add(TextUtils.formatText(line));
         }
         meta.setLore(lore);
         item.setItemMeta(meta);

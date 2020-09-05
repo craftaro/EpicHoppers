@@ -1,30 +1,22 @@
 package com.songoda.epichoppers.utils;
 
 import com.songoda.core.compatibility.ServerVersion;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by songoda on 2/24/2017.
  */
 public class Methods {
-
-    private static final Map<String, Location> serializeCache = new HashMap<>();
 
     public static boolean isSimilarMaterial(ItemStack is1, ItemStack is2) {
         if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) ||
@@ -106,7 +98,7 @@ public class Methods {
                 .processPlaceholder("level", level).getMessage();
 
 
-        return Methods.formatText(name);
+        return TextUtils.formatText(name);
     }
 
     public static void doParticles(Entity entity, Location location) {
@@ -117,17 +109,6 @@ public class Methods {
         entity.getWorld().spawnParticle(org.bukkit.Particle.valueOf(instance.getConfig().getString("Main.Upgrade Particle Type")), location, 200, .5, .5, .5);
     }
 
-    /**
-     * Serializes the location of the block specified.
-     *
-     * @param b The block whose location is to be saved.
-     * @return The serialized data.
-     */
-    public static String serializeLocation(Block b) {
-        if (b == null)
-            return "";
-        return serializeLocation(b.getLocation());
-    }
 
     /**
      * Serializes the location specified.
@@ -145,52 +126,6 @@ public class Methods {
         String str = w + ":" + x + ":" + y + ":" + z;
         str = str.replace(".0", "").replace(".", "/");
         return str;
-    }
-
-    /**
-     * Deserializes a location from the string.
-     *
-     * @param str The string to parse.
-     * @return The location that was serialized in the string.
-     */
-    public static Location unserializeLocation(String str) {
-        if (str == null || str.equals(""))
-            return null;
-        if (serializeCache.containsKey(str)) {
-            return serializeCache.get(str).clone();
-        }
-        String cacheKey = str;
-        str = str.replace("y:", ":").replace("z:", ":").replace("w:", "").replace("x:", ":").replace("/", ".");
-        List<String> args = Arrays.asList(str.split("\\s*:\\s*"));
-
-        World world = Bukkit.getWorld(args.get(0));
-        double x = Double.parseDouble(args.get(1)), y = Double.parseDouble(args.get(2)), z = Double.parseDouble(args.get(3));
-        Location location = new Location(world, x, y, z, 0, 0);
-        serializeCache.put(cacheKey, location.clone());
-        return location;
-    }
-
-    public static String convertToInvisibleString(String s) {
-        if (s == null || s.equals(""))
-            return "";
-        StringBuilder hidden = new StringBuilder();
-        for (char c : s.toCharArray()) hidden.append(ChatColor.COLOR_CHAR + "").append(c);
-        return hidden.toString();
-    }
-
-
-    public static String formatText(String text) {
-        if (text == null || text.equals(""))
-            return "";
-        return formatText(text, false);
-    }
-
-    public static String formatText(String text, boolean cap) {
-        if (text == null || text.equals(""))
-            return "";
-        if (cap)
-            text = text.substring(0, 1).toUpperCase() + text.substring(1);
-        return ChatColor.translateAlternateColorCodes('&', text);
     }
 
     /**

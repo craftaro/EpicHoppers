@@ -3,6 +3,7 @@ package com.songoda.epichoppers.gui;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.gui.Gui;
 import com.songoda.core.gui.GuiUtils;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -30,7 +31,7 @@ public class GUIAutoSellFilter extends Gui {
         this.hopper = hopper;
 
         setRows(6);
-        setTitle(Methods.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f AutoSell Filter"));
+        setTitle(TextUtils.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f AutoSell Filter"));
         setDefaultItem(null);
         setAcceptsItems(true);
 
@@ -104,7 +105,7 @@ public class GUIAutoSellFilter extends Gui {
         String[] parts = plugin.getLocale().getMessage("interface.autosell-filter.infolore").getMessage().split("\\|");
 
         for (String line : parts) {
-            loreInfo.add(Methods.formatText(line));
+            loreInfo.add(TextUtils.formatText(line));
         }
 
         indicatorMeta.setLore(loreInfo);

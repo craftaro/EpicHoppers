@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Settings {
 
-    static final Config config = EpicHoppers.getInstance().getCoreConfig();
+    private static final Config config = EpicHoppers.getInstance().getCoreConfig();
 
     public static final ConfigSetting HOPPER_UPGRADING = new ConfigSetting(config, "Main.Allow hopper Upgrading", true,
             "Should hoppers be upgradable?");

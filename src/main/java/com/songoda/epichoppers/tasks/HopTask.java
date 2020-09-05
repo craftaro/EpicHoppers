@@ -50,8 +50,8 @@ public class HopTask extends BukkitRunnable {
     private boolean legacyFabledSkyblock;
     private final Plugin fabledSkyblockPlugin;
 
-    public HopTask(EpicHoppers plug) {
-        plugin = plug;
+    public HopTask(EpicHoppers plugin) {
+        HopTask.plugin = plugin;
         this.hopTicks = Math.max(1, Settings.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
         if ((this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null)) {

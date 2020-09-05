@@ -24,11 +24,11 @@ public class TeleportHandler {
 
     private final Map<UUID, Long> lastTeleports = new HashMap<>();
 
-    private EpicHoppers instance;
+    private EpicHoppers plugin;
 
-    public TeleportHandler(EpicHoppers instance) {
-        this.instance = instance;
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(instance, this::teleportRunner, 0, instance.getConfig().getLong("Main.Amount of Ticks Between Teleport"));
+    public TeleportHandler(EpicHoppers plugin) {
+        this.plugin = plugin;
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0, plugin.getConfig().getLong("Main.Amount of Ticks Between Teleport"));
     }
 
     private void teleportRunner() {
@@ -37,16 +37,16 @@ public class TeleportHandler {
                 if (!(entity instanceof LivingEntity) || entity.getType() == EntityType.ARMOR_STAND)
                     continue;
 
-                if (!this.instance.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers")
+                if (!this.plugin.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers")
                         || (entity instanceof Player && !entity.hasPermission("EpicHoppers.Teleport")))
                     continue;
 
                 Location location = entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
 
-                if (!this.instance.getHopperManager().isHopper(location))
+                if (!this.plugin.getHopperManager().isHopper(location))
                     continue;
 
-                Hopper hopper = this.instance.getHopperManager().getHopper(location);
+                Hopper hopper = this.plugin.getHopperManager().getHopper(location);
 
                 if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON)
                     continue;
@@ -64,11 +64,11 @@ public class TeleportHandler {
     }
 
     public void tpEntity(Entity entity, Hopper hopper) {
-        if (hopper == null || !this.instance.getHopperManager().isHopper(hopper.getLocation()))
+        if (hopper == null || !this.plugin.getHopperManager().isHopper(hopper.getLocation()))
             return;
 
         Hopper lastHopper = this.getChain(hopper, 1);
-        if (hopper != lastHopper)
+        if (!hopper.equals(lastHopper))
             this.doTeleport(entity, lastHopper.getLocation());
     }
 
@@ -85,7 +85,7 @@ public class TeleportHandler {
 
         for (Location nextHopperLocation : lastHopper.getLinkedBlocks()) {
             if (nextHopperLocation.getBlock().getState() instanceof org.bukkit.block.Hopper) {
-                Hopper hopper = this.instance.getHopperManager().getHopper(nextHopperLocation);
+                Hopper hopper = this.plugin.getHopperManager().getHopper(nextHopperLocation);
                 if (hopper != null)
                     return this.getChain(hopper, currentChainLength + 1);
             }
