@@ -1,34 +1,21 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.settings.Settings;
-import com.songoda.epichoppers.utils.Methods;
-import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Random;
 
 
 /**
@@ -36,12 +23,10 @@ import java.util.Random;
  */
 public class BlockListeners implements Listener {
 
-    private final EpicHoppers instance;
-    private final Random random;
+    private final EpicHoppers plugin;
 
-    public BlockListeners(EpicHoppers instance) {
-        this.instance = instance;
-        this.random = new Random();
+    public BlockListeners(EpicHoppers plugin) {
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -51,7 +36,7 @@ public class BlockListeners implements Listener {
         if (e.getBlock().getType() != Material.HOPPER)
             return;
 
-        if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getBlock().getLocation()))
+        if (plugin.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(e.getBlock().getLocation()))
             return;
 
         int amt = count(e.getBlock().getChunk());
@@ -59,19 +44,19 @@ public class BlockListeners implements Listener {
         int max = maxHoppers(player);
 
         if (max != -1 && amt > max) {
-            player.sendMessage(instance.getLocale().getMessage("event.hopper.toomany").processPlaceholder("amount", max).getMessage());
+            player.sendMessage(plugin.getLocale().getMessage("event.hopper.toomany").processPlaceholder("amount", max).getMessage());
             e.setCancelled(true);
             return;
         }
 
         ItemStack item = e.getItemInHand().clone();
 
-        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getLevelManager().isEpicHopper(item))
+        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !plugin.getLevelManager().isEpicHopper(item))
             return;
 
-        Hopper hopper = instance.getHopperManager().addHopper(
+        Hopper hopper = plugin.getHopperManager().addHopper(
                 new HopperBuilder(e.getBlock())
-                        .setLevel(instance.getLevelManager().getLevel(item))
+                        .setLevel(plugin.getLevelManager().getLevel(item))
                         .setPlacedBy(player)
                         .setLastPlayerOpened(player).build());
         EpicHoppers.getInstance().getDataManager().createHopper(hopper);
@@ -85,7 +70,7 @@ public class BlockListeners implements Listener {
             if (num > limit)
                 limit = num;
         }
-        if (limit == -1) limit = instance.getConfig().getInt("Main.Max Hoppers Per Chunk");
+        if (limit == -1) limit = plugin.getConfig().getInt("Main.Max Hoppers Per Chunk");
         return limit;
     }
 
@@ -108,19 +93,19 @@ public class BlockListeners implements Listener {
 
         if (event.getBlock().getType() != Material.HOPPER) return;
 
-        if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(block.getLocation()))
+        if (plugin.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(block.getLocation()))
             return;
 
-        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(block.getLocation()))
+        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !plugin.getHopperManager().isHopper(block.getLocation()))
             return;
 
-        Hopper hopper = instance.getHopperManager().getHopper(block);
+        Hopper hopper = plugin.getHopperManager().getHopper(block);
 
         Level level = hopper.getLevel();
 
         if (level.getLevel() > 1) {
             event.setCancelled(true);
-            ItemStack item = instance.newHopperItem(level);
+            ItemStack item = plugin.newHopperItem(level);
 
             event.getBlock().setType(Material.AIR);
             event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
@@ -136,9 +121,9 @@ public class BlockListeners implements Listener {
                 filter(m -> m != null)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
 
-        instance.getHopperManager().removeHopper(block.getLocation());
-        instance.getDataManager().deleteHopper(hopper);
+        plugin.getHopperManager().removeHopper(block.getLocation());
+        plugin.getDataManager().deleteHopper(hopper);
 
-        instance.getPlayerDataManager().getPlayerData(player).setSyncType(null);
+        plugin.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
 }

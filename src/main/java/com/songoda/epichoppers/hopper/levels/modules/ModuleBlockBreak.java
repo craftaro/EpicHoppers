@@ -1,10 +1,10 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.songoda.core.compatibility.ServerVersion;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
-import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -109,7 +109,7 @@ public class ModuleBlockBreak extends Module {
             waterlogged = true;
         }
 
-        above.breakNaturally();
+        above.breakNaturally(new ItemStack(Material.DIAMOND_PICKAXE));
 
         if (waterlogged)
             above.setType(Material.WATER);
@@ -127,7 +127,7 @@ public class ModuleBlockBreak extends Module {
                         : plugin.getLocale().getMessage("general.word.disabled").getMessage())
                 .getMessage().split("\\|");
         for (String line : parts) {
-            loreblock.add(Methods.formatText(line));
+            loreblock.add(TextUtils.formatText(line));
         }
         blockmeta.setLore(loreblock);
         block.setItemMeta(blockmeta);

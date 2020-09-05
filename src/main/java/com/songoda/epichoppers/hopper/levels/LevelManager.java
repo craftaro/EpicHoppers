@@ -7,7 +7,11 @@ import com.songoda.epichoppers.hopper.levels.modules.Module;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 public class LevelManager {
 

@@ -41,8 +41,6 @@ public enum HopperDirection {
 
     public BlockFace getDirection() {
         switch (this) {
-            case DOWN:
-                return BlockFace.DOWN;
             case NORTH:
                 return BlockFace.NORTH;
             case SOUTH:
@@ -51,9 +49,9 @@ public enum HopperDirection {
                 return BlockFace.WEST;
             case EAST:
                 return BlockFace.EAST;
+            default:
+                return BlockFace.DOWN;
         }
-        // really shouldn't happen, tbh
-        return BlockFace.DOWN;
     }
 
     public int getX() {

@@ -3,6 +3,7 @@ package com.songoda.epichoppers.gui;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.gui.Gui;
 import com.songoda.core.gui.GuiUtils;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
@@ -15,7 +16,7 @@ public class GUICrafting extends Gui {
 
     public GUICrafting(ModuleAutoCrafting module, Hopper hopper, Player player) {
         setRows(3);
-        setTitle(Methods.formatName(hopper.getLevel().getLevel()) + Methods.formatText(" &8-&f Crafting"));
+        setTitle(Methods.formatName(hopper.getLevel().getLevel()) + TextUtils.formatText(" &8-&f Crafting"));
         setOnClose((event) -> setItem(module, hopper, player));
         setAcceptsItems(true);
 

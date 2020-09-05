@@ -6,7 +6,6 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
-import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.TeleportTrigger;
 import com.songoda.skyblock.SkyBlock;
 import org.bukkit.Bukkit;
@@ -21,7 +20,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * Created by songoda on 3/14/2017.

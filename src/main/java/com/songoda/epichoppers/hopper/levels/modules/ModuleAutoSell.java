@@ -2,6 +2,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.hooks.EconomyManager;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUIAutoSellFilter;
 import com.songoda.epichoppers.hopper.Filter;
@@ -125,7 +126,7 @@ public class ModuleAutoSell extends Module {
                 .processPlaceholder("state", isNotifying(hopper)).getMessage().split("\\|");
 
         for (String line : parts) {
-            loreSell.add(Methods.formatText(line));
+            loreSell.add(TextUtils.formatText(line));
         }
 
         sellMeta.setLore(loreSell);

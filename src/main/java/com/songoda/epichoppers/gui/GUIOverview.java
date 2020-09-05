@@ -4,6 +4,7 @@ import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.core.gui.Gui;
 import com.songoda.core.gui.GuiUtils;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -75,7 +76,7 @@ public class GUIOverview extends Gui {
                         ? plugin.getLocale().getMessage("general.word.disabled").getMessage()
                         : hopper.getTeleportTrigger().name()).getMessage().split("\\|");
         for (String line : parts) {
-            loreperl.add(Methods.formatText(line));
+            loreperl.add(TextUtils.formatText(line));
         }
         perlmeta.setLore(loreperl);
         perl.setItemMeta(perlmeta);
@@ -86,7 +87,7 @@ public class GUIOverview extends Gui {
         ArrayList<String> lorefilter = new ArrayList<>();
         parts = plugin.getLocale().getMessage("interface.hopper.filterlore").getMessage().split("\\|");
         for (String line : parts) {
-            lorefilter.add(Methods.formatText(line));
+            lorefilter.add(TextUtils.formatText(line));
         }
         filtermeta.setLore(lorefilter);
         filter.setItemMeta(filtermeta);
@@ -114,7 +115,7 @@ public class GUIOverview extends Gui {
                     .getMessage().split("\\|");
             lore.add("");
             for (String line : parts)
-                lore.add(Methods.formatText(line));
+                lore.add(TextUtils.formatText(line));
         }
 
         itemmeta.setLore(lore);
@@ -128,7 +129,7 @@ public class GUIOverview extends Gui {
                 .processPlaceholder("amount", hopper.getLinkedBlocks().stream().distinct().count())
                 .getMessage().split("\\|");
         for (String line : parts) {
-            lorehook.add(Methods.formatText(line));
+            lorehook.add(TextUtils.formatText(line));
         }
         hookmeta.setLore(lorehook);
         hook.setItemMeta(hookmeta);

@@ -4,6 +4,7 @@ import com.bgsoftware.wildstacker.api.WildStackerAPI;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.CompatibleParticleHandler;
 import com.songoda.core.locale.Locale;
+import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
@@ -18,9 +19,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Method;
@@ -77,7 +78,7 @@ public class ModuleSuction extends Module {
                         && entity.getLocation().getBlock().getType() != Material.HOPPER)
                 .map(entity -> (Item) entity)
                 .collect(Collectors.toSet());
-        
+
         if (itemsToSuck.isEmpty())
             return;
 
@@ -89,7 +90,7 @@ public class ModuleSuction extends Module {
             inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
             hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
         }
-        
+
         for (Item item : itemsToSuck) {
 
             ItemStack itemStack = item.getItemStack();
@@ -129,7 +130,7 @@ public class ModuleSuction extends Module {
                     }
                 }
             }
-            
+
             if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
                 hopperInventory.setContents(hopperCache.cachedInventory);
                 InventoryPickupItemEvent pickupevent = new InventoryPickupItemEvent(hopperInventory, item);
@@ -206,7 +207,7 @@ public class ModuleSuction extends Module {
                 .processPlaceholder("status", isEnabled(hopper) ? locale.getMessage("general.word.enabled").getMessage() : locale.getMessage("general.word.disabled").getMessage())
                 .processPlaceholder("radius", getRadius(hopper)).getMessage().split("\\|");
         for (String line : parts) {
-            lore.add(Methods.formatText(line));
+            lore.add(TextUtils.formatText(line));
         }
         meta.setLore(lore);
         item.setItemMeta(meta);

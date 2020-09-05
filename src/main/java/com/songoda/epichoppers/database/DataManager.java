@@ -4,7 +4,11 @@ import com.songoda.core.database.DataManagerAbstract;
 import com.songoda.core.database.DatabaseConnector;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
-import com.songoda.epichoppers.hopper.*;
+import com.songoda.epichoppers.hopper.Filter;
+import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.HopperBuilder;
+import com.songoda.epichoppers.hopper.ItemType;
+import com.songoda.epichoppers.hopper.LinkType;
 import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -20,7 +24,12 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class DataManager extends DataManagerAbstract {

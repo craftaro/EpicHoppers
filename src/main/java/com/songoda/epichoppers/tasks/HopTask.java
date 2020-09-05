@@ -26,7 +26,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -45,8 +50,8 @@ public class HopTask extends BukkitRunnable {
     private boolean legacyFabledSkyblock;
     private final Plugin fabledSkyblockPlugin;
 
-    public HopTask(EpicHoppers plug) {
-        plugin = plug;
+    public HopTask(EpicHoppers plugin) {
+        HopTask.plugin = plugin;
         this.hopTicks = Math.max(1, Settings.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
         if ((this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null)) {
@@ -261,11 +266,11 @@ public class HopTask extends BukkitRunnable {
         boolean isFarmItem = false;
         Collection<Entity> nearbyEntities = null;
         StorageContainerCache.Cache aboveCache = null;
-        if ((above.getType() != Material.AIR
+        if ((isFarmItem = this.isFarmItem(above))
+                || (above.getType() != Material.AIR)
                 && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
-                && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null)
-                || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()
-                || (isFarmItem = this.isFarmItem(above))) {
+                && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null
+                || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()) {
             // Get the inventory holder. Special check for EpicFarming.
             // Get the slots that we can pull items from.
             InventoryHolder aboveInvHolder;
@@ -567,7 +572,6 @@ public class HopTask extends BukkitRunnable {
 
     private ItemStack[] getFarmContents(Block block) {
         return com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager()
-                .getFarm(block).getItems().toArray(new ItemStack[0]);
+                .getFarm(block).getItems().stream().filter(i -> i.getType() != Material.BONE_MEAL).collect(Collectors.toList()).toArray(new ItemStack[0]);
     }
-
 }
