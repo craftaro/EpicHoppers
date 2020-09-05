@@ -26,7 +26,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -262,10 +267,10 @@ public class HopTask extends BukkitRunnable {
         Collection<Entity> nearbyEntities = null;
         StorageContainerCache.Cache aboveCache = null;
         if ((isFarmItem = this.isFarmItem(above))
-            || (above.getType() != Material.AIR)
-               && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
-               && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null
-            || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()) {
+                || (above.getType() != Material.AIR)
+                && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
+                && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null
+                || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()) {
             // Get the inventory holder. Special check for EpicFarming.
             // Get the slots that we can pull items from.
             InventoryHolder aboveInvHolder;

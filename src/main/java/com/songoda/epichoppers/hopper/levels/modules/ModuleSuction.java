@@ -18,9 +18,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.Method;
@@ -77,7 +77,7 @@ public class ModuleSuction extends Module {
                         && entity.getLocation().getBlock().getType() != Material.HOPPER)
                 .map(entity -> (Item) entity)
                 .collect(Collectors.toSet());
-        
+
         if (itemsToSuck.isEmpty())
             return;
 
@@ -89,7 +89,7 @@ public class ModuleSuction extends Module {
             inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
             hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
         }
-        
+
         for (Item item : itemsToSuck) {
 
             ItemStack itemStack = item.getItemStack();
@@ -129,7 +129,7 @@ public class ModuleSuction extends Module {
                     }
                 }
             }
-            
+
             if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
                 hopperInventory.setContents(hopperCache.cachedInventory);
                 InventoryPickupItemEvent pickupevent = new InventoryPickupItemEvent(hopperInventory, item);
