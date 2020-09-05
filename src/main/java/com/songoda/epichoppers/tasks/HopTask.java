@@ -261,11 +261,11 @@ public class HopTask extends BukkitRunnable {
         boolean isFarmItem = false;
         Collection<Entity> nearbyEntities = null;
         StorageContainerCache.Cache aboveCache = null;
-        if ((above.getType() != Material.AIR
-                && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
-                && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null)
-                || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()
-                || (isFarmItem = this.isFarmItem(above))) {
+        if ((isFarmItem = this.isFarmItem(above))
+            || (above.getType() != Material.AIR)
+               && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
+               && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null
+            || !(nearbyEntities = above.getWorld().getNearbyEntities(above.getLocation().clone(), 0.5, 0.5, 0.5)).isEmpty()) {
             // Get the inventory holder. Special check for EpicFarming.
             // Get the slots that we can pull items from.
             InventoryHolder aboveInvHolder;
@@ -567,7 +567,6 @@ public class HopTask extends BukkitRunnable {
 
     private ItemStack[] getFarmContents(Block block) {
         return com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager()
-                .getFarm(block).getItems().toArray(new ItemStack[0]);
+                .getFarm(block).getItems().stream().filter(i -> i.getType() != Material.BONE_MEAL).collect(Collectors.toList()).toArray(new ItemStack[0]);
     }
-
 }
