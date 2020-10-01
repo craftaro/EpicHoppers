@@ -47,20 +47,13 @@ public class HopTask extends BukkitRunnable {
 
     private final int hopTicks;
     private final boolean hasFabledSkyBlock;
-    private boolean legacyFabledSkyblock;
     private final Plugin fabledSkyblockPlugin;
 
     public HopTask(EpicHoppers plugin) {
         HopTask.plugin = plugin;
         this.hopTicks = Math.max(1, Settings.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
-        if ((this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null)) {
-            try {
-                Class.forName("me.goodandevil.skyblock.SkyBlock");
-                legacyFabledSkyblock = true;
-            } catch (ClassNotFoundException ex) {
-            }
-        }
+        this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null;
     }
 
     @Override
@@ -154,56 +147,29 @@ public class HopTask extends BukkitRunnable {
 
                 // Support for FabledSkyBlock stackables.
                 if (this.hasFabledSkyBlock) {
-                    if (legacyFabledSkyblock) {
-                        Object stackableManager = fabledSkyblockPlugin.getClass().getMethod("getStackableManager").invoke(fabledSkyblockPlugin);
-                        boolean isStacked = stackableManager != null && (boolean) stackableManager.getClass().getMethod("isStacked", Location.class).invoke(stackableManager, pointingLocation);
-                        if (isStacked) {
-                            Material mat = pointingLocation.getBlock().getType();
-                            Object stackable = stackableManager.getClass().getMethod("getStack", Location.class, Material.class).invoke(stackableManager, pointingLocation, mat);
+                    com.songoda.skyblock.stackable.StackableManager stackableManager = ((com.songoda.skyblock.SkyBlock) fabledSkyblockPlugin).getStackableManager();
+                    if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
+                        Block pointingBlock = pointingLocation.getBlock();
 
-                            for (int i = 0; i < 5; i++) {
-                                final ItemStack item = hopperCache.cachedInventory[i];
-                                if (item == null) {
-                                    continue;
-                                }
+                        com.songoda.skyblock.core.compatibility.CompatibleMaterial compatibleMaterial = com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(pointingBlock);
 
-                                if (item.getType() == mat) {
-                                    stackable.getClass().getMethod("addOne").invoke(stackable);
-                                    if (item.getAmount() == 1) {
-                                        hopperCache.removeItem(i);
-                                    } else {
-                                        item.setAmount(item.getAmount() - 1);
-                                        hopperCache.dirty = hopperCache.cacheChanged[i] = true;
-                                    }
-                                    break;
-                                }
+                        com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, compatibleMaterial);
+
+                        for (int i = 0; i < 5; i++) {
+                            final ItemStack item = hopperCache.cachedInventory[i];
+                            if (item == null) {
+                                continue;
                             }
-                        }
-                    } else {
-                        com.songoda.skyblock.stackable.StackableManager stackableManager = ((com.songoda.skyblock.SkyBlock) fabledSkyblockPlugin).getStackableManager();
-                        if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
-                            Block pointingBlock = pointingLocation.getBlock();
 
-                            com.songoda.skyblock.core.compatibility.CompatibleMaterial compatibleMaterial = com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(pointingBlock);
-
-                            com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, compatibleMaterial);
-
-                            for (int i = 0; i < 5; i++) {
-                                final ItemStack item = hopperCache.cachedInventory[i];
-                                if (item == null) {
-                                    continue;
+                            if (com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(item) == compatibleMaterial) {
+                                stackable.addOne();
+                                if (item.getAmount() == 1) {
+                                    hopperCache.removeItem(i);
+                                } else {
+                                    item.setAmount(item.getAmount() - 1);
+                                    hopperCache.dirty = hopperCache.cacheChanged[i] = true;
                                 }
-
-                                if (com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(item) == compatibleMaterial) {
-                                    stackable.addOne();
-                                    if (item.getAmount() == 1) {
-                                        hopperCache.removeItem(i);
-                                    } else {
-                                        item.setAmount(item.getAmount() - 1);
-                                        hopperCache.dirty = hopperCache.cacheChanged[i] = true;
-                                    }
-                                    break;
-                                }
+                                break;
                             }
                         }
                     }
