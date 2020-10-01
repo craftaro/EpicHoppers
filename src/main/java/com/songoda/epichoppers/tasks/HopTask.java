@@ -58,8 +58,6 @@ public class HopTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        Set<Location> toRemove = new HashSet<>();
-
         for (final com.songoda.epichoppers.hopper.Hopper hopper : plugin.getHopperManager().getHoppers().values()) {
 
             try {
@@ -74,10 +72,8 @@ public class HopTask extends BukkitRunnable {
                 Block block = location.getBlock();
 
                 // If block is not a hopper remove and continue.
-                if (block.getType() != Material.HOPPER) {
-                    toRemove.add(location);
+                if (block.getType() != Material.HOPPER)
                     continue;
-                }
 
                 // If hopper block is powered, update its redstone state and continue.
                 if (block.getBlockPower() > 0) {
@@ -185,14 +181,6 @@ public class HopTask extends BukkitRunnable {
 
         // push out inventory changes
         StorageContainerCache.update();
-
-        // Clear out invalid hoppers
-        HopperManager hopperManager = plugin.getHopperManager();
-        toRemove.forEach(h -> {
-            com.songoda.epichoppers.hopper.Hopper
-                    hopper = hopperManager.removeHopper(h);
-            plugin.getDataManager().deleteHopper(hopper);
-        });
     }
 
     private void debt(ItemStack item, int amountToMove, InventoryHolder currentHolder) {
