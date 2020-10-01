@@ -86,7 +86,7 @@ public class ModuleAutoSell extends Module {
                         value = 0;
                     }
                 } else
-                    value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> Material.valueOf(line.split(",")[0]) == itemStack.getType()).findFirst()
+                    value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> CompatibleMaterial.valueOf(line.split(",")[0]) == CompatibleMaterial.getMaterial(itemStack)).findFirst()
                             .map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
 
                 if (value <= 0) continue;

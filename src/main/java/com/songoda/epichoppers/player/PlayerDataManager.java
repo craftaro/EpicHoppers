@@ -13,7 +13,7 @@ public class PlayerDataManager {
     private final Map<UUID, PlayerData> registeredPlayers = new HashMap<>();
 
     private PlayerData getPlayerData(UUID uuid) {
-        if (registeredPlayers.containsKey(uuid))
+        if (!registeredPlayers.containsKey(uuid))
             registeredPlayers.put(uuid, new PlayerData());
         return registeredPlayers.get(uuid);
     }
