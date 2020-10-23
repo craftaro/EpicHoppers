@@ -5,6 +5,7 @@ general:
     prefix: '&7[&6EpicHoppers&7]'
     next: '&9Next'
     back: '&9Back'
+    exit: '&cExit'
     nameformat: '&eLevel %level% &fHopper'
     lore: ''
   word:
@@ -47,6 +48,14 @@ interface:
     suctionlore: '|&7Left-Click to toggle suction |&7(&6%status%&7).||&7Right-Click to set radius |&7(&6%radius%&7).'
     synchopper: '&6Click to Link This hopper'
     rejectsync: '&6Click to Link Rejected Items'
+    mobhopper: '&7Mob Hopper: &6Every %ticks% ticks'
+    mobtitle: '&6Click to Toggle MobHopper'
+    moblore: '|&7MobHopper is set to &6%enabled%&7.'
+    autosmelt: '&7Auto Smelting: &6Every %ticks% ticks'
+    smelttitle: '&6AutoSmelting'
+    smeltlore: '&7Smelting in &6%timeleft%s&7.||&7Left-Click to toggle AutoSmelting|&7for specific items.||&7Right-Click to toggle AutoSmelting.||&7AutoSmelting is set to &6%enabled%&7.'
+    toggle: '&7Click to toggle if this item can be smelted.'
+
   filter:
     infotitle: '&aFilter Guide'
     infolore: '&7Items placed in the leftmost column|&7space will be whitelisted.||&7Items placed in the rightmost column|&7will be void.||&7Items placed in the middle column|&7will be blacklisted.'
