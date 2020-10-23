@@ -125,9 +125,8 @@ public class ModuleAutoSell extends Module {
                 .processPlaceholder("timeleft", getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20))
                 .processPlaceholder("state", isNotifying(hopper)).getMessage().split("\\|");
 
-        for (String line : parts) {
+        for (String line : parts)
             loreSell.add(TextUtils.formatText(line));
-        }
 
         sellMeta.setLore(loreSell);
         sellItem.setItemMeta(sellMeta);

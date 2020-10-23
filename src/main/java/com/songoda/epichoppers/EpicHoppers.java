@@ -28,7 +28,9 @@ import com.songoda.epichoppers.hopper.levels.LevelManager;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSell;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSmelter;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleBlockBreak;
+import com.songoda.epichoppers.hopper.levels.modules.ModuleMobHopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
 import com.songoda.epichoppers.listeners.BlockListeners;
 import com.songoda.epichoppers.listeners.EntityListeners;
@@ -222,6 +224,10 @@ public class EpicHoppers extends SongodaPlugin {
                     modules.add(new ModuleAutoCrafting(this));
                 } else if (key.equals("AutoSell")) {
                     modules.add(new ModuleAutoSell(this, autoSell));
+                } else if (key.equals("MobHopper")) {
+                    modules.add(new ModuleMobHopper(this, levels.getInt("MobHopper")));
+                } else if (key.equals("AutoSmelting")) {
+                    modules.add(new ModuleAutoSmelter(this, levels.getInt("AutoSmelting")));
                 }
 
             }
