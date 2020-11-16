@@ -103,7 +103,7 @@ public class BlockListeners implements Listener {
 
         Level level = hopper.getLevel();
 
-        if (level.getLevel() > 1) {
+        if (level.getLevel() > 1 || Settings.ALLOW_NORMAL_HOPPERS.getBoolean()) {
             event.setCancelled(true);
             ItemStack item = plugin.newHopperItem(level);
 
