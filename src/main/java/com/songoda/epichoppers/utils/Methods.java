@@ -43,22 +43,6 @@ public class Methods {
         return false;
     }
 
-    public static boolean canMove(ItemStack[] contents, ItemStack item) {
-        final ItemMeta itemMeta = item.getItemMeta();
-        for (int i = 0; i < contents.length - 2; i++) {
-            final ItemStack stack = contents[i];
-            if (stack == null || stack.getAmount() == 0)
-                return true;
-            final ItemMeta stackMeta;
-            if (isSimilarMaterial(stack, item) && (stack.getAmount() + item.getAmount()) < stack.getMaxStackSize()
-                    && ((itemMeta == null) == ((stackMeta = stack.getItemMeta()) == null))
-                    && (itemMeta == null || Bukkit.getItemFactory().equals(itemMeta, stackMeta))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public static boolean canMoveReserved(Inventory inventory, ItemStack item) {
         if (inventory.firstEmpty() != inventory.getSize() - 1) return true;
 

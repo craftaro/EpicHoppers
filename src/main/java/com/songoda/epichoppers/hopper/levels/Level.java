@@ -10,10 +10,10 @@ public class Level {
 
     private final ArrayList<Module> registeredModules;
     private final List<String> description = new ArrayList<>();
-    private int level, costExperience, costEconomy, range, amount, linkAmount;
-    private boolean filter, teleport;
+    private final int level, costExperience, costEconomy, range, amount, linkAmount;
+    private final boolean filter, teleport;
 
-    Level(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, ArrayList<Module> registeredModules) {
+    public Level(int level, int costExperience, int costEconomy, int range, int amount, boolean filter, boolean teleport, int linkAmount, ArrayList<Module> registeredModules) {
         this.level = level;
         this.costExperience = costExperience;
         this.costEconomy = costEconomy;
