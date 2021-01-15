@@ -78,9 +78,6 @@ public class InteractListeners implements Listener {
 
         if (playerData.getSyncType() == null) {
             if (event.getClickedBlock().getType() == Material.HOPPER) {
-                if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(event.getClickedBlock().getLocation()))
-                    return;
-
                 if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(event.getClickedBlock().getLocation()))
                     return;
 

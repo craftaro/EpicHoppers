@@ -71,7 +71,7 @@ public class HopTask extends BukkitRunnable {
                 // Get Hopper Block.
                 Block block = location.getBlock();
 
-                // If block is not a hopper remove and continue.
+                // If block is not a hopper continue.
                 if (block.getType() != Material.HOPPER)
                     continue;
 

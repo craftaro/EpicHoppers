@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.gui;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.gui.Gui;
+import com.songoda.core.gui.CustomizableGui;
 import com.songoda.core.gui.GuiUtils;
 import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
@@ -21,13 +21,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GUIFilter extends Gui {
+public class GUIFilter extends CustomizableGui {
 
     private final EpicHoppers plugin;
 
     private final Hopper hopper;
 
     public GUIFilter(EpicHoppers plugin, Hopper hopper, Player player) {
+        super(plugin, "filter");
         this.plugin = plugin;
         this.hopper = hopper;
 
@@ -43,21 +44,21 @@ public class GUIFilter extends Gui {
         ItemStack glass1 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_1.getMaterial());
         ItemStack glass2 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_2.getMaterial());
 
-        GuiUtils.mirrorFill(this, 0, 6, true, false, glass2);
-        GuiUtils.mirrorFill(this, 0, 7, true, false, glass2);
-        GuiUtils.mirrorFill(this, 0, 8, true, false, glass2);
-        GuiUtils.mirrorFill(this, 1, 6, true, false, glass2);
-        GuiUtils.mirrorFill(this, 1, 8, true, false, glass2);
-        GuiUtils.mirrorFill(this, 2, 6, true, false, glass2);
-        GuiUtils.mirrorFill(this, 2, 7, true, false, glass1);
-        GuiUtils.mirrorFill(this, 2, 8, true, false, glass2);
+        mirrorFill("mirrorfill_1", 0, 6, true, false, glass2);
+        mirrorFill("mirrorfill_2", 0, 7, true, false, glass2);
+        mirrorFill("mirrorfill_3", 0, 8, true, false, glass2);
+        mirrorFill("mirrorfill_4", 1, 6, true, false, glass2);
+        mirrorFill("mirrorfill_5", 1, 8, true, false, glass2);
+        mirrorFill("mirrorfill_6", 2, 6, true, false, glass2);
+        mirrorFill("mirrorfill_7", 2, 7, true, false, glass1);
+        mirrorFill("mirrorfill_8", 2, 8, true, false, glass2);
 
         ItemStack it = CompatibleMaterial.WHITE_STAINED_GLASS_PANE.getItem();
         ItemMeta itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist").getMessage());
         it.setItemMeta(itm);
 
-        setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+        setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
                 plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
                     hopper.overview(guiManager, event.player);
@@ -84,7 +85,7 @@ public class GUIFilter extends Gui {
 
         int[] blackSlots = {2, 3, 47, 48};
         for (int nu : blackSlots) {
-            setItem(nu, it);
+            setItem("blacklist", nu, it);
         }
 
         int[] ablack = {11, 12, 20, 21, 29, 30, 38, 39};
@@ -102,7 +103,7 @@ public class GUIFilter extends Gui {
 
         int[] avoid = {4, 5, 49, 50};
         for (int nu : avoid) {
-            setItem(nu, it);
+            setItem("void", nu, it);
         }
 
         int[] voidSlots = {13, 14, 22, 23, 31, 32, 40, 41};
@@ -124,7 +125,7 @@ public class GUIFilter extends Gui {
         itemmetaInfo.setLore(loreInfo);
         itemInfo.setItemMeta(itemmetaInfo);
 
-        setItem(16, itemInfo);
+        setItem("info", 16, itemInfo);
 
 
         ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
@@ -139,7 +140,7 @@ public class GUIFilter extends Gui {
         }
         hookmeta.setLore(lorehook);
         hook.setItemMeta(hookmeta);
-        setButton(43, hook,
+        setButton("reject", 43, hook,
                 (event) -> {
                     if (event.clickType == ClickType.RIGHT) {
                         plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);

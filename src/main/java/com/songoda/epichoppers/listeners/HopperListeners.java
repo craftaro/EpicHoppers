@@ -64,10 +64,6 @@ public class HopperListeners implements Listener {
             return;
         }
 
-        // Don't touch liquid tank hoppers
-        if (instance.isLiquidtanks() && net.arcaniax.liquidtanks.object.LiquidTankAPI.isLiquidTank(destinationLocation))
-            return;
-
         // Special cases when a hopper is picking up items
         if (destination.getHolder() instanceof org.bukkit.block.Hopper) {
             if (destinationLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(destinationLocation))

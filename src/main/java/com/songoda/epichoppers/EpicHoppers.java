@@ -74,7 +74,6 @@ public class EpicHoppers extends SongodaPlugin {
     private DatabaseConnector databaseConnector;
     private DataManager dataManager;
 
-    private boolean liquidtanks = false;
     private boolean epicfarming = false;
 
     public static EpicHoppers getInstance() {
@@ -143,9 +142,6 @@ public class EpicHoppers extends SongodaPlugin {
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(), this);
-
-        // Check for liquid tanks
-        if (pluginManager.isPluginEnabled("LiquidTanks")) liquidtanks = true;
 
         // Check for epicfarming
         if (pluginManager.isPluginEnabled("EpicFarming")) epicfarming = true;
@@ -296,10 +292,6 @@ public class EpicHoppers extends SongodaPlugin {
 
     public DatabaseConnector getDatabaseConnector() {
         return databaseConnector;
-    }
-
-    public boolean isLiquidtanks() {
-        return liquidtanks;
     }
 
     public boolean isEpicFarming() {
