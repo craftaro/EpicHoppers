@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.gui;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.gui.Gui;
+import com.songoda.core.gui.CustomizableGui;
 import com.songoda.core.gui.GuiUtils;
 import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
@@ -18,7 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GUIAutoSellFilter extends Gui {
+public class GUIAutoSellFilter extends CustomizableGui {
 
     private final EpicHoppers plugin;
     private final Hopper hopper;
@@ -27,6 +27,7 @@ public class GUIAutoSellFilter extends Gui {
     private final int[] blackListSlots = {12, 13, 14, 21, 22, 23, 30, 31, 32, 39, 40, 41};
 
     public GUIAutoSellFilter(EpicHoppers plugin, Hopper hopper) {
+        super(plugin, "autosell");
         this.plugin = plugin;
         this.hopper = hopper;
 
@@ -43,17 +44,17 @@ public class GUIAutoSellFilter extends Gui {
         ItemStack glass1 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_1.getMaterial());
         ItemStack glass2 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_2.getMaterial());
 
-        GuiUtils.mirrorFill(this, 0, 6, true, false, glass2);
-        GuiUtils.mirrorFill(this, 0, 7, true, false, glass2);
-        GuiUtils.mirrorFill(this, 0, 8, true, false, glass2);
-        GuiUtils.mirrorFill(this, 1, 6, true, false, glass2);
-        GuiUtils.mirrorFill(this, 1, 8, true, false, glass2);
-        GuiUtils.mirrorFill(this, 2, 6, true, false, glass2);
-        GuiUtils.mirrorFill(this, 2, 7, true, false, glass1);
-        GuiUtils.mirrorFill(this, 2, 8, true, false, glass2);
-        GuiUtils.mirrorFill(this, 4, 7, false, false, glass1);
+        mirrorFill("mirrorfill_1", 0, 6, true, false, glass2);
+        mirrorFill("mirrorfill_2", 0, 7, true, false, glass2);
+        mirrorFill("mirrorfill_3", 0, 8, true, false, glass2);
+        mirrorFill("mirrorfill_4", 1, 6, true, false, glass2);
+        mirrorFill("mirrorfill_5", 1, 8, true, false, glass2);
+        mirrorFill("mirrorfill_6", 2, 6, true, false, glass2);
+        mirrorFill("mirrorfill_7", 2, 7, true, false, glass1);
+        mirrorFill("mirrorfill_8", 2, 8, true, false, glass2);
+        mirrorFill("mirrorfill_9", 4, 7, false, false, glass1);
 
-        setButton(8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+        setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
                 plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
                     hopper.overview(guiManager, event.player);
@@ -68,7 +69,7 @@ public class GUIAutoSellFilter extends Gui {
 
         int[] whiteSlots = {0, 1, 2, 45, 46, 47};
         for (int nu : whiteSlots) {
-            setItem(nu, indicatorItem);
+            setItem("whitelist", nu, indicatorItem);
         }
 
         int num = 0;
@@ -86,7 +87,7 @@ public class GUIAutoSellFilter extends Gui {
 
         int[] blackSlots = {3, 4, 5, 48, 49, 50};
         for (int nu : blackSlots) {
-            setItem(nu, indicatorItem);
+            setItem("blacklist", nu, indicatorItem);
         }
 
         num = 0;
@@ -111,7 +112,7 @@ public class GUIAutoSellFilter extends Gui {
         indicatorMeta.setLore(loreInfo);
         indicatorItem.setItemMeta(indicatorMeta);
 
-        setItem(16, indicatorItem);
+        setItem("info", 16, indicatorItem);
 
         setUnlockedRange(9, 14);
         setUnlockedRange(18, 23);

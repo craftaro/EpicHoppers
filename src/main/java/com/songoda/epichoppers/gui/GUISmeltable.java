@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.gui;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.gui.Gui;
+import com.songoda.core.gui.CustomizableGui;
 import com.songoda.core.gui.GuiUtils;
 import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GUISmeltable extends Gui {
+public class GUISmeltable extends CustomizableGui {
 
     private final EpicHoppers plugin;
     private final Hopper hopper;
@@ -27,6 +27,7 @@ public class GUISmeltable extends Gui {
             .filter(m -> m.getBurnResult() != null).collect(Collectors.toList());
 
     public GUISmeltable(ModuleAutoSmelter moduleAutoSmelter, EpicHoppers plugin, Hopper hopper) {
+        super(plugin, "smeltable");
         this.plugin = plugin;
         this.hopper = hopper;
         this.moduleAutoSmelter = moduleAutoSmelter;
@@ -49,10 +50,10 @@ public class GUISmeltable extends Gui {
 
         setDefaultItem(glass1);
 
-        GuiUtils.mirrorFill(this, 0, 0, true, true, glass2);
-        GuiUtils.mirrorFill(this, 0, 1, true, true, glass2);
-        GuiUtils.mirrorFill(this, 0, 2, true, true, glass3);
-        GuiUtils.mirrorFill(this, 1, 0, true, true, glass2);
+        mirrorFill("mirrorfill_1", 0, 0, true, true, glass2);
+        mirrorFill("mirrorfill_2", 0, 1, true, true, glass2);
+        mirrorFill("mirrorfill_3", 0, 2, true, true, glass3);
+        mirrorFill("mirrorfill_4", 1, 0, true, true, glass2);
 
         int smeltableIndex = page == 1 ? 0 : 32 * (page - 1);
 
@@ -71,7 +72,7 @@ public class GUISmeltable extends Gui {
 
         clearActions(51);
         if (page < maxPages) {
-            setButton(51, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
+            setButton("next", 51, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
                     plugin.getLocale().getMessage("general.nametag.next").getMessage()),
                     (event) -> {
                         page++;
@@ -81,7 +82,7 @@ public class GUISmeltable extends Gui {
 
         clearActions(47);
         if (page > 1) {
-            setButton(47, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
+            setButton("back", 47, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
                     plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                     (event) -> {
                         page--;
@@ -89,7 +90,7 @@ public class GUISmeltable extends Gui {
                     });
         }
 
-        setButton(49, GuiUtils.createButtonItem(CompatibleMaterial.OAK_DOOR,
+        setButton("exit", 49, GuiUtils.createButtonItem(CompatibleMaterial.OAK_DOOR,
                 plugin.getLocale().getMessage("general.nametag.exit").getMessage()),
                 (event) -> hopper.overview(plugin.getGuiManager(), event.player));
     }

@@ -2,7 +2,7 @@ package com.songoda.epichoppers.gui;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.gui.Gui;
+import com.songoda.core.gui.CustomizableGui;
 import com.songoda.core.gui.GuiUtils;
 import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class GUIOverview extends Gui {
+public class GUIOverview extends CustomizableGui {
 
     private final EpicHoppers plugin;
     private final Hopper hopper;
@@ -37,6 +37,7 @@ public class GUIOverview extends Gui {
     private int task;
 
     public GUIOverview(EpicHoppers plugin, Hopper hopper, Player player) {
+        super(plugin, "overview");
         this.plugin = plugin;
         this.hopper = hopper;
         this.player = player;
@@ -55,11 +56,11 @@ public class GUIOverview extends Gui {
 
         setDefaultItem(glass1);
 
-        GuiUtils.mirrorFill(this, 0, 0, true, true, glass2);
-        GuiUtils.mirrorFill(this, 0, 1, true, true, glass2);
-        GuiUtils.mirrorFill(this, 0, 2, true, true, glass3);
-        GuiUtils.mirrorFill(this, 1, 0, false, true, glass2);
-        GuiUtils.mirrorFill(this, 1, 1, false, true, glass3);
+        mirrorFill("mirrorfill_1", 0, 0, true, true, glass2);
+        mirrorFill("mirrorfill_2", 0, 1, true, true, glass2);
+        mirrorFill("mirrorfill_3", 0, 2, true, true, glass3);
+        mirrorFill("mirrorfill_4", 1, 0, false, true, glass2);
+        mirrorFill("mirrorfill_5", 1, 1, false, true, glass3);
 
         plugin.getPlayerDataManager().getPlayerData(player).setLastHopper(hopper);
 
@@ -164,7 +165,7 @@ public class GUIOverview extends Gui {
             int slot = layout[ii];
 
             if (ii == 0) {
-                setButton(slot, hook,
+                setButton("sync", slot, hook,
                         (event) -> {
                             if (hopper.getLastPlayerOpened() != null && !hopper.getLastPlayerOpened().equals(player.getUniqueId())) {
                                 plugin.getLocale().getMessage("event.hopper.syncdidnotplace").sendPrefixedMessage(player);
@@ -190,7 +191,7 @@ public class GUIOverview extends Gui {
                             player.closeInventory();
                         });
             } else if (canTeleport) {
-                setButton(slot, perl,
+                setButton("teleport", slot, perl,
                         (event) -> {
                             if (event.clickType == ClickType.LEFT) {
                                 if (hopper.getLinkedBlocks() != null) {
@@ -211,14 +212,13 @@ public class GUIOverview extends Gui {
                         });
                 canTeleport = false;
             } else if (canFilter) {
-                setButton(slot, filter,
-                        (event) -> guiManager.showGUI(player, new GUIFilter(plugin, hopper, player)));
+                setButton("filter", slot, filter, (event) -> guiManager.showGUI(player, new GUIFilter(plugin, hopper, player)));
                 canFilter = false;
             } else {
                 if (modules.isEmpty()) break;
                 Module module = modules.get(0);
                 modules.remove(module);
-                setButton(slot, module.getGUIButton(hopper),
+                setButton(module.getName().toLowerCase().replace(" ", "_"), slot, module.getGUIButton(hopper),
                         (event) -> module.runButtonPress(player, hopper, event.clickType));
             }
         }
@@ -227,7 +227,7 @@ public class GUIOverview extends Gui {
             if (Settings.UPGRADE_WITH_XP.getBoolean()
                     && level.getCostExperience() != -1
                     && player.hasPermission("EpicHoppers.Upgrade.XP")) {
-                setButton(1, 2, GuiUtils.createButtonItem(
+                setButton("upgrade_xp", 1, 2, GuiUtils.createButtonItem(
                         Settings.XP_ICON.getMaterial(CompatibleMaterial.EXPERIENCE_BOTTLE),
                         plugin.getLocale().getMessage("interface.hopper.upgradewithxp").getMessage(),
                         nextLevel != null
@@ -242,7 +242,7 @@ public class GUIOverview extends Gui {
             if (Settings.UPGRADE_WITH_ECONOMY.getBoolean()
                     && level.getCostEconomy() != -1
                     && player.hasPermission("EpicHoppers.Upgrade.ECO")) {
-                setButton(1, 6, GuiUtils.createButtonItem(
+                setButton("upgrade_economy", 1, 6, GuiUtils.createButtonItem(
                         Settings.ECO_ICON.getMaterial(CompatibleMaterial.SUNFLOWER),
                         plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy").getMessage(),
                         nextLevel != null
@@ -256,7 +256,7 @@ public class GUIOverview extends Gui {
             }
         }
 
-        setItem(13, item);
+        setItem("hopper", 13, item);
 
         hopper.setLastPlayerOpened(player.getUniqueId());
     }
