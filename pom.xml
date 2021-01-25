@@ -2,7 +2,7 @@
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.6.16b</version>
+    <version>4.6.17</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <finalName>EpicHoppers-${project.version}</finalName>
