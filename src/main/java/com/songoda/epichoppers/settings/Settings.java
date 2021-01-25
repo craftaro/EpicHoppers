@@ -54,6 +54,9 @@ public class Settings {
     public static final ConfigSetting MAX_CHUNK = new ConfigSetting(config, "Main.Max Hoppers Per Chunk", -1,
             "The maximum amount of hoppers per chunk.");
 
+    public static final ConfigSetting USE_PROTECTION_PLUGINS = new ConfigSetting(config, "Main.Use Protection Plugins", true,
+            "Should we use protection plugins?");
+
     public static final ConfigSetting BLOCKBREAK_PARTICLE = new ConfigSetting(config, "Main.BlockBreak Particle Type", "LAVA",
             "The particle shown when the block break module performs a block break.");
 

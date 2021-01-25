@@ -10,6 +10,7 @@ import com.songoda.core.database.DatabaseConnector;
 import com.songoda.core.database.SQLiteConnector;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.core.hooks.EconomyManager;
+import com.songoda.core.hooks.ProtectionManager;
 import com.songoda.core.locale.Locale;
 import com.songoda.core.nms.NmsManager;
 import com.songoda.core.nms.nbt.NBTItem;
@@ -98,6 +99,9 @@ public class EpicHoppers extends SongodaPlugin {
 
         // Load Economy
         EconomyManager.load();
+
+        // Load protection hook
+        ProtectionManager.load(this);
 
         // Setup Config
         Settings.setupConfig();
