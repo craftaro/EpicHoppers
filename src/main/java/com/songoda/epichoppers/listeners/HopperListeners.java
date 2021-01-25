@@ -66,10 +66,10 @@ public class HopperListeners implements Listener {
 
         // Special cases when a hopper is picking up items
         if (destination.getHolder() instanceof org.bukkit.block.Hopper) {
-            if (destinationLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(destinationLocation))
+            Hopper toHopper = instance.getHopperManager().getHopper(destinationLocation);
+            if (destinationLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && toHopper == null)
                 return;
             // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
-            Hopper toHopper = instance.getHopperManager().getHopper(destinationLocation);
             final ItemStack toMove = event.getItem();
 
             // Don't fill the last inventory slot on crafting hoppers (fixes crafters getting stuck)

@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.listeners;
 
+import com.songoda.core.hooks.ProtectionManager;
 import com.songoda.core.hooks.WorldGuardHook;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -63,6 +64,11 @@ public class InteractListeners implements Listener {
 
         if (WorldGuardHook.isInteractAllowed(event.getClickedBlock().getLocation()))
             return;
+
+        if (Settings.USE_PROTECTION_PLUGINS.getBoolean() && !ProtectionManager.canInteract(player, event.getClickedBlock().getLocation())) {
+            player.sendMessage(instance.getLocale().getMessage("event.general.protected").getPrefixedMessage());
+            return;
+        }
 
         if (Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock")) {
             SkyBlock skyBlock = SkyBlock.getInstance();
