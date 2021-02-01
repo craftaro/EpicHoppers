@@ -44,6 +44,8 @@ public class Hopper {
 
     private int syncId = -1;
 
+    private Player activePlayer;
+
     private final Map<String, Object> moduleCache = new HashMap<>();
 
     public Hopper(Location location) {
@@ -67,7 +69,14 @@ public class Hopper {
 
         EpicHoppers instance = EpicHoppers.getInstance();
         if (!player.hasPermission("epichoppers.overview")) return;
+
+        setActivePlayer(player);
         guiManager.showGUI(player, new GUIOverview(instance, this, player));
+    }
+
+    public void forceClose() {
+        if (activePlayer != null)
+            activePlayer.closeInventory();
     }
 
     public void upgrade(Player player, CostType type) {
@@ -326,5 +335,13 @@ public class Hopper {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Player getActivePlayer() {
+        return activePlayer;
+    }
+
+    public void setActivePlayer(Player activePlayer) {
+        this.activePlayer = activePlayer;
     }
 }

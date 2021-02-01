@@ -145,6 +145,7 @@ public class ModuleAutoSell extends Module {
             setNotifying(hopper, !isNotifying(hopper));
         } else if (type == ClickType.SHIFT_LEFT || type == ClickType.SHIFT_RIGHT) {
             // Any shift click opens AutoSell filter configuration GUI
+            hopper.setActivePlayer(player);
             EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUIAutoSellFilter(EpicHoppers.getInstance(), hopper));
         }
     }

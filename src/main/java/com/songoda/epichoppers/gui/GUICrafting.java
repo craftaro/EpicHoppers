@@ -18,7 +18,10 @@ public class GUICrafting extends CustomizableGui {
         super(EpicHoppers.getInstance(), "crafting");
         setRows(3);
         setTitle(Methods.formatName(hopper.getLevel().getLevel()) + TextUtils.formatText(" &8-&f Crafting"));
-        setOnClose((event) -> setItem(module, hopper, player));
+        setOnClose((event) -> {
+            hopper.setActivePlayer(null);
+            setItem(module, hopper, player);
+        });
         setAcceptsItems(true);
 
         ItemStack glass1 = GuiUtils.getBorderItem(Settings.GLASS_TYPE_1.getMaterial());

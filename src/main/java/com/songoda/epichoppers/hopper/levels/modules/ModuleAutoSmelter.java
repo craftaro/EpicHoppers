@@ -89,9 +89,10 @@ public class ModuleAutoSmelter extends Module {
     }
 
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
-        if (type == ClickType.LEFT)
+        if (type == ClickType.LEFT) {
+            hopper.setActivePlayer(player);
             EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUISmeltable(this, plugin, hopper));
-        else if (type == ClickType.RIGHT)
+        } else if (type == ClickType.RIGHT)
             toggleEnabled(hopper);
     }
 

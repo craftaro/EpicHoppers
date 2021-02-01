@@ -36,7 +36,10 @@ public class GUIAutoSellFilter extends CustomizableGui {
         setDefaultItem(null);
         setAcceptsItems(true);
 
-        setOnClose((event) -> compile());
+        setOnClose((event) -> {
+            hopper.setActivePlayer(null);
+            compile();
+        });
 
         Filter filter = hopper.getFilter();
 

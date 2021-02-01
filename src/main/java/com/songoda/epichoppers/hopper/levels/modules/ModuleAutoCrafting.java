@@ -195,6 +195,7 @@ public class ModuleAutoCrafting extends Module {
 
     @Override
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
+        hopper.setActivePlayer(player);
         EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUICrafting(this, hopper, player));
     }
 
