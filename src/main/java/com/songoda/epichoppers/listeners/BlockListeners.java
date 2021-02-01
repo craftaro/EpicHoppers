@@ -105,6 +105,8 @@ public class BlockListeners implements Listener {
             event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
         }
 
+        hopper.forceClose();
+
         hopper.getFilter().getWhiteList().stream()
                 .filter(m -> m != null)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));

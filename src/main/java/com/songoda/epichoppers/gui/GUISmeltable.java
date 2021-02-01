@@ -41,6 +41,8 @@ public class GUISmeltable extends CustomizableGui {
 
         this.setOnPage((event) -> showPage());
         showPage();
+
+        this.setOnClose((event) -> hopper.setActivePlayer(null));
     }
 
     void showPage() {

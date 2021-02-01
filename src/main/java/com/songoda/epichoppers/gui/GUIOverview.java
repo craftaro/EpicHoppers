@@ -46,7 +46,10 @@ public class GUIOverview extends CustomizableGui {
         setTitle(Methods.formatName(hopper.getLevel().getLevel()));
         runTask();
         constructGUI();
-        this.setOnClose(action -> Bukkit.getScheduler().cancelTask(task));
+        this.setOnClose(action -> {
+            hopper.setActivePlayer(null);
+            Bukkit.getScheduler().cancelTask(task);
+        });
     }
 
     private void constructGUI() {
@@ -212,7 +215,10 @@ public class GUIOverview extends CustomizableGui {
                         });
                 canTeleport = false;
             } else if (canFilter) {
-                setButton("filter", slot, filter, (event) -> guiManager.showGUI(player, new GUIFilter(plugin, hopper, player)));
+                setButton("filter", slot, filter, (event) -> {
+                    hopper.setActivePlayer(player);
+                    guiManager.showGUI(player, new GUIFilter(plugin, hopper, player));
+                });
                 canFilter = false;
             } else {
                 if (modules.isEmpty()) break;
