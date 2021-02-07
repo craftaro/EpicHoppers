@@ -80,10 +80,6 @@ public class InteractListeners implements Listener {
                     return;
         }
 
-        if (!instance.getHopperManager().isHopper(event.getClickedBlock().getLocation())) {
-            return;
-        }
-
         PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
 
 
