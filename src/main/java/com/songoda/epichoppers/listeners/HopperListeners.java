@@ -66,9 +66,10 @@ public class HopperListeners implements Listener {
 
         // Special cases when a hopper is picking up items
         if (destination.getHolder() instanceof org.bukkit.block.Hopper) {
-            Hopper toHopper = instance.getHopperManager().getHopper(destinationLocation);
-            if (destinationLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && toHopper == null)
+            if (destinationLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(destinationLocation))
                 return;
+
+            Hopper toHopper = instance.getHopperManager().getHopper(destinationLocation);
             // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
             final ItemStack toMove = event.getItem();
 
