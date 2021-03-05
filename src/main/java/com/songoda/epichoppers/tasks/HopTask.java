@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.tasks;
 
+import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.HopperManager;
@@ -521,11 +522,12 @@ public class HopTask extends BukkitRunnable {
      * @return true if the block is a farm item, otherwise false
      */
     private boolean isFarmItem(Block block) {
-        return EpicHoppers.getInstance().isEpicFarming() && com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(block) != null;
+        return plugin.isEpicFarming() && com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(block) != null;
     }
 
     private ItemStack[] getFarmContents(Block block) {
-        return com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager()
-                .getFarm(block).getItems().stream().filter(i -> i.getType() != Material.BONE_MEAL).collect(Collectors.toList()).toArray(new ItemStack[0]);
+        return com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(block).getItems()
+                .stream().filter(i -> CompatibleMaterial.getMaterial(i) != CompatibleMaterial.BONE_MEAL)
+                .toArray(ItemStack[]::new);
     }
 }
