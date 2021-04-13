@@ -36,7 +36,7 @@ public class InteractListeners implements Listener {
     @EventHandler
     public void onPlayerToggleSneakEvent(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
-        if (player.isSneaking()) {
+        if (player.isSneaking() && instance.getHopperManager().isReady()) {
             Location location = player.getLocation().getBlock().getRelative(BlockFace.SELF).getLocation();
             Location down = location.getBlock().getRelative(BlockFace.DOWN).getLocation();
             if (instance.getHopperManager().isHopper(down)) {
@@ -82,9 +82,14 @@ public class InteractListeners implements Listener {
 
         PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
 
-
         if (playerData.getSyncType() == null) {
             if (event.getClickedBlock().getType() == Material.HOPPER) {
+                if (!instance.getHopperManager().isReady()) {
+                    player.sendMessage(instance.getLocale().getMessage("event.hopper.notready").getMessage());
+                    event.setCancelled(true);
+                    return;
+                }
+
                 if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(event.getClickedBlock().getLocation()))
                     return;
 

@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-
 public class EpicHoppers extends SongodaPlugin {
 
     private static EpicHoppers INSTANCE;
@@ -173,6 +172,8 @@ public class EpicHoppers extends SongodaPlugin {
         this.dataManager.getHoppers((hoppers) -> {
             this.hopperManager.addHoppers(hoppers.values());
             this.dataManager.getBoosts((boosts) -> this.boostManager.addBoosts(boosts));
+
+            this.hopperManager.setReady();
         });
     }
 
@@ -229,7 +230,6 @@ public class EpicHoppers extends SongodaPlugin {
                 } else if (key.equals("AutoSmelting")) {
                     modules.add(new ModuleAutoSmelter(this, levels.getInt("AutoSmelting")));
                 }
-
             }
             levelManager.addLevel(level, costExperience, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }

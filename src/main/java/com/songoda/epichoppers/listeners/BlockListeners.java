@@ -17,7 +17,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-
 /**
  * Created by songoda on 3/14/2017.
  */
@@ -53,6 +52,12 @@ public class BlockListeners implements Listener {
 
         if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !plugin.getLevelManager().isEpicHopper(item))
             return;
+
+        if (!plugin.getHopperManager().isReady()) {
+            player.sendMessage(plugin.getLocale().getMessage("event.hopper.notready").getMessage());
+            e.setCancelled(true);
+            return;
+        }
 
         Hopper hopper = plugin.getHopperManager().addHopper(
                 new HopperBuilder(e.getBlock())
@@ -92,6 +97,12 @@ public class BlockListeners implements Listener {
         Player player = event.getPlayer();
 
         if (event.getBlock().getType() != Material.HOPPER) return;
+
+        if (!plugin.getHopperManager().isReady()) {
+            player.sendMessage(plugin.getLocale().getMessage("event.hopper.notready").getMessage());
+            event.setCancelled(true);
+            return;
+        }
 
         if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !plugin.getHopperManager().isHopper(block.getLocation()))
             return;

@@ -13,8 +13,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HopperManager {
+    protected boolean ready;
 
     private final Map<Location, Hopper> registeredHoppers = new HashMap<>();
+
+    /**
+     * Sets {@link #isReady()} to {@code true}.<br>
+     * <b>Called by {@link EpicHoppers#onDataLoad()}</b>
+     */
+    public void setReady() {
+        this.ready = true;
+    }
+
+    /**
+     * @return true, if all the data has been loaded from the DB
+     */
+    public boolean isReady() {
+        return this.ready;
+    }
 
     public Hopper addHopper(Hopper hopper) {
         registeredHoppers.put(roundLocation(hopper.getLocation()), hopper);
@@ -50,40 +66,46 @@ public class HopperManager {
         return removed;
     }
 
-
     public Hopper getHopper(Location location) {
         if (!registeredHoppers.containsKey(location = roundLocation(location))) {
+            if (!this.ready) {
+                throw new IllegalStateException("Hoppers are still being loaded");
+            }
+
             Hopper hopper = addHopper(new Hopper(location));
             EpicHoppers.getInstance().getDataManager().createHopper(hopper);
         }
         return registeredHoppers.get(location);
     }
 
-
     public Hopper getHopper(Block block) {
         return getHopper(block.getLocation());
     }
 
-
+    /**
+     * <em>Returns {@code false} if {@link #isReady()} is false too</em>
+     */
     public boolean isHopper(Location location) {
         return registeredHoppers.containsKey(roundLocation(location));
     }
-
 
     public Map<Location, Hopper> getHoppers() {
         return Collections.unmodifiableMap(registeredHoppers);
     }
 
-
     public Hopper getHopperFromPlayer(Player player) {
+        if (!this.ready) {
+            throw new IllegalStateException("Hoppers are still being loaded");
+        }
+
         for (Hopper hopper : registeredHoppers.values()) {
             if (hopper.getLastPlayerOpened() == player.getUniqueId()) {
                 return hopper;
             }
         }
+
         return null;
     }
-
 
     private Location roundLocation(Location location) {
         location = location.clone();

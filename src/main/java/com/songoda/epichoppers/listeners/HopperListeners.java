@@ -69,6 +69,10 @@ public class HopperListeners implements Listener {
             if (destinationLocation != null && Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(destinationLocation))
                 return;
 
+            // Calling HopperManager#getHopper() automatically creates a new Hopper and we don't need to iterate over default-valued hoppers
+            if (!instance.getHopperManager().isHopper(destinationLocation))
+                return;
+
             Hopper toHopper = instance.getHopperManager().getHopper(destinationLocation);
             // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
             final ItemStack toMove = event.getItem();
@@ -89,7 +93,7 @@ public class HopperListeners implements Listener {
             if (toHopper != null
                     && toHopper.getFilter().getEndPoint() == null
                     && !(toHopper.getFilter().getWhiteList().isEmpty() && toHopper.getFilter().getBlackList().isEmpty())) {
-                // this hopper has a filter with no rejection endpoint, so don't absorb disalowed items
+                // this hopper has a filter with no rejection endpoint, so don't absorb disallowed items
                 boolean allowItem;
                 ItemStack moveInstead = null;
                 // whitelist has priority
@@ -113,10 +117,9 @@ public class HopperListeners implements Listener {
                     }
                 } else {
                     // check the blacklist
-                    allowItem = !toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(toMove, item));
+                    allowItem = toHopper.getFilter().getBlackList().stream().noneMatch(item -> Methods.isSimilarMaterial(toMove, item));
                     if (!allowItem) {
                         // can we change the item to something else?
-                        searchReplacement:
                         for (ItemStack sourceItem : source.getContents()) {
                             if (sourceItem != null && Methods.canMove(destination, sourceItem)) {
                                 boolean blacklisted = toHopper.getFilter().getBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(sourceItem, item));

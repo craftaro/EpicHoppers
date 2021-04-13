@@ -3,7 +3,6 @@ package com.songoda.epichoppers.tasks;
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
-import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.settings.Settings;
@@ -29,10 +28,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -174,7 +171,6 @@ public class HopTask extends BukkitRunnable {
 
                 // Move items into destination containers
                 pushItemsIntoContainers(hopper, hopperCache, maxToMove, blockedMaterials, hopperDirection);
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
