@@ -77,7 +77,7 @@ public class ModuleAutoSmelter extends Module {
         blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.smelttitle").getMessage());
         ArrayList<String> loreblock = new ArrayList<>();
         String[] parts = plugin.getLocale().getMessage("interface.hopper.smeltlore").processPlaceholder("timeleft",
-                getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20)).processPlaceholder("enabled",
+                getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20.0)).processPlaceholder("enabled",
                 isEnabled(hopper) ? EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled").getMessage()
                         : EpicHoppers.getInstance().getLocale().getMessage("general.word.disabled").getMessage()).getMessage().split("\\|");
         for (String line : parts) {
@@ -112,7 +112,7 @@ public class ModuleAutoSmelter extends Module {
     @Override
     public String getDescription() {
         return plugin.getLocale().getMessage("interface.hopper.autosmelt")
-                .processPlaceholder("ticks", (int) Math.floor(timeOut / 20)).getMessage();
+                .processPlaceholder("ticks", (int) Math.floor(timeOut / 20.0)).getMessage();
     }
 
     private int getTime(Hopper hopper) {
