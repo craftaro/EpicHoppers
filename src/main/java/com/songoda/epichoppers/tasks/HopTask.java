@@ -41,14 +41,14 @@ public class HopTask extends BukkitRunnable {
 
     // Hop to the bop to the be bop top.
 
-    private static EpicHoppers plugin;
+    private EpicHoppers plugin;
 
     private final int hopTicks;
     private final boolean hasFabledSkyBlock;
     private final Plugin fabledSkyblockPlugin;
 
     public HopTask(EpicHoppers plugin) {
-        HopTask.plugin = plugin;
+        this.plugin = plugin;
         this.hopTicks = Math.max(1, Settings.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
         this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null;
@@ -107,8 +107,8 @@ public class HopTask extends BukkitRunnable {
                                 List<Material> materials = module.getBlockedItems(hopper);
                                 if (materials != null && !materials.isEmpty())
                                     blockedMaterials.addAll(materials);
-                            } catch (Throwable th) {
-                                th.printStackTrace();
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
                             }
                         });
 
@@ -382,7 +382,7 @@ public class HopTask extends BukkitRunnable {
         if (checkForMinecarts) {
             for (InventoryHolder minecartInventory : hopper.getWorld().getNearbyEntities(pointingLocation.clone().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)
                     .stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
-                    .map(e -> (InventoryHolder) e).collect(Collectors.toSet())) {
+                    .map(InventoryHolder.class::cast).collect(Collectors.toSet())) {
                 StorageContainerCache.Cache cache = new StorageContainerCache.Cache(Material.CHEST, minecartInventory.getInventory().getContents());
                 if (tryPush(hopper, hopperCache, cache, filterCache, maxToMove, blockedMaterials)) {
                     if (cache.isDirty())

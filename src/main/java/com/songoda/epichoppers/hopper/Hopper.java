@@ -92,7 +92,7 @@ public class Hopper {
                 return;
             }
             if (!EconomyManager.hasBalance(player, cost)) {
-                plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
+                plugin.getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
                 return;
             }
             EconomyManager.withdrawBalance(player, cost);

@@ -269,7 +269,7 @@ public class GUIOverview extends CustomizableGui {
 
     private void runTask() {
         task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            if (inventory.getViewers().size() != 0)
+            if (!inventory.getViewers().isEmpty())
                 this.constructGUI();
         }, 5L, 5L);
     }

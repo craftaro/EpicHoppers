@@ -99,7 +99,7 @@ public class ModuleAutoSmelter extends Module {
     @Override
     public List<Material> getBlockedItems(Hopper hopper) {
         if (getTime(hopper) == -9999)
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
 
         List<Material> blockedItems = new ArrayList<>();
         for (CompatibleMaterial material : CompatibleMaterial.values())

@@ -90,8 +90,7 @@ public class Serializers {
             SkullMeta meta = (SkullMeta) item.getItemMeta();
             meta.setOwner(owner);
             item.setItemMeta(meta);
-        } catch (Exception exception) {
-            return;
+        } catch (Exception ignore) {
         }
     }
 
@@ -140,8 +139,7 @@ public class Serializers {
             LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
             meta.setColor(Color.fromRGB(red, green, blue));
             item.setItemMeta(meta);
-        } catch (Exception exception) {
-            return;
+        } catch (Exception ignore) {
         }
     }
 

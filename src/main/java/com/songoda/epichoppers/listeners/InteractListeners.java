@@ -106,7 +106,7 @@ public class InteractListeners implements Listener {
         if (event.getClickedBlock().getState() instanceof InventoryHolder || (event.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests"))) {
             Hopper hopper = playerData.getLastHopper();
             if (event.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
-                if (hopper.getLinkedBlocks().size() != 0)
+                if (!hopper.getLinkedBlocks().isEmpty())
                     instance.getLocale().getMessage("event.hopper.syncfinish").sendPrefixedMessage(player);
                 else
                     instance.getLocale().getMessage("event.hopper.synccanceled").sendPrefixedMessage(player);

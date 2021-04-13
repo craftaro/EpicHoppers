@@ -35,8 +35,7 @@ public class CommandBoost extends AbstractCommand {
         long duration = 0L;
 
         if (args.length > 2) {
-            for (int i = 0; i < args.length; i++) {
-                String line = args[i];
+            for (String line : args) {
                 long time = Methods.parseTime(line);
                 duration += time;
 

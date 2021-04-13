@@ -36,7 +36,7 @@ public class LevelManager {
 
         // Legacy trash.
         if (item.hasItemMeta() && item.getItemMeta().getDisplayName().contains(":")) {
-            String arr[] = item.getItemMeta().getDisplayName().replace(String.valueOf(ChatColor.COLOR_CHAR), "").split(":");
+            String[] arr = item.getItemMeta().getDisplayName().replace(String.valueOf(ChatColor.COLOR_CHAR), "").split(":");
             return getLevel(Integer.parseInt(arr[0]));
         }
 

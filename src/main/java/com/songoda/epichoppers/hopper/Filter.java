@@ -21,7 +21,7 @@ public class Filter {
 
 
     public List<ItemStack> getWhiteList() {
-        return whiteList != null ? whiteList : Collections.EMPTY_LIST;
+        return whiteList != null ? whiteList : Collections.emptyList();
     }
 
 
@@ -31,7 +31,7 @@ public class Filter {
 
 
     public List<ItemStack> getBlackList() {
-        return blackList != null ? blackList : Collections.EMPTY_LIST;
+        return blackList != null ? blackList : Collections.emptyList();
     }
 
 
@@ -41,7 +41,7 @@ public class Filter {
 
 
     public List<ItemStack> getVoidList() {
-        return voidList != null ? voidList : Collections.EMPTY_LIST;
+        return voidList != null ? voidList : Collections.emptyList();
     }
 
 
@@ -51,7 +51,7 @@ public class Filter {
 
 
     public List<ItemStack> getAutoSellWhiteList() {
-        return autoSellWhiteList != null ? autoSellWhiteList : Collections.EMPTY_LIST;
+        return autoSellWhiteList != null ? autoSellWhiteList : Collections.emptyList();
     }
 
 
@@ -61,7 +61,7 @@ public class Filter {
 
 
     public List<ItemStack> getAutoSellBlackList() {
-        return autoSellBlackList != null ? autoSellBlackList : Collections.EMPTY_LIST;
+        return autoSellBlackList != null ? autoSellBlackList : Collections.emptyList();
     }
 
 

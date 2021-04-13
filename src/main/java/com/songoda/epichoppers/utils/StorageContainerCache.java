@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class StorageContainerCache {
 
-    private final static Map<Block, Cache> inventoryCache = new HashMap<>();
+    private static final Map<Block, Cache> inventoryCache = new HashMap<>();
 
     // need to get the topmost inventory for a double chest, and save as that block
     public static Cache getCachedInventory(Block b) {
@@ -71,6 +71,9 @@ public class StorageContainerCache {
                             break;
                         case WEST:
                             other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.NORTH : BlockFace.SOUTH);
+                            break;
+                        default:
+                            break;
                     }
                     // double-check
                     if (other != null && other.getType() == block.getType()) {
@@ -81,7 +84,7 @@ public class StorageContainerCache {
         } else {
             // legacy check
             Material material = block.getType();
-            BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
+            BlockFace[] faces = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
             for (BlockFace face : faces) {
                 Block adjacentBlock = block.getRelative(face);
 
@@ -291,7 +294,10 @@ public class StorageContainerCache {
                     else
                         check[0] = true;
 
+                    break;
                 }
+                default:
+                    break;
             }
 
             // we can reduce calls to ItemStack.isSimilar() by caching what cells to look at

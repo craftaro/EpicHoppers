@@ -258,6 +258,7 @@ public class EpicHoppers extends SongodaPlugin {
         return nbtItem.finish();
     }
 
+    @Override
     public Locale getLocale() {
         return locale;
     }
