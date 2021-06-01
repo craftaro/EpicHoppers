@@ -14,7 +14,7 @@ import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.TeleportTrigger;
+import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

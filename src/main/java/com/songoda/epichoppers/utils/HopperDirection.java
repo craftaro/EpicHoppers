@@ -11,12 +11,12 @@ public enum HopperDirection {
     WEST(4, 12, -1, 0, 0),
     EAST(5, 13, 1, 0, 0);
 
-    private int unpowered;
-    private int powered;
+    private final int unpowered;
+    private final int powered;
 
-    private int x;
-    private int y;
-    private int z;
+    private final int x;
+    private final int y;
+    private final int z;
 
     HopperDirection(int unpowered, int powered, int x, int y, int z) {
         this.unpowered = unpowered;
@@ -28,10 +28,9 @@ public enum HopperDirection {
     }
 
     public static HopperDirection getDirection(int value) {
-        for (HopperDirection hopperDirection : HopperDirection.values()) {
-            if (hopperDirection.getPowered() == value
-                    || hopperDirection.getUnpowered() == value) return hopperDirection;
-        }
+        for (HopperDirection hopperDirection : HopperDirection.values())
+            if (hopperDirection.getPowered() == value || hopperDirection.getUnpowered() == value)
+                return hopperDirection;
         return null;
     }
 

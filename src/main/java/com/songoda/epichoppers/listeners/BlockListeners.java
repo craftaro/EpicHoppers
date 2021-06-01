@@ -75,7 +75,7 @@ public class BlockListeners implements Listener {
             if (num > limit)
                 limit = num;
         }
-        if (limit == -1) limit = plugin.getConfig().getInt("Main.Max Hoppers Per Chunk");
+        if (limit == -1) limit = Settings.MAX_CHUNK.getInt();
         return limit;
     }
 

@@ -22,7 +22,7 @@ import com.songoda.epichoppers.commands.CommandReload;
 import com.songoda.epichoppers.commands.CommandSettings;
 import com.songoda.epichoppers.database.DataManager;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
-import com.songoda.epichoppers.handlers.TeleportHandler;
+import com.songoda.epichoppers.hopper.teleport.TeleportHandler;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;

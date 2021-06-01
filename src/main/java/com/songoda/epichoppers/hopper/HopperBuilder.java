@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.hopper;
 
 import com.songoda.epichoppers.hopper.levels.Level;
-import com.songoda.epichoppers.utils.TeleportTrigger;
+import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;

@@ -1,13 +1,13 @@
-package com.songoda.epichoppers.handlers;
+package com.songoda.epichoppers.hopper.teleport;
 
+import com.songoda.core.compatibility.CompatibleSound;
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -24,43 +24,45 @@ public class TeleportHandler {
 
     private final Map<UUID, Long> lastTeleports = new HashMap<>();
 
-    private EpicHoppers plugin;
+    private final EpicHoppers plugin;
 
     public TeleportHandler(EpicHoppers plugin) {
         this.plugin = plugin;
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0, plugin.getConfig().getLong("Main.Amount of Ticks Between Teleport"));
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0,
+                Settings.TELEPORT_TICKS.getLong());
     }
 
     private void teleportRunner() {
-        if (plugin.getHopperManager().isReady()) {
-            for (World world : Bukkit.getWorlds()) {
-                for (Entity entity : world.getEntities()) {
-                    if (!(entity instanceof LivingEntity) || entity.getType() == EntityType.ARMOR_STAND)
+        if (!plugin.getHopperManager().isReady())
+            return;
+
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntities()) {
+                if (!(entity instanceof LivingEntity) || entity.getType() == EntityType.ARMOR_STAND)
+                    continue;
+
+                if (!Settings.TELEPORT.getBoolean()
+                        || (entity instanceof Player && !entity.hasPermission("EpicHoppers.Teleport")))
+                    continue;
+
+                Location location = entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
+
+                if (!this.plugin.getHopperManager().isHopper(location))
+                    continue;
+
+                Hopper hopper = this.plugin.getHopperManager().getHopper(location);
+
+                if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON)
+                    continue;
+
+                if (this.lastTeleports.containsKey(entity.getUniqueId())) {
+                    long duration = (new Date()).getTime() - new Date(this.lastTeleports.get(entity.getUniqueId())).getTime();
+                    if (duration <= 5 * 1000)
                         continue;
-
-                    if (!this.plugin.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers")
-                            || (entity instanceof Player && !entity.hasPermission("EpicHoppers.Teleport")))
-                        continue;
-
-                    Location location = entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
-
-                    if (!this.plugin.getHopperManager().isHopper(location))
-                        continue;
-
-                    Hopper hopper = this.plugin.getHopperManager().getHopper(location);
-
-                    if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON)
-                        continue;
-
-                    if (this.lastTeleports.containsKey(entity.getUniqueId())) {
-                        long duration = (new Date()).getTime() - new Date(this.lastTeleports.get(entity.getUniqueId())).getTime();
-                        if (duration <= 5 * 1000)
-                            continue;
-                    }
-
-                    this.tpEntity(entity, hopper);
-                    this.lastTeleports.put(entity.getUniqueId(), System.currentTimeMillis());
                 }
+
+                this.tpEntity(entity, hopper);
+                this.lastTeleports.put(entity.getUniqueId(), System.currentTimeMillis());
             }
         }
     }
@@ -79,7 +81,6 @@ public class TeleportHandler {
      *
      * @param lastHopper         The previous hopper found in the chain
      * @param currentChainLength The current length of the chain, used to cap the search length
-     *
      * @return The hopper at the end of the chain (or up to 15 in depth)
      */
     private Hopper getChain(Hopper lastHopper, int currentChainLength) {
