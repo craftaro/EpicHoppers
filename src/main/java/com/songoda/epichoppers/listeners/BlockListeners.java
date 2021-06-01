@@ -36,6 +36,9 @@ public class BlockListeners implements Listener {
         if (e.getBlock().getType() != Material.HOPPER)
             return;
 
+        if (Settings.DISABLED_WORLDS.getStringList().contains(player.getWorld().getName()))
+            return;
+
         int amt = count(e.getBlock().getChunk());
 
         int max = maxHoppers(player);
