@@ -2,8 +2,6 @@ package com.songoda.epichoppers.player;
 
 import com.songoda.epichoppers.hopper.Hopper;
 
-import java.util.UUID;
-
 public class PlayerData {
 
     private Hopper lastHopper = null;

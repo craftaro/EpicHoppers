@@ -106,3 +106,4 @@ event:
     syncchest: '&7You have linked your &9%name% &7with this chest.'
     desyncchest: '&7You have unlinked your &9%name% &7with this chest.'
     autosell: '&7Your hopper sold &6%items% &7item(s) worth &6$%amount%&7.'
+    notready: '&cHoppers are still being loaded...'

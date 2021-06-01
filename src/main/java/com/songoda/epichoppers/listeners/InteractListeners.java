@@ -7,7 +7,7 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
-import com.songoda.epichoppers.utils.TeleportTrigger;
+import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import com.songoda.skyblock.SkyBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,26 +27,26 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class InteractListeners implements Listener {
 
-    private final EpicHoppers instance;
+    private final EpicHoppers plugin;
 
-    public InteractListeners(EpicHoppers instance) {
-        this.instance = instance;
+    public InteractListeners(EpicHoppers plugin) {
+        this.plugin = plugin;
     }
 
     @EventHandler
     public void onPlayerToggleSneakEvent(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
-        if (player.isSneaking()) {
+        if (player.isSneaking() && plugin.getHopperManager().isReady()) {
             Location location = player.getLocation().getBlock().getRelative(BlockFace.SELF).getLocation();
             Location down = location.getBlock().getRelative(BlockFace.DOWN).getLocation();
-            if (instance.getHopperManager().isHopper(down)) {
-                Hopper hopper = instance.getHopperManager().getHopper(down);
+            if (plugin.getHopperManager().isHopper(down)) {
+                Hopper hopper = plugin.getHopperManager().getHopper(down);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
-                    instance.getTeleportHandler().tpEntity(player, hopper);
-            } else if (instance.getHopperManager().isHopper(location)) {
-                Hopper hopper = instance.getHopperManager().getHopper(location);
+                    plugin.getTeleportHandler().tpEntity(player, hopper);
+            } else if (plugin.getHopperManager().isHopper(location)) {
+                Hopper hopper = plugin.getHopperManager().getHopper(location);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK)
-                    instance.getTeleportHandler().tpEntity(player, hopper);
+                    plugin.getTeleportHandler().tpEntity(player, hopper);
             }
         }
     }
@@ -66,7 +66,7 @@ public class InteractListeners implements Listener {
             return;
 
         if (Settings.USE_PROTECTION_PLUGINS.getBoolean() && !ProtectionManager.canInteract(player, event.getClickedBlock().getLocation())) {
-            player.sendMessage(instance.getLocale().getMessage("event.general.protected").getPrefixedMessage());
+            player.sendMessage(plugin.getLocale().getMessage("event.general.protected").getPrefixedMessage());
             return;
         }
 
@@ -80,17 +80,22 @@ public class InteractListeners implements Listener {
                     return;
         }
 
-        PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
-
+        PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
 
         if (playerData.getSyncType() == null) {
             if (event.getClickedBlock().getType() == Material.HOPPER) {
-                if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !instance.getHopperManager().isHopper(event.getClickedBlock().getLocation()))
+                if (!plugin.getHopperManager().isReady()) {
+                    player.sendMessage(plugin.getLocale().getMessage("event.hopper.notready").getMessage());
+                    event.setCancelled(true);
+                    return;
+                }
+
+                if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !plugin.getHopperManager().isHopper(event.getClickedBlock().getLocation()))
                     return;
 
-                Hopper hopper = instance.getHopperManager().getHopper(event.getClickedBlock());
+                Hopper hopper = plugin.getHopperManager().getHopper(event.getClickedBlock());
                 if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
-                    hopper.overview(instance.getGuiManager(), player);
+                    hopper.overview(plugin.getGuiManager(), player);
                     event.setCancelled(true);
                     return;
                 }
@@ -98,13 +103,15 @@ public class InteractListeners implements Listener {
             return;
         }
 
-        if (event.getClickedBlock().getState() instanceof InventoryHolder || (event.getClickedBlock().getType().equals(Material.ENDER_CHEST) && instance.getConfig().getBoolean("Main.Support Enderchests"))) {
+        if (event.getClickedBlock().getState() instanceof InventoryHolder
+                || (event.getClickedBlock().getType().equals(Material.ENDER_CHEST)
+                && Settings.ENDERCHESTS.getBoolean())) {
             Hopper hopper = playerData.getLastHopper();
             if (event.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
-                if (hopper.getLinkedBlocks().size() != 0)
-                    instance.getLocale().getMessage("event.hopper.syncfinish").sendPrefixedMessage(player);
+                if (!hopper.getLinkedBlocks().isEmpty())
+                    plugin.getLocale().getMessage("event.hopper.syncfinish").sendPrefixedMessage(player);
                 else
-                    instance.getLocale().getMessage("event.hopper.synccanceled").sendPrefixedMessage(player);
+                    plugin.getLocale().getMessage("event.hopper.synccanceled").sendPrefixedMessage(player);
                 hopper.cancelSync(player);
             } else if (playerData.getSyncType() != null) {
                 hopper.link(event.getClickedBlock(), playerData.getSyncType() == SyncType.FILTERED, player);

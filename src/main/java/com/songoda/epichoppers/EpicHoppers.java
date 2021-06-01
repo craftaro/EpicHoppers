@@ -22,7 +22,7 @@ import com.songoda.epichoppers.commands.CommandReload;
 import com.songoda.epichoppers.commands.CommandSettings;
 import com.songoda.epichoppers.database.DataManager;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
-import com.songoda.epichoppers.handlers.TeleportHandler;
+import com.songoda.epichoppers.hopper.teleport.TeleportHandler;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 
 public class EpicHoppers extends SongodaPlugin {
 
@@ -173,6 +172,8 @@ public class EpicHoppers extends SongodaPlugin {
         this.dataManager.getHoppers((hoppers) -> {
             this.hopperManager.addHoppers(hoppers.values());
             this.dataManager.getBoosts((boosts) -> this.boostManager.addBoosts(boosts));
+
+            this.hopperManager.setReady();
         });
     }
 
@@ -229,7 +230,6 @@ public class EpicHoppers extends SongodaPlugin {
                 } else if (key.equals("AutoSmelting")) {
                     modules.add(new ModuleAutoSmelter(this, levels.getInt("AutoSmelting")));
                 }
-
             }
             levelManager.addLevel(level, costExperience, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }
@@ -258,6 +258,7 @@ public class EpicHoppers extends SongodaPlugin {
         return nbtItem.finish();
     }
 
+    @Override
     public Locale getLocale() {
         return locale;
     }

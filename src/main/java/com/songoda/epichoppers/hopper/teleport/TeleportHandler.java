@@ -1,13 +1,13 @@
-package com.songoda.epichoppers.handlers;
+package com.songoda.epichoppers.hopper.teleport;
 
+import com.songoda.core.compatibility.CompatibleSound;
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
@@ -24,20 +24,24 @@ public class TeleportHandler {
 
     private final Map<UUID, Long> lastTeleports = new HashMap<>();
 
-    private EpicHoppers plugin;
+    private final EpicHoppers plugin;
 
     public TeleportHandler(EpicHoppers plugin) {
         this.plugin = plugin;
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0, plugin.getConfig().getLong("Main.Amount of Ticks Between Teleport"));
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0,
+                Settings.TELEPORT_TICKS.getLong());
     }
 
     private void teleportRunner() {
+        if (!plugin.getHopperManager().isReady())
+            return;
+
         for (World world : Bukkit.getWorlds()) {
             for (Entity entity : world.getEntities()) {
                 if (!(entity instanceof LivingEntity) || entity.getType() == EntityType.ARMOR_STAND)
                     continue;
 
-                if (!this.plugin.getConfig().getBoolean("Main.Allow Players To Teleport Through Hoppers")
+                if (!Settings.TELEPORT.getBoolean()
                         || (entity instanceof Player && !entity.hasPermission("EpicHoppers.Teleport")))
                     continue;
 
@@ -106,7 +110,6 @@ public class TeleportHandler {
 
         entity.teleport(location);
 
-        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_12))
-            entity.getWorld().playSound(entity.getLocation(), ServerVersion.isServerVersion(ServerVersion.V1_12) ? Sound.valueOf("ENTITY_ENDERMEN_TELEPORT") : Sound.ENTITY_ENDERMAN_TELEPORT, 10, 10);
+        CompatibleSound.ENTITY_ENDERMAN_TELEPORT.play(entity.getWorld(), entity.getLocation(), 10, 10);
     }
 }

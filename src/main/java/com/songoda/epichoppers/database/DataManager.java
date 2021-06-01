@@ -9,7 +9,7 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.ItemType;
 import com.songoda.epichoppers.hopper.LinkType;
-import com.songoda.epichoppers.utils.TeleportTrigger;
+import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

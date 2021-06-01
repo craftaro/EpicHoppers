@@ -460,7 +460,7 @@ public class ModuleAutoCrafting extends Module {
              * Like {@link #equals(Object)} but ignores {@link #additionalAmount} and {@link ItemStack#getAmount()}
              *
              * @return If two {@link SimpleIngredient} objects are equal
-             * while ignoring any item amounts, true otherwise false
+             *         while ignoring any item amounts, true otherwise false
              */
             public boolean isSimilar(Object o) {
                 if (this == o) return true;

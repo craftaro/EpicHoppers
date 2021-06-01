@@ -1,5 +1,7 @@
 package com.songoda.epichoppers.hopper;
 
+import com.songoda.core.compatibility.CompatibleParticleHandler;
+import com.songoda.core.compatibility.CompatibleSound;
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.core.hooks.EconomyManager;
@@ -7,14 +9,14 @@ import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.api.events.HopperAccessEvent;
 import com.songoda.epichoppers.gui.GUIOverview;
 import com.songoda.epichoppers.hopper.levels.Level;
+import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import com.songoda.epichoppers.player.PlayerData;
+import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.utils.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -92,7 +94,7 @@ public class Hopper {
                 return;
             }
             if (!EconomyManager.hasBalance(player, cost)) {
-                plugin.getInstance().getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
+                plugin.getLocale().getMessage("event.upgrade.cannotafford").sendPrefixedMessage(player);
                 return;
             }
             EconomyManager.withdrawBalance(player, cost);
@@ -123,20 +125,16 @@ public class Hopper {
         }
         Location loc = location.clone().add(.5, .5, .5);
 
-        if (!ServerVersion.isServerVersionAtLeast(ServerVersion.V1_12)) return;
-
-        player.getWorld().spawnParticle(org.bukkit.Particle.valueOf(plugin.getConfig().getString("Main.Upgrade Particle Type")), loc, 200, .5, .5, .5);
+        CompatibleParticleHandler.spawnParticles(CompatibleParticleHandler.ParticleType.getParticle(Settings.UPGRADE_PARTICLE_TYPE.getString()),
+                loc, 100, .5, .5, .5);
 
         if (plugin.getLevelManager().getHighestLevel() != level) {
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6F, 15.0F);
+            player.playSound(player.getLocation(), CompatibleSound.ENTITY_PLAYER_LEVELUP.getSound(), 0.6F, 15.0F);
         } else {
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2F, 25.0F);
-
-            if (!ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)) return;
-
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 2F, 25.0F);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.2F, 35.0F), 5L);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.8F, 35.0F), 10L);
+            player.playSound(player.getLocation(), CompatibleSound.ENTITY_PLAYER_LEVELUP.getSound(), 2F, 25.0F);
+            player.playSound(player.getLocation(), CompatibleSound.BLOCK_NOTE_BLOCK_CHIME.getSound(), 2F, 25.0F);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), CompatibleSound.BLOCK_NOTE_BLOCK_CHIME.getSound(), 1.2F, 35.0F), 5L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> player.playSound(player.getLocation(), CompatibleSound.BLOCK_NOTE_BLOCK_CHIME.getSound(), 1.8F, 35.0F), 10L);
         }
     }
 
@@ -155,7 +153,7 @@ public class Hopper {
                 instance.getLocale().getMessage("event.hopper.synctimeout").sendPrefixedMessage(player);
                 playerData.setSyncType(null);
             }
-        }, instance.getConfig().getLong("Main.Timeout When Syncing Hoppers") * level.getLinkAmount());
+        }, Settings.LINK_TIMEOUT.getLong() * level.getLinkAmount());
     }
 
     public void link(Block toLink, boolean filtered, Player player) {

@@ -36,7 +36,7 @@ public class Settings {
     public static final ConfigSetting ENDERCHESTS = new ConfigSetting(config, "Main.Support Enderchests", true,
             "Should hoppers dump items into a player enderchests?");
 
-    public static final ConfigSetting PARTICLE_TYPE = new ConfigSetting(config, "Main.Upgrade Particle Type", "SPELL_WITCH",
+    public static final ConfigSetting UPGRADE_PARTICLE_TYPE = new ConfigSetting(config, "Main.Upgrade Particle Type", "SPELL_WITCH",
             "The type of particle shown when a hopper is upgraded.");
 
     public static final ConfigSetting HOP_TICKS = new ConfigSetting(config, "Main.Amount of Ticks Between Hops", 8L,
@@ -52,7 +52,7 @@ public class Settings {
             "The cooldown between teleports. It prevents players",
             "from getting stuck in a teleport loop.");
 
-    public static final ConfigSetting SYNC_TIMEOUT = new ConfigSetting(config, "Main.Timeout When Syncing Hoppers", 300L,
+    public static final ConfigSetting LINK_TIMEOUT = new ConfigSetting(config, "Main.Timeout When Syncing Hoppers", 300L,
             "The amount of time in ticks a player has between hitting the hopper",
             "Link button and performing the link. When the time is up the link event is canceled.");
 
