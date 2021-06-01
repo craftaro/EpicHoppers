@@ -10,6 +10,7 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
+import com.songoda.ultimatestacker.UltimateStacker;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -39,20 +40,6 @@ public class ModuleSuction extends Module {
 
     private static final boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
     private static final boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
-    private static boolean oldUltimateStacker;
-    private static Method oldUltimateStacker_updateItemAmount;
-
-    static {
-        if (ultimateStacker) {
-            try {
-                oldUltimateStacker_updateItemAmount = com.songoda.ultimatestacker.utils.Methods.class.getDeclaredMethod("updateItemAmount", Item.class, int.class);
-                oldUltimateStacker = true;
-            } catch (NoSuchMethodException | SecurityException ignore) {
-            }
-        } else {
-            oldUltimateStacker = false;
-        }
-    }
 
     public ModuleSuction(EpicHoppers plugin, int amount) {
         super(plugin);
@@ -176,15 +163,7 @@ public class ModuleSuction extends Module {
 
     private void updateAmount(Item item, int amount) {
         if (ultimateStacker) {
-            if (oldUltimateStacker) {
-                try {
-                    oldUltimateStacker_updateItemAmount.invoke(null, item, amount);
-                } catch (Exception ex) {
-                    item.remove(); // not the best solution, but they should update, anyway..
-                }
-            } else {
-                com.songoda.ultimatestacker.utils.Methods.updateItemAmount(item, item.getItemStack(), amount);
-            }
+            UltimateStacker.updateItemAmount(item, item.getItemStack(), amount);
         } else if (wildStacker)
             WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
         else
