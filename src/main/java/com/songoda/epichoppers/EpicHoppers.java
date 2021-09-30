@@ -75,6 +75,7 @@ public class EpicHoppers extends SongodaPlugin {
     private DataManager dataManager;
 
     private boolean epicfarming = false;
+    private boolean advancedchests = false;
 
     public static EpicHoppers getInstance() {
         return INSTANCE;
@@ -148,6 +149,7 @@ public class EpicHoppers extends SongodaPlugin {
 
         // Check for epicfarming
         if (pluginManager.isPluginEnabled("EpicFarming")) epicfarming = true;
+        if (pluginManager.isPluginEnabled("AdvancedChests")) advancedchests = true;
 
         // Start auto save
         int saveInterval = Settings.AUTOSAVE.getInt() * 60 * 20;
@@ -301,5 +303,9 @@ public class EpicHoppers extends SongodaPlugin {
 
     public boolean isEpicFarming() {
         return epicfarming;
+    }
+
+    public boolean isAdvancedChests() {
+        return advancedchests;
     }
 }
