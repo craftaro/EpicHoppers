@@ -162,6 +162,29 @@ public class HopTask extends BukkitRunnable {
                                 } else {
                                     item.setAmount(item.getAmount() - 1);
                                     hopperCache.dirty = hopperCache.cacheChanged[i] = true;
+                            }
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (plugin.isAdvancedChests()) {
+                    us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest chest = us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.getChestManager().getAdvancedChest(pointingLocation);
+                    if (chest != null) {
+                        for (int i = 0; i < 5; i++) {
+                            final ItemStack item = hopperCache.cachedInventory[i];
+                            if (item == null) {
+                                continue;
+                            }
+
+                            if (us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.hasSpaceForItem(chest, item)) {
+                                us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.addItemToChest(chest, item);
+                                if (item.getAmount() == 1) {
+                                    hopperCache.removeItem(i);
+                                } else {
+                                    item.setAmount(item.getAmount() - 1);
+                                    hopperCache.dirty = hopperCache.cacheChanged[i] = true;
                                 }
                                 break;
                             }
@@ -365,6 +388,14 @@ public class HopTask extends BukkitRunnable {
                 continue;
             }
 
+            if (plugin.isAdvancedChests()) {
+                us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest chest = us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.getChestManager().getAdvancedChest(targetBlock.getLocation());
+                if (chest != null) {
+                    addToAdvancedChest(hopper, hopperCache, chest, filterCache, maxToMove, blockedMaterials);
+                    return;
+                }
+            }
+
             // Is this a storage container?
             StorageContainerCache.Cache targetCache = StorageContainerCache.getCachedInventory(targetBlock);
             if (targetCache == null) {
@@ -391,6 +422,52 @@ public class HopTask extends BukkitRunnable {
                 }
             }
         }
+    }
+
+    private boolean addToAdvancedChest(com.songoda.epichoppers.hopper.Hopper hopper,
+                                    StorageContainerCache.Cache hopperCache,
+                                    us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest chest,
+                                    StorageContainerCache.Cache filterCache,
+                                    int maxToMove, Collection<Material> blockedMaterials) {
+        for (int i = 0; i < 5; i++) {
+            // Get potential item to move.
+            ItemStack item = hopperCache.cachedInventory[i];
+
+            // Can we check this item?
+            if (    // Ignore this one if the slot is empty
+                    item == null
+                            // Don't try to move items that we've added this round
+                            || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
+                            // skip if blocked or voidlisted
+                            || blockedMaterials.contains(item.getType())
+                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
+                continue;
+
+            // Create item that will be moved.
+            ItemStack itemToMove = item.clone();
+            itemToMove.setAmount(Math.min(item.getAmount(), maxToMove));
+
+            // Process whitelist and blacklist.
+            boolean blocked = (!hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getWhiteList().stream().noneMatch(itemStack -> itemStack.isSimilar(item))
+                    || hopper.getFilter().getBlackList().stream().anyMatch(itemStack -> itemStack.isSimilar(item)));
+
+            // If blocked check to see if a movement can be made
+            if (blocked) {
+                if (filterCache != null && filterCache.addItem(itemToMove)) {
+                    hopperCache.removeItems(itemToMove);
+                    return true;
+                }
+                // can't move into a filter chest, so keep looking for something else to move
+                continue;
+            }
+
+            // Add item to container and return on success.
+            if (us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.addItemToChest(chest, itemToMove)) {
+                hopperCache.removeItems(itemToMove);
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean tryPush(com.songoda.epichoppers.hopper.Hopper hopper,

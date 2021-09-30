@@ -2,7 +2,7 @@
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.6.22</version>
+    <version>4.6.23</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <finalName>EpicHoppers-${project.version}</finalName>
@@ -90,6 +90,10 @@
             <id>public</id>
             <url>https://repo.songoda.com/repository/public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -101,18 +105,13 @@
             <groupId>com.songoda</groupId>
             <artifactId>skyblock</artifactId>
             <version>2.2.13</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
             <artifactId>SongodaCore</artifactId>
             <version>LATEST</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.songoda</groupId>
-            <artifactId>fabledskyblock</artifactId>
-            <version>LATEST</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
@@ -135,6 +134,12 @@
             <groupId>com.bgsoftware</groupId>
             <artifactId>wildstacker</artifactId>
             <version>3.5.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.DeadSilenceIV</groupId>
+            <artifactId>AdvancedChestsAPI</artifactId>
+            <version>2.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
