@@ -275,7 +275,7 @@ public class StorageContainerCache {
                     // fuel in 5th position, input in 4th
                     if (item.getType() == Material.BLAZE_POWDER)
                         check[4] = true;
-                    else
+                    else if (CompatibleMaterial.getMaterial(item).isBrewingStandIngredient())
                         check[3] = true;
 
                     break;
