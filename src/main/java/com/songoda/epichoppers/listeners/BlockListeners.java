@@ -1,10 +1,13 @@
 package com.songoda.epichoppers.listeners;
 
 import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.api.events.HopperBreakEvent;
+import com.songoda.epichoppers.api.events.HopperPlaceEvent;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.settings.Settings;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -64,6 +67,10 @@ public class BlockListeners implements Listener {
                         .setLevel(plugin.getLevelManager().getLevel(item))
                         .setPlacedBy(player)
                         .setLastPlayerOpened(player).build());
+
+        HopperPlaceEvent hopperPlaceEvent = new HopperPlaceEvent(player, hopper);
+        Bukkit.getPluginManager().callEvent(hopperPlaceEvent);
+
         EpicHoppers.getInstance().getDataManager().createHopper(hopper);
     }
 
@@ -112,6 +119,9 @@ public class BlockListeners implements Listener {
         Level level = hopper.getLevel();
 
         if (level.getLevel() > 1 || Settings.ALLOW_NORMAL_HOPPERS.getBoolean()) {
+            HopperBreakEvent hopperBreakEvent = new HopperBreakEvent(player, hopper);
+            Bukkit.getPluginManager().callEvent(hopperBreakEvent);
+
             event.setCancelled(true);
             ItemStack item = plugin.newHopperItem(level);
 
