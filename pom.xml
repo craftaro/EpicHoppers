@@ -121,9 +121,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.brcdev</groupId>
-            <artifactId>ShopGUIPlus</artifactId>
-            <version>1.19.5</version>
+            <groupId>com.github.brcdev-minecraft</groupId>
+            <artifactId>shopgui-api</artifactId>
+            <version>2.2.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.songoda</groupId>
