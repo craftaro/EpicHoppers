@@ -20,6 +20,7 @@ import com.songoda.epichoppers.commands.CommandBoost;
 import com.songoda.epichoppers.commands.CommandGive;
 import com.songoda.epichoppers.commands.CommandReload;
 import com.songoda.epichoppers.commands.CommandSettings;
+import com.songoda.epichoppers.containers.ContainerManager;
 import com.songoda.epichoppers.database.DataManager;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
 import com.songoda.epichoppers.hopper.teleport.TeleportHandler;
@@ -68,14 +69,12 @@ public class EpicHoppers extends SongodaPlugin {
     private LevelManager levelManager;
     private BoostManager boostManager;
     private PlayerDataManager playerDataManager;
+    private ContainerManager containerManager;
 
     private TeleportHandler teleportHandler;
 
     private DatabaseConnector databaseConnector;
     private DataManager dataManager;
-
-    private boolean epicfarming = false;
-    private boolean advancedchests = false;
 
     public static EpicHoppers getInstance() {
         return INSTANCE;
@@ -122,6 +121,7 @@ public class EpicHoppers extends SongodaPlugin {
 
         this.hopperManager = new HopperManager();
         this.playerDataManager = new PlayerDataManager();
+        this.containerManager = new ContainerManager(this);
         this.boostManager = new BoostManager();
 
         // Database stuff, go!
@@ -146,10 +146,6 @@ public class EpicHoppers extends SongodaPlugin {
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(), this);
-
-        // Check for epicfarming
-        if (pluginManager.isPluginEnabled("EpicFarming")) epicfarming = true;
-        if (pluginManager.isPluginEnabled("AdvancedChests")) advancedchests = true;
 
         // Start auto save
         int saveInterval = Settings.AUTOSAVE.getInt() * 60 * 20;
@@ -301,11 +297,7 @@ public class EpicHoppers extends SongodaPlugin {
         return databaseConnector;
     }
 
-    public boolean isEpicFarming() {
-        return epicfarming;
-    }
-
-    public boolean isAdvancedChests() {
-        return advancedchests;
+    public ContainerManager getContainerManager() {
+        return containerManager;
     }
 }

@@ -65,8 +65,8 @@ public class ModuleBlockBreak extends Module {
 
         Block above = hopper.getLocation().getBlock().getRelative(0, 1, 0);
 
-        // Don't break farm items from EpicFarming
-        if (plugin.isEpicFarming() && com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(above) != null)
+        // Don't break farm items from custom containers
+        if (plugin.getContainerManager().getCustomContainer(above) != null)
             return;
 
         // don't break blacklisted blocks, fluids, or containers
@@ -92,18 +92,14 @@ public class ModuleBlockBreak extends Module {
             float yy = (float) (0 + (Math.random() * .5));
             float zz = (float) (0 + (Math.random() * .5));
 
-            Particle particle = null;
-            if (!Settings.BLOCKBREAK_PARTICLE.getString().trim().isEmpty()) {
-                try {
-                    particle = Particle.valueOf(Settings.BLOCKBREAK_PARTICLE.getString());
-                } catch (Exception ignore) {
-                    particle = Particle.LAVA;
-                }
+            Particle particle;
+            try {
+                particle = Particle.valueOf(Settings.BLOCKBREAK_PARTICLE.getString());
+            } catch (Exception e) {
+                particle = Particle.LAVA;
             }
 
-            if (particle != null) {
-                above.getWorld().spawnParticle(particle, locationAbove, 15, xx, yy, zz);
-            }
+            above.getWorld().spawnParticle(particle, locationAbove, 15, xx, yy, zz);
         }
 
         boolean waterlogged = false;

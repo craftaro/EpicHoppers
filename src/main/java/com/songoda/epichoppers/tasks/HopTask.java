@@ -1,8 +1,8 @@
 package com.songoda.epichoppers.tasks;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
+import com.songoda.epichoppers.containers.CustomContainer;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.settings.Settings;
@@ -23,7 +23,6 @@ import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -40,18 +39,13 @@ import java.util.stream.IntStream;
 public class HopTask extends BukkitRunnable {
 
     // Hop to the bop to the be bop top.
-
     private EpicHoppers plugin;
-
     private final int hopTicks;
-    private final boolean hasFabledSkyBlock;
-    private final Plugin fabledSkyblockPlugin;
 
     public HopTask(EpicHoppers plugin) {
         this.plugin = plugin;
         this.hopTicks = Math.max(1, Settings.HOP_TICKS.getInt() / 2); // Purposeful integer division. Don't go below 1.
         this.runTaskTimer(plugin, 0, 2);
-        this.hasFabledSkyBlock = (fabledSkyblockPlugin = Bukkit.getPluginManager().getPlugin("FabledSkyBlock")) != null;
     }
 
     @Override
@@ -139,55 +133,22 @@ public class HopTask extends BukkitRunnable {
                 if (!doProcess)
                     continue;
 
-                // Support for FabledSkyBlock stackables.
-                if (this.hasFabledSkyBlock) {
-                    com.songoda.skyblock.stackable.StackableManager stackableManager = ((com.songoda.skyblock.SkyBlock) fabledSkyblockPlugin).getStackableManager();
-                    if (stackableManager != null && stackableManager.isStacked(pointingLocation)) {
-                        Block pointingBlock = pointingLocation.getBlock();
-
-                        com.songoda.skyblock.core.compatibility.CompatibleMaterial compatibleMaterial = com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(pointingBlock);
-
-                        com.songoda.skyblock.stackable.Stackable stackable = stackableManager.getStack(pointingLocation, compatibleMaterial);
-
-                        for (int i = 0; i < 5; i++) {
-                            final ItemStack item = hopperCache.cachedInventory[i];
-                            if (item == null) {
-                                continue;
-                            }
-
-                            if (com.songoda.skyblock.core.compatibility.CompatibleMaterial.getMaterial(item) == compatibleMaterial) {
-                                stackable.addOne();
-                                if (item.getAmount() == 1) {
-                                    hopperCache.removeItem(i);
-                                } else {
-                                    item.setAmount(item.getAmount() - 1);
-                                    hopperCache.dirty = hopperCache.cacheChanged[i] = true;
-                            }
-                                break;
-                            }
+                CustomContainer container = plugin.getContainerManager().getCustomContainer(pointingLocation.getBlock());
+                if (container != null) {
+                    for (int i = 0; i < 5; i++) {
+                        final ItemStack item = hopperCache.cachedInventory[i];
+                        if (item == null) {
+                            continue;
                         }
-                    }
-                }
 
-                if (plugin.isAdvancedChests()) {
-                    us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest chest = us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.getChestManager().getAdvancedChest(pointingLocation);
-                    if (chest != null) {
-                        for (int i = 0; i < 5; i++) {
-                            final ItemStack item = hopperCache.cachedInventory[i];
-                            if (item == null) {
-                                continue;
+                        if (container.addToContainer(item)) {
+                            if (item.getAmount() == 1) {
+                                hopperCache.removeItem(i);
+                            } else {
+                                item.setAmount(item.getAmount() - 1);
+                                hopperCache.dirty = hopperCache.cacheChanged[i] = true;
                             }
-
-                            if (us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.hasSpaceForItem(chest, item)) {
-                                us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.addItemToChest(chest, item);
-                                if (item.getAmount() == 1) {
-                                    hopperCache.removeItem(i);
-                                } else {
-                                    item.setAmount(item.getAmount() - 1);
-                                    hopperCache.dirty = hopperCache.cacheChanged[i] = true;
-                                }
-                                break;
-                            }
+                            break;
                         }
                     }
                 }
@@ -234,13 +195,15 @@ public class HopTask extends BukkitRunnable {
     }
 
     private void pullItemsFromContainers(com.songoda.epichoppers.hopper.Hopper toHopper, StorageContainerCache.Cache hopperCache, int maxToMove) {
-        // Grab items from the container above (includes storage/hopper minecarts and EpicFarming farm items)
+        // Grab items from the container above (includes storage/hopper minecarts, EpicFarming farm items and AdvancedChests chest)
         // If the container above is a hopper, ignore it if it's pointing down
         Block above = toHopper.getBlock().getRelative(BlockFace.UP);
-        boolean isFarmItem = false;
+
         Collection<Entity> nearbyEntities = null;
         StorageContainerCache.Cache aboveCache = null;
-        if ((isFarmItem = this.isFarmItem(above))
+
+        CustomContainer container = plugin.getContainerManager().getCustomContainer(above);
+        if ((container != null)
                 || (above.getType() != Material.AIR)
                 && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
                 && (aboveCache = StorageContainerCache.getCachedInventory(above)) != null
@@ -254,9 +217,9 @@ public class HopTask extends BukkitRunnable {
                 pullableSlots = this.getPullableSlots(above.getType(), aboveCache.cachedInventory.length - 1);
                 contents = aboveCache.cachedInventory;
                 aboveInvHolder = null;
-            } else if (isFarmItem) {
+            } else if (container != null) {
                 aboveInvHolder = null;
-                contents = getFarmContents(above);
+                contents = container.getItems();
                 pullableSlots = IntStream.rangeClosed(0, contents.length - 1).toArray();
             } else {
                 if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null
@@ -322,10 +285,11 @@ public class HopTask extends BukkitRunnable {
                     if (aboveCache != null) {
                         aboveCache.removeItems(itemToMove);
                     } else {
-                        if (isFarmItem)
-                            com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(above).removeMaterial(itemToMove.getType(), amountToMove);
-                        else
+                        if (container != null)
+                            container.removeFromContainer(itemToMove, amountToMove);
+                        else {
                             this.debt(itemToMove, amountToMove, aboveInvHolder);
+                        }
                     }
                     break;
                 }
@@ -388,12 +352,9 @@ public class HopTask extends BukkitRunnable {
                 continue;
             }
 
-            if (plugin.isAdvancedChests()) {
-                us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest chest = us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.getChestManager().getAdvancedChest(targetBlock.getLocation());
-                if (chest != null) {
-                    addToAdvancedChest(hopper, hopperCache, chest, filterCache, maxToMove, blockedMaterials);
-                    return;
-                }
+            CustomContainer container = plugin.getContainerManager().getCustomContainer(targetLocation.getBlock());
+            if (container != null && tryPushCustomContainer(hopper, hopperCache, container, filterCache, maxToMove, blockedMaterials)) {
+                return;
             }
 
             // Is this a storage container?
@@ -424,11 +385,11 @@ public class HopTask extends BukkitRunnable {
         }
     }
 
-    private boolean addToAdvancedChest(com.songoda.epichoppers.hopper.Hopper hopper,
-                                    StorageContainerCache.Cache hopperCache,
-                                    us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest chest,
-                                    StorageContainerCache.Cache filterCache,
-                                    int maxToMove, Collection<Material> blockedMaterials) {
+    private boolean tryPushCustomContainer(com.songoda.epichoppers.hopper.Hopper hopper,
+                                           StorageContainerCache.Cache hopperCache,
+                                           CustomContainer container,
+                                           StorageContainerCache.Cache filterCache,
+                                           int maxToMove, Collection<Material> blockedMaterials) {
         for (int i = 0; i < 5; i++) {
             // Get potential item to move.
             ItemStack item = hopperCache.cachedInventory[i];
@@ -462,7 +423,7 @@ public class HopTask extends BukkitRunnable {
             }
 
             // Add item to container and return on success.
-            if (us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI.addItemToChest(chest, itemToMove)) {
+            if (container.addToContainer(itemToMove)) {
                 hopperCache.removeItems(itemToMove);
                 return true;
             }
@@ -586,21 +547,5 @@ public class HopTask extends BukkitRunnable {
         if (inventoryHolders.size() == 1)
             return inventoryHolders.get(0);
         return inventoryHolders.get(ThreadLocalRandom.current().nextInt(inventoryHolders.size()));
-    }
-
-    /**
-     * Checks if a given block is an EpicFarming farm item
-     *
-     * @param block The block to check
-     * @return true if the block is a farm item, otherwise false
-     */
-    private boolean isFarmItem(Block block) {
-        return plugin.isEpicFarming() && com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(block) != null;
-    }
-
-    private ItemStack[] getFarmContents(Block block) {
-        return com.songoda.epicfarming.EpicFarming.getInstance().getFarmManager().getFarm(block).getItems()
-                .stream().filter(i -> CompatibleMaterial.getMaterial(i) != CompatibleMaterial.BONE_MEAL)
-                .toArray(ItemStack[]::new);
     }
 }

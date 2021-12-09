@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.listeners;
 
+import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.api.events.HopperBreakEvent;
 import com.songoda.epichoppers.api.events.HopperPlaceEvent;
@@ -10,6 +11,7 @@ import com.songoda.epichoppers.settings.Settings;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,6 +28,7 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 public class BlockListeners implements Listener {
 
     private final EpicHoppers plugin;
+    private static final boolean hasMinHeight = ServerVersion.isServerVersionAtLeast(ServerVersion.V1_16);
 
     public BlockListeners(EpicHoppers plugin) {
         this.plugin = plugin;
@@ -90,7 +93,7 @@ public class BlockListeners implements Listener {
         int count = 0;
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                for (int y = 0; y < c.getWorld().getMaxHeight(); y++) {
+                for (int y = getMinHeight(c.getWorld()); y < c.getWorld().getMaxHeight(); y++) {
                     if (c.getBlock(x, y, z).getType() == Material.HOPPER) count++;
                 }
             }
@@ -125,6 +128,8 @@ public class BlockListeners implements Listener {
             event.setCancelled(true);
             ItemStack item = plugin.newHopperItem(level);
 
+            hopper.dropItems();
+
             event.getBlock().setType(Material.AIR);
             event.getBlock().getLocation().getWorld().dropItemNaturally(event.getBlock().getLocation(), item);
         }
@@ -145,5 +150,9 @@ public class BlockListeners implements Listener {
         plugin.getDataManager().deleteHopper(hopper);
 
         plugin.getPlayerDataManager().getPlayerData(player).setSyncType(null);
+    }
+
+    public int getMinHeight(World world) {
+        return hasMinHeight ? world.getMinHeight() : 0;
     }
 }
