@@ -138,8 +138,11 @@ public class Hopper {
         }
         Location loc = location.clone().add(.5, .5, .5);
 
-        CompatibleParticleHandler.spawnParticles(CompatibleParticleHandler.ParticleType.getParticle(Settings.UPGRADE_PARTICLE_TYPE.getString()),
-                loc, 100, .5, .5, .5);
+        if (!Settings.UPGRADE_PARTICLE_TYPE.getString().trim().isEmpty()) {
+            CompatibleParticleHandler.spawnParticles(
+                    CompatibleParticleHandler.ParticleType.getParticle(Settings.UPGRADE_PARTICLE_TYPE.getString()),
+                    loc, 100, .5, .5, .5);
+        }
 
         if (plugin.getLevelManager().getHighestLevel() != level) {
             player.playSound(player.getLocation(), CompatibleSound.ENTITY_PLAYER_LEVELUP.getSound(), 0.6F, 15.0F);

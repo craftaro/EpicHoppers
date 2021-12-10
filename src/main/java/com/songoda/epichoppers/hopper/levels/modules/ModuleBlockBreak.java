@@ -92,14 +92,18 @@ public class ModuleBlockBreak extends Module {
             float yy = (float) (0 + (Math.random() * .5));
             float zz = (float) (0 + (Math.random() * .5));
 
-            Particle particle;
-            try {
-                particle = Particle.valueOf(Settings.BLOCKBREAK_PARTICLE.getString());
-            } catch (Exception e) {
-                particle = Particle.LAVA;
+            Particle particle = null;
+            if (!Settings.BLOCKBREAK_PARTICLE.getString().trim().isEmpty()) {
+                try {
+                    particle = Particle.valueOf(Settings.BLOCKBREAK_PARTICLE.getString());
+                } catch (Exception ignore) {
+                    particle = Particle.LAVA;
+                }
             }
 
-            above.getWorld().spawnParticle(particle, locationAbove, 15, xx, yy, zz);
+            if (particle != null) {
+                above.getWorld().spawnParticle(particle, locationAbove, 15, xx, yy, zz);
+            }
         }
 
         boolean waterlogged = false;
