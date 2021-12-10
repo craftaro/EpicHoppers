@@ -14,12 +14,12 @@ import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,6 +79,19 @@ public class Hopper {
     public void forceClose() {
         if (activePlayer != null)
             activePlayer.closeInventory();
+    }
+
+    public void dropItems() {
+        Inventory inventory = ((InventoryHolder) location.getBlock().getState()).getInventory();
+        World world = location.getWorld();
+
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack == null || itemStack.getType() == Material.AIR) {
+                continue;
+            }
+
+            world.dropItemNaturally(location, itemStack);
+        }
     }
 
     public void upgrade(Player player, CostType type) {
