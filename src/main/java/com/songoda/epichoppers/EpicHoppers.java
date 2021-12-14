@@ -23,7 +23,6 @@ import com.songoda.epichoppers.commands.CommandSettings;
 import com.songoda.epichoppers.containers.ContainerManager;
 import com.songoda.epichoppers.database.DataManager;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
-import com.songoda.epichoppers.hopper.teleport.TeleportHandler;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
@@ -34,6 +33,7 @@ import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSmelter;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleBlockBreak;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleMobHopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
+import com.songoda.epichoppers.hopper.teleport.TeleportHandler;
 import com.songoda.epichoppers.listeners.BlockListeners;
 import com.songoda.epichoppers.listeners.EntityListeners;
 import com.songoda.epichoppers.listeners.HopperListeners;
@@ -46,7 +46,6 @@ import com.songoda.epichoppers.utils.Methods;
 import com.songoda.skyblock.SkyBlock;
 import com.songoda.skyblock.permission.BasicPermission;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -235,18 +234,20 @@ public class EpicHoppers extends SongodaPlugin {
 
     private void saveModules() {
         if (levelManager != null) {
-            for (Level level : levelManager.getLevels().values())
-                for (Module module : level.getRegisteredModules())
+            for (Level level : levelManager.getLevels().values()) {
+                for (Module module : level.getRegisteredModules()) {
                     module.saveDataToFile();
+                }
+            }
         }
     }
 
     public ItemStack newHopperItem(Level level) {
-        ItemStack item = new ItemStack(Material.HOPPER, 1);
+        ItemStack item = new ItemStack(CompatibleMaterial.HOPPER.getMaterial());
         ItemMeta itemmeta = item.getItemMeta();
         itemmeta.setDisplayName(TextUtils.formatText(Methods.formatName(level.getLevel())));
         String line = getLocale().getMessage("general.nametag.lore").getMessage();
-        if (!line.equals("")) {
+        if (!line.isEmpty()) {
             itemmeta.setLore(Arrays.asList(line.split("\n")));
         }
         item.setItemMeta(itemmeta);

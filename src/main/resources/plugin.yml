@@ -1,7 +1,7 @@
 name: EpicHoppers
 description: EpicHoppers
 main: com.songoda.epichoppers.EpicHoppers
-softdepend: [FabledSkyBlock, LiquidTanks, UltimateStacker, WildStacker, Reserve, Towny, RedProtect, Kingdoms, PlotsSquared, GriefPrevention, USkyBlock, ASkyBlock, WorldGuard, Factions, Vault, EpicFarming, AdvancedChests]
+softdepend: [ FabledSkyBlock, LiquidTanks, UltimateStacker, WildStacker, Reserve, Towny, RedProtect, Kingdoms, PlotsSquared, GriefPrevention, USkyBlock, ASkyBlock, WorldGuard, Factions, Vault, EpicFarming, AdvancedChests ]
 version: maven-version-number
 author: Songoda
 api-version: 1.13
@@ -9,5 +9,5 @@ commands:
   eh:
     description: View information on this plugin.
     default: true
-    aliases: [EpicHoppers]
+    aliases: [ EpicHoppers ]
     usage: /eh

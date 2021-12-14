@@ -58,7 +58,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
         mirrorFill("mirrorfill_9", 4, 7, false, false, glass1);
 
         setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
-                plugin.getLocale().getMessage("general.nametag.back").getMessage()),
+                        plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
                     hopper.overview(guiManager, event.player);
                     compile();
@@ -101,7 +101,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
         }
 
         // Info item
-        indicatorItem = new ItemStack(Material.PAPER, 1);
+        indicatorItem = new ItemStack(CompatibleMaterial.PAPER.getMaterial());
         indicatorMeta = indicatorItem.getItemMeta();
 
         indicatorMeta.setDisplayName(plugin.getLocale().getMessage("interface.autosell-filter.infotitle").getMessage());
@@ -135,7 +135,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
             for (int slot : whiteListSlots) {
                 if (slot != i) continue;
 
-                if (items[i] != null && items[i].getType() != Material.AIR) {
+                if (items[i] != null && !items[i].getType().isAir()) {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
@@ -150,7 +150,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
             for (int slot : blackListSlots) {
                 if (slot != i) continue;
 
-                if (items[i] != null && items[i].getType() != Material.AIR) {
+                if (items[i] != null && !items[i].getType().isAir()) {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
