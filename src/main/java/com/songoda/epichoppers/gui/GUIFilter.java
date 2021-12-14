@@ -99,7 +99,7 @@ public class GUIFilter extends CustomizableGui {
             num++;
         }
 
-        it = new ItemStack(Material.BARRIER);
+        it = new ItemStack(CompatibleMaterial.BARRIER.getMaterial());
         itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.void").getMessage());
         it.setItemMeta(itm);
@@ -117,7 +117,7 @@ public class GUIFilter extends CustomizableGui {
             num++;
         }
 
-        ItemStack itemInfo = new ItemStack(Material.PAPER, 1);
+        ItemStack itemInfo = new ItemStack(CompatibleMaterial.PAPER.getMaterial());
         ItemMeta itemmetaInfo = itemInfo.getItemMeta();
         itemmetaInfo.setDisplayName(plugin.getLocale().getMessage("interface.filter.infotitle").getMessage());
         ArrayList<String> loreInfo = new ArrayList<>();
@@ -131,7 +131,7 @@ public class GUIFilter extends CustomizableGui {
         setItem("info", 16, itemInfo);
 
 
-        ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
+        ItemStack hook = new ItemStack(CompatibleMaterial.TRIPWIRE_HOOK.getMaterial());
         ItemMeta hookmeta = hook.getItemMeta();
         hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.rejectsync").getMessage());
         ArrayList<String> lorehook = new ArrayList<>();
