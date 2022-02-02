@@ -113,6 +113,11 @@
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+
+        <repository>
+            <id>rosewood-repo</id>
+            <url>https://repo.rosewooddev.io/repository/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -169,6 +174,13 @@
             <groupId>com.github.DeadSilenceIV</groupId>
             <artifactId>AdvancedChestsAPI</artifactId>
             <version>2.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.rosewood</groupId>
+            <artifactId>rosestacker</artifactId>
+            <version>1.4.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

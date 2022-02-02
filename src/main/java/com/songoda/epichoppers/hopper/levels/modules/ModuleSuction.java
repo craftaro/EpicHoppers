@@ -11,6 +11,7 @@ import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import com.songoda.ultimatestacker.UltimateStacker;
+import dev.rosewood.rosestacker.api.RoseStackerAPI;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -40,6 +41,7 @@ public class ModuleSuction extends Module {
 
     private static final boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
     private static final boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
+    private static final boolean roseStacker = Bukkit.getPluginManager().isPluginEnabled("RoseStacker");
 
     public ModuleSuction(EpicHoppers plugin, int amount) {
         super(plugin);
@@ -154,8 +156,10 @@ public class ModuleSuction extends Module {
     private int getActualItemAmount(Item item) {
         if (ultimateStacker) {
             return com.songoda.ultimatestacker.utils.Methods.getActualItemAmount(item);
-        } else if (wildStacker)
+        } else if (wildStacker) {
             return WildStackerAPI.getItemAmount(item);
+        } else if (roseStacker && RoseStackerAPI.getInstance().isItemStacked(item))
+            return RoseStackerAPI.getInstance().getStackedItem(item).getStackSize();
         else
             return item.getItemStack().getAmount();
 
@@ -164,8 +168,10 @@ public class ModuleSuction extends Module {
     private void updateAmount(Item item, int amount) {
         if (ultimateStacker) {
             UltimateStacker.updateItemAmount(item, item.getItemStack(), amount);
-        } else if (wildStacker)
+        } else if (wildStacker) {
             WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
+        } else if (roseStacker && RoseStackerAPI.getInstance().isItemStacked(item))
+            RoseStackerAPI.getInstance().getStackedItem(item).setStackSize(amount);
         else
             item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
     }
