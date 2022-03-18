@@ -52,7 +52,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -156,8 +155,8 @@ public class EpicHoppers extends SongodaPlugin {
                 try {
                     SkyBlock.getInstance().getPermissionManager().registerPermission(
                             (BasicPermission) Class.forName("com.songoda.epichoppers.compatibility.EpicHoppersPermission").getDeclaredConstructor().newInstance());
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    e.printStackTrace();
+                } catch (ReflectiveOperationException ex) {
+                    ex.printStackTrace();
                 }
             }
         });
