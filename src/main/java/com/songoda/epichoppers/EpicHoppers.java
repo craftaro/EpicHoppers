@@ -12,8 +12,7 @@ import com.songoda.core.gui.GuiManager;
 import com.songoda.core.hooks.EconomyManager;
 import com.songoda.core.hooks.ProtectionManager;
 import com.songoda.core.locale.Locale;
-import com.songoda.core.nms.NmsManager;
-import com.songoda.core.nms.nbt.NBTItem;
+import com.songoda.core.third_party.de.tr7zw.nbtapi.NBTItem;
 import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.CommandBoost;
@@ -251,9 +250,9 @@ public class EpicHoppers extends SongodaPlugin {
         }
         item.setItemMeta(itemmeta);
 
-        NBTItem nbtItem = NmsManager.getNbt().of(item);
-        nbtItem.set("level", level.getLevel());
-        return nbtItem.finish();
+        NBTItem nbtItem = new NBTItem(item);
+        nbtItem.setInteger("level", level.getLevel());
+        return nbtItem.getItem();
     }
 
     @Override

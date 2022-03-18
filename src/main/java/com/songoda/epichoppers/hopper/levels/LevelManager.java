@@ -2,7 +2,7 @@ package com.songoda.epichoppers.hopper.levels;
 
 import com.songoda.core.nms.NmsManager;
 import com.songoda.core.nms.nbt.NBTCore;
-import com.songoda.core.nms.nbt.NBTItem;
+import com.songoda.core.third_party.de.tr7zw.nbtapi.NBTItem;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
@@ -28,11 +28,10 @@ public class LevelManager {
     }
 
     public Level getLevel(ItemStack item) {
-        NBTCore nbt = NmsManager.getNbt();
-        NBTItem nbtItem = nbt.of(item);
+        NBTItem nbtItem = new NBTItem(item);
 
-        if (nbtItem.has("level"))
-            return getLevel(nbtItem.getNBTObject("level").asInt());
+        if (nbtItem.hasKey("level"))
+            return getLevel(nbtItem.getInteger("level"));
 
         // Legacy trash.
         if (item.hasItemMeta() && item.getItemMeta().getDisplayName().contains(":")) {
