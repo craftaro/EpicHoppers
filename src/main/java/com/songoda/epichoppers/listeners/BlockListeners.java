@@ -146,6 +146,13 @@ public class BlockListeners implements Listener {
                 filter(m -> m != null)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
 
+        hopper.getFilter().getAutoSellWhiteList().stream()
+                .filter(m -> m != null)
+                .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
+        hopper.getFilter().getAutoSellBlackList().stream()
+                .filter(m -> m != null)
+                .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
+
         plugin.getHopperManager().removeHopper(block.getLocation());
         plugin.getDataManager().deleteHopper(hopper);
 
