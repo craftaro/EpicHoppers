@@ -86,8 +86,12 @@ public class Settings {
 
     public static final ConfigSetting AUTOSELL_SHOPGUIPLUS = new ConfigSetting(config, "Main.Use ShopGuiPlus for Prices", false,
             "Should prices be grabbed from ShopGuiPlus?",
-            "If ShopGuiPlus is not enabled or the player is offline the default price list will be used.",
+            "If ShopGuiPlus is not enabled or the player is offline the default price list will be used (or EconomyShopGUI if enabled).",
             "If this is something that you do not want then you should empty the default list.");
+
+    public static final ConfigSetting AUTOSELL_ECONOMY_SHOP_GUI = new ConfigSetting(config, "Main.Use EconomyShopGUI for Prices", false,
+            "Should prices be grabbed from EconomyShopGUI?",
+            "If 'Use ShopGuiPlus for Prices' is enabled and the player is online, this will be ignored.");
 
     public static final ConfigSetting ECONOMY_PLUGIN = new ConfigSetting(config, "Main.Economy", EconomyManager.getEconomy() == null ? "Vault" : EconomyManager.getEconomy().getName(),
             "Which economy plugin should be used?",

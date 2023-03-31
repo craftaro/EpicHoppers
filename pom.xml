@@ -152,6 +152,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.Gypopo</groupId>
+            <artifactId>EconomyShopGUI-API</artifactId>
+            <version>1.4.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.songoda</groupId>
             <artifactId>UltimateStacker</artifactId>
             <version>2.1.6</version>

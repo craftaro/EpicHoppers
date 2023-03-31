@@ -10,6 +10,7 @@ import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.utils.StorageContainerCache;
+import me.gypopo.economyshopgui.api.EconomyShopGUIHook;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -75,7 +76,7 @@ public class ModuleAutoSell extends Module {
                         continue;
                 }
 
-                // Get the value from config or ShopGuiPlus
+                // Get the value from config or ShopGuiPlus or EconomyShopGui
                 double value;
                 if (Settings.AUTOSELL_SHOPGUIPLUS.getBoolean() && player.isOnline()) {
                     try {
@@ -85,9 +86,22 @@ public class ModuleAutoSell extends Module {
                     } catch (Exception e) {
                         value = 0;
                     }
-                } else
+                } else if (Settings.AUTOSELL_ECONOMY_SHOP_GUI.getBoolean() && player.isOnline() && (Bukkit.getPluginManager().isPluginEnabled("EconomyShopGUI") || Bukkit.getPluginManager().isPluginEnabled("EconomyShopGUI-Premium"))) {
+                    value = 0;
+                    try {
+                        ItemStack clone = itemStack.clone();
+                        clone.setAmount(1);
+                        Double sellPrice = EconomyShopGUIHook.getItemSellPrice(player.getPlayer(), clone);
+                        if (sellPrice != null) {
+                            value = sellPrice;
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
                     value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> CompatibleMaterial.valueOf(line.split(",")[0]) == CompatibleMaterial.getMaterial(itemStack)).findFirst()
                             .map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
+                }
 
                 if (value <= 0) continue;
 
