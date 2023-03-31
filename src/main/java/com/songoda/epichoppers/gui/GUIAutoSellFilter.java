@@ -164,7 +164,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         filter.setAutoSellWhiteList(whiteListItems);
         filter.setAutoSellBlackList(blackListItems);
-        plugin.getDataManager().updateItems(hopper, ItemType.WHITELIST, whiteListItems);
-        plugin.getDataManager().updateItems(hopper, ItemType.BLACKLIST, blackListItems);
+        plugin.getDataManager().updateItems(hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
+        plugin.getDataManager().updateItems(hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
     }
 }
