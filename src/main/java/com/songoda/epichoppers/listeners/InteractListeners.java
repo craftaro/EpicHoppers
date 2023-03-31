@@ -4,10 +4,10 @@ import com.songoda.core.hooks.ProtectionManager;
 import com.songoda.core.hooks.WorldGuardHook;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
-import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import com.songoda.skyblock.SkyBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -62,10 +62,7 @@ public class InteractListeners implements Listener {
             return;
         }
 
-        if (WorldGuardHook.isInteractAllowed(event.getClickedBlock().getLocation()))
-            return;
-
-        if (Settings.USE_PROTECTION_PLUGINS.getBoolean() && !ProtectionManager.canInteract(player, event.getClickedBlock().getLocation())) {
+        if (Settings.USE_PROTECTION_PLUGINS.getBoolean() && ProtectionManager.canInteract(player, event.getClickedBlock().getLocation()) && WorldGuardHook.isInteractAllowed(event.getClickedBlock().getLocation())) {
             player.sendMessage(plugin.getLocale().getMessage("event.general.protected").getPrefixedMessage());
             return;
         }
@@ -73,11 +70,9 @@ public class InteractListeners implements Listener {
         if (Bukkit.getPluginManager().isPluginEnabled("FabledSkyBlock")) {
             SkyBlock skyBlock = SkyBlock.getInstance();
 
-            if (skyBlock.getWorldManager().isIslandWorld(event.getPlayer().getWorld()))
-                if (!skyBlock.getPermissionManager().hasPermission(event.getPlayer(),
-                        skyBlock.getIslandManager().getIslandAtLocation(event.getClickedBlock().getLocation()),
-                        "EpicHoppers"))
-                    return;
+            if (skyBlock.getWorldManager().isIslandWorld(event.getPlayer().getWorld()) &&
+                    !skyBlock.getPermissionManager().hasPermission(event.getPlayer(), skyBlock.getIslandManager().getIslandAtLocation(event.getClickedBlock().getLocation()), "EpicHoppers"))
+                return;
         }
 
         PlayerData playerData = plugin.getPlayerDataManager().getPlayerData(player);
@@ -108,10 +103,11 @@ public class InteractListeners implements Listener {
                 && Settings.ENDERCHESTS.getBoolean())) {
             Hopper hopper = playerData.getLastHopper();
             if (event.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
-                if (!hopper.getLinkedBlocks().isEmpty())
+                if (!hopper.getLinkedBlocks().isEmpty()) {
                     plugin.getLocale().getMessage("event.hopper.syncfinish").sendPrefixedMessage(player);
-                else
+                } else {
                     plugin.getLocale().getMessage("event.hopper.synccanceled").sendPrefixedMessage(player);
+                }
                 hopper.cancelSync(player);
             } else if (playerData.getSyncType() != null) {
                 hopper.link(event.getClickedBlock(), playerData.getSyncType() == SyncType.FILTERED, player);
