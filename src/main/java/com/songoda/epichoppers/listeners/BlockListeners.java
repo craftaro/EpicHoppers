@@ -4,6 +4,8 @@ import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.api.events.HopperBreakEvent;
 import com.songoda.epichoppers.api.events.HopperPlaceEvent;
+import com.songoda.epichoppers.gui.GUIAutoSellFilter;
+import com.songoda.epichoppers.gui.GUIFilter;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
@@ -118,6 +120,9 @@ public class BlockListeners implements Listener {
             return;
 
         Hopper hopper = plugin.getHopperManager().getHopper(block);
+
+        GUIFilter.compileOpenGuiFilter(hopper);
+        GUIAutoSellFilter.compileOpenAutoSellFilter(hopper);
 
         Level level = hopper.getLevel();
 

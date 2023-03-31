@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GUIFilter extends CustomizableGui {
+    private static final List<GUIFilter> openInventories = new ArrayList<>();
 
     private final EpicHoppers plugin;
 
@@ -37,7 +38,10 @@ public class GUIFilter extends CustomizableGui {
         setDefaultItem(null);
         setAcceptsItems(true);
 
+        setOnOpen((event) -> GUIFilter.openInventories.add(this));
+
         setOnClose((event) -> {
+            GUIFilter.openInventories.remove(this);
             hopper.setActivePlayer(null);
             compile();
         });
@@ -162,7 +166,6 @@ public class GUIFilter extends CustomizableGui {
         setUnlockedRange(36, 41);
     }
 
-
     private void compile() {
         ItemStack[] items = inventory.getContents();
 
@@ -220,5 +223,13 @@ public class GUIFilter extends CustomizableGui {
         plugin.getDataManager().updateItems(hopper, ItemType.WHITELIST, owhite);
         plugin.getDataManager().updateItems(hopper, ItemType.BLACKLIST, oblack);
         plugin.getDataManager().updateItems(hopper, ItemType.VOID, ovoid);
+    }
+
+    public static void compileOpenGuiFilter(Hopper hopper) {
+        for (GUIFilter guiFilter : openInventories) {
+            if (guiFilter.hopper == hopper) {
+                guiFilter.compile();
+            }
+        }
     }
 }

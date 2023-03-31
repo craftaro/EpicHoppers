@@ -11,7 +11,6 @@ import com.songoda.epichoppers.hopper.ItemType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GUIAutoSellFilter extends CustomizableGui {
+    private static final List<GUIAutoSellFilter> openInventories = new ArrayList<>();
 
     private final EpicHoppers plugin;
     private final Hopper hopper;
@@ -36,7 +36,10 @@ public class GUIAutoSellFilter extends CustomizableGui {
         setDefaultItem(null);
         setAcceptsItems(true);
 
+        setOnOpen((event) -> GUIAutoSellFilter.openInventories.add(this));
+
         setOnClose((event) -> {
+            GUIAutoSellFilter.openInventories.remove(this);
             hopper.setActivePlayer(null);
             compile();
         });
@@ -166,5 +169,13 @@ public class GUIAutoSellFilter extends CustomizableGui {
         filter.setAutoSellBlackList(blackListItems);
         plugin.getDataManager().updateItems(hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
         plugin.getDataManager().updateItems(hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
+    }
+
+    public static void compileOpenAutoSellFilter(Hopper hopper) {
+        for (GUIAutoSellFilter autoSellFilter : openInventories) {
+            if (autoSellFilter.hopper == hopper) {
+                autoSellFilter.compile();
+            }
+        }
     }
 }
