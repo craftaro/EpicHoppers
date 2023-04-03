@@ -4,6 +4,8 @@ import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.api.events.HopperBreakEvent;
 import com.songoda.epichoppers.api.events.HopperPlaceEvent;
+import com.songoda.epichoppers.gui.GUIAutoSellFilter;
+import com.songoda.epichoppers.gui.GUIFilter;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.HopperBuilder;
 import com.songoda.epichoppers.hopper.levels.Level;
@@ -119,6 +121,9 @@ public class BlockListeners implements Listener {
 
         Hopper hopper = plugin.getHopperManager().getHopper(block);
 
+        GUIFilter.compileOpenGuiFilter(hopper);
+        GUIAutoSellFilter.compileOpenAutoSellFilter(hopper);
+
         Level level = hopper.getLevel();
 
         if (level.getLevel() > 1 || Settings.ALLOW_NORMAL_HOPPERS.getBoolean()) {
@@ -144,6 +149,13 @@ public class BlockListeners implements Listener {
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
         hopper.getFilter().getVoidList().stream().
                 filter(m -> m != null)
+                .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
+
+        hopper.getFilter().getAutoSellWhiteList().stream()
+                .filter(m -> m != null)
+                .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
+        hopper.getFilter().getAutoSellBlackList().stream()
+                .filter(m -> m != null)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
 
         plugin.getHopperManager().removeHopper(block.getLocation());

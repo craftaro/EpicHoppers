@@ -2,7 +2,7 @@
     <groupId>com.songoda</groupId>
     <artifactId>EpicHoppers</artifactId>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.7.6</version>
+    <version>4.7.8</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <finalName>EpicHoppers-${project.version}</finalName>
@@ -119,7 +119,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.19-R0.1-SNAPSHOT</version>
+            <version>1.19.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -133,7 +133,7 @@
         <dependency>
             <groupId>com.songoda</groupId>
             <artifactId>SongodaCore</artifactId>
-            <version>2.6.16</version>
+            <version>2.6.19-DEV</version>
             <scope>compile</scope>
         </dependency>
 
@@ -148,6 +148,13 @@
             <groupId>com.github.brcdev-minecraft</groupId>
             <artifactId>shopgui-api</artifactId>
             <version>2.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.Gypopo</groupId>
+            <artifactId>EconomyShopGUI-API</artifactId>
+            <version>1.4.0</version>
             <scope>provided</scope>
         </dependency>
 

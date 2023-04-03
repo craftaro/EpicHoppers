@@ -1,7 +1,26 @@
 name: EpicHoppers
 description: EpicHoppers
 main: com.songoda.epichoppers.EpicHoppers
-softdepend: [ FabledSkyBlock, LiquidTanks, UltimateStacker, WildStacker, Reserve, Towny, RedProtect, Kingdoms, PlotsSquared, GriefPrevention, USkyBlock, ASkyBlock, WorldGuard, Factions, Vault, EpicFarming, AdvancedChests ]
+softdepend:
+  - ASkyBlock
+  - AdvancedChests
+  - EconomyShopGUI
+  - EconomyShopGUI-Premium
+  - EpicFarming
+  - FabledSkyBlock
+  - Factions
+  - GriefPrevention
+  - Kingdoms
+  - LiquidTanks
+  - PlotsSquared
+  - RedProtect
+  - Reserve
+  - Towny
+  - USkyBlock
+  - UltimateStacker
+  - Vault
+  - WildStacker
+  - WorldGuard
 version: maven-version-number
 author: Songoda
 api-version: 1.13

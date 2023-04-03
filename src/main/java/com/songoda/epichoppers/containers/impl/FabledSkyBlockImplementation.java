@@ -35,7 +35,7 @@ public class FabledSkyBlockImplementation implements IContainer {
             }
 
             stackable.addOne();
-            if (stackable.isMaxSize()) {
+            if (stackable.getMaxSize() > 0 && stackable.isMaxSize()) {
                 stackable.setSize(stackable.getMaxSize());
                 return false;
             }
