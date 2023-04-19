@@ -2,7 +2,7 @@ package com.songoda.epichoppers.utils;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.utils.BlockUtils;
+import com.songoda.core.nms.NmsManager;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -112,7 +112,8 @@ public class StorageContainerCache {
                             inventory.setItem(i, cachedInventory[i]);
                         }
                     }
-                    BlockUtils.updateAdjacentComparators(e.getKey().getLocation());
+
+                    NmsManager.getWorld().updateAdjacentComparators(e.getKey());
                 });
         inventoryCache.clear();
     }
