@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.listeners;
 
 import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.utils.BlockUtils;
+import com.songoda.core.nms.NmsManager;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
@@ -139,10 +139,14 @@ public class HopperListeners implements Listener {
                         //event.setItem(moveInstead);
                         // we need to instead cancel and manually remove the item to move
                         source.removeItem(moveInstead);
-                        BlockUtils.updateAdjacentComparators(sourceLocation);
+                        if (sourceLocation != null) {
+                            NmsManager.getWorld().updateAdjacentComparators(sourceLocation.getBlock());
+                        }
                         // now add it to the hopper
                         destination.addItem(moveInstead);
-                        BlockUtils.updateAdjacentComparators(destinationLocation);
+                        if (destinationLocation != null) {
+                            NmsManager.getWorld().updateAdjacentComparators(destinationLocation.getBlock());
+                        }
                     }
                     return;
                 }
