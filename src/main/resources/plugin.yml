@@ -1,9 +1,12 @@
-name: EpicHoppers
-description: EpicHoppers
+name: ${project.name}
+description: ${project.description}
+version: ${project.version}
+api-version: 1.13
+
 main: com.songoda.epichoppers.EpicHoppers
 softdepend:
-  - ASkyBlock
   - AdvancedChests
+  - ASkyBlock
   - EconomyShopGUI
   - EconomyShopGUI-Premium
   - EpicFarming
@@ -16,14 +19,15 @@ softdepend:
   - RedProtect
   - Reserve
   - Towny
-  - USkyBlock
   - UltimateStacker
+  - USkyBlock
   - Vault
   - WildStacker
   - WorldGuard
-version: maven-version-number
-author: Songoda
-api-version: 1.13
+
+author: Craftaro
+website: ${project.url}
+
 commands:
   eh:
     description: View information on this plugin.
