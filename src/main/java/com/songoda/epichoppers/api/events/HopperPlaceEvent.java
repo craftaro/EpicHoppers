@@ -5,11 +5,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 public class HopperPlaceEvent extends HopperEvent {
-
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public HopperPlaceEvent(Player player, Hopper hopper) {
-        super(player, hopper);
+    public HopperPlaceEvent(Player who, Hopper hopper) {
+        super(who, hopper);
     }
 
     @Override
@@ -20,5 +19,4 @@ public class HopperPlaceEvent extends HopperEvent {
     public static HandlerList getHandlerList() {
         return HANDLERS;
     }
-
 }

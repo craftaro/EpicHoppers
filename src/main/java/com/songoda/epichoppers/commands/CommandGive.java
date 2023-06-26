@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CommandGive extends AbstractCommand {
-
     private final EpicHoppers plugin;
 
     public CommandGive(EpicHoppers plugin) {
@@ -26,29 +25,29 @@ public class CommandGive extends AbstractCommand {
             return ReturnType.SYNTAX_ERROR;
         }
         if (Bukkit.getPlayerExact(args[0]) == null) {
-            plugin.getLocale().newMessage("&cThat username does not exist, or the user is not online!").sendPrefixedMessage(sender);
+            this.plugin.getLocale().newMessage("&cThat username does not exist, or the user is not online!").sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         }
 
-        Level level = plugin.getLevelManager().getLowestLevel();
+        Level level = this.plugin.getLevelManager().getLowestLevel();
         Player player;
         if (Bukkit.getPlayer(args[0]) == null) {
-            plugin.getLocale().newMessage("&cThat player does not exist or is currently offline.").sendPrefixedMessage(sender);
+            this.plugin.getLocale().newMessage("&cThat player does not exist or is currently offline.").sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else {
             player = Bukkit.getPlayer(args[0]);
         }
 
 
-        if (!plugin.getLevelManager().isLevel(Integer.parseInt(args[1]))) {
-            plugin.getLocale().newMessage("&cNot a valid level... The current valid levels are: &4" + level.getLevel() + "-" + plugin.getLevelManager().getHighestLevel().getLevel() + "&c.")
+        if (!this.plugin.getLevelManager().isLevel(Integer.parseInt(args[1]))) {
+            this.plugin.getLocale().newMessage("&cNot a valid level... The current valid levels are: &4" + level.getLevel() + "-" + this.plugin.getLevelManager().getHighestLevel().getLevel() + "&c.")
                     .sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         } else {
-            level = plugin.getLevelManager().getLevel(Integer.parseInt(args[1]));
+            level = this.plugin.getLevelManager().getLevel(Integer.parseInt(args[1]));
         }
-        player.getInventory().addItem(plugin.newHopperItem(level));
-        plugin.getLocale().getMessage("command.give.success").processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
+        player.getInventory().addItem(this.plugin.newHopperItem(level));
+        this.plugin.getLocale().getMessage("command.give.success").processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
 
         return ReturnType.SUCCESS;
     }

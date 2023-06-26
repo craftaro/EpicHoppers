@@ -12,7 +12,6 @@ import com.songoda.core.database.SQLiteConnector;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.core.hooks.EconomyManager;
 import com.songoda.core.hooks.ProtectionManager;
-import com.songoda.core.locale.Locale;
 import com.songoda.core.third_party.de.tr7zw.nbtapi.NBTItem;
 import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.boost.BoostManager;
@@ -58,8 +57,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class EpicHoppers extends SongodaPlugin {
-
-    private static EpicHoppers INSTANCE;
     private final GuiManager guiManager = new GuiManager(this);
     private final Config levelsConfig = new Config(this, "levels.yml");
     private HopperManager hopperManager;
@@ -74,13 +71,8 @@ public class EpicHoppers extends SongodaPlugin {
     private DatabaseConnector databaseConnector;
     private DataManager dataManager;
 
-    public static EpicHoppers getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public void onPluginLoad() {
-        INSTANCE = this;
     }
 
     @Override
@@ -117,9 +109,9 @@ public class EpicHoppers extends SongodaPlugin {
                         new CommandSettings(this)
                 );
 
-        this.hopperManager = new HopperManager();
+        this.hopperManager = new HopperManager(this);
         this.playerDataManager = new PlayerDataManager();
-        this.containerManager = new ContainerManager(this);
+        this.containerManager = new ContainerManager();
         this.boostManager = new BoostManager();
 
         // Database stuff, go!
@@ -145,8 +137,7 @@ public class EpicHoppers extends SongodaPlugin {
         }
 
         this.dataManager = new DataManager(this.databaseConnector, this);
-        DataMigrationManager dataMigrationManager = new DataMigrationManager(this.databaseConnector, this.dataManager,
-                new _1_InitialMigration());
+        DataMigrationManager dataMigrationManager = new DataMigrationManager(this.databaseConnector, this.dataManager, new _1_InitialMigration(this));
         dataMigrationManager.runMigrations();
 
         this.loadLevelManager();
@@ -155,7 +146,7 @@ public class EpicHoppers extends SongodaPlugin {
         this.teleportHandler = new TeleportHandler(this);
 
         // Register Listeners
-        guiManager.init();
+        this.guiManager.init();
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new HopperListeners(this), this);
         pluginManager.registerEvents(new EntityListeners(), this);
@@ -200,24 +191,25 @@ public class EpicHoppers extends SongodaPlugin {
 
     @Override
     public List<Config> getExtraConfig() {
-        return Collections.singletonList(levelsConfig);
+        return Collections.singletonList(this.levelsConfig);
     }
 
     private void loadLevelManager() {
-        if (!new File(this.getDataFolder(), "levels.yml").exists())
+        if (!new File(this.getDataFolder(), "levels.yml").exists()) {
             this.saveResource("levels.yml", false);
-        levelsConfig.load();
+        }
+        this.levelsConfig.load();
 
         // Load an instance of LevelManager
-        levelManager = new LevelManager();
+        this.levelManager = new LevelManager();
         /*
          * Register Levels into LevelManager from configuration.
          */
-        levelManager.clear();
-        for (String levelName : levelsConfig.getKeys(false)) {
+        this.levelManager.clear();
+        for (String levelName : this.levelsConfig.getKeys(false)) {
             int level = Integer.parseInt(levelName.split("-")[1]);
 
-            ConfigurationSection levels = levelsConfig.getConfigurationSection(levelName);
+            ConfigurationSection levels = this.levelsConfig.getConfigurationSection(levelName);
 
             int radius = levels.getInt("Range");
             int amount = levels.getInt("Amount");
@@ -245,13 +237,13 @@ public class EpicHoppers extends SongodaPlugin {
                     modules.add(new ModuleAutoSmelter(this, levels.getInt("AutoSmelting")));
                 }
             }
-            levelManager.addLevel(level, costExperience, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
+            this.levelManager.addLevel(level, costExperience, costEconomy, radius, amount, filter, teleport, linkAmount, modules);
         }
     }
 
     private void saveModules() {
-        if (levelManager != null) {
-            for (Level level : levelManager.getLevels().values()) {
+        if (this.levelManager != null) {
+            for (Level level : this.levelManager.getLevels().values()) {
                 for (Module module : level.getRegisteredModules()) {
                     module.saveDataToFile();
                 }
@@ -274,48 +266,52 @@ public class EpicHoppers extends SongodaPlugin {
         return nbtItem.getItem();
     }
 
-    @Override
-    public Locale getLocale() {
-        return locale;
-    }
-
     public TeleportHandler getTeleportHandler() {
-        return teleportHandler;
+        return this.teleportHandler;
     }
 
     public BoostManager getBoostManager() {
-        return boostManager;
+        return this.boostManager;
     }
 
     public CommandManager getCommandManager() {
-        return commandManager;
+        return this.commandManager;
     }
 
     public LevelManager getLevelManager() {
-        return levelManager;
+        return this.levelManager;
     }
 
     public HopperManager getHopperManager() {
-        return hopperManager;
+        return this.hopperManager;
     }
 
     public PlayerDataManager getPlayerDataManager() {
-        return playerDataManager;
+        return this.playerDataManager;
     }
 
     public GuiManager getGuiManager() {
-        return guiManager;
+        return this.guiManager;
     }
 
     public DataManager getDataManager() {
-        return dataManager;
+        return this.dataManager;
     }
 
     public DatabaseConnector getDatabaseConnector() {
-        return databaseConnector;
+        return this.databaseConnector;
     }
 
     public ContainerManager getContainerManager() {
-        return containerManager;
+        return this.containerManager;
+    }
+
+
+    /**
+     * @deprecated Use {@link #getPlugin(Class)} instead
+     */
+    @Deprecated
+    public static EpicHoppers getInstance() {
+        return EpicHoppers.getPlugin(EpicHoppers.class);
     }
 }

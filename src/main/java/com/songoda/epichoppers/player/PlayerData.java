@@ -3,13 +3,11 @@ package com.songoda.epichoppers.player;
 import com.songoda.epichoppers.hopper.Hopper;
 
 public class PlayerData {
-
     private Hopper lastHopper = null;
-
     private SyncType syncType = null; // Null means off.
 
     public Hopper getLastHopper() {
-        return lastHopper;
+        return this.lastHopper;
     }
 
     public void setLastHopper(Hopper lastHopper) {
@@ -17,7 +15,7 @@ public class PlayerData {
     }
 
     public SyncType getSyncType() {
-        return syncType;
+        return this.syncType;
     }
 
     public void setSyncType(SyncType syncType) {

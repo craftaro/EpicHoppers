@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerEvent;
  * Represents an abstract {@link Event} given a {@link Player} and {@link Hopper} instance
  */
 public abstract class HopperEvent extends PlayerEvent {
-
     protected final Hopper hopper;
 
     public HopperEvent(Player who, Hopper hopper) {
@@ -23,7 +22,7 @@ public abstract class HopperEvent extends PlayerEvent {
      * @return the broken spawner
      */
     public Hopper getHopper() {
-        return hopper;
+        return this.hopper;
     }
 
 }

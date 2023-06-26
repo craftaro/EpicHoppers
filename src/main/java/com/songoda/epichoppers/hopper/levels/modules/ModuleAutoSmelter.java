@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class ModuleAutoSmelter extends Module {
-
     private final int timeOut;
     private final int hopperTickRate;
 
@@ -35,21 +34,28 @@ public class ModuleAutoSmelter extends Module {
 
     @Override
     public void run(Hopper hopper, StorageContainerCache.Cache hopperCache) {
-        if (!isEnabled(hopper)) return;
+        if (!isEnabled(hopper)) {
+            return;
+        }
 
         int currentTime = getTime(hopper);
+        if (currentTime == -9999) {
+            return;
+        }
 
-        if (currentTime == -9999) return;
-
-        int subtract = currentTime - hopperTickRate;
+        int subtract = currentTime - this.hopperTickRate;
 
 
         if (subtract <= 0) {
             for (int i = 0; i < 5; i++) {
                 final ItemStack itemStack = hopperCache.cachedInventory[i];
-                if (itemStack == null) continue;
+                if (itemStack == null) {
+                    continue;
+                }
                 CompatibleMaterial material = CompatibleMaterial.getMaterial(itemStack);
-                if (!isSmeltable(hopper, material)) continue;
+                if (!isSmeltable(hopper, material)) {
+                    continue;
+                }
                 CompatibleMaterial result = CompatibleMaterial.getMaterial(itemStack).getBurnResult();
 
                 if (hopperCache.addItem(result.getItem())) {
@@ -63,7 +69,7 @@ public class ModuleAutoSmelter extends Module {
                 }
             }
 
-            modifyDataCache(hopper, "time", timeOut);
+            modifyDataCache(hopper, "time", this.timeOut);
             return;
         }
 
@@ -74,16 +80,20 @@ public class ModuleAutoSmelter extends Module {
     public ItemStack getGUIButton(Hopper hopper) {
         ItemStack block = CompatibleMaterial.IRON_INGOT.getItem();
         ItemMeta blockmeta = block.getItemMeta();
-        blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.smelttitle").getMessage());
-        ArrayList<String> loreblock = new ArrayList<>();
-        String[] parts = plugin.getLocale().getMessage("interface.hopper.smeltlore").processPlaceholder("timeleft",
-                getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20.0)).processPlaceholder("enabled",
-                isEnabled(hopper) ? EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled").getMessage()
-                        : EpicHoppers.getInstance().getLocale().getMessage("general.word.disabled").getMessage()).getMessage().split("\\|");
+        blockmeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.smelttitle").getMessage());
+        ArrayList<String> loreBlock = new ArrayList<>();
+        String[] parts = this.plugin.getLocale().getMessage("interface.hopper.smeltlore")
+                .processPlaceholder("timeleft", getTime(hopper) == -9999 ? "∞" : (int) Math.floor(getTime(hopper) / 20.0))
+                .processPlaceholder("enabled", isEnabled(hopper) ?
+                        this.plugin.getLocale().getMessage("general.word.enabled").getMessage() :
+                        this.plugin.getLocale().getMessage("general.word.disabled").getMessage()
+                )
+                .getMessage()
+                .split("\\|");
         for (String line : parts) {
-            loreblock.add(TextUtils.formatText(line));
+            loreBlock.add(TextUtils.formatText(line));
         }
-        blockmeta.setLore(loreblock);
+        blockmeta.setLore(loreBlock);
         block.setItemMeta(blockmeta);
         return block;
     }
@@ -91,54 +101,65 @@ public class ModuleAutoSmelter extends Module {
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
         if (type == ClickType.LEFT) {
             hopper.setActivePlayer(player);
-            EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUISmeltable(this, plugin, hopper));
-        } else if (type == ClickType.RIGHT)
+            this.plugin.getGuiManager().showGUI(player, new GUISmeltable(this, this.plugin, hopper));
+        } else if (type == ClickType.RIGHT) {
             toggleEnabled(hopper);
+        }
     }
 
     @Override
     public List<Material> getBlockedItems(Hopper hopper) {
-        if (getTime(hopper) == -9999)
+        if (getTime(hopper) == -9999) {
             return Collections.emptyList();
+        }
 
         List<Material> blockedItems = new ArrayList<>();
-        for (CompatibleMaterial material : CompatibleMaterial.values())
-            if (material.getBurnResult() != null && isSmeltable(hopper, material))
+        for (CompatibleMaterial material : CompatibleMaterial.values()) {
+            if (material.getBurnResult() != null && isSmeltable(hopper, material)) {
                 blockedItems.add(material.getMaterial());
+            }
+        }
 
         return blockedItems;
     }
 
     @Override
     public String getDescription() {
-        return plugin.getLocale().getMessage("interface.hopper.autosmelt")
-                .processPlaceholder("ticks", (int) Math.floor(timeOut / 20.0)).getMessage();
+        return this.plugin.getLocale().getMessage("interface.hopper.autosmelt")
+                .processPlaceholder("ticks", (int) Math.floor(this.timeOut / 20.0)).getMessage();
     }
 
     private int getTime(Hopper hopper) {
         Object time = getData(hopper, "time");
-        if (time == null) return -9999;
+        if (time == null) {
+            return -9999;
+        }
         return (int) time;
     }
 
     private boolean isEnabled(Hopper hopper) {
         Object obj = getData(hopper, "time");
-        if (obj == null) return false;
+        if (obj == null) {
+            return false;
+        }
         return ((int) obj) != -9999;
     }
 
     public boolean isSmeltable(Hopper hopper, CompatibleMaterial material) {
         Object obj = getData(hopper, material.name());
-        if (obj == null) return false;
+        if (obj == null) {
+            return false;
+        }
 
         return ((boolean) obj);
     }
 
     private void toggleEnabled(Hopper hopper) {
-        if (isEnabled(hopper))
+        if (isEnabled(hopper)) {
             saveData(hopper, "time", -9999);
-        else
-            saveData(hopper, "time", timeOut);
+        } else {
+            saveData(hopper, "time", this.timeOut);
+        }
     }
 
     public void toggleSmeltable(Hopper hopper, CompatibleMaterial material) {

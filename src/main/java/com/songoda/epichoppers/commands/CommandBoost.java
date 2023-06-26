@@ -1,19 +1,20 @@
 package com.songoda.epichoppers.commands;
 
 import com.songoda.core.commands.AbstractCommand;
+import com.songoda.core.utils.NumberUtils;
+import com.songoda.core.utils.TimeUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
-import com.songoda.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class CommandBoost extends AbstractCommand {
-
     private final EpicHoppers plugin;
 
     public CommandBoost(EpicHoppers plugin) {
@@ -24,11 +25,11 @@ public class CommandBoost extends AbstractCommand {
     @Override
     protected ReturnType runCommand(CommandSender sender, String... args) {
         if (args.length < 2) {
-            plugin.getLocale().newMessage("&7Syntax error...").sendPrefixedMessage(sender);
+            this.plugin.getLocale().newMessage("&7Syntax error...").sendPrefixedMessage(sender);
             return ReturnType.SYNTAX_ERROR;
         }
-        if (!Methods.isInt(args[1])) {
-            plugin.getLocale().newMessage("&6" + args[1] + " &7is not a number...").sendPrefixedMessage(sender);
+        if (!NumberUtils.isInt(args[1])) {
+            this.plugin.getLocale().newMessage("&6" + args[1] + " &7is not a number...").sendPrefixedMessage(sender);
             return ReturnType.SYNTAX_ERROR;
         }
 
@@ -36,7 +37,7 @@ public class CommandBoost extends AbstractCommand {
 
         if (args.length > 2) {
             for (String line : args) {
-                long time = Methods.parseTime(line);
+                long time = TimeUtils.parseTime(line);
                 duration += time;
 
             }
@@ -44,14 +45,14 @@ public class CommandBoost extends AbstractCommand {
 
         Player player = Bukkit.getPlayer(args[0]);
         if (player == null) {
-            plugin.getLocale().newMessage("&cThat player does not exist or is not online...").sendPrefixedMessage(sender);
+            this.plugin.getLocale().newMessage("&cThat player does not exist or is not online...").sendPrefixedMessage(sender);
             return ReturnType.FAILURE;
         }
 
         BoostData boostData = new BoostData(Integer.parseInt(args[1]), duration == 0L ? Long.MAX_VALUE : System.currentTimeMillis() + duration, player.getUniqueId());
-        plugin.getBoostManager().addBoostToPlayer(boostData);
-        plugin.getLocale().newMessage("&7Successfully boosted &6" + Bukkit.getPlayer(args[0]).getName()
-                + "'s &7hopper transfer rates by &6" + args[1] + "x" + (duration == 0L ? "" : (" for " + Methods.makeReadable(duration))) + "&7.").sendPrefixedMessage(sender);
+        this.plugin.getBoostManager().addBoostToPlayer(boostData);
+        this.plugin.getLocale().newMessage("&7Successfully boosted &6" + Bukkit.getPlayer(args[0]).getName()
+                + "'s &7hopper transfer rates by &6" + args[1] + "x" + (duration == 0L ? "" : (" for " + TimeUtils.makeReadable(duration))) + "&7.").sendPrefixedMessage(sender);
         return ReturnType.SUCCESS;
     }
 
@@ -68,7 +69,8 @@ public class CommandBoost extends AbstractCommand {
         } else if (args.length == 3) {
             return Arrays.asList("1m", "1h", "1d");
         }
-        return null;
+
+        return Collections.emptyList();
     }
 
     @Override

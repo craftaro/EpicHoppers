@@ -21,44 +21,48 @@ import java.util.Map;
 import java.util.UUID;
 
 public class TeleportHandler {
-
     private final Map<UUID, Long> lastTeleports = new HashMap<>();
 
     private final EpicHoppers plugin;
 
     public TeleportHandler(EpicHoppers plugin) {
         this.plugin = plugin;
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0,
-                Settings.TELEPORT_TICKS.getLong());
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0, Settings.TELEPORT_TICKS.getLong());
     }
 
     private void teleportRunner() {
-        if (!plugin.getHopperManager().isReady())
+        if (!this.plugin.getHopperManager().isReady()) {
             return;
+        }
 
         for (World world : Bukkit.getWorlds()) {
             for (Entity entity : world.getEntities()) {
-                if (!(entity instanceof LivingEntity) || entity.getType() == EntityType.ARMOR_STAND)
+                if (!(entity instanceof LivingEntity) || entity.getType() == EntityType.ARMOR_STAND) {
                     continue;
+                }
 
                 if (!Settings.TELEPORT.getBoolean()
-                        || (entity instanceof Player && !entity.hasPermission("EpicHoppers.Teleport")))
+                        || (entity instanceof Player && !entity.hasPermission("EpicHoppers.Teleport"))) {
                     continue;
+                }
 
                 Location location = entity.getLocation().getBlock().getRelative(BlockFace.DOWN).getLocation();
 
-                if (!this.plugin.getHopperManager().isHopper(location))
+                if (!this.plugin.getHopperManager().isHopper(location)) {
                     continue;
+                }
 
                 Hopper hopper = this.plugin.getHopperManager().getHopper(location);
 
-                if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON)
+                if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON) {
                     continue;
+                }
 
                 if (this.lastTeleports.containsKey(entity.getUniqueId())) {
                     long duration = (new Date()).getTime() - new Date(this.lastTeleports.get(entity.getUniqueId())).getTime();
-                    if (duration <= 5 * 1000)
+                    if (duration <= 5 * 1000) {
                         continue;
+                    }
                 }
 
                 this.tpEntity(entity, hopper);
@@ -68,12 +72,14 @@ public class TeleportHandler {
     }
 
     public void tpEntity(Entity entity, Hopper hopper) {
-        if (hopper == null || !this.plugin.getHopperManager().isHopper(hopper.getLocation()))
+        if (hopper == null || !this.plugin.getHopperManager().isHopper(hopper.getLocation())) {
             return;
+        }
 
         Hopper lastHopper = this.getChain(hopper, 1);
-        if (!hopper.equals(lastHopper))
+        if (!hopper.equals(lastHopper)) {
             this.doTeleport(entity, lastHopper.getLocation());
+        }
     }
 
     /**
@@ -84,14 +90,16 @@ public class TeleportHandler {
      * @return The hopper at the end of the chain (or up to 15 in depth)
      */
     private Hopper getChain(Hopper lastHopper, int currentChainLength) {
-        if (currentChainLength > 15)
+        if (currentChainLength > 15) {
             return lastHopper;
+        }
 
         for (Location nextHopperLocation : lastHopper.getLinkedBlocks()) {
             if (nextHopperLocation.getBlock().getState() instanceof org.bukkit.block.Hopper) {
                 Hopper hopper = this.plugin.getHopperManager().getHopper(nextHopperLocation);
-                if (hopper != null)
+                if (hopper != null) {
                     return this.getChain(hopper, currentChainLength + 1);
+                }
             }
         }
 

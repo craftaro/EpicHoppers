@@ -14,7 +14,11 @@ import com.songoda.epichoppers.player.PlayerData;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -27,16 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Created by songoda on 3/14/2017.
- */
 public class Hopper {
-
     // Id for database use.
     private int id;
 
     private final Location location;
-    private Level level = EpicHoppers.getInstance().getLevelManager().getLowestLevel();
+    private Level level = EpicHoppers.getPlugin(EpicHoppers.class).getLevelManager().getLowestLevel();
     private UUID lastPlayerOpened = null;
     private UUID placedBy = null;
     private final List<Location> linkedBlocks = new ArrayList<>();
@@ -55,10 +55,10 @@ public class Hopper {
     }
 
     public void overview(GuiManager guiManager, Player player) {
-        if (lastPlayerOpened != null
-                && lastPlayerOpened != player.getUniqueId()
-                && Bukkit.getPlayer(lastPlayerOpened) != null) {
-            Bukkit.getPlayer(lastPlayerOpened).closeInventory();
+        if (this.lastPlayerOpened != null &&
+                this.lastPlayerOpened != player.getUniqueId() &&
+                Bukkit.getPlayer(this.lastPlayerOpened) != null) {
+            Bukkit.getPlayer(this.lastPlayerOpened).closeInventory();
         }
 
         HopperAccessEvent accessEvent = new HopperAccessEvent(player, this);
@@ -67,36 +67,43 @@ public class Hopper {
             return;
         }
 
-        if (placedBy == null) placedBy = player.getUniqueId();
+        if (this.placedBy == null) {
+            this.placedBy = player.getUniqueId();
+        }
 
-        EpicHoppers instance = EpicHoppers.getInstance();
-        if (!player.hasPermission("epichoppers.overview")) return;
+        EpicHoppers instance = EpicHoppers.getPlugin(EpicHoppers.class);
+        if (!player.hasPermission("epichoppers.overview")) {
+            return;
+        }
 
         setActivePlayer(player);
         guiManager.showGUI(player, new GUIOverview(instance, this, player));
     }
 
     public void forceClose() {
-        if (activePlayer != null)
-            activePlayer.closeInventory();
+        if (this.activePlayer != null) {
+            this.activePlayer.closeInventory();
+        }
     }
 
     public void dropItems() {
-        Inventory inventory = ((InventoryHolder) location.getBlock().getState()).getInventory();
-        World world = location.getWorld();
+        Inventory inventory = ((InventoryHolder) this.location.getBlock().getState()).getInventory();
+        World world = this.location.getWorld();
 
         for (ItemStack itemStack : inventory.getContents()) {
             if (itemStack == null || itemStack.getType() == Material.AIR) {
                 continue;
             }
 
-            world.dropItemNaturally(location, itemStack);
+            world.dropItemNaturally(this.location, itemStack);
         }
     }
 
     public void upgrade(Player player, CostType type) {
-        EpicHoppers plugin = EpicHoppers.getInstance();
-        if (!plugin.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) return;
+        EpicHoppers plugin = EpicHoppers.getPlugin(EpicHoppers.class);
+        if (!plugin.getLevelManager().getLevels().containsKey(this.level.getLevel() + 1)) {
+            return;
+        }
 
         Level level = plugin.getLevelManager().getLevel(this.level.getLevel() + 1);
         int cost = type == CostType.ECONOMY ? level.getCostEconomy() : level.getCostExperience();
@@ -125,7 +132,7 @@ public class Hopper {
     }
 
     private void upgradeFinal(Level level, Player player) {
-        EpicHoppers plugin = EpicHoppers.getInstance();
+        EpicHoppers plugin = EpicHoppers.getPlugin(EpicHoppers.class);
         this.level = level;
         plugin.getDataManager().updateHopper(this);
         syncName();
@@ -136,7 +143,7 @@ public class Hopper {
             plugin.getLocale().getMessage("event.upgrade.maxed")
                     .processPlaceholder("level", level.getLevel()).sendPrefixedMessage(player);
         }
-        Location loc = location.clone().add(.5, .5, .5);
+        Location loc = this.location.clone().add(.5, .5, .5);
 
         if (!Settings.UPGRADE_PARTICLE_TYPE.getString().trim().isEmpty()) {
             CompatibleParticleHandler.spawnParticles(
@@ -155,35 +162,36 @@ public class Hopper {
     }
 
     private void syncName() {
-        org.bukkit.block.Hopper hopper = (org.bukkit.block.Hopper) location.getBlock().getState();
-        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_10))
-            hopper.setCustomName(Methods.formatName(level.getLevel()));
+        org.bukkit.block.Hopper hopper = (org.bukkit.block.Hopper) this.location.getBlock().getState();
+        if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_10)) {
+            hopper.setCustomName(Methods.formatName(this.level.getLevel()));
+        }
         hopper.update(true);
     }
 
     public void timeout(Player player) {
-        EpicHoppers instance = EpicHoppers.getInstance();
-        syncId = Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
+        EpicHoppers instance = EpicHoppers.getPlugin(EpicHoppers.class);
+        this.syncId = Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> {
             PlayerData playerData = instance.getPlayerDataManager().getPlayerData(player);
             if (playerData.getSyncType() != null && playerData.getLastHopper() == this) {
                 instance.getLocale().getMessage("event.hopper.synctimeout").sendPrefixedMessage(player);
                 playerData.setSyncType(null);
             }
-        }, Settings.LINK_TIMEOUT.getLong() * level.getLinkAmount());
+        }, Settings.LINK_TIMEOUT.getLong() * this.level.getLinkAmount());
     }
 
     public void link(Block toLink, boolean filtered, Player player) {
-        EpicHoppers instance = EpicHoppers.getInstance();
+        EpicHoppers instance = EpicHoppers.getPlugin(EpicHoppers.class);
 
-        if (location.getWorld().equals(toLink.getLocation().getWorld())
+        if (this.location.getWorld().equals(toLink.getLocation().getWorld())
                 && !player.hasPermission("EpicHoppers.Override")
                 && !player.hasPermission("EpicHoppers.Admin")
-                && location.distance(toLink.getLocation()) > level.getRange()) {
+                && this.location.distance(toLink.getLocation()) > this.level.getRange()) {
             instance.getLocale().getMessage("event.hopper.syncoutofrange").sendPrefixedMessage(player);
             return;
         }
 
-        if (linkedBlocks.contains(toLink.getLocation())) {
+        if (this.linkedBlocks.contains(toLink.getLocation())) {
             instance.getLocale().getMessage("event.hopper.already").sendPrefixedMessage(player);
             return;
         }
@@ -200,14 +208,14 @@ public class Hopper {
         }
         this.lastPlayerOpened = player.getUniqueId();
 
-        if (level.getLinkAmount() > 1) {
-            if (linkedBlocks.size() >= level.getLinkAmount()) {
+        if (this.level.getLinkAmount() > 1) {
+            if (this.linkedBlocks.size() >= this.level.getLinkAmount()) {
                 instance.getLocale().getMessage("event.hopper.syncdone").sendPrefixedMessage(player);
                 cancelSync(player);
                 return;
             }
             instance.getLocale().getMessage("event.hopper.syncsuccessmore")
-                    .processPlaceholder("amount", level.getLinkAmount() - linkedBlocks.size())
+                    .processPlaceholder("amount", this.level.getLinkAmount() - this.linkedBlocks.size())
                     .sendPrefixedMessage(player);
             return;
         }
@@ -236,31 +244,31 @@ public class Hopper {
     }
 
     public Location getLocation() {
-        return location.clone();
+        return this.location.clone();
     }
 
     public Block getBlock() {
-        return location.getBlock();
+        return this.location.getBlock();
     }
 
     public World getWorld() {
-        return location.getWorld();
+        return this.location.getWorld();
     }
 
     public int getX() {
-        return location.getBlockX();
+        return this.location.getBlockX();
     }
 
     public int getY() {
-        return location.getBlockY();
+        return this.location.getBlockY();
     }
 
     public int getZ() {
-        return location.getBlockZ();
+        return this.location.getBlockZ();
     }
 
     public Level getLevel() {
-        return level;
+        return this.level;
     }
 
     public void setLevel(Level level) {
@@ -268,7 +276,7 @@ public class Hopper {
     }
 
     public UUID getPlacedBy() {
-        return placedBy;
+        return this.placedBy;
     }
 
     public void setPlacedBy(UUID placedBy) {
@@ -276,15 +284,15 @@ public class Hopper {
     }
 
     public UUID getLastPlayerOpened() {
-        return lastPlayerOpened;
+        return this.lastPlayerOpened;
     }
 
     public void setLastPlayerOpened(UUID uuid) {
-        lastPlayerOpened = uuid;
+        this.lastPlayerOpened = uuid;
     }
 
     public TeleportTrigger getTeleportTrigger() {
-        return teleportTrigger;
+        return this.teleportTrigger;
     }
 
     public void setTeleportTrigger(TeleportTrigger teleportTrigger) {
@@ -292,14 +300,15 @@ public class Hopper {
     }
 
     public List<Location> getLinkedBlocks() {
-        return new ArrayList<>(linkedBlocks);
+        return new ArrayList<>(this.linkedBlocks);
     }
 
     public void addLinkedBlock(Location location, LinkType type) {
-        if (type == LinkType.REGULAR)
-            linkedBlocks.add(location);
-        else
-            filter.setEndPoint(location);
+        if (type == LinkType.REGULAR) {
+            this.linkedBlocks.add(location);
+        } else {
+            this.filter.setEndPoint(location);
+        }
     }
 
     public void removeLinkedBlock(Location location) {
@@ -311,7 +320,7 @@ public class Hopper {
     }
 
     public Filter getFilter() {
-        return filter;
+        return this.filter;
     }
 
     public void setFilter(Filter filter) {
@@ -339,12 +348,12 @@ public class Hopper {
     }
 
     public void cancelSync(Player player) {
-        Bukkit.getScheduler().cancelTask(syncId);
-        EpicHoppers.getInstance().getPlayerDataManager().getPlayerData(player).setSyncType(null);
+        Bukkit.getScheduler().cancelTask(this.syncId);
+        EpicHoppers.getPlugin(EpicHoppers.class).getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(int id) {
@@ -352,7 +361,7 @@ public class Hopper {
     }
 
     public Player getActivePlayer() {
-        return activePlayer;
+        return this.activePlayer;
     }
 
     public void setActivePlayer(Player activePlayer) {

@@ -4,17 +4,19 @@ import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.compatibility.ServerVersion;
 import com.songoda.core.gui.CustomizableGui;
 import com.songoda.core.gui.GuiUtils;
+import com.songoda.core.utils.NumberUtils;
 import com.songoda.core.utils.TextUtils;
+import com.songoda.core.utils.TimeUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
+import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import com.songoda.epichoppers.player.SyncType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.CostType;
 import com.songoda.epichoppers.utils.Methods;
-import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -29,7 +31,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GUIOverview extends CustomizableGui {
-
     private final EpicHoppers plugin;
     private final Hopper hopper;
     private final Player player;
@@ -48,7 +49,7 @@ public class GUIOverview extends CustomizableGui {
         constructGUI();
         this.setOnClose(action -> {
             hopper.setActivePlayer(null);
-            Bukkit.getScheduler().cancelTask(task);
+            Bukkit.getScheduler().cancelTask(this.task);
         });
     }
 
@@ -65,78 +66,84 @@ public class GUIOverview extends CustomizableGui {
         mirrorFill("mirrorfill_4", 1, 0, false, true, glass2);
         mirrorFill("mirrorfill_5", 1, 1, false, true, glass3);
 
-        plugin.getPlayerDataManager().getPlayerData(player).setLastHopper(hopper);
+        this.plugin.getPlayerDataManager().getPlayerData(this.player).setLastHopper(this.hopper);
 
-        Level level = hopper.getLevel();
+        Level level = this.hopper.getLevel();
 
-        Level nextLevel = plugin.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? plugin.getLevelManager().getLevel(level.getLevel() + 1) : null;
+        Level nextLevel = this.plugin.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? this.plugin.getLevelManager().getLevel(level.getLevel() + 1) : null;
 
-        ItemStack perl = new ItemStack(Material.ENDER_PEARL, 1);
-        ItemMeta perlmeta = perl.getItemMeta();
-        perlmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.perltitle").getMessage());
-        ArrayList<String> loreperl = new ArrayList<>();
-        String[] parts = plugin.getLocale().getMessage("interface.hopper.perllore2")
-                .processPlaceholder("type", hopper.getTeleportTrigger() == TeleportTrigger.DISABLED
-                        ? plugin.getLocale().getMessage("general.word.disabled").getMessage()
-                        : hopper.getTeleportTrigger().name()).getMessage().split("\\|");
+        ItemStack pearl = new ItemStack(Material.ENDER_PEARL, 1);
+        ItemMeta pearlMeta = pearl.getItemMeta();
+        pearlMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.perltitle").getMessage());
+        ArrayList<String> lorePearl = new ArrayList<>();
+        String[] parts = this.plugin.getLocale().getMessage("interface.hopper.perllore2")
+                .processPlaceholder(
+                        "type",
+                        this.hopper.getTeleportTrigger() == TeleportTrigger.DISABLED
+                                ? this.plugin.getLocale().getMessage("general.word.disabled").getMessage()
+                                : this.hopper.getTeleportTrigger().name()
+                )
+                .getMessage()
+                .split("\\|");
         for (String line : parts) {
-            loreperl.add(TextUtils.formatText(line));
+            lorePearl.add(TextUtils.formatText(line));
         }
-        perlmeta.setLore(loreperl);
-        perl.setItemMeta(perlmeta);
+        pearlMeta.setLore(lorePearl);
+        pearl.setItemMeta(pearlMeta);
 
         ItemStack filter = new ItemStack(ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) ? Material.COMPARATOR : Material.valueOf("REDSTONE_COMPARATOR"), 1);
-        ItemMeta filtermeta = filter.getItemMeta();
-        filtermeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.filtertitle").getMessage());
-        ArrayList<String> lorefilter = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.filterlore").getMessage().split("\\|");
+        ItemMeta filterMeta = filter.getItemMeta();
+        filterMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.filtertitle").getMessage());
+        ArrayList<String> loreFilter = new ArrayList<>();
+        parts = this.plugin.getLocale().getMessage("interface.hopper.filterlore").getMessage().split("\\|");
         for (String line : parts) {
-            lorefilter.add(TextUtils.formatText(line));
+            loreFilter.add(TextUtils.formatText(line));
         }
-        filtermeta.setLore(lorefilter);
-        filter.setItemMeta(filtermeta);
+        filterMeta.setLore(loreFilter);
+        filter.setItemMeta(filterMeta);
 
 
         ItemStack item = new ItemStack(Material.HOPPER, 1);
         ItemMeta itemmeta = item.getItemMeta();
-        itemmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.currentlevel").processPlaceholder("level", level.getLevel()).getMessage());
+        itemmeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.currentlevel").processPlaceholder("level", level.getLevel()).getMessage());
         List<String> lore = level.getDescription();
-        if (plugin.getConfig().getBoolean("Main.Allow hopper Upgrading")) {
+        if (this.plugin.getConfig().getBoolean("Main.Allow hopper Upgrading")) {
             lore.add("");
-            if (nextLevel == null)
-                lore.add(plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage());
-            else {
-                lore.add(plugin.getLocale().getMessage("interface.hopper.nextlevel").processPlaceholder("level", nextLevel.getLevel()).getMessage());
+            if (nextLevel == null) {
+                lore.add(this.plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage());
+            } else {
+                lore.add(this.plugin.getLocale().getMessage("interface.hopper.nextlevel").processPlaceholder("level", nextLevel.getLevel()).getMessage());
                 lore.addAll(nextLevel.getDescription());
             }
         }
 
-        BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
+        BoostData boostData = this.plugin.getBoostManager().getBoost(this.hopper.getPlacedBy());
         if (boostData != null) {
-            parts = plugin.getLocale().getMessage("interface.hopper.boostedstats")
+            parts = this.plugin.getLocale().getMessage("interface.hopper.boostedstats")
                     .processPlaceholder("amount", Integer.toString(boostData.getMultiplier()))
-                    .processPlaceholder("time", Methods.makeReadable(boostData.getEndTime() - System.currentTimeMillis()))
+                    .processPlaceholder("time", TimeUtils.makeReadable(boostData.getEndTime() - System.currentTimeMillis()))
                     .getMessage().split("\\|");
             lore.add("");
-            for (String line : parts)
+            for (String line : parts) {
                 lore.add(TextUtils.formatText(line));
+            }
         }
 
         itemmeta.setLore(lore);
         item.setItemMeta(itemmeta);
 
         ItemStack hook = new ItemStack(Material.TRIPWIRE_HOOK, 1);
-        ItemMeta hookmeta = hook.getItemMeta();
-        hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.synchopper").getMessage());
-        ArrayList<String> lorehook = new ArrayList<>();
-        parts = plugin.getLocale().getMessage("interface.hopper.synclore")
-                .processPlaceholder("amount", hopper.getLinkedBlocks().stream().distinct().count())
+        ItemMeta hookMeta = hook.getItemMeta();
+        hookMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.synchopper").getMessage());
+        ArrayList<String> loreHook = new ArrayList<>();
+        parts = this.plugin.getLocale().getMessage("interface.hopper.synclore")
+                .processPlaceholder("amount", this.hopper.getLinkedBlocks().stream().distinct().count())
                 .getMessage().split("\\|");
         for (String line : parts) {
-            lorehook.add(TextUtils.formatText(line));
+            loreHook.add(TextUtils.formatText(line));
         }
-        hookmeta.setLore(lorehook);
-        hook.setItemMeta(hookmeta);
+        hookMeta.setLore(loreHook);
+        hook.setItemMeta(hookMeta);
 
         Map<Integer, Integer[]> layouts = new HashMap<>();
         layouts.put(1, new Integer[]{22});
@@ -152,13 +159,19 @@ public class GUIOverview extends CustomizableGui {
 
         int amount = 1;
 
-        boolean canFilter = level.isFilter() || player.hasPermission("EpicHoppers.Filter");
-        boolean canTeleport = level.isTeleport() || player.hasPermission("EpicHoppers.Teleport");
-        if (canFilter) amount++;
-        if (canTeleport) amount++;
+        boolean canFilter = level.isFilter() || this.player.hasPermission("EpicHoppers.Filter");
+        boolean canTeleport = level.isTeleport() || this.player.hasPermission("EpicHoppers.Teleport");
+        if (canFilter) {
+            amount++;
+        }
+        if (canTeleport) {
+            amount++;
+        }
 
-        List<Module> modules = level.getRegisteredModules().stream().filter(module ->
-                module.getGUIButton(hopper) != null).collect(Collectors.toList());
+        List<Module> modules = level.getRegisteredModules()
+                .stream()
+                .filter(module -> module.getGUIButton(this.hopper) != null)
+                .collect(Collectors.toList());
 
         amount += modules.size();
 
@@ -170,107 +183,111 @@ public class GUIOverview extends CustomizableGui {
             if (ii == 0) {
                 setButton("sync", slot, hook,
                         (event) -> {
-                            if (hopper.getLastPlayerOpened() != null && !hopper.getLastPlayerOpened().equals(player.getUniqueId())) {
-                                plugin.getLocale().getMessage("event.hopper.syncdidnotplace").sendPrefixedMessage(player);
+                            if (this.hopper.getLastPlayerOpened() != null && !this.hopper.getLastPlayerOpened().equals(this.player.getUniqueId())) {
+                                this.plugin.getLocale().getMessage("event.hopper.syncdidnotplace").sendPrefixedMessage(this.player);
                                 return;
                             }
-                            hopper.clearLinkedBlocks();
-                            plugin.getDataManager().deleteLinks(hopper);
+                            this.hopper.clearLinkedBlocks();
+                            this.plugin.getDataManager().deleteLinks(this.hopper);
                             if (event.clickType == ClickType.RIGHT) {
-                                plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
+                                this.plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(this.player);
                                 constructGUI();
                                 return;
                             } else {
-                                plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.REGULAR);
-                                plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
+                                this.plugin.getPlayerDataManager().getPlayerData(this.player).setSyncType(SyncType.REGULAR);
+                                this.plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(this.player);
 
-                                if (level.getLinkAmount() > 1)
-                                    plugin.getLocale().getMessage("event.hopper.syncstart")
+                                if (level.getLinkAmount() > 1) {
+                                    this.plugin.getLocale().getMessage("event.hopper.syncstart")
                                             .processPlaceholder("amount", level.getLinkAmount())
-                                            .sendPrefixedMessage(player);
+                                            .sendPrefixedMessage(this.player);
+                                }
 
-                                hopper.timeout(player);
+                                this.hopper.timeout(this.player);
                             }
-                            player.closeInventory();
+                            this.player.closeInventory();
                         });
             } else if (canTeleport) {
-                setButton("teleport", slot, perl,
+                setButton("teleport", slot, pearl,
                         (event) -> {
                             if (event.clickType == ClickType.LEFT) {
-                                if (hopper.getLinkedBlocks() != null) {
-                                    plugin.getTeleportHandler().tpEntity(player, hopper);
-                                    player.closeInventory();
+                                if (this.hopper.getLinkedBlocks() != null) {
+                                    this.plugin.getTeleportHandler().tpEntity(this.player, this.hopper);
+                                    this.player.closeInventory();
                                 }
                             } else {
-                                if (hopper.getTeleportTrigger() == TeleportTrigger.DISABLED) {
-                                    hopper.setTeleportTrigger(TeleportTrigger.SNEAK);
-                                } else if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK) {
-                                    hopper.setTeleportTrigger(TeleportTrigger.WALK_ON);
-                                } else if (hopper.getTeleportTrigger() == TeleportTrigger.WALK_ON) {
-                                    hopper.setTeleportTrigger(TeleportTrigger.DISABLED);
+                                if (this.hopper.getTeleportTrigger() == TeleportTrigger.DISABLED) {
+                                    this.hopper.setTeleportTrigger(TeleportTrigger.SNEAK);
+                                } else if (this.hopper.getTeleportTrigger() == TeleportTrigger.SNEAK) {
+                                    this.hopper.setTeleportTrigger(TeleportTrigger.WALK_ON);
+                                } else if (this.hopper.getTeleportTrigger() == TeleportTrigger.WALK_ON) {
+                                    this.hopper.setTeleportTrigger(TeleportTrigger.DISABLED);
                                 }
-                                plugin.getDataManager().updateHopper(hopper);
+                                this.plugin.getDataManager().updateHopper(this.hopper);
                                 constructGUI();
                             }
                         });
                 canTeleport = false;
             } else if (canFilter) {
                 setButton("filter", slot, filter, (event) -> {
-                    hopper.setActivePlayer(player);
-                    guiManager.showGUI(player, new GUIFilter(plugin, hopper, player));
+                    this.hopper.setActivePlayer(this.player);
+                    this.guiManager.showGUI(this.player, new GUIFilter(this.plugin, this.hopper, this.player));
                 });
                 canFilter = false;
             } else {
-                if (modules.isEmpty()) break;
+                if (modules.isEmpty()) {
+                    break;
+                }
                 Module module = modules.get(0);
                 modules.remove(module);
-                setButton(module.getName().toLowerCase().replace(" ", "_"), slot, module.getGUIButton(hopper),
-                        (event) -> module.runButtonPress(player, hopper, event.clickType));
+                setButton(module.getName().toLowerCase().replace(" ", "_"), slot, module.getGUIButton(this.hopper),
+                        (event) -> module.runButtonPress(this.player, this.hopper, event.clickType));
             }
         }
 
         if (Settings.HOPPER_UPGRADING.getBoolean()) {
             if (Settings.UPGRADE_WITH_XP.getBoolean()
                     && level.getCostExperience() != -1
-                    && player.hasPermission("EpicHoppers.Upgrade.XP")) {
+                    && this.player.hasPermission("EpicHoppers.Upgrade.XP")) {
                 setButton("upgrade_xp", 1, 2, GuiUtils.createButtonItem(
-                        Settings.XP_ICON.getMaterial(CompatibleMaterial.EXPERIENCE_BOTTLE),
-                        plugin.getLocale().getMessage("interface.hopper.upgradewithxp").getMessage(),
-                        nextLevel != null
-                                ? plugin.getLocale().getMessage("interface.hopper.upgradewithxplore")
-                                .processPlaceholder("cost", nextLevel.getCostExperience()).getMessage()
-                                : plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage()),
+                                Settings.XP_ICON.getMaterial(CompatibleMaterial.EXPERIENCE_BOTTLE),
+                                this.plugin.getLocale().getMessage("interface.hopper.upgradewithxp").getMessage(),
+                                nextLevel != null
+                                        ? this.plugin.getLocale().getMessage("interface.hopper.upgradewithxplore")
+                                        .processPlaceholder("cost", nextLevel.getCostExperience()).getMessage()
+                                        : this.plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage()),
                         (event) -> {
-                            hopper.upgrade(player, CostType.EXPERIENCE);
-                            hopper.overview(guiManager, player);
+                            this.hopper.upgrade(this.player, CostType.EXPERIENCE);
+                            this.hopper.overview(this.guiManager, this.player);
                         });
             }
             if (Settings.UPGRADE_WITH_ECONOMY.getBoolean()
                     && level.getCostEconomy() != -1
-                    && player.hasPermission("EpicHoppers.Upgrade.ECO")) {
+                    && this.player.hasPermission("EpicHoppers.Upgrade.ECO")) {
                 setButton("upgrade_economy", 1, 6, GuiUtils.createButtonItem(
-                        Settings.ECO_ICON.getMaterial(CompatibleMaterial.SUNFLOWER),
-                        plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy").getMessage(),
-                        nextLevel != null
-                                ? plugin.getLocale().getMessage("interface.hopper.upgradewitheconomylore")
-                                .processPlaceholder("cost", Methods.formatEconomy(nextLevel.getCostEconomy())).getMessage()
-                                : plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage()),
+                                Settings.ECO_ICON.getMaterial(CompatibleMaterial.SUNFLOWER),
+                                this.plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy").getMessage(),
+                                nextLevel != null
+                                        ? this.plugin.getLocale().getMessage("interface.hopper.upgradewitheconomylore")
+                                        .processPlaceholder("cost", NumberUtils.formatNumber(nextLevel.getCostEconomy())).getMessage()
+                                        : this.plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage()),
                         (event) -> {
-                            hopper.upgrade(player, CostType.ECONOMY);
-                            hopper.overview(guiManager, player);
+                            this.hopper.upgrade(this.player, CostType.ECONOMY);
+                            this.hopper.overview(this.guiManager, this.player);
                         });
             }
         }
 
         setItem("hopper", 13, item);
 
-        hopper.setLastPlayerOpened(player.getUniqueId());
+        this.hopper.setLastPlayerOpened(this.player.getUniqueId());
     }
 
     private void runTask() {
-        task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            if (!inventory.getViewers().isEmpty())
+        this.task = Bukkit.getScheduler().scheduleSyncRepeatingTask(this.plugin, () -> {
+            if (!this.inventory.getViewers().isEmpty()) {
                 this.constructGUI();
+            }
         }, 5L, 5L);
     }
 }

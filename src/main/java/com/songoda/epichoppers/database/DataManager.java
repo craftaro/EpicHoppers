@@ -34,14 +34,13 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class DataManager extends DataManagerAbstract {
-
     public DataManager(DatabaseConnector databaseConnector, Plugin plugin) {
         super(databaseConnector, plugin);
     }
 
     public void createBoost(BoostData boostData) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String createBoostedPlayer = "INSERT INTO " + this.getTablePrefix() + "boosted_players (player, multiplier, end_time) VALUES (?, ?, ?)";
                 PreparedStatement statement = connection.prepareStatement(createBoostedPlayer);
                 statement.setString(1, boostData.getPlayer().toString());
@@ -57,7 +56,7 @@ public class DataManager extends DataManagerAbstract {
     public void getBoosts(Consumer<List<BoostData>> callback) {
         List<BoostData> boosts = new ArrayList<>();
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 Statement statement = connection.createStatement();
                 String selectBoostedPlayers = "SELECT * FROM " + this.getTablePrefix() + "boosted_players";
                 ResultSet result = statement.executeQuery(selectBoostedPlayers);
@@ -77,7 +76,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void deleteBoost(BoostData boostData) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String deleteBoost = "DELETE FROM " + this.getTablePrefix() + "boosted_players WHERE end_time = ?";
                 PreparedStatement statement = connection.prepareStatement(deleteBoost);
                 statement.setLong(1, boostData.getEndTime());
@@ -90,7 +89,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void createLink(Hopper hopper, Location location, LinkType type) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String createLink = "INSERT INTO " + this.getTablePrefix() + "links (hopper_id, link_type, world, x, y, z) VALUES (?, ?, ?, ?, ?, ?)";
                 PreparedStatement statement = connection.prepareStatement(createLink);
                 statement.setInt(1, hopper.getId());
@@ -110,7 +109,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void updateItems(Hopper hopper, ItemType type, List<ItemStack> items) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String clearItems = "DELETE FROM " + this.getTablePrefix() + "items WHERE hopper_id = ? AND item_type = ?";
                 try (PreparedStatement statement = connection.prepareStatement(clearItems)) {
                     statement.setInt(1, hopper.getId());
@@ -143,7 +142,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void deleteLink(Hopper hopper, Location location) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String deleteLink = "DELETE FROM " + this.getTablePrefix() + "links WHERE hopper_id = ? AND world = ? AND x = ? AND y = ? AND z = ?";
                 PreparedStatement statement = connection.prepareStatement(deleteLink);
                 statement.setInt(1, hopper.getId());
@@ -160,7 +159,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void deleteLinks(Hopper hopper) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String deleteHopperLinks = "DELETE FROM " + this.getTablePrefix() + "links WHERE hopper_id = ?";
                 PreparedStatement statement = connection.prepareStatement(deleteHopperLinks);
                 statement.setInt(1, hopper.getId());
@@ -172,13 +171,14 @@ public class DataManager extends DataManagerAbstract {
     }
 
     public void createHoppers(List<Hopper> hoppers) {
-        for (Hopper hopper : hoppers)
+        for (Hopper hopper : hoppers) {
             createHopper(hopper);
+        }
     }
 
     public void createHopper(Hopper hopper) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String createHopper = "INSERT INTO " + this.getTablePrefix() + "placed_hoppers (level, placed_by, last_opened_by, teleport_trigger, world, x, y, z) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement statement = connection.prepareStatement(createHopper)) {
                     statement.setInt(1, hopper.getLevel().getLevel());
@@ -204,20 +204,25 @@ public class DataManager extends DataManagerAbstract {
                 Map<ItemStack, ItemType> items = new HashMap<>();
                 Filter filter = hopper.getFilter();
 
-                for (ItemStack item : filter.getWhiteList())
+                for (ItemStack item : filter.getWhiteList()) {
                     items.put(item, ItemType.WHITELIST);
+                }
 
-                for (ItemStack item : filter.getBlackList())
+                for (ItemStack item : filter.getBlackList()) {
                     items.put(item, ItemType.BLACKLIST);
+                }
 
-                for (ItemStack item : filter.getVoidList())
+                for (ItemStack item : filter.getVoidList()) {
                     items.put(item, ItemType.VOID);
+                }
 
-                for (ItemStack item : filter.getAutoSellWhiteList())
+                for (ItemStack item : filter.getAutoSellWhiteList()) {
                     items.put(item, ItemType.AUTO_SELL_WHITELIST);
+                }
 
-                for (ItemStack item : filter.getAutoSellBlackList())
+                for (ItemStack item : filter.getAutoSellBlackList()) {
                     items.put(item, ItemType.AUTO_SELL_BLACKLIST);
+                }
 
                 String createItem = "INSERT INTO " + this.getTablePrefix() + "items (hopper_id, item_type, item) VALUES (?, ?, ?)";
                 try (PreparedStatement statement = connection.prepareStatement(createItem)) {
@@ -239,11 +244,13 @@ public class DataManager extends DataManagerAbstract {
 
                 Map<Location, LinkType> links = new HashMap<>();
 
-                for (Location location : hopper.getLinkedBlocks())
+                for (Location location : hopper.getLinkedBlocks()) {
                     links.put(location, LinkType.REGULAR);
+                }
 
-                if (filter.getEndPoint() != null)
+                if (filter.getEndPoint() != null) {
                     links.put(filter.getEndPoint(), LinkType.REJECT);
+                }
 
                 String createLink = "INSERT INTO " + this.getTablePrefix() + "links (hopper_id, link_type, world, x, y, z) VALUES (?, ?, ?, ?, ?, ?)";
                 try (PreparedStatement statement = connection.prepareStatement(createLink)) {
@@ -269,7 +276,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void updateHopper(Hopper hopper) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String updateHopper = "UPDATE " + this.getTablePrefix() + "placed_hoppers SET level = ?, placed_by = ?, last_opened_by = ?, teleport_trigger = ? WHERE id = ?";
                 PreparedStatement statement = connection.prepareStatement(updateHopper);
                 statement.setInt(1, hopper.getLevel().getLevel());
@@ -286,7 +293,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void deleteHopper(Hopper hopper) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 String deleteHopper = "DELETE FROM " + this.getTablePrefix() + "placed_hoppers WHERE id = ?";
                 try (PreparedStatement statement = connection.prepareStatement(deleteHopper)) {
                     statement.setInt(1, hopper.getId());
@@ -312,7 +319,7 @@ public class DataManager extends DataManagerAbstract {
 
     public void getHoppers(Consumer<Map<Integer, Hopper>> callback) {
         this.runAsync(() -> {
-            try (Connection connection = this.databaseConnector.getConnection()){
+            try (Connection connection = this.databaseConnector.getConnection()) {
                 Map<Integer, Hopper> hoppers = new HashMap<>();
 
                 try (Statement statement = connection.createStatement()) {
@@ -321,8 +328,9 @@ public class DataManager extends DataManagerAbstract {
                     while (result.next()) {
                         World world = Bukkit.getWorld(result.getString("world"));
 
-                        if (world == null)
+                        if (world == null) {
                             continue;
+                        }
 
                         int id = result.getInt("id");
                         int level = result.getInt("level");
@@ -342,7 +350,7 @@ public class DataManager extends DataManagerAbstract {
 
                         Hopper hopper = new HopperBuilder(location)
                                 .setId(id)
-                                .setLevel(EpicHoppers.getInstance().getLevelManager().getLevel(level))
+                                .setLevel(((EpicHoppers) this.plugin).getLevelManager().getLevel(level))
                                 .setPlacedBy(placedBy)
                                 .setLastPlayerOpened(lastOpenedBy)
                                 .setTeleportTrigger(teleportTrigger)
@@ -358,8 +366,9 @@ public class DataManager extends DataManagerAbstract {
                     while (result.next()) {
                         World world = Bukkit.getWorld(result.getString("world"));
 
-                        if (world == null)
+                        if (world == null) {
                             continue;
+                        }
 
                         int id = result.getInt("hopper_id");
                         LinkType type = LinkType.valueOf(result.getString("link_type"));
@@ -370,7 +379,9 @@ public class DataManager extends DataManagerAbstract {
                         Location location = new Location(world, x, y, z);
 
                         Hopper hopper = hoppers.get(id);
-                        if (hopper == null) break;
+                        if (hopper == null) {
+                            break;
+                        }
 
                         hopper.addLinkedBlock(location, type);
                     }
@@ -392,10 +403,13 @@ public class DataManager extends DataManagerAbstract {
                         }
 
                         Hopper hopper = hoppers.get(id);
-                        if (hopper == null) break;
+                        if (hopper == null) {
+                            break;
+                        }
 
-                        if (item != null)
+                        if (item != null) {
                             hopper.getFilter().addItem(item, type);
+                        }
                     }
                 }
                 this.sync(() -> callback.accept(hoppers));

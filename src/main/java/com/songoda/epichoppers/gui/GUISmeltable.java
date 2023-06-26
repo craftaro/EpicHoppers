@@ -17,14 +17,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GUISmeltable extends CustomizableGui {
-
     private final EpicHoppers plugin;
     private final Hopper hopper;
-    private int maxPages;
-    private ModuleAutoSmelter moduleAutoSmelter;
+    private final int maxPages;
+    private final ModuleAutoSmelter moduleAutoSmelter;
 
-    private static List<CompatibleMaterial> burnables = Arrays.stream(CompatibleMaterial.values())
-            .filter(m -> m.getBurnResult() != null).collect(Collectors.toList());
+    private static final List<CompatibleMaterial> BURNABLES = Arrays
+            .stream(CompatibleMaterial.values())
+            .filter(material -> material.getBurnResult() != null)
+            .collect(Collectors.toList());
 
     public GUISmeltable(ModuleAutoSmelter moduleAutoSmelter, EpicHoppers plugin, Hopper hopper) {
         super(plugin, "smeltable");
@@ -32,9 +33,9 @@ public class GUISmeltable extends CustomizableGui {
         this.hopper = hopper;
         this.moduleAutoSmelter = moduleAutoSmelter;
 
-        int smeltables = burnables.size();
+        int smeltables = BURNABLES.size();
 
-        maxPages = (int) Math.ceil(smeltables / 32.);
+        this.maxPages = (int) Math.ceil(smeltables / 32.);
 
         setTitle(Methods.formatName(hopper.getLevel().getLevel()) + TextUtils.formatText(" &7-&f Smelting"));
         setRows(6);
@@ -57,44 +58,44 @@ public class GUISmeltable extends CustomizableGui {
         mirrorFill("mirrorfill_3", 0, 2, true, true, glass3);
         mirrorFill("mirrorfill_4", 1, 0, true, true, glass2);
 
-        int smeltableIndex = page == 1 ? 0 : 32 * (page - 1);
+        int smeltableIndex = this.page == 1 ? 0 : 32 * (this.page - 1);
 
         for (int i = 9; i < 45; i++) {
             if (i == 9 || i == 17 || i == 44 || i == 36) continue;
             setItem(i, null);
             clearActions(i);
-            if (smeltableIndex >= (burnables.size() - 1)) continue;
-            CompatibleMaterial burnable = burnables.get(smeltableIndex);
-            setButton(i, getItemStack(burnable, moduleAutoSmelter.isSmeltable(hopper, burnable)), (event) -> {
-                moduleAutoSmelter.toggleSmeltable(hopper, burnable);
-                setItem(event.slot, getItemStack(burnable, moduleAutoSmelter.isSmeltable(hopper, burnable)));
+            if (smeltableIndex >= (BURNABLES.size() - 1)) continue;
+            CompatibleMaterial burnable = BURNABLES.get(smeltableIndex);
+            setButton(i, getItemStack(burnable, this.moduleAutoSmelter.isSmeltable(this.hopper, burnable)), (event) -> {
+                this.moduleAutoSmelter.toggleSmeltable(this.hopper, burnable);
+                setItem(event.slot, getItemStack(burnable, this.moduleAutoSmelter.isSmeltable(this.hopper, burnable)));
             });
             smeltableIndex++;
         }
 
         clearActions(51);
-        if (page < maxPages) {
+        if (this.page < this.maxPages) {
             setButton("next", 51, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
-                    plugin.getLocale().getMessage("general.nametag.next").getMessage()),
+                            this.plugin.getLocale().getMessage("general.nametag.next").getMessage()),
                     (event) -> {
-                        page++;
+                        this.page++;
                         showPage();
                     });
         }
 
         clearActions(47);
-        if (page > 1) {
+        if (this.page > 1) {
             setButton("back", 47, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
-                    plugin.getLocale().getMessage("general.nametag.back").getMessage()),
+                            this.plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                     (event) -> {
-                        page--;
+                        this.page--;
                         showPage();
                     });
         }
 
         setButton("exit", 49, GuiUtils.createButtonItem(CompatibleMaterial.OAK_DOOR,
-                plugin.getLocale().getMessage("general.nametag.exit").getMessage()),
-                (event) -> hopper.overview(plugin.getGuiManager(), event.player));
+                        this.plugin.getLocale().getMessage("general.nametag.exit").getMessage()),
+                (event) -> this.hopper.overview(this.plugin.getGuiManager(), event.player));
     }
 
     public ItemStack getItemStack(CompatibleMaterial material, boolean enabled) {
@@ -104,7 +105,7 @@ public class GUISmeltable extends CustomizableGui {
         meta.setLore(Arrays.asList(TextUtils.formatText("   &7-> &e" + material.getBurnResult().name()),
                 TextUtils.formatText("&7Enabled: &6" + String.valueOf(enabled).toLowerCase() + "&7."),
                 "",
-                plugin.getLocale().getMessage("interface.hopper.toggle").getMessage()));
+                this.plugin.getLocale().getMessage("interface.hopper.toggle").getMessage()));
         item.setItemMeta(meta);
 
         return item;

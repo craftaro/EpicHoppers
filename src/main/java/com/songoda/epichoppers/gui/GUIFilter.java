@@ -22,10 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GUIFilter extends CustomizableGui {
-    private static final List<GUIFilter> openInventories = new ArrayList<>();
+    private static final List<GUIFilter> OPEN_INVENTORIES = new ArrayList<>();
 
     private final EpicHoppers plugin;
-
     private final Hopper hopper;
 
     public GUIFilter(EpicHoppers plugin, Hopper hopper, Player player) {
@@ -38,10 +37,10 @@ public class GUIFilter extends CustomizableGui {
         setDefaultItem(null);
         setAcceptsItems(true);
 
-        setOnOpen((event) -> GUIFilter.openInventories.add(this));
+        setOnOpen((event) -> GUIFilter.OPEN_INVENTORIES.add(this));
 
         setOnClose((event) -> {
-            GUIFilter.openInventories.remove(this);
+            GUIFilter.OPEN_INVENTORIES.remove(this);
             hopper.setActivePlayer(null);
             compile();
         });
@@ -66,9 +65,9 @@ public class GUIFilter extends CustomizableGui {
         it.setItemMeta(itm);
 
         setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
-                plugin.getLocale().getMessage("general.nametag.back").getMessage()),
+                        plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    hopper.overview(guiManager, event.player);
+                    hopper.overview(this.guiManager, event.player);
                     compile();
                 });
 
@@ -80,7 +79,9 @@ public class GUIFilter extends CustomizableGui {
         int[] awhite = {9, 10, 18, 19, 27, 28, 36, 37};
         int num = 0;
         for (ItemStack m : filter.getWhiteList()) {
-            if (num >= filter.getWhiteList().size()) break;
+            if (num >= filter.getWhiteList().size()) {
+                break;
+            }
             setItem(awhite[num], new ItemStack(m));
             num++;
         }
@@ -98,7 +99,10 @@ public class GUIFilter extends CustomizableGui {
         int[] ablack = {11, 12, 20, 21, 29, 30, 38, 39};
         num = 0;
         for (ItemStack m : filter.getBlackList()) {
-            if (num >= filter.getBlackList().size()) break;
+            if (num >= filter.getBlackList().size()) {
+                break;
+            }
+
             setItem(ablack[num], new ItemStack(m));
             num++;
         }
@@ -116,37 +120,39 @@ public class GUIFilter extends CustomizableGui {
         int[] voidSlots = {13, 14, 22, 23, 31, 32, 40, 41};
         num = 0;
         for (ItemStack m : filter.getVoidList()) {
-            if (num >= filter.getVoidList().size()) break;
+            if (num >= filter.getVoidList().size()) {
+                break;
+            }
             setItem(voidSlots[num], new ItemStack(m));
             num++;
         }
 
         ItemStack itemInfo = new ItemStack(CompatibleMaterial.PAPER.getMaterial());
-        ItemMeta itemmetaInfo = itemInfo.getItemMeta();
-        itemmetaInfo.setDisplayName(plugin.getLocale().getMessage("interface.filter.infotitle").getMessage());
+        ItemMeta itemMetaInfo = itemInfo.getItemMeta();
+        itemMetaInfo.setDisplayName(plugin.getLocale().getMessage("interface.filter.infotitle").getMessage());
         ArrayList<String> loreInfo = new ArrayList<>();
         String[] parts = plugin.getLocale().getMessage("interface.filter.infolore").getMessage().split("\\|");
         for (String line : parts) {
             loreInfo.add(TextUtils.formatText(line));
         }
-        itemmetaInfo.setLore(loreInfo);
-        itemInfo.setItemMeta(itemmetaInfo);
+        itemMetaInfo.setLore(loreInfo);
+        itemInfo.setItemMeta(itemMetaInfo);
 
         setItem("info", 16, itemInfo);
 
 
         ItemStack hook = new ItemStack(CompatibleMaterial.TRIPWIRE_HOOK.getMaterial());
-        ItemMeta hookmeta = hook.getItemMeta();
-        hookmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.rejectsync").getMessage());
-        ArrayList<String> lorehook = new ArrayList<>();
+        ItemMeta hookMeta = hook.getItemMeta();
+        hookMeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.rejectsync").getMessage());
+        ArrayList<String> loreHook = new ArrayList<>();
         parts = plugin.getLocale().getMessage("interface.hopper.synclore")
                 .processPlaceholder("amount", filter.getEndPoint() != null ? 1 : 0)
                 .getMessage().split("\\|");
         for (String line : parts) {
-            lorehook.add(TextUtils.formatText(line));
+            loreHook.add(TextUtils.formatText(line));
         }
-        hookmeta.setLore(lorehook);
-        hook.setItemMeta(hookmeta);
+        hookMeta.setLore(loreHook);
+        hook.setItemMeta(hookMeta);
         setButton("reject", 43, hook,
                 (event) -> {
                     if (event.clickType == ClickType.RIGHT) {
@@ -167,9 +173,9 @@ public class GUIFilter extends CustomizableGui {
     }
 
     private void compile() {
-        ItemStack[] items = inventory.getContents();
+        ItemStack[] items = this.inventory.getContents();
 
-        Filter filter = hopper.getFilter();
+        Filter filter = this.hopper.getFilter();
 
         List<ItemStack> owhite = new ArrayList<>();
         List<ItemStack> oblack = new ArrayList<>();
@@ -181,36 +187,42 @@ public class GUIFilter extends CustomizableGui {
 
         for (int i = 0; i < items.length; i++) {
             for (int aa : awhite) {
-                if (aa != i) continue;
+                if (aa != i) {
+                    continue;
+                }
                 if (items[i] != null && items[i].getType() != Material.AIR) {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
+                        Bukkit.getPlayer(this.hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     owhite.add(item);
                 }
             }
             for (int aa : ablack) {
-                if (aa != i) continue;
+                if (aa != i) {
+                    continue;
+                }
                 if (items[i] != null && items[i].getType() != Material.AIR) {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
+                        Bukkit.getPlayer(this.hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     oblack.add(item);
                 }
             }
             for (int aa : avoid) {
-                if (aa != i) continue;
+                if (aa != i) {
+                    continue;
+                }
                 if (items[i] != null && items[i].getType() != Material.AIR) {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
+                        Bukkit.getPlayer(this.hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     ovoid.add(item);
@@ -220,13 +232,13 @@ public class GUIFilter extends CustomizableGui {
         filter.setWhiteList(owhite);
         filter.setBlackList(oblack);
         filter.setVoidList(ovoid);
-        plugin.getDataManager().updateItems(hopper, ItemType.WHITELIST, owhite);
-        plugin.getDataManager().updateItems(hopper, ItemType.BLACKLIST, oblack);
-        plugin.getDataManager().updateItems(hopper, ItemType.VOID, ovoid);
+        this.plugin.getDataManager().updateItems(this.hopper, ItemType.WHITELIST, owhite);
+        this.plugin.getDataManager().updateItems(this.hopper, ItemType.BLACKLIST, oblack);
+        this.plugin.getDataManager().updateItems(this.hopper, ItemType.VOID, ovoid);
     }
 
     public static void compileOpenGuiFilter(Hopper hopper) {
-        for (GUIFilter guiFilter : openInventories) {
+        for (GUIFilter guiFilter : OPEN_INVENTORIES) {
             if (guiFilter.hopper == hopper) {
                 guiFilter.compile();
             }

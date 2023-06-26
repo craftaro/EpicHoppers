@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Level {
-
     private final ArrayList<Module> registeredModules;
     private final List<String> description = new ArrayList<>();
     private final int level, costExperience, costEconomy, range, amount, linkAmount;
@@ -29,91 +28,108 @@ public class Level {
     }
 
     public void buildDescription() {
-        EpicHoppers instance = EpicHoppers.getInstance();
+        EpicHoppers instance = EpicHoppers.getPlugin(EpicHoppers.class);
 
-        description.clear();
+        this.description.clear();
 
-        description.add(instance.getLocale().getMessage("interface.hopper.range")
-                .processPlaceholder("range", range).getMessage());
-        description.add(instance.getLocale().getMessage("interface.hopper.amount")
-                .processPlaceholder("amount", amount).getMessage());
-        if (linkAmount != 1)
-            description.add(instance.getLocale().getMessage("interface.hopper.linkamount")
-                    .processPlaceholder("amount", linkAmount).getMessage());
-        if (filter)
-            description.add(instance.getLocale().getMessage("interface.hopper.filter")
-                    .processPlaceholder("enabled", EpicHoppers.getInstance().getLocale()
+        this.description.add(instance.getLocale().getMessage("interface.hopper.range")
+                .processPlaceholder("range", this.range).getMessage());
+        this.description.add(instance.getLocale().getMessage("interface.hopper.amount")
+                .processPlaceholder("amount", this.amount).getMessage());
+        if (this.linkAmount != 1) {
+            this.description.add(instance.getLocale().getMessage("interface.hopper.linkamount")
+                    .processPlaceholder("amount", this.linkAmount).getMessage());
+        }
+        if (this.filter) {
+            this.description.add(instance.getLocale().getMessage("interface.hopper.filter")
+                    .processPlaceholder("enabled", instance.getLocale()
                             .getMessage("general.word.enabled").getMessage()).getMessage());
-        if (teleport)
-            description.add(instance.getLocale().getMessage("interface.hopper.teleport")
-                    .processPlaceholder("enabled", EpicHoppers.getInstance()
-                            .getLocale().getMessage("general.word.enabled").getMessage()).getMessage());
+        }
+        if (this.teleport) {
+            this.description.add(instance
+                    .getLocale()
+                    .getMessage("interface.hopper.teleport")
+                    .processPlaceholder(
+                            "enabled",
+                            instance
+                                    .getLocale()
+                                    .getMessage("general.word.enabled")
+                                    .getMessage())
+                    .getMessage());
+        }
 
-        for (Module module : registeredModules) {
-            description.add(module.getDescription());
+        for (Module module : this.registeredModules) {
+            this.description.add(module.getDescription());
         }
     }
 
 
     public int getLevel() {
-        return level;
+        return this.level;
     }
 
 
     public int getRange() {
-        return range;
+        return this.range;
     }
 
 
     public int getAmount() {
-        return amount;
+        return this.amount;
     }
 
 
     public boolean isFilter() {
-        return filter;
+        return this.filter;
     }
 
 
     public boolean isTeleport() {
-        return teleport;
+        return this.teleport;
     }
 
 
     public int getLinkAmount() {
-        return linkAmount;
+        return this.linkAmount;
     }
 
 
     public int getCostExperience() {
-        return costExperience;
+        return this.costExperience;
     }
 
 
     public int getCostEconomy() {
-        return costEconomy;
+        return this.costEconomy;
     }
 
 
     public List<String> getDescription() {
-        return new ArrayList<>(description);
+        return new ArrayList<>(this.description);
     }
 
 
     public ArrayList<Module> getRegisteredModules() {
-        return new ArrayList<>(registeredModules);
+        return new ArrayList<>(this.registeredModules);
     }
 
 
     public void addModule(Module module) {
-        registeredModules.add(module);
+        this.registeredModules.add(module);
         buildDescription();
     }
 
 
     public Module getModule(String name) {
-        return registeredModules == null ? null :
-                registeredModules.stream().filter(module -> module.getName().equals(name)).findFirst().orElse(null);
+        if (this.registeredModules == null) {
+            return null;
+        }
+
+        for (Module module : this.registeredModules) {
+            if (module.getName().equals(name)) {
+                return module;
+            }
+        }
+        return null;
     }
 }
-

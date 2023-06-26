@@ -21,25 +21,24 @@ import java.util.Map;
  * containers in large batches
  */
 public class StorageContainerCache {
-
-    private static final Map<Block, Cache> inventoryCache = new HashMap<>();
+    private static final Map<Block, Cache> INVENTORY_CACHE = new HashMap<>();
 
     // need to get the topmost inventory for a double chest, and save as that block
-    public static Cache getCachedInventory(Block b) {
-        Cache cache = inventoryCache.get(b);
+    public static Cache getCachedInventory(Block block) {
+        Cache cache = INVENTORY_CACHE.get(block);
         if (cache == null) {
-            Material type = b.getType();
+            Material type = block.getType();
             if (type == Material.CHEST || type == Material.TRAPPED_CHEST) {
-                Block b2 = findAdjacentDoubleChest(b);
-                //System.out.println("Adjacent to " + b + " = " + b2);
-                if (b2 != null && (cache = inventoryCache.get(b2)) != null) {
+                Block b2 = findAdjacentDoubleChest(block);
+                //System.out.println("Adjacent to " + block + " = " + b2);
+                if (b2 != null && (cache = INVENTORY_CACHE.get(b2)) != null) {
                     return cache;
                 }
             }
-            BlockState blockState = b.getState();
+            BlockState blockState = block.getState();
             if (blockState instanceof InventoryHolder) {
-                //System.out.println("Load " + b.getLocation());
-                inventoryCache.put(b, cache = new Cache(b, ((InventoryHolder) blockState).getInventory().getContents()));
+                //System.out.println("Load " + block.getLocation());
+                INVENTORY_CACHE.put(block, cache = new Cache(block, ((InventoryHolder) blockState).getInventory().getContents()));
             }
         }
         return cache;
@@ -47,30 +46,27 @@ public class StorageContainerCache {
 
     /**
      * Look for a double chest adjacent to a chest
-     *
-     * @param block
-     * @return
      */
     public static Block findAdjacentDoubleChest(Block block) {
         if (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13)) {
-            final BlockData d = block.getBlockData();
-            if (d instanceof Chest) {
-                final Chest c = (Chest) d;
-                if (c.getType() != Chest.Type.SINGLE) {
+            final BlockData blockData = block.getBlockData();
+            if (blockData instanceof Chest) {
+                final Chest chest = (Chest) blockData;
+                if (chest.getType() != Chest.Type.SINGLE) {
                     // this is a double chest - check the other chest for registration data
                     Block other = null;
-                    switch (c.getFacing()) {
+                    switch (chest.getFacing()) {
                         case SOUTH:
-                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.WEST : BlockFace.EAST);
+                            other = block.getRelative(chest.getType() != Chest.Type.RIGHT ? BlockFace.WEST : BlockFace.EAST);
                             break;
                         case NORTH:
-                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.EAST : BlockFace.WEST);
+                            other = block.getRelative(chest.getType() != Chest.Type.RIGHT ? BlockFace.EAST : BlockFace.WEST);
                             break;
                         case EAST:
-                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.SOUTH : BlockFace.NORTH);
+                            other = block.getRelative(chest.getType() != Chest.Type.RIGHT ? BlockFace.SOUTH : BlockFace.NORTH);
                             break;
                         case WEST:
-                            other = block.getRelative(c.getType() != Chest.Type.RIGHT ? BlockFace.NORTH : BlockFace.SOUTH);
+                            other = block.getRelative(chest.getType() != Chest.Type.RIGHT ? BlockFace.NORTH : BlockFace.SOUTH);
                             break;
                         default:
                             break;
@@ -84,7 +80,7 @@ public class StorageContainerCache {
         } else {
             // legacy check
             Material material = block.getType();
-            BlockFace[] faces = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
+            BlockFace[] faces = new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
             for (BlockFace face : faces) {
                 Block adjacentBlock = block.getRelative(face);
 
@@ -97,7 +93,7 @@ public class StorageContainerCache {
     }
 
     public static void update() {
-        inventoryCache.entrySet().stream()
+        INVENTORY_CACHE.entrySet().stream()
                 .filter(e -> e.getValue().dirty)
                 .forEach(e -> {
                     //System.out.println("Update " + e.getKey().getLocation());
@@ -115,11 +111,10 @@ public class StorageContainerCache {
 
                     NmsManager.getWorld().updateAdjacentComparators(e.getKey());
                 });
-        inventoryCache.clear();
+        INVENTORY_CACHE.clear();
     }
 
     public static class Cache {
-
         public final Material type;
         public final Block block;
         public ItemStack[] cachedInventory;
@@ -135,9 +130,9 @@ public class StorageContainerCache {
             this.cacheAdded = new int[cachedInventory.length];
         }
 
-        public Cache(Block b, ItemStack[] cachedInventory) {
-            this.block = b;
-            this.type = b.getType();
+        public Cache(Block block, ItemStack[] cachedInventory) {
+            this.block = block;
+            this.type = block.getType();
             this.cachedInventory = cachedInventory;
             this.cacheChanged = new boolean[cachedInventory.length];
             this.cacheAdded = new int[cachedInventory.length];
@@ -152,50 +147,50 @@ public class StorageContainerCache {
         }
 
         public void setContents(ItemStack[] items) {
-            if (cachedInventory == null || items.length == cachedInventory.length) {
-                cachedInventory = items;
-                for (int i = 0; i < cachedInventory.length; i++) {
-                    cacheChanged[i] = true;
+            if (this.cachedInventory == null || items.length == this.cachedInventory.length) {
+                this.cachedInventory = items;
+                for (int i = 0; i < this.cachedInventory.length; i++) {
+                    this.cacheChanged[i] = true;
                 }
-                dirty = true;
+                this.dirty = true;
             }
         }
 
         public void setItem(int item, ItemStack itemStack) {
-            if (cachedInventory != null) {
-                cachedInventory[item] = itemStack;
-                cacheChanged[item] = true;
-                dirty = true;
+            if (this.cachedInventory != null) {
+                this.cachedInventory[item] = itemStack;
+                this.cacheChanged[item] = true;
+                this.dirty = true;
             }
         }
 
         public void removeItem(int item) {
-            if (cachedInventory != null) {
-                cachedInventory[item] = null;
-                cacheChanged[item] = true;
-                dirty = true;
+            if (this.cachedInventory != null) {
+                this.cachedInventory[item] = null;
+                this.cacheChanged[item] = true;
+                this.dirty = true;
             }
         }
 
         public void removeItems(ItemStack item) {
-            if (cachedInventory != null && item != null) {
+            if (this.cachedInventory != null && item != null) {
                 int toRemove = item.getAmount();
-                for (int i = 0; toRemove > 0 && i < cachedInventory.length; i++) {
-                    final ItemStack cacheItem = cachedInventory[i];
+                for (int i = 0; toRemove > 0 && i < this.cachedInventory.length; i++) {
+                    final ItemStack cacheItem = this.cachedInventory[i];
                     if (cacheItem != null && cacheItem.getAmount() != 0 && item.isSimilar(cacheItem)) {
                         int have = cacheItem.getAmount();
                         if (have > toRemove) {
-                            cachedInventory[i].setAmount(have - toRemove);
-                            cacheChanged[i] = true;
+                            this.cachedInventory[i].setAmount(have - toRemove);
+                            this.cacheChanged[i] = true;
                             toRemove = 0;
                         } else {
-                            cachedInventory[i] = null;
-                            cacheChanged[i] = true;
+                            this.cachedInventory[i] = null;
+                            this.cacheChanged[i] = true;
                             toRemove -= have;
                         }
                     }
                 }
-                dirty = dirty | (toRemove != item.getAmount());
+                this.dirty = this.dirty | (toRemove != item.getAmount());
             }
         }
 
@@ -207,37 +202,37 @@ public class StorageContainerCache {
          * @return how many items were added
          */
         public int addAny(ItemStack item, int amountToAdd) {
-
             // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
-            if (type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
+            if (this.type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX")) {
                 return 0;
+            }
 
             int totalAdded = 0;
-            if (cachedInventory != null && item != null) {
+            if (this.cachedInventory != null && item != null) {
                 final int maxStack = item.getMaxStackSize();
-                for (int i = 0; amountToAdd > 0 && i < cachedInventory.length; i++) {
-                    final ItemStack cacheItem = cachedInventory[i];
+                for (int i = 0; amountToAdd > 0 && i < this.cachedInventory.length; i++) {
+                    final ItemStack cacheItem = this.cachedInventory[i];
                     if (cacheItem == null || cacheItem.getAmount() == 0) {
                         // free slot!
                         int toAdd = Math.min(maxStack, amountToAdd);
-                        cachedInventory[i] = item.clone();
-                        cachedInventory[i].setAmount(toAdd);
-                        cacheChanged[i] = true;
-                        cacheAdded[i] = toAdd;
+                        this.cachedInventory[i] = item.clone();
+                        this.cachedInventory[i].setAmount(toAdd);
+                        this.cacheChanged[i] = true;
+                        this.cacheAdded[i] = toAdd;
                         totalAdded += toAdd;
                         amountToAdd -= toAdd;
                     } else if (maxStack > cacheItem.getAmount() && item.isSimilar(cacheItem)) {
                         // free space!
                         int toAdd = Math.min(maxStack - cacheItem.getAmount(), amountToAdd);
-                        cachedInventory[i].setAmount(toAdd + cacheItem.getAmount());
-                        cacheChanged[i] = true;
-                        cacheAdded[i] += toAdd;
+                        this.cachedInventory[i].setAmount(toAdd + cacheItem.getAmount());
+                        this.cacheChanged[i] = true;
+                        this.cacheAdded[i] += toAdd;
                         totalAdded += toAdd;
                         amountToAdd -= toAdd;
                     }
                 }
                 if (totalAdded != 0) {
-                    dirty = true;
+                    this.dirty = true;
                 }
             }
             return totalAdded;
@@ -250,12 +245,14 @@ public class StorageContainerCache {
          * @return true if the item was added
          */
         public boolean addItem(ItemStack item) {
-            if (cachedInventory == null || item == null || item.getAmount() <= 0)
+            if (this.cachedInventory == null || item == null || item.getAmount() <= 0) {
                 return false;
+            }
 
             // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
-            if (type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX"))
+            if (this.type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX")) {
                 return false;
+            }
 
             // grab the amount to move and the max item stack size
             int toAdd = item.getAmount();
@@ -263,7 +260,7 @@ public class StorageContainerCache {
             boolean[] check = null;
 
             // some destination containers have special conditions
-            switch (type.name()) {
+            switch (this.type.name()) {
                 case "BREWING_STAND": {
 
                     // first compile a list of what slots to check
@@ -274,10 +271,11 @@ public class StorageContainerCache {
                         check[0] = check[1] = check[2] = true;
                     }
                     // fuel in 5th position, input in 4th
-                    if (item.getType() == Material.BLAZE_POWDER)
+                    if (item.getType() == Material.BLAZE_POWDER) {
                         check[4] = true;
-                    else if (CompatibleMaterial.getMaterial(item).isBrewingStandIngredient())
+                    } else if (CompatibleMaterial.getMaterial(item).isBrewingStandIngredient()) {
                         check[3] = true;
+                    }
 
                     break;
                 }
@@ -290,10 +288,11 @@ public class StorageContainerCache {
 
                     boolean isFuel = !item.getType().name().contains("LOG") && CompatibleMaterial.getMaterial(item.getType()).isFuel();
                     // fuel is 2nd slot, input is first
-                    if (isFuel)
+                    if (isFuel) {
                         check[1] = true;
-                    else
+                    } else {
                         check[0] = true;
+                    }
 
                     break;
                 }
@@ -303,15 +302,16 @@ public class StorageContainerCache {
 
             // we can reduce calls to ItemStack.isSimilar() by caching what cells to look at
             if (check == null) {
-                check = new boolean[cachedInventory.length];
-                for (int i = 0; toAdd > 0 && i < check.length; i++)
+                check = new boolean[this.cachedInventory.length];
+                for (int i = 0; toAdd > 0 && i < check.length; i++) {
                     check[i] = true;
+                }
             }
 
             // first verify that we can add this item
-            for (int i = 0; toAdd > 0 && i < cachedInventory.length; i++) {
+            for (int i = 0; toAdd > 0 && i < this.cachedInventory.length; i++) {
                 if (check[i]) {
-                    final ItemStack cacheItem = cachedInventory[i];
+                    final ItemStack cacheItem = this.cachedInventory[i];
                     if (cacheItem == null || cacheItem.getAmount() == 0) {
                         // free slot!
                         toAdd -= Math.min(maxStack, toAdd);
@@ -320,36 +320,38 @@ public class StorageContainerCache {
                         // free space!
                         toAdd -= Math.min(maxStack - cacheItem.getAmount(), toAdd);
                         check[i] = true;
-                    } else
+                    } else {
                         check[i] = false;
+                    }
                 }
             }
             if (toAdd <= 0) {
                 // all good to add!
                 toAdd = item.getAmount();
-                for (int i = 0; toAdd > 0 && i < cachedInventory.length; i++) {
-                    if (!check[i])
+                for (int i = 0; toAdd > 0 && i < this.cachedInventory.length; i++) {
+                    if (!check[i]) {
                         continue;
-                    final ItemStack cacheItem = cachedInventory[i];
+                    }
+                    final ItemStack cacheItem = this.cachedInventory[i];
                     if (cacheItem == null || cacheItem.getAmount() == 0) {
                         // free slot!
                         int adding = Math.min(maxStack, toAdd);
-                        cachedInventory[i] = item.clone();
-                        cachedInventory[i].setAmount(adding);
-                        cacheChanged[i] = true;
-                        cacheAdded[i] = adding;
+                        this.cachedInventory[i] = item.clone();
+                        this.cachedInventory[i].setAmount(adding);
+                        this.cacheChanged[i] = true;
+                        this.cacheAdded[i] = adding;
                         toAdd -= adding;
                     } else if (maxStack > cacheItem.getAmount()) {
                         // free space!
                         // (no need to check item.isSimilar(cacheItem), since we have that cached in check[])
                         int adding = Math.min(maxStack - cacheItem.getAmount(), toAdd);
-                        cachedInventory[i].setAmount(adding + cacheItem.getAmount());
-                        cacheChanged[i] = true;
-                        cacheAdded[i] += adding;
+                        this.cachedInventory[i].setAmount(adding + cacheItem.getAmount());
+                        this.cacheChanged[i] = true;
+                        this.cacheAdded[i] += adding;
                         toAdd -= adding;
                     }
                 }
-                dirty = true;
+                this.dirty = true;
                 return true;
             }
             return false;

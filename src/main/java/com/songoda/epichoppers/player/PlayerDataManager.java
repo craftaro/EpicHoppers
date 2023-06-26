@@ -9,11 +9,10 @@ import java.util.Map;
 import java.util.UUID;
 
 public class PlayerDataManager {
-
     private final Map<UUID, PlayerData> registeredPlayers = new HashMap<>();
 
     private PlayerData getPlayerData(UUID uuid) {
-        return registeredPlayers.computeIfAbsent(uuid, u -> new PlayerData());
+        return this.registeredPlayers.computeIfAbsent(uuid, u -> new PlayerData());
     }
 
     public PlayerData getPlayerData(Player player) {
@@ -21,6 +20,6 @@ public class PlayerDataManager {
     }
 
     public Collection<PlayerData> getRegisteredPlayers() {
-        return Collections.unmodifiableCollection(registeredPlayers.values());
+        return Collections.unmodifiableCollection(this.registeredPlayers.values());
     }
 }

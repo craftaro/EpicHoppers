@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import java.util.List;
 
 public class CommandReload extends AbstractCommand {
-
     private final EpicHoppers plugin;
 
     public CommandReload(EpicHoppers plugin) {
@@ -17,8 +16,8 @@ public class CommandReload extends AbstractCommand {
 
     @Override
     protected ReturnType runCommand(CommandSender sender, String... args) {
-        plugin.reloadConfig();
-        plugin.getLocale().getMessage("&7Configuration and Language files reloaded.").sendPrefixedMessage(sender);
+        this.plugin.reloadConfig();
+        this.plugin.getLocale().getMessage("&7Configuration and Language files reloaded.").sendPrefixedMessage(sender);
         return ReturnType.SUCCESS;
     }
 

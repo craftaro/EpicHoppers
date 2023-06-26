@@ -33,13 +33,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Created by songoda on 3/14/2017.
- */
 public class HopTask extends BukkitRunnable {
-
-    // Hop to the bop to the be bop top.
-    private EpicHoppers plugin;
+    private final EpicHoppers plugin;
     private final int hopTicks;
 
     public HopTask(EpicHoppers plugin) {
@@ -50,22 +45,24 @@ public class HopTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        for (final com.songoda.epichoppers.hopper.Hopper hopper : plugin.getHopperManager().getHoppers().values()) {
+        for (final com.songoda.epichoppers.hopper.Hopper hopper : this.plugin.getHopperManager().getHoppers().values()) {
 
             try {
-                // Get this hoppers location.
+                // Get this hopper's location.
                 Location location = hopper.getLocation();
 
                 // Skip if chunk is not loaded.
-                if (location.getWorld() == null || !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4))
+                if (location.getWorld() == null || !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
                     continue;
+                }
 
                 // Get Hopper Block.
                 Block block = location.getBlock();
 
                 // If block is not a hopper continue.
-                if (block.getType() != Material.HOPPER)
+                if (block.getType() != Material.HOPPER) {
                     continue;
+                }
 
                 // If hopper block is powered, update its redstone state and continue.
                 if (block.getBlockPower() > 0) {
@@ -73,11 +70,12 @@ public class HopTask extends BukkitRunnable {
                     continue;
                 }
 
-                if (!hopper.tryTick(this.hopTicks, true))
+                if (!hopper.tryTick(this.hopTicks, true)) {
                     continue;
+                }
 
                 // Amount to be moved.
-                BoostData boostData = plugin.getBoostManager().getBoost(hopper.getPlacedBy());
+                BoostData boostData = this.plugin.getBoostManager().getBoost(hopper.getPlacedBy());
                 int maxToMove = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
                 // Get hopper state data.
@@ -99,8 +97,9 @@ public class HopTask extends BukkitRunnable {
 
                                 // Add banned materials to list.
                                 List<Material> materials = module.getBlockedItems(hopper);
-                                if (materials != null && !materials.isEmpty())
+                                if (materials != null && !materials.isEmpty()) {
                                     blockedMaterials.addAll(materials);
+                                }
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
@@ -124,16 +123,18 @@ public class HopTask extends BukkitRunnable {
                                     || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
                                     // skip if blocked or voidlisted
                                     || blockedMaterials.contains(item.getType())
-                                    || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
+                                    || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item))) {
                         continue;
+                    }
 
                     doProcess = true;
                     break;
                 }
-                if (!doProcess)
+                if (!doProcess) {
                     continue;
+                }
 
-                CustomContainer container = plugin.getContainerManager().getCustomContainer(pointingLocation.getBlock());
+                CustomContainer container = this.plugin.getContainerManager().getCustomContainer(pointingLocation.getBlock());
                 if (container != null) {
                     for (int i = 0; i < 5; i++) {
                         final ItemStack item = hopperCache.cachedInventory[i];
@@ -165,10 +166,11 @@ public class HopTask extends BukkitRunnable {
     }
 
     private void debt(ItemStack item, int amountToMove, InventoryHolder currentHolder) {
-        if (item.getAmount() - amountToMove > 0)
+        if (item.getAmount() - amountToMove > 0) {
             item.setAmount(item.getAmount() - amountToMove);
-        else
+        } else {
             currentHolder.getInventory().removeItem(item);
+        }
     }
 
     private StorageContainerCache.Cache getFilterEndpoint(com.songoda.epichoppers.hopper.Hopper hopper) {
@@ -176,11 +178,14 @@ public class HopTask extends BukkitRunnable {
         Location endPoint = hopper.getFilter().getEndPoint();
 
         // Check for null.
-        if (endPoint == null) return null;
+        if (endPoint == null) {
+            return null;
+        }
 
         // Make sure chunk is loaded.
-        if (!endPoint.getWorld().isChunkLoaded(endPoint.getBlockX() >> 4, endPoint.getBlockZ() >> 4))
+        if (!endPoint.getWorld().isChunkLoaded(endPoint.getBlockX() >> 4, endPoint.getBlockZ() >> 4)) {
             return null;
+        }
 
         // Fetch Cache
         StorageContainerCache.Cache cache = StorageContainerCache.getCachedInventory(endPoint.getBlock());
@@ -202,7 +207,7 @@ public class HopTask extends BukkitRunnable {
         Collection<Entity> nearbyEntities = null;
         StorageContainerCache.Cache aboveCache = null;
 
-        CustomContainer container = plugin.getContainerManager().getCustomContainer(above);
+        CustomContainer container = this.plugin.getContainerManager().getCustomContainer(above);
         if ((container != null)
                 || (above.getType() != Material.AIR)
                 && (above.getType() != Material.HOPPER || HopperDirection.getDirection(above.getState().getRawData()) != HopperDirection.DOWN)
@@ -223,8 +228,9 @@ public class HopTask extends BukkitRunnable {
                 pullableSlots = IntStream.rangeClosed(0, contents.length - 1).toArray();
             } else {
                 if ((aboveInvHolder = this.getRandomInventoryHolderFromEntities(nearbyEntities)) == null
-                        || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY())
+                        || ((Minecart) aboveInvHolder).getLocation().getBlockY() + 1 == above.getY()) {
                     return;
+                }
                 if (aboveInvHolder instanceof StorageMinecart) {
                     pullableSlots = IntStream.rangeClosed(0, 26).toArray();
                 } else {
@@ -243,13 +249,15 @@ public class HopTask extends BukkitRunnable {
                 final ItemStack toMove = contents[i];
 
                 // If item is invalid, try the next slot.
-                if (toMove == null || toMove.getAmount() == 0)
+                if (toMove == null || toMove.getAmount() == 0) {
                     continue;
+                }
 
                 // if we're not moving the item that we're trying to craft, we need to verify that we're not trying to fill the last slot
                 // (filling every slot leaves no room for the crafter to function)
-                if (toCraft != null && !Methods.isSimilarMaterial(toMove, toCraft) && !Methods.canMoveReserved(hopperCache.cachedInventory, toMove))
+                if (toCraft != null && !Methods.isSimilarMaterial(toMove, toCraft) && !Methods.canMoveReserved(hopperCache.cachedInventory, toMove)) {
                     continue;
+                }
 
                 // respect whitelist/blacklist filters
                 if (toHopper.getFilter().getEndPoint() == null
@@ -285,9 +293,9 @@ public class HopTask extends BukkitRunnable {
                     if (aboveCache != null) {
                         aboveCache.removeItems(itemToMove);
                     } else {
-                        if (container != null)
+                        if (container != null) {
                             container.removeFromContainer(itemToMove, amountToMove);
-                        else {
+                        } else {
                             this.debt(itemToMove, amountToMove, aboveInvHolder);
                         }
                     }
@@ -309,9 +317,7 @@ public class HopTask extends BukkitRunnable {
         // Add container that the hopper is attached to physically.
         final Location pointingLocation = hopper.getLocation().add(hopperDirection.getX(), hopperDirection.getY(), hopperDirection.getZ());
         if (!linkedContainers.contains(pointingLocation)
-                && pointingLocation.getWorld().isChunkLoaded(
-                pointingLocation.getBlockX() >> 4,
-                pointingLocation.getBlockZ() >> 4)) {
+                && pointingLocation.getWorld().isChunkLoaded(pointingLocation.getBlockX() >> 4, pointingLocation.getBlockZ() >> 4)) {
             switch (pointingLocation.getBlock().getType().name()) {
                 case "AIR":
                 case "RAILS":
@@ -330,8 +336,9 @@ public class HopTask extends BukkitRunnable {
         for (Location targetLocation : linkedContainers) {
 
             // Don't check if it's not in a loaded chunk
-            if (!targetLocation.getWorld().isChunkLoaded(targetLocation.getBlockX() >> 4, targetLocation.getBlockZ() >> 4))
+            if (!targetLocation.getWorld().isChunkLoaded(targetLocation.getBlockX() >> 4, targetLocation.getBlockZ() >> 4)) {
                 continue;
+            }
 
             // special case for ender chests
             final Block targetBlock = targetLocation.getBlock();
@@ -343,8 +350,9 @@ public class HopTask extends BukkitRunnable {
                     StorageContainerCache.Cache cache = new StorageContainerCache.Cache(targetBlock.getType(), destinationInventory.getContents());
                     if (tryPush(hopper, hopperCache, cache, filterCache, maxToMove, blockedMaterials)) {
                         // update inventory and exit
-                        if (cache.isDirty())
+                        if (cache.isDirty()) {
                             destinationInventory.setContents(cache.cachedInventory);
+                        }
                         return;
                     }
                 }
@@ -352,7 +360,7 @@ public class HopTask extends BukkitRunnable {
                 continue;
             }
 
-            CustomContainer container = plugin.getContainerManager().getCustomContainer(targetLocation.getBlock());
+            CustomContainer container = this.plugin.getContainerManager().getCustomContainer(targetLocation.getBlock());
             if (container != null && tryPushCustomContainer(hopper, hopperCache, container, filterCache, maxToMove, blockedMaterials)) {
                 return;
             }
@@ -366,8 +374,9 @@ public class HopTask extends BukkitRunnable {
             }
 
             // Now attempt to push items into this container and exit on success
-            if (tryPush(hopper, hopperCache, targetCache, filterCache, maxToMove, blockedMaterials))
+            if (tryPush(hopper, hopperCache, targetCache, filterCache, maxToMove, blockedMaterials)) {
                 return;
+            }
         }
 
         // if we've gotten this far, check if we can push into a minecart
@@ -377,8 +386,9 @@ public class HopTask extends BukkitRunnable {
                     .map(InventoryHolder.class::cast).collect(Collectors.toSet())) {
                 StorageContainerCache.Cache cache = new StorageContainerCache.Cache(Material.CHEST, minecartInventory.getInventory().getContents());
                 if (tryPush(hopper, hopperCache, cache, filterCache, maxToMove, blockedMaterials)) {
-                    if (cache.isDirty())
+                    if (cache.isDirty()) {
                         minecartInventory.getInventory().setContents(cache.cachedInventory);
+                    }
                     return;
                 }
             }
@@ -401,8 +411,9 @@ public class HopTask extends BukkitRunnable {
                             || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
                             // skip if blocked or voidlisted
                             || blockedMaterials.contains(item.getType())
-                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
+                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item))) {
                 continue;
+            }
 
             // Create item that will be moved.
             ItemStack itemToMove = item.clone();
@@ -449,8 +460,9 @@ public class HopTask extends BukkitRunnable {
                             || (hopperCache.cacheChanged[i] && item.getAmount() - hopperCache.cacheAdded[i] < maxToMove)
                             // skip if blocked or voidlisted
                             || blockedMaterials.contains(item.getType())
-                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item)))
+                            || hopper.getFilter().getVoidList().stream().anyMatch(itemStack -> Methods.isSimilarMaterial(itemStack, item))) {
                 continue;
+            }
 
             // Create item that will be moved.
             ItemStack itemToMove = item.clone();
@@ -506,8 +518,9 @@ public class HopTask extends BukkitRunnable {
      * @return A set of valid pullable slots
      */
     private int[] getPullableSlots(Material material, int contentsLength) {
-        if (material.name().contains("SHULKER_BOX"))
+        if (material.name().contains("SHULKER_BOX")) {
             return IntStream.rangeClosed(0, 26).toArray();
+        }
 
         switch (material.name()) {
             case "BARREL":
@@ -542,10 +555,12 @@ public class HopTask extends BukkitRunnable {
         List<InventoryHolder> inventoryHolders = new ArrayList<>();
         entities.stream().filter(e -> e.getType() == EntityType.MINECART_CHEST || e.getType() == EntityType.MINECART_HOPPER)
                 .forEach(e -> inventoryHolders.add((InventoryHolder) e));
-        if (inventoryHolders.isEmpty())
+        if (inventoryHolders.isEmpty()) {
             return null;
-        if (inventoryHolders.size() == 1)
+        }
+        if (inventoryHolders.size() == 1) {
             return inventoryHolders.get(0);
+        }
         return inventoryHolders.get(ThreadLocalRandom.current().nextInt(inventoryHolders.size()));
     }
 }

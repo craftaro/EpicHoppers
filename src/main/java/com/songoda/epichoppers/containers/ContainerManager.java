@@ -1,6 +1,5 @@
 package com.songoda.epichoppers.containers;
 
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.containers.impl.AdvancedChestImplementation;
 import com.songoda.epichoppers.containers.impl.EpicFarmingImplementation;
 import com.songoda.epichoppers.containers.impl.FabledSkyBlockImplementation;
@@ -13,12 +12,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ContainerManager {
-
-    private final EpicHoppers plugin;
     private final Set<IContainer> customContainers;
 
-    public ContainerManager(EpicHoppers plugin) {
-        this.plugin = plugin;
+    public ContainerManager() {
         this.customContainers = new HashSet<>();
 
         registerCustomContainerImplementation("AdvancedChests", new AdvancedChestImplementation());
@@ -27,13 +23,13 @@ public class ContainerManager {
     }
 
     public Set<IContainer> getCustomContainerImplementations() {
-        return Collections.unmodifiableSet(customContainers);
+        return Collections.unmodifiableSet(this.customContainers);
     }
 
     public void registerCustomContainerImplementation(String requiredPlugin, IContainer container) {
         PluginManager pluginManager = Bukkit.getPluginManager();
         if (requiredPlugin != null && pluginManager.isPluginEnabled(requiredPlugin)) {
-            customContainers.add(container);
+            this.customContainers.add(container);
         }
     }
 
@@ -42,7 +38,7 @@ public class ContainerManager {
     }
 
     public CustomContainer getCustomContainer(Block block) {
-        for (IContainer container : customContainers) {
+        for (IContainer container : this.customContainers) {
             CustomContainer customContainer = container.getCustomContainer(block);
             if (customContainer.isContainer()) {
                 return customContainer;

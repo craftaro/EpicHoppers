@@ -2,6 +2,7 @@ package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.songoda.core.compatibility.CompatibleMaterial;
 import com.songoda.core.hooks.EconomyManager;
+import com.songoda.core.utils.NumberUtils;
 import com.songoda.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUIAutoSellFilter;
@@ -25,13 +26,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ModuleAutoSell extends Module {
+    private static final Map<Hopper, Boolean> CACHED_NOTIFICATIONS = new ConcurrentHashMap<>();
 
     private final int timeOut;
     private final int hopperTickRate;
-    private static final Map<Hopper, Boolean> cachedNotifications = new ConcurrentHashMap<>();
 
     public ModuleAutoSell(EpicHoppers plugin, int timeOut) {
         super(plugin);
+
         this.timeOut = timeOut * 20;
         this.hopperTickRate = Settings.HOP_TICKS.getInt();
     }
@@ -46,15 +48,19 @@ public class ModuleAutoSell extends Module {
 
         int currentTime = getTime(hopper);
 
-        if (currentTime == -9999) return;
+        if (currentTime == -9999) {
+            return;
+        }
 
-        int subtract = getTime(hopper) - hopperTickRate;
+        int subtract = getTime(hopper) - this.hopperTickRate;
 
         if (subtract <= 0) {
             int amountSold = 0;
             double totalValue = 0;
 
-            if (!EconomyManager.isEnabled()) return;
+            if (!EconomyManager.isEnabled()) {
+                return;
+            }
 
             OfflinePlayer player = Bukkit.getOfflinePlayer(hopper.getPlacedBy());
 
@@ -62,18 +68,22 @@ public class ModuleAutoSell extends Module {
             for (int i = 0; i < hopperCache.cachedInventory.length; i++) {
                 final ItemStack itemStack = hopperCache.cachedInventory[i];
 
-                if (itemStack == null) continue;
+                if (itemStack == null) {
+                    continue;
+                }
 
                 Filter filter = hopper.getFilter();
 
                 if (filter.getAutoSellWhiteList().isEmpty()) {
                     // Check blacklist
-                    if (filter.getAutoSellBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(itemStack, item)))
+                    if (filter.getAutoSellBlackList().stream().anyMatch(item -> Methods.isSimilarMaterial(itemStack, item))) {
                         continue;
+                    }
                 } else {
                     // Check whitelist
-                    if (filter.getAutoSellWhiteList().stream().noneMatch(item -> Methods.isSimilarMaterial(itemStack, item)))
+                    if (filter.getAutoSellWhiteList().stream().noneMatch(item -> Methods.isSimilarMaterial(itemStack, item))) {
                         continue;
+                    }
                 }
 
                 // Get the value from config or ShopGuiPlus or EconomyShopGui
@@ -103,7 +113,9 @@ public class ModuleAutoSell extends Module {
                             .map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
                 }
 
-                if (value <= 0) continue;
+                if (value <= 0) {
+                    continue;
+                }
 
                 double sellingFor = value * itemStack.getAmount();
 
@@ -112,15 +124,16 @@ public class ModuleAutoSell extends Module {
                 hopperCache.removeItem(i);
             }
 
-            if (totalValue != 0)
+            if (totalValue != 0) {
                 EconomyManager.deposit(player, totalValue);
+            }
             if (totalValue != 0 && player.isOnline() && isNotifying(hopper)) {
-                plugin.getLocale().getMessage("event.hopper.autosell")
+                this.plugin.getLocale().getMessage("event.hopper.autosell")
                         .processPlaceholder("items", amountSold)
-                        .processPlaceholder("amount", Methods.formatEconomy(totalValue)).sendPrefixedMessage(player.getPlayer());
+                        .processPlaceholder("amount", NumberUtils.formatNumber(totalValue)).sendPrefixedMessage(player.getPlayer());
             }
 
-            modifyDataCache(hopper, "time", timeOut);
+            modifyDataCache(hopper, "time", this.timeOut);
             return;
         }
 
@@ -132,15 +145,18 @@ public class ModuleAutoSell extends Module {
         ItemStack sellItem = CompatibleMaterial.SUNFLOWER.getItem();
         ItemMeta sellMeta = sellItem.getItemMeta();
 
-        sellMeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selltitle").getMessage());
+        sellMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.selltitle").getMessage());
         ArrayList<String> loreSell = new ArrayList<>();
 
-        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.selllore")
-                .processPlaceholder("timeleft", getTime(hopper) == -9999 ? "\u221E" : (int) Math.floor(getTime(hopper) / 20))
-                .processPlaceholder("state", isNotifying(hopper)).getMessage().split("\\|");
+        String[] parts = this.plugin.getLocale().getMessage("interface.hopper.selllore")
+                .processPlaceholder("timeleft", getTime(hopper) == -9999 ? "∞" : (int) Math.floor(getTime(hopper) / 20))
+                .processPlaceholder("state", isNotifying(hopper))
+                .getMessage()
+                .split("\\|");
 
-        for (String line : parts)
+        for (String line : parts) {
             loreSell.add(TextUtils.formatText(line));
+        }
 
         sellMeta.setLore(loreSell);
         sellItem.setItemMeta(sellMeta);
@@ -151,7 +167,7 @@ public class ModuleAutoSell extends Module {
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
         if (type == ClickType.LEFT) {
             if (getTime(hopper) == -9999) {
-                saveData(hopper, "time", timeOut);
+                saveData(hopper, "time", this.timeOut);
             } else {
                 saveData(hopper, "time", -9999);
             }
@@ -160,7 +176,7 @@ public class ModuleAutoSell extends Module {
         } else if (type == ClickType.SHIFT_LEFT || type == ClickType.SHIFT_RIGHT) {
             // Any shift click opens AutoSell filter configuration GUI
             hopper.setActivePlayer(player);
-            EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUIAutoSellFilter(EpicHoppers.getInstance(), hopper));
+            this.plugin.getGuiManager().showGUI(player, new GUIAutoSellFilter(this.plugin, hopper));
         }
     }
 
@@ -171,33 +187,37 @@ public class ModuleAutoSell extends Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.autosell")
-                .processPlaceholder("seconds", (int) Math.floor(timeOut / 20)).getMessage();
+        return this.plugin.getLocale()
+                .getMessage("interface.hopper.autosell")
+                .processPlaceholder("seconds", (int) Math.floor(this.timeOut / 20))
+                .getMessage();
     }
 
     @Override
     public void clearData(Hopper hopper) {
         super.clearData(hopper);
-        cachedNotifications.remove(hopper);
+        CACHED_NOTIFICATIONS.remove(hopper);
     }
 
     private boolean isNotifying(Hopper hopper) {
-        Boolean enabled = cachedNotifications.get(hopper);
+        Boolean enabled = CACHED_NOTIFICATIONS.get(hopper);
         if (enabled == null) {
             Object notifications = getData(hopper, "notifications");
-            cachedNotifications.put(hopper, enabled = notifications != null && (boolean) notifications);
+            CACHED_NOTIFICATIONS.put(hopper, enabled = notifications != null && (boolean) notifications);
         }
         return enabled;
     }
 
     public void setNotifying(Hopper hopper, boolean enable) {
         saveData(hopper, "notifications", enable);
-        cachedNotifications.put(hopper, enable);
+        CACHED_NOTIFICATIONS.put(hopper, enable);
     }
 
     private int getTime(Hopper hopper) {
         Object time = getData(hopper, "time");
-        if (time == null) return -9999;
+        if (time == null) {
+            return -9999;
+        }
         return (int) time;
     }
 }

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GUIAutoSellFilter extends CustomizableGui {
-    private static final List<GUIAutoSellFilter> openInventories = new ArrayList<>();
+    private static final List<GUIAutoSellFilter> OPEN_INVENTORIES = new ArrayList<>();
 
     private final EpicHoppers plugin;
     private final Hopper hopper;
@@ -36,10 +36,10 @@ public class GUIAutoSellFilter extends CustomizableGui {
         setDefaultItem(null);
         setAcceptsItems(true);
 
-        setOnOpen((event) -> GUIAutoSellFilter.openInventories.add(this));
+        setOnOpen((event) -> GUIAutoSellFilter.OPEN_INVENTORIES.add(this));
 
         setOnClose((event) -> {
-            GUIAutoSellFilter.openInventories.remove(this);
+            GUIAutoSellFilter.OPEN_INVENTORIES.remove(this);
             hopper.setActivePlayer(null);
             compile();
         });
@@ -63,7 +63,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
         setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    hopper.overview(guiManager, event.player);
+                    hopper.overview(this.guiManager, event.player);
                     compile();
                 });
 
@@ -80,8 +80,10 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         int num = 0;
         for (ItemStack m : filter.getAutoSellWhiteList()) {
-            if (num >= filter.getAutoSellWhiteList().size()) break;
-            setItem(whiteListSlots[num], new ItemStack(m));
+            if (num >= filter.getAutoSellWhiteList().size()) {
+                break;
+            }
+            setItem(this.whiteListSlots[num], new ItemStack(m));
             num++;
         }
 
@@ -98,8 +100,10 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         num = 0;
         for (ItemStack m : filter.getAutoSellBlackList()) {
-            if (num >= filter.getAutoSellBlackList().size()) break;
-            setItem(blackListSlots[num], new ItemStack(m));
+            if (num >= filter.getAutoSellBlackList().size()) {
+                break;
+            }
+            setItem(this.blackListSlots[num], new ItemStack(m));
             num++;
         }
 
@@ -109,7 +113,11 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         indicatorMeta.setDisplayName(plugin.getLocale().getMessage("interface.autosell-filter.infotitle").getMessage());
         ArrayList<String> loreInfo = new ArrayList<>();
-        String[] parts = plugin.getLocale().getMessage("interface.autosell-filter.infolore").getMessage().split("\\|");
+        String[] parts = plugin
+                .getLocale()
+                .getMessage("interface.autosell-filter.infolore")
+                .getMessage()
+                .split("\\|");
 
         for (String line : parts) {
             loreInfo.add(TextUtils.formatText(line));
@@ -127,22 +135,24 @@ public class GUIAutoSellFilter extends CustomizableGui {
     }
 
     private void compile() {
-        ItemStack[] items = inventory.getContents();
+        ItemStack[] items = this.inventory.getContents();
 
-        Filter filter = hopper.getFilter();
+        Filter filter = this.hopper.getFilter();
 
         List<ItemStack> whiteListItems = new ArrayList<>();
         List<ItemStack> blackListItems = new ArrayList<>();
 
         for (int i = 0; i < items.length; i++) {
-            for (int slot : whiteListSlots) {
-                if (slot != i) continue;
+            for (int slot : this.whiteListSlots) {
+                if (slot != i) {
+                    continue;
+                }
 
                 if (items[i] != null && !items[i].getType().isAir()) {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
+                        Bukkit.getPlayer(this.hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
 
@@ -150,14 +160,16 @@ public class GUIAutoSellFilter extends CustomizableGui {
                 }
             }
 
-            for (int slot : blackListSlots) {
-                if (slot != i) continue;
+            for (int slot : this.blackListSlots) {
+                if (slot != i) {
+                    continue;
+                }
 
                 if (items[i] != null && !items[i].getType().isAir()) {
                     ItemStack item = items[i];
                     if (item.getAmount() != 1) {
                         item.setAmount(item.getAmount() - 1);
-                        Bukkit.getPlayer(hopper.getLastPlayerOpened()).getInventory().addItem(item);
+                        Bukkit.getPlayer(this.hopper.getLastPlayerOpened()).getInventory().addItem(item);
                         item.setAmount(1);
                     }
                     blackListItems.add(item);
@@ -167,12 +179,12 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         filter.setAutoSellWhiteList(whiteListItems);
         filter.setAutoSellBlackList(blackListItems);
-        plugin.getDataManager().updateItems(hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
-        plugin.getDataManager().updateItems(hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
+        this.plugin.getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
+        this.plugin.getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
     }
 
     public static void compileOpenAutoSellFilter(Hopper hopper) {
-        for (GUIAutoSellFilter autoSellFilter : openInventories) {
+        for (GUIAutoSellFilter autoSellFilter : OPEN_INVENTORIES) {
             if (autoSellFilter.hopper == hopper) {
                 autoSellFilter.compile();
             }

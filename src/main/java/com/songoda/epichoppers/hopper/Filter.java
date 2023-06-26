@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Filter {
-
     private List<ItemStack> whiteList = new ArrayList<>();
     private List<ItemStack> blackList = new ArrayList<>();
     private List<ItemStack> voidList = new ArrayList<>();
@@ -21,7 +20,7 @@ public class Filter {
 
 
     public List<ItemStack> getWhiteList() {
-        return whiteList != null ? whiteList : Collections.emptyList();
+        return this.whiteList != null ? this.whiteList : Collections.emptyList();
     }
 
 
@@ -31,7 +30,7 @@ public class Filter {
 
 
     public List<ItemStack> getBlackList() {
-        return blackList != null ? blackList : Collections.emptyList();
+        return this.blackList != null ? this.blackList : Collections.emptyList();
     }
 
 
@@ -41,7 +40,7 @@ public class Filter {
 
 
     public List<ItemStack> getVoidList() {
-        return voidList != null ? voidList : Collections.emptyList();
+        return this.voidList != null ? this.voidList : Collections.emptyList();
     }
 
 
@@ -51,7 +50,7 @@ public class Filter {
 
 
     public List<ItemStack> getAutoSellWhiteList() {
-        return autoSellWhiteList != null ? autoSellWhiteList : Collections.emptyList();
+        return this.autoSellWhiteList != null ? this.autoSellWhiteList : Collections.emptyList();
     }
 
 
@@ -61,7 +60,7 @@ public class Filter {
 
 
     public List<ItemStack> getAutoSellBlackList() {
-        return autoSellBlackList != null ? autoSellBlackList : Collections.emptyList();
+        return this.autoSellBlackList != null ? this.autoSellBlackList : Collections.emptyList();
     }
 
 
@@ -71,7 +70,7 @@ public class Filter {
 
 
     public Location getEndPoint() {
-        return endPoint;
+        return this.endPoint;
     }
 
 
@@ -82,19 +81,23 @@ public class Filter {
     public void addItem(ItemStack item, ItemType type) {
         switch (type) {
             case WHITELIST:
-                whiteList.add(item);
+                this.whiteList.add(item);
                 break;
+
             case BLACKLIST:
-                blackList.add(item);
+                this.blackList.add(item);
                 break;
+
             case VOID:
-                voidList.add(item);
+                this.voidList.add(item);
                 break;
+
             case AUTO_SELL_WHITELIST:
-                autoSellWhiteList.add(item);
+                this.autoSellWhiteList.add(item);
                 break;
+
             case AUTO_SELL_BLACKLIST:
-                autoSellBlackList.add(item);
+                this.autoSellBlackList.add(item);
                 break;
         }
     }

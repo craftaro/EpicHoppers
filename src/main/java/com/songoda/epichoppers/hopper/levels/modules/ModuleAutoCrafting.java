@@ -31,15 +31,15 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ModuleAutoCrafting extends Module {
+    private static final Map<ItemStack, Recipes> CACHED_RECIPES = new ConcurrentHashMap<>();
+    private static final Map<Hopper, ItemStack> CACHED_CRAFTING = new ConcurrentHashMap<>();
+    private static final ItemStack NO_CRAFT = new ItemStack(Material.AIR);
 
-    private static final Map<ItemStack, Recipes> cachedRecipes = new ConcurrentHashMap<>();
-    private static final Map<Hopper, ItemStack> cachedCrafting = new ConcurrentHashMap<>();
-    private static final ItemStack noCraft = new ItemStack(Material.AIR);
-    private boolean crafterEjection;
+    private final boolean crafterEjection;
 
     public ModuleAutoCrafting(EpicHoppers plugin) {
         super(plugin);
-        crafterEjection = Settings.AUTOCRAFT_JAM_EJECT.getBoolean();
+        this.crafterEjection = Settings.AUTOCRAFT_JAM_EJECT.getBoolean();
     }
 
     @Override
@@ -50,8 +50,9 @@ public class ModuleAutoCrafting extends Module {
     @Override
     public void run(Hopper hopper, StorageContainerCache.Cache hopperCache) {
         final ItemStack toCraft;
-        if (hopper == null || (toCraft = getAutoCrafting(hopper)) == null || toCraft.getType() == Material.AIR)
+        if (hopper == null || (toCraft = getAutoCrafting(hopper)) == null || toCraft.getType() == Material.AIR) {
             return;
+        }
 
         synchronized (hopperCache) {    //TODO: Check if this is required
             ItemStack[] items = hopperCache.cachedInventory;
@@ -67,8 +68,12 @@ public class ModuleAutoCrafting extends Module {
                     for (int i = 0; i < items.length; i++) {
                         ItemStack item = items[i];
 
-                        if (item == null) continue;
-                        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) continue;
+                        if (item == null) {
+                            continue;
+                        }
+                        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                            continue;
+                        }
 
                         boolean sameMaterial = Methods.isSimilarMaterial(item, ingredient.item);
 
@@ -82,7 +87,9 @@ public class ModuleAutoCrafting extends Module {
                             }
 
                             // Still doesn't not match --> Skip this item
-                            if (!sameMaterial) continue;
+                            if (!sameMaterial) {
+                                continue;
+                            }
                         }
 
                         if (item.getAmount() >= amount) {
@@ -95,7 +102,9 @@ public class ModuleAutoCrafting extends Module {
                     }
 
                     // Not enough ingredients for this recipe
-                    if (amount != 0) continue recipeLoop;
+                    if (amount != 0) {
+                        continue recipeLoop;
+                    }
                 }
 
                 boolean freeSlotAfterRemovingIngredients =
@@ -105,7 +114,7 @@ public class ModuleAutoCrafting extends Module {
                                                 recipe.result.isSimilar(item)));
 
                 // jam check: is this hopper gummed up?
-                if (crafterEjection && !freeSlotAfterRemovingIngredients) {
+                if (this.crafterEjection && !freeSlotAfterRemovingIngredients) {
                     // Crafter can't function if there's nowhere to put the output
                     // ¯\_(ツ)_/¯
 
@@ -180,10 +189,10 @@ public class ModuleAutoCrafting extends Module {
     public ItemStack getGUIButton(Hopper hopper) {
         ItemStack crafting = CompatibleMaterial.CRAFTING_TABLE.getItem();
         ItemMeta craftingmeta = crafting.getItemMeta();
-        craftingmeta.setDisplayName(EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftingtitle")
+        craftingmeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.craftingtitle")
                 .getMessage());
         ArrayList<String> lorecrafting = new ArrayList<>();
-        String[] parts = EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.craftinglore")
+        String[] parts = this.plugin.getLocale().getMessage("interface.hopper.craftinglore")
                 .getMessage().split("\\|");
         for (String line : parts) {
             lorecrafting.add(TextUtils.formatText(line));
@@ -196,7 +205,7 @@ public class ModuleAutoCrafting extends Module {
     @Override
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
         hopper.setActivePlayer(player);
-        EpicHoppers.getInstance().getGuiManager().showGUI(player, new GUICrafting(this, hopper, player));
+        this.plugin.getGuiManager().showGUI(player, new GUICrafting(this,this.plugin, hopper, player));
     }
 
     @Override
@@ -205,26 +214,30 @@ public class ModuleAutoCrafting extends Module {
         if (itemStack != null && itemStack.getType() != Material.AIR) {
             return getRecipes(itemStack).getPossibleIngredientTypes();
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.crafting").processPlaceholder("enabled",
-                EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled").getMessage()).getMessage();
+        return this.plugin.getLocale()
+                .getMessage("interface.hopper.crafting")
+                .processPlaceholder("enabled", this.plugin.getLocale().getMessage("general.word.enabled").getMessage())
+                .getMessage();
     }
 
     @Override
     public void clearData(Hopper hopper) {
         super.clearData(hopper);
-        cachedCrafting.remove(hopper);
+        CACHED_CRAFTING.remove(hopper);
     }
 
     private Recipes getRecipes(ItemStack toCraft) {
-        Recipes recipes = cachedRecipes.get(toCraft);
+        Recipes recipes = CACHED_RECIPES.get(toCraft);
         if (Settings.AUTOCRAFT_BLACKLIST.getStringList().stream()
-                .anyMatch(r -> r.equalsIgnoreCase(toCraft.getType().name())))
+                .anyMatch(r -> r.equalsIgnoreCase(toCraft.getType().name()))) {
             return new Recipes();
+        }
+
         if (recipes == null) {
             try {
                 recipes = new Recipes(Bukkit.getServer().getRecipesFor(toCraft));
@@ -238,32 +251,37 @@ public class ModuleAutoCrafting extends Module {
                         Recipe recipe = recipeIterator.next();
 
                         ItemStack stack = recipe.getResult();
-                        if (Methods.isSimilarMaterial(stack, toCraft))
+                        if (Methods.isSimilarMaterial(stack, toCraft)) {
                             recipes.addRecipe(recipe);
+                        }
                     } catch (Throwable ignored) {
                     }
                 }
             }
 
-            cachedRecipes.put(toCraft, recipes);
+            CACHED_RECIPES.put(toCraft, recipes);
         }
+
         return recipes;
     }
 
     public ItemStack getAutoCrafting(Hopper hopper) {
-        if (cachedCrafting.containsKey(hopper))
-            return cachedCrafting.get(hopper);
+        if (CACHED_CRAFTING.containsKey(hopper)) {
+            return CACHED_CRAFTING.get(hopper);
+        }
 
         Object autocrafting = getData(hopper, "autocrafting");
         ItemStack toCraft = autocrafting instanceof ItemStack ? (ItemStack) autocrafting : decode((String) autocrafting);
-        cachedCrafting.put(hopper, toCraft == null ? noCraft : toCraft);
+        CACHED_CRAFTING.put(hopper, toCraft == null ? NO_CRAFT : toCraft);
         return toCraft;
     }
 
     public void setAutoCrafting(Hopper hopper, Player player, ItemStack autoCrafting) {
         saveData(hopper, "autocrafting", autoCrafting == null ? null : encode(autoCrafting), autoCrafting);
-        cachedCrafting.put(hopper, autoCrafting == null ? noCraft : autoCrafting);
-        if (autoCrafting == null) return;
+        CACHED_CRAFTING.put(hopper, autoCrafting == null ? NO_CRAFT : autoCrafting);
+        if (autoCrafting == null) {
+            return;
+        }
         int excess = autoCrafting.getAmount() - 1;
         autoCrafting.setAmount(1);
         if (excess > 0 && player != null) {
@@ -285,7 +303,7 @@ public class ModuleAutoCrafting extends Module {
                 1, Short.parseShort(autoCraftingParts.length == 2 ? autoCraftingParts[1] : "0"));
     }
 
-    private final static class Recipes {
+    private static final class Recipes {
         private final List<SimpleRecipe> recipes = new ArrayList<>();
         // Used for the blacklist to ensure that items are not going to get transferred
         private final List<Material> possibleIngredientTypes = new ArrayList<>();
@@ -298,11 +316,11 @@ public class ModuleAutoCrafting extends Module {
         }
 
         public List<SimpleRecipe> getRecipes() {
-            return Collections.unmodifiableList(recipes);
+            return Collections.unmodifiableList(this.recipes);
         }
 
         public List<Material> getPossibleIngredientTypes() {
-            return Collections.unmodifiableList(possibleIngredientTypes);
+            return Collections.unmodifiableList(this.possibleIngredientTypes);
         }
 
         public void addRecipe(Recipe recipe) {
@@ -315,19 +333,21 @@ public class ModuleAutoCrafting extends Module {
             }
 
             // Skip unsupported recipe type
-            if (simpleRecipe == null) return;
+            if (simpleRecipe == null) {
+                return;
+            }
 
             this.recipes.add(simpleRecipe);
 
             // Keep a list of all possible ingredients.
             for (SimpleRecipe.SimpleIngredient ingredient : simpleRecipe.ingredients) {
-                if (!possibleIngredientTypes.contains(ingredient.item.getType())) {
-                    possibleIngredientTypes.add(ingredient.item.getType());
+                if (!this.possibleIngredientTypes.contains(ingredient.item.getType())) {
+                    this.possibleIngredientTypes.add(ingredient.item.getType());
                 }
 
                 for (ItemStack material : ingredient.alternativeTypes) {
-                    if (!possibleIngredientTypes.contains(material.getType())) {
-                        possibleIngredientTypes.add(material.getType());
+                    if (!this.possibleIngredientTypes.contains(material.getType())) {
+                        this.possibleIngredientTypes.add(material.getType());
                     }
                 }
             }
@@ -338,15 +358,15 @@ public class ModuleAutoCrafting extends Module {
         }
 
         public boolean hasRecipes() {
-            return !recipes.isEmpty();
+            return !this.recipes.isEmpty();
         }
 
         public void clearRecipes() {
-            recipes.clear();
+            this.recipes.clear();
         }
     }
 
-    private final static class SimpleRecipe {
+    private static final class SimpleRecipe {
         private final SimpleIngredient[] ingredients;
         private final ItemStack result;
 
@@ -384,7 +404,9 @@ public class ModuleAutoCrafting extends Module {
                 } catch (NoSuchMethodError ignore) {    // Method missing in Spigot 1.12.2
                 }
 
-                if (item == null) continue;
+                if (item == null) {
+                    continue;
+                }
 
                 processIngredient(ingredients, item, rChoice);
             }
@@ -449,26 +471,29 @@ public class ModuleAutoCrafting extends Module {
             }
 
             public int getAdditionalAmount() {
-                return additionalAmount;
+                return this.additionalAmount;
             }
 
             public void addAdditionalAmount(int amountToAdd) {
-                additionalAmount += amountToAdd;
+                this.additionalAmount += amountToAdd;
             }
 
             /**
              * Like {@link #equals(Object)} but ignores {@link #additionalAmount} and {@link ItemStack#getAmount()}
              *
              * @return If two {@link SimpleIngredient} objects are equal
-             *         while ignoring any item amounts, true otherwise false
+             * while ignoring any item amounts, true otherwise false
              */
             public boolean isSimilar(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
+                if (this == o) {
+                    return true;
+                }
+                if (o == null || getClass() != o.getClass()) {
+                    return false;
+                }
 
                 SimpleIngredient that = (SimpleIngredient) o;
-                return item.isSimilar(that.item) &&
-                        Arrays.equals(alternativeTypes, that.alternativeTypes);
+                return this.item.isSimilar(that.item) && Arrays.equals(this.alternativeTypes, that.alternativeTypes);
             }
         }
     }

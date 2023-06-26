@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class BoostManager {
-
     private final Set<BoostData> registeredBoosts = new HashSet<>();
 
     public void addBoostToPlayer(BoostData data) {
@@ -19,16 +18,19 @@ public class BoostManager {
     }
 
     public void addBoosts(List<BoostData> boosts) {
-        registeredBoosts.addAll(boosts);
+        this.registeredBoosts.addAll(boosts);
     }
 
     public Set<BoostData> getBoosts() {
-        return Collections.unmodifiableSet(registeredBoosts);
+        return Collections.unmodifiableSet(this.registeredBoosts);
     }
 
     public BoostData getBoost(UUID player) {
-        if (player == null) return null;
-        for (BoostData boostData : registeredBoosts) {
+        if (player == null) {
+            return null;
+        }
+
+        for (BoostData boostData : this.registeredBoosts) {
             if (boostData.getPlayer().toString().equals(player.toString())) {
                 if (System.currentTimeMillis() >= boostData.getEndTime()) {
                     removeBoostFromPlayer(boostData);

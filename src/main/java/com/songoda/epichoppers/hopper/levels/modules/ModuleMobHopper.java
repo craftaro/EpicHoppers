@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ModuleMobHopper extends Module {
-
     private final int amount;
     private final Map<Block, Integer> blockTick = new HashMap<>();
 
@@ -39,41 +38,45 @@ public class ModuleMobHopper extends Module {
     public void run(Hopper hopper, StorageContainerCache.Cache hopperCache) {
         Block block = hopper.getLocation().getBlock();
 
-        if (!blockTick.containsKey(block)) {
-            blockTick.put(block, 1);
+        if (!this.blockTick.containsKey(block)) {
+            this.blockTick.put(block, 1);
             return;
         }
-        int tick = blockTick.get(block);
+        int tick = this.blockTick.get(block);
         int put = tick + 1;
-        blockTick.put(block, put);
-        if (tick < amount || !isEnabled(hopper)) return;
+        this.blockTick.put(block, put);
+        if (tick < this.amount || !isEnabled(hopper)) {
+            return;
+        }
 
         hopper.getWorld().getNearbyEntities(hopper.getLocation(), 5, 5, 5).stream()
                 .filter(entity -> entity instanceof LivingEntity && !(entity instanceof Player) &&
                         !(entity instanceof ArmorStand)).limit(1).forEach(entity -> {
-            Location location = hopper.getLocation().add(.5, 1, .5);
-            if (location.getBlock().getType() != Material.AIR) return;
+                    Location location = hopper.getLocation().add(.5, 1, .5);
+                    if (location.getBlock().getType() != Material.AIR) {
+                        return;
+                    }
 
-            entity.teleport(location);
-            ((LivingEntity) entity).damage(99999999);
-        });
-        blockTick.remove(block);
+                    entity.teleport(location);
+                    ((LivingEntity) entity).damage(99999999);
+                });
+        this.blockTick.remove(block);
     }
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
         ItemStack block = new ItemStack(Material.ROTTEN_FLESH, 1);
-        ItemMeta blockmeta = block.getItemMeta();
-        blockmeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.mobtitle").getMessage());
-        ArrayList<String> loreblock = new ArrayList<>();
-        String[] parts = plugin.getLocale().getMessage("interface.hopper.moblore").processPlaceholder("enabled",
-                isEnabled(hopper) ? EpicHoppers.getInstance().getLocale().getMessage("general.word.enabled").getMessage()
-                        : EpicHoppers.getInstance().getLocale().getMessage("general.word.disabled").getMessage()).getMessage().split("\\|");
+        ItemMeta blockMeta = block.getItemMeta();
+        blockMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.mobtitle").getMessage());
+        ArrayList<String> loreBlock = new ArrayList<>();
+        String[] parts = this.plugin.getLocale().getMessage("interface.hopper.moblore").processPlaceholder("enabled",
+                isEnabled(hopper) ? this.plugin.getLocale().getMessage("general.word.enabled").getMessage()
+                        : this.plugin.getLocale().getMessage("general.word.disabled").getMessage()).getMessage().split("\\|");
         for (String line : parts) {
-            loreblock.add(TextUtils.formatText(line));
+            loreBlock.add(TextUtils.formatText(line));
         }
-        blockmeta.setLore(loreblock);
-        block.setItemMeta(blockmeta);
+        blockMeta.setLore(loreBlock);
+        block.setItemMeta(blockMeta);
         return block;
     }
 
@@ -89,8 +92,10 @@ public class ModuleMobHopper extends Module {
 
     @Override
     public String getDescription() {
-        return plugin.getLocale().getMessage("interface.hopper.mobhopper")
-                .processPlaceholder("ticks", amount).getMessage();
+        return this.plugin.getLocale()
+                .getMessage("interface.hopper.mobhopper")
+                .processPlaceholder("ticks", this.amount)
+                .getMessage();
     }
 
     public boolean isEnabled(Hopper hopper) {

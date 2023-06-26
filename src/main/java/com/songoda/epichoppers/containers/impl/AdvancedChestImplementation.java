@@ -8,13 +8,12 @@ import us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI;
 import us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest;
 
 public class AdvancedChestImplementation implements IContainer {
-
     @Override
     public CustomContainer getCustomContainer(Block block) {
         return new Container(block);
     }
 
-    class Container extends CustomContainer {
+    static class Container extends CustomContainer {
         private final AdvancedChest advancedChest;
 
         public Container(Block block) {
@@ -24,23 +23,26 @@ public class AdvancedChestImplementation implements IContainer {
 
         @Override
         public boolean addToContainer(ItemStack itemToMove) {
-            return AdvancedChestsAPI.addItemToChest(advancedChest, itemToMove);
+            return AdvancedChestsAPI.addItemToChest(this.advancedChest, itemToMove);
         }
 
         @Override
         public ItemStack[] getItems() {
-            return advancedChest.getAllItems().toArray(new ItemStack[0]);
+            return this.advancedChest.getAllItems().toArray(new ItemStack[0]);
         }
 
         @Override
         public void removeFromContainer(ItemStack itemToMove, int amountToMove) {
-            for (ItemStack item : advancedChest.getAllItems()) {
-                if (item == null) return;
+            for (ItemStack item : this.advancedChest.getAllItems()) {
+                if (item == null) {
+                    return;
+                }
+
                 if (itemToMove.getType() == item.getType()) {
                     item.setAmount(item.getAmount() - amountToMove);
 
                     if (item.getAmount() <= 0)
-                        advancedChest.getAllItems().remove(item);
+                        this.advancedChest.getAllItems().remove(item);
                     return;
                 }
             }
@@ -48,7 +50,7 @@ public class AdvancedChestImplementation implements IContainer {
 
         @Override
         public boolean isContainer() {
-            return advancedChest != null;
+            return this.advancedChest != null;
         }
     }
 }

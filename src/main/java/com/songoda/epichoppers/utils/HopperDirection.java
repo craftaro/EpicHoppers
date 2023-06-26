@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 
 public enum HopperDirection {
-
     DOWN(0, 8, 0, -1, 0),
     NORTH(2, 10, 0, 0, -1),
     SOUTH(3, 11, 0, 0, 1),
@@ -28,9 +27,11 @@ public enum HopperDirection {
     }
 
     public static HopperDirection getDirection(int value) {
-        for (HopperDirection hopperDirection : HopperDirection.values())
-            if (hopperDirection.getPowered() == value || hopperDirection.getUnpowered() == value)
+        for (HopperDirection hopperDirection : HopperDirection.values()) {
+            if (hopperDirection.getPowered() == value || hopperDirection.getUnpowered() == value) {
                 return hopperDirection;
+            }
+        }
         return null;
     }
 
@@ -54,22 +55,22 @@ public enum HopperDirection {
     }
 
     public int getX() {
-        return x;
+        return this.x;
     }
 
     public int getY() {
-        return y;
+        return this.y;
     }
 
     public int getZ() {
-        return z;
+        return this.z;
     }
 
     public int getUnpowered() {
-        return unpowered;
+        return this.unpowered;
     }
 
     public int getPowered() {
-        return powered;
+        return this.powered;
     }
 }

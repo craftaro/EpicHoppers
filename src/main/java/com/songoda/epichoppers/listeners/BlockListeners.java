@@ -24,6 +24,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
+import java.util.Objects;
+
 /**
  * Created by songoda on 3/14/2017.
  */
@@ -40,63 +42,73 @@ public class BlockListeners implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         Player player = e.getPlayer();
 
-        if (e.getBlock().getType() != Material.HOPPER)
+        if (e.getBlock().getType() != Material.HOPPER) {
             return;
+        }
 
-        if (Settings.DISABLED_WORLDS.getStringList().contains(player.getWorld().getName()))
+        if (Settings.DISABLED_WORLDS.getStringList().contains(player.getWorld().getName())) {
             return;
+        }
 
         int amt = count(e.getBlock().getChunk());
 
         int max = maxHoppers(player);
 
         if (max != -1 && amt > max) {
-            player.sendMessage(plugin.getLocale().getMessage("event.hopper.toomany").processPlaceholder("amount", max).getMessage());
+            player.sendMessage(this.plugin.getLocale().getMessage("event.hopper.toomany").processPlaceholder("amount", max).getMessage());
             e.setCancelled(true);
             return;
         }
 
         ItemStack item = e.getItemInHand().clone();
 
-        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !plugin.getLevelManager().isEpicHopper(item))
+        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !this.plugin.getLevelManager().isEpicHopper(item)) {
             return;
+        }
 
-        if (!plugin.getHopperManager().isReady()) {
-            player.sendMessage(plugin.getLocale().getMessage("event.hopper.notready").getMessage());
+        if (!this.plugin.getHopperManager().isReady()) {
+            player.sendMessage(this.plugin.getLocale().getMessage("event.hopper.notready").getMessage());
             e.setCancelled(true);
             return;
         }
 
-        Hopper hopper = plugin.getHopperManager().addHopper(
+        Hopper hopper = this.plugin.getHopperManager().addHopper(
                 new HopperBuilder(e.getBlock())
-                        .setLevel(plugin.getLevelManager().getLevel(item))
+                        .setLevel(this.plugin.getLevelManager().getLevel(item))
                         .setPlacedBy(player)
                         .setLastPlayerOpened(player).build());
 
         HopperPlaceEvent hopperPlaceEvent = new HopperPlaceEvent(player, hopper);
         Bukkit.getPluginManager().callEvent(hopperPlaceEvent);
 
-        EpicHoppers.getInstance().getDataManager().createHopper(hopper);
+        this.plugin.getDataManager().createHopper(hopper);
     }
 
     private int maxHoppers(Player player) {
         int limit = -1;
         for (PermissionAttachmentInfo permissionAttachmentInfo : player.getEffectivePermissions()) {
-            if (!permissionAttachmentInfo.getPermission().toLowerCase().startsWith("epichoppers.limit")) continue;
+            if (!permissionAttachmentInfo.getPermission().toLowerCase().startsWith("epichoppers.limit")) {
+                continue;
+            }
             int num = Integer.parseInt(permissionAttachmentInfo.getPermission().split("\\.")[2]);
-            if (num > limit)
+            if (num > limit) {
                 limit = num;
+            }
         }
-        if (limit == -1) limit = Settings.MAX_CHUNK.getInt();
+        if (limit == -1) {
+            limit = Settings.MAX_CHUNK.getInt();
+        }
         return limit;
     }
 
-    private int count(Chunk c) {
+    private int count(Chunk chunk) {
         int count = 0;
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                for (int y = getMinHeight(c.getWorld()); y < c.getWorld().getMaxHeight(); y++) {
-                    if (c.getBlock(x, y, z).getType() == Material.HOPPER) count++;
+                for (int y = getMinHeight(chunk.getWorld()); y < chunk.getWorld().getMaxHeight(); y++) {
+                    if (chunk.getBlock(x, y, z).getType() == Material.HOPPER) {
+                        count++;
+                    }
                 }
             }
         }
@@ -108,18 +120,21 @@ public class BlockListeners implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        if (event.getBlock().getType() != Material.HOPPER) return;
+        if (event.getBlock().getType() != Material.HOPPER) {
+            return;
+        }
 
-        if (!plugin.getHopperManager().isReady()) {
-            player.sendMessage(plugin.getLocale().getMessage("event.hopper.notready").getMessage());
+        if (!this.plugin.getHopperManager().isReady()) {
+            player.sendMessage(this.plugin.getLocale().getMessage("event.hopper.notready").getMessage());
             event.setCancelled(true);
             return;
         }
 
-        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !plugin.getHopperManager().isHopper(block.getLocation()))
+        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !this.plugin.getHopperManager().isHopper(block.getLocation())) {
             return;
+        }
 
-        Hopper hopper = plugin.getHopperManager().getHopper(block);
+        Hopper hopper = this.plugin.getHopperManager().getHopper(block);
 
         GUIFilter.compileOpenGuiFilter(hopper);
         GUIAutoSellFilter.compileOpenAutoSellFilter(hopper);
@@ -131,7 +146,7 @@ public class BlockListeners implements Listener {
             Bukkit.getPluginManager().callEvent(hopperBreakEvent);
 
             event.setCancelled(true);
-            ItemStack item = plugin.newHopperItem(level);
+            ItemStack item = this.plugin.newHopperItem(level);
 
             hopper.dropItems();
 
@@ -142,26 +157,26 @@ public class BlockListeners implements Listener {
         hopper.forceClose();
 
         hopper.getFilter().getWhiteList().stream()
-                .filter(m -> m != null)
+                .filter(Objects::nonNull)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
         hopper.getFilter().getBlackList().stream()
-                .filter(m -> m != null)
+                .filter(Objects::nonNull)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
         hopper.getFilter().getVoidList().stream().
-                filter(m -> m != null)
+                filter(Objects::nonNull)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
 
         hopper.getFilter().getAutoSellWhiteList().stream()
-                .filter(m -> m != null)
+                .filter(Objects::nonNull)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
         hopper.getFilter().getAutoSellBlackList().stream()
-                .filter(m -> m != null)
+                .filter(Objects::nonNull)
                 .forEach(m -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), m));
 
-        plugin.getHopperManager().removeHopper(block.getLocation());
-        plugin.getDataManager().deleteHopper(hopper);
+        this.plugin.getHopperManager().removeHopper(block.getLocation());
+        this.plugin.getDataManager().deleteHopper(hopper);
 
-        plugin.getPlayerDataManager().getPlayerData(player).setSyncType(null);
+        this.plugin.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
 
     public int getMinHeight(World world) {

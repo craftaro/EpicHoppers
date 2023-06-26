@@ -10,13 +10,12 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public class FabledSkyBlockImplementation implements IContainer {
-
     @Override
     public CustomContainer getCustomContainer(Block block) {
         return new Container(block);
     }
 
-    class Container extends CustomContainer {
+    static class Container extends CustomContainer {
         private final Stackable stackable;
 
         public Container(Block block) {
@@ -30,13 +29,13 @@ public class FabledSkyBlockImplementation implements IContainer {
 
         @Override
         public boolean addToContainer(ItemStack itemToMove) {
-            if (CompatibleMaterial.getMaterial(itemToMove) != stackable.getMaterial()) {
+            if (CompatibleMaterial.getMaterial(itemToMove) != this.stackable.getMaterial()) {
                 return false;
             }
 
-            stackable.addOne();
-            if (stackable.getMaxSize() > 0 && stackable.isMaxSize()) {
-                stackable.setSize(stackable.getMaxSize());
+            this.stackable.addOne();
+            if (this.stackable.getMaxSize() > 0 && this.stackable.isMaxSize()) {
+                this.stackable.setSize(this.stackable.getMaxSize());
                 return false;
             }
 
@@ -45,22 +44,21 @@ public class FabledSkyBlockImplementation implements IContainer {
 
         @Override
         public ItemStack[] getItems() {
-            ItemStack[] array = { new ItemStack(stackable.getMaterial().getMaterial(), stackable.getSize()) };
-            return array;
+            return new ItemStack[]{new ItemStack(this.stackable.getMaterial().getMaterial(), this.stackable.getSize())};
         }
 
         @Override
         public void removeFromContainer(ItemStack itemToMove, int amountToMove) {
-            if (CompatibleMaterial.getMaterial(itemToMove) != stackable.getMaterial()) {
+            if (CompatibleMaterial.getMaterial(itemToMove) != this.stackable.getMaterial()) {
                 return;
             }
 
-            stackable.setSize(stackable.getSize() - amountToMove);
+            this.stackable.setSize(this.stackable.getSize() - amountToMove);
         }
 
         @Override
         public boolean isContainer() {
-            return stackable != null;
+            return this.stackable != null;
         }
     }
 }

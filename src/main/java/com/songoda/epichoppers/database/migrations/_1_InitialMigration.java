@@ -9,14 +9,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class _1_InitialMigration extends DataMigration {
+    private final EpicHoppers plugin;
 
-    public _1_InitialMigration() {
+    public _1_InitialMigration(EpicHoppers plugin) {
         super(1);
+        this.plugin = plugin;
     }
 
     @Override
     public void migrate(Connection connection, String tablePrefix) throws SQLException {
-        String autoIncrement = EpicHoppers.getInstance().getDatabaseConnector() instanceof MySQLConnector ? " AUTO_INCREMENT" : "";
+        String autoIncrement = this.plugin.getDatabaseConnector() instanceof MySQLConnector ? " AUTO_INCREMENT" : "";
 
         // Create hoppers table
         try (Statement statement = connection.createStatement()) {

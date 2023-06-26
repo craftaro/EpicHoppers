@@ -9,7 +9,6 @@ import org.bukkit.block.Block;
 import java.util.UUID;
 
 public class HopperBuilder {
-
     private final Hopper hopper;
 
     public HopperBuilder(Location location) {
@@ -31,8 +30,9 @@ public class HopperBuilder {
     }
 
     public HopperBuilder addLinkedBlocks(LinkType type, Location... linkedBlocks) {
-        for (Location location : linkedBlocks)
-            hopper.addLinkedBlock(location, type);
+        for (Location location : linkedBlocks) {
+            this.hopper.addLinkedBlock(location, type);
+        }
         return this;
     }
 

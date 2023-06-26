@@ -31,13 +31,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ModuleSuction extends Module {
+    private static final List<UUID> BLACKLIST = new ArrayList<>();
+
+    private static final boolean WILD_STACKER = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
+    private static final boolean ULTIMATE_STACKER = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
 
     private final int maxSearchRadius;
-
-    private static List<UUID> blacklist = new ArrayList<>();
-
-    private static final boolean wildStacker = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
-    private static final boolean ultimateStacker = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
 
     public ModuleSuction(EpicHoppers plugin, int amount) {
         super(plugin);
@@ -53,7 +52,9 @@ public class ModuleSuction extends Module {
     public void run(Hopper hopper, StorageContainerCache.Cache hopperCache) {
         double radius = getRadius(hopper) + .5;
 
-        if (!isEnabled(hopper)) return;
+        if (!isEnabled(hopper)) {
+            return;
+        }
 
         Set<Item> itemsToSuck = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
                 .stream()
@@ -64,8 +65,9 @@ public class ModuleSuction extends Module {
                 .map(Item.class::cast)
                 .collect(Collectors.toSet());
 
-        if (itemsToSuck.isEmpty())
+        if (itemsToSuck.isEmpty()) {
             return;
+        }
 
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
@@ -76,7 +78,6 @@ public class ModuleSuction extends Module {
         }
 
         for (Item item : itemsToSuck) {
-
             ItemStack itemStack = item.getItemStack();
 
             if (item.getPickupDelay() == 0) {
@@ -84,21 +85,23 @@ public class ModuleSuction extends Module {
                 continue;
             }
 
-            if (itemStack.getType().name().contains("SHULKER_BOX"))
+            if (itemStack.getType().name().contains("SHULKER_BOX")) {
                 return;
+            }
 
             if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() &&
                     itemStack.getItemMeta().getDisplayName().startsWith("***")) {
                 return; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
             }
 
-            if (blacklist.contains(item.getUniqueId()))
+            if (BLACKLIST.contains(item.getUniqueId())) {
                 return;
+            }
 
             // respect filter if no endpoint
             if (!filterEndpoint
                     && !(hopper.getFilter().getWhiteList().isEmpty() && hopper.getFilter().getBlackList().isEmpty())) {
-                // this hopper has a filter with no rejection endpoint, so don't absorb disalowed items
+                // this hopper has a filter with no rejection endpoint, so don't absorb disallowed items
                 // whitelist has priority
                 if (!hopper.getFilter().getWhiteList().isEmpty()) {
                     // is this item on the whitelist?
@@ -117,28 +120,30 @@ public class ModuleSuction extends Module {
 
             if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
                 hopperInventory.setContents(hopperCache.cachedInventory);
-                InventoryPickupItemEvent pickupevent = new InventoryPickupItemEvent(hopperInventory, item);
-                Bukkit.getPluginManager().callEvent(pickupevent);
-                if (pickupevent.isCancelled())
+                InventoryPickupItemEvent pickupEvent = new InventoryPickupItemEvent(hopperInventory, item);
+                Bukkit.getPluginManager().callEvent(pickupEvent);
+                if (pickupEvent.isCancelled()) {
                     continue;
+                }
             }
 
             // try to add the items to the hopper
             int toAdd, added = hopperCache.addAny(itemStack, toAdd = getActualItemAmount(item));
-            if (added == 0)
+            if (added == 0) {
                 return;
+            }
 
             // items added ok!
-            if (added == toAdd)
+            if (added == toAdd) {
                 item.remove();
-            else {
+            } else {
                 // update the item's total
                 updateAmount(item, toAdd - added);
 
                 // wait before trying to add again
-                blacklist.add(item.getUniqueId());
-                Bukkit.getScheduler().runTaskLater(EpicHoppers.getInstance(),
-                        () -> blacklist.remove(item.getUniqueId()), 10L);
+                BLACKLIST.add(item.getUniqueId());
+                Bukkit.getScheduler().runTaskLater(this.plugin,
+                        () -> BLACKLIST.remove(item.getUniqueId()), 10L);
             }
 
             float xx = (float) (0 + (Math.random() * .1));
@@ -150,31 +155,33 @@ public class ModuleSuction extends Module {
     }
 
     private int getActualItemAmount(Item item) {
-        if (ultimateStacker) {
-            return com.songoda.ultimatestacker.utils.Methods.getActualItemAmount(item);
-        } else if (wildStacker)
+        if (ULTIMATE_STACKER) {
+            return UltimateStacker.getActualItemAmount(item);
+        } else if (WILD_STACKER) {
             return WildStackerAPI.getItemAmount(item);
-        else
+        } else {
             return item.getItemStack().getAmount();
+        }
 
     }
 
     private void updateAmount(Item item, int amount) {
-        if (ultimateStacker) {
+        if (ULTIMATE_STACKER) {
             UltimateStacker.updateItemAmount(item, item.getItemStack(), amount);
-        } else if (wildStacker)
+        } else if (WILD_STACKER) {
             WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
-        else
+        } else {
             item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
+        }
     }
 
     public static boolean isBlacklisted(UUID uuid) {
-        return blacklist.contains(uuid);
+        return BLACKLIST.contains(uuid);
     }
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        Locale locale = EpicHoppers.getInstance().getLocale();
+        Locale locale = this.plugin.getLocale();
         ItemStack item = CompatibleMaterial.CAULDRON.getItem();
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(locale.getMessage("interface.hopper.suctiontitle").getMessage());
@@ -196,7 +203,7 @@ public class ModuleSuction extends Module {
             toggleEnabled(hopper);
         } else if (type == ClickType.RIGHT) {
             int setRadius = getRadius(hopper);
-            if (setRadius >= maxSearchRadius) {
+            if (setRadius >= this.maxSearchRadius) {
                 setRadius(hopper, 1);
             } else {
                 setRadius(hopper, ++setRadius);
@@ -216,7 +223,7 @@ public class ModuleSuction extends Module {
 
     private int getRadius(Hopper hopper) {
         Object foundRadius = getData(hopper, "radius");
-        return foundRadius == null ? maxSearchRadius : (int) foundRadius;
+        return foundRadius == null ? this.maxSearchRadius : (int) foundRadius;
     }
 
     private void setRadius(Hopper hopper, int radius) {
@@ -230,7 +237,9 @@ public class ModuleSuction extends Module {
 
     @Override
     public String getDescription() {
-        return EpicHoppers.getInstance().getLocale().getMessage("interface.hopper.suction")
-                .processPlaceholder("suction", maxSearchRadius).getMessage();
+        return this.plugin.getLocale()
+                .getMessage("interface.hopper.suction")
+                .processPlaceholder("suction", this.maxSearchRadius)
+                .getMessage();
     }
 }

@@ -13,9 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class GUICrafting extends CustomizableGui {
-
-    public GUICrafting(ModuleAutoCrafting module, Hopper hopper, Player player) {
-        super(EpicHoppers.getInstance(), "crafting");
+    public GUICrafting(ModuleAutoCrafting module, EpicHoppers plugin, Hopper hopper, Player player) {
+        super(plugin, "crafting");
         setRows(3);
         setTitle(Methods.formatName(hopper.getLevel().getLevel()) + TextUtils.formatText(" &8-&f Crafting"));
         setOnClose((event) -> {
@@ -37,20 +36,20 @@ public class GUICrafting extends CustomizableGui {
         mirrorFill("mirrorfill_5", 1, 1, false, true, glass3);
 
         setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
-                EpicHoppers.getInstance().getLocale().getMessage("general.nametag.back").getMessage()),
+                        plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    hopper.overview(guiManager, event.player);
+                    hopper.overview(this.guiManager, event.player);
                     setItem(module, hopper, player);
                 }
         );
 
         setButton(13, module.getAutoCrafting(hopper),
-                (event) -> module.setAutoCrafting(hopper, player, inventory.getItem(13)));
+                (event) -> module.setAutoCrafting(hopper, player, this.inventory.getItem(13)));
 
         setUnlocked(13);
     }
 
     public void setItem(ModuleAutoCrafting module, Hopper hopper, Player player) {
-        module.setAutoCrafting(hopper, player, inventory.getItem(13));
+        module.setAutoCrafting(hopper, player, this.inventory.getItem(13));
     }
 }
