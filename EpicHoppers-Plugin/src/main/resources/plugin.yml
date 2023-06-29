@@ -1,5 +1,5 @@
-name: ${project.name}
-description: ${project.description}
+name: ${project.parent.name}
+description: ${project.parent.description}
 version: ${project.version}
 api-version: 1.13
 
@@ -26,7 +26,7 @@ softdepend:
   - WorldGuard
 
 author: Craftaro
-website: ${project.url}
+website: ${project.parent.url}
 
 commands:
   eh:

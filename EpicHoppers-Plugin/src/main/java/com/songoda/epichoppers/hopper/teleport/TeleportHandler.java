@@ -30,6 +30,17 @@ public class TeleportHandler {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0, Settings.TELEPORT_TICKS.getLong());
     }
 
+    public void tpEntity(Entity entity, Hopper hopper) {
+        if (hopper == null || !this.plugin.getHopperManager().isHopper(hopper.getLocation())) {
+            return;
+        }
+
+        Hopper lastHopper = this.getChain(hopper, 1);
+        if (!hopper.equals(lastHopper)) {
+            this.doTeleport(entity, lastHopper.getLocation());
+        }
+    }
+
     private void teleportRunner() {
         if (!this.plugin.getHopperManager().isReady()) {
             return;
@@ -68,17 +79,6 @@ public class TeleportHandler {
                 this.tpEntity(entity, hopper);
                 this.lastTeleports.put(entity.getUniqueId(), System.currentTimeMillis());
             }
-        }
-    }
-
-    public void tpEntity(Entity entity, Hopper hopper) {
-        if (hopper == null || !this.plugin.getHopperManager().isHopper(hopper.getLocation())) {
-            return;
-        }
-
-        Hopper lastHopper = this.getChain(hopper, 1);
-        if (!hopper.equals(lastHopper)) {
-            this.doTeleport(entity, lastHopper.getLocation());
         }
     }
 
