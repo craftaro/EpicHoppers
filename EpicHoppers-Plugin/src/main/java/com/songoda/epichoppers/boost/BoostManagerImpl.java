@@ -6,25 +6,30 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class BoostManager {
+public class BoostManagerImpl implements BoostManager {
     private final Set<BoostData> registeredBoosts = new HashSet<>();
 
+    @Override
     public void addBoostToPlayer(BoostData data) {
         this.registeredBoosts.add(data);
     }
 
+    @Override
     public void removeBoostFromPlayer(BoostData data) {
         this.registeredBoosts.remove(data);
     }
 
+    @Override
     public void addBoosts(List<BoostData> boosts) {
         this.registeredBoosts.addAll(boosts);
     }
 
+    @Override
     public Set<BoostData> getBoosts() {
         return Collections.unmodifiableSet(this.registeredBoosts);
     }
 
+    @Override
     public BoostData getBoost(UUID player) {
         if (player == null) {
             return null;

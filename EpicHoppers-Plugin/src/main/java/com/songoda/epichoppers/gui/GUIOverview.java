@@ -1,5 +1,6 @@
 package com.songoda.epichoppers.gui;
 
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.compatibility.ServerVersion;
 import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
@@ -7,7 +8,7 @@ import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.NumberUtils;
 import com.craftaro.core.utils.TextUtils;
 import com.craftaro.core.utils.TimeUtils;
-import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.EpicHoppersApi;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.Level;
@@ -31,13 +32,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GUIOverview extends CustomizableGui {
-    private final EpicHoppers plugin;
+    private final SongodaPlugin plugin;
     private final Hopper hopper;
     private final Player player;
 
     private int task;
 
-    public GUIOverview(EpicHoppers plugin, Hopper hopper, Player player) {
+    public GUIOverview(SongodaPlugin plugin, Hopper hopper, Player player) {
         super(plugin, "overview");
         this.plugin = plugin;
         this.hopper = hopper;
@@ -66,11 +67,11 @@ public class GUIOverview extends CustomizableGui {
         mirrorFill("mirrorfill_4", 1, 0, false, true, glass2);
         mirrorFill("mirrorfill_5", 1, 1, false, true, glass3);
 
-        this.plugin.getPlayerDataManager().getPlayerData(this.player).setLastHopper(this.hopper);
+        EpicHoppersApi.getApi().getPlayerDataManager().getPlayerData(this.player).setLastHopper(this.hopper);
 
         Level level = this.hopper.getLevel();
 
-        Level nextLevel = this.plugin.getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? this.plugin.getLevelManager().getLevel(level.getLevel() + 1) : null;
+        Level nextLevel = EpicHoppersApi.getApi().getLevelManager().getHighestLevel().getLevel() > level.getLevel() ? EpicHoppersApi.getApi().getLevelManager().getLevel(level.getLevel() + 1) : null;
 
         ItemStack pearl = new ItemStack(Material.ENDER_PEARL, 1);
         ItemMeta pearlMeta = pearl.getItemMeta();
@@ -117,7 +118,7 @@ public class GUIOverview extends CustomizableGui {
             }
         }
 
-        BoostData boostData = this.plugin.getBoostManager().getBoost(this.hopper.getPlacedBy());
+        BoostData boostData = EpicHoppersApi.getApi().getBoostManager().getBoost(this.hopper.getPlacedBy());
         if (boostData != null) {
             parts = this.plugin.getLocale().getMessage("interface.hopper.boostedstats")
                     .processPlaceholder("amount", Integer.toString(boostData.getMultiplier()))
@@ -188,13 +189,13 @@ public class GUIOverview extends CustomizableGui {
                                 return;
                             }
                             this.hopper.clearLinkedBlocks();
-                            this.plugin.getDataManager().deleteLinks(this.hopper);
+                            EpicHoppersApi.getApi().getDataManager().deleteLinks(this.hopper);
                             if (event.clickType == ClickType.RIGHT) {
                                 this.plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(this.player);
                                 constructGUI();
                                 return;
                             } else {
-                                this.plugin.getPlayerDataManager().getPlayerData(this.player).setSyncType(SyncType.REGULAR);
+                                EpicHoppersApi.getApi().getPlayerDataManager().getPlayerData(this.player).setSyncType(SyncType.REGULAR);
                                 this.plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(this.player);
 
                                 if (level.getLinkAmount() > 1) {
@@ -212,7 +213,7 @@ public class GUIOverview extends CustomizableGui {
                         (event) -> {
                             if (event.clickType == ClickType.LEFT) {
                                 if (this.hopper.getLinkedBlocks() != null) {
-                                    this.plugin.getTeleportHandler().tpEntity(this.player, this.hopper);
+                                    EpicHoppersApi.getApi().getTeleportHandler().tpEntity(this.player, this.hopper);
                                     this.player.closeInventory();
                                 }
                             } else {
@@ -223,7 +224,7 @@ public class GUIOverview extends CustomizableGui {
                                 } else if (this.hopper.getTeleportTrigger() == TeleportTrigger.WALK_ON) {
                                     this.hopper.setTeleportTrigger(TeleportTrigger.DISABLED);
                                 }
-                                this.plugin.getDataManager().updateHopper(this.hopper);
+                                EpicHoppersApi.getApi().getDataManager().updateHopper(this.hopper);
                                 constructGUI();
                             }
                         });
@@ -258,7 +259,9 @@ public class GUIOverview extends CustomizableGui {
                                         : this.plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage()),
                         (event) -> {
                             this.hopper.upgrade(this.player, CostType.EXPERIENCE);
-                            this.hopper.overview(this.guiManager, this.player);
+                            if (this.hopper.prepareForOpeningOverviewGui(this.player)) {
+                                this.guiManager.showGUI(event.player, new GUIOverview(this.plugin, this.hopper, event.player));
+                            }
                         });
             }
             if (Settings.UPGRADE_WITH_ECONOMY.getBoolean()
@@ -273,7 +276,9 @@ public class GUIOverview extends CustomizableGui {
                                         : this.plugin.getLocale().getMessage("interface.hopper.alreadymaxed").getMessage()),
                         (event) -> {
                             this.hopper.upgrade(this.player, CostType.ECONOMY);
-                            this.hopper.overview(this.guiManager, this.player);
+                            if (this.hopper.prepareForOpeningOverviewGui(this.player)) {
+                                this.guiManager.showGUI(this.player, new GUIOverview(this.plugin, this.hopper, this.player));
+                            }
                         });
             }
         }

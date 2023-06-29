@@ -13,6 +13,7 @@ import org.bukkit.block.data.type.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,7 @@ import java.util.Map;
  * Persistent storage intended for streamlining read/write for storage
  * containers in large batches
  */
+@ApiStatus.Internal
 public class StorageContainerCache {
     private static final Map<Block, Cache> INVENTORY_CACHE = new HashMap<>();
 

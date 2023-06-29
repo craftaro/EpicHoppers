@@ -1,11 +1,11 @@
 package com.songoda.epichoppers.gui;
 
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.compatibility.CompatibleMaterial;
 import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSmelter;
 import com.songoda.epichoppers.settings.Settings;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GUISmeltable extends CustomizableGui {
-    private final EpicHoppers plugin;
+    private final SongodaPlugin plugin;
     private final Hopper hopper;
     private final int maxPages;
     private final ModuleAutoSmelter moduleAutoSmelter;
@@ -28,7 +28,7 @@ public class GUISmeltable extends CustomizableGui {
             .filter(material -> CompatibleMaterial.getFurnaceResult(material) != null)
             .collect(Collectors.toList());
 
-    public GUISmeltable(ModuleAutoSmelter moduleAutoSmelter, EpicHoppers plugin, Hopper hopper) {
+    public GUISmeltable(ModuleAutoSmelter moduleAutoSmelter, SongodaPlugin plugin, Hopper hopper) {
         super(plugin, "smeltable");
         this.plugin = plugin;
         this.hopper = hopper;
@@ -102,7 +102,11 @@ public class GUISmeltable extends CustomizableGui {
 
         setButton("exit", 49, GuiUtils.createButtonItem(XMaterial.OAK_DOOR,
                         this.plugin.getLocale().getMessage("general.nametag.exit").getMessage()),
-                (event) -> this.hopper.overview(this.plugin.getGuiManager(), event.player));
+                (event) -> {
+                    if (this.hopper.prepareForOpeningOverviewGui(event.player)) {
+                        this.guiManager.showGUI(event.player, new GUIOverview(this.plugin, this.hopper, event.player));
+                    }
+                });
     }
 
     public ItemStack getItemStack(XMaterial material, boolean enabled) {

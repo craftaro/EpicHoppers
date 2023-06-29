@@ -4,6 +4,7 @@ import com.craftaro.core.SongodaCore;
 import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.commands.CommandManager;
 import com.craftaro.core.configuration.Config;
+import com.craftaro.core.database.DataManagerAbstract;
 import com.craftaro.core.database.DataMigrationManager;
 import com.craftaro.core.database.DatabaseConnector;
 import com.craftaro.core.database.MySQLConnector;
@@ -15,16 +16,20 @@ import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.third_party.de.tr7zw.nbtapi.NBTItem;
 import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.boost.BoostManager;
+import com.songoda.epichoppers.boost.BoostManagerImpl;
 import com.songoda.epichoppers.commands.CommandBoost;
 import com.songoda.epichoppers.commands.CommandGive;
 import com.songoda.epichoppers.commands.CommandReload;
 import com.songoda.epichoppers.commands.CommandSettings;
 import com.songoda.epichoppers.containers.ContainerManager;
+import com.songoda.epichoppers.containers.ContainerManagerImpl;
 import com.songoda.epichoppers.database.DataManager;
+import com.songoda.epichoppers.database.DataManagerImpl;
 import com.songoda.epichoppers.database.migrations._1_InitialMigration;
 import com.songoda.epichoppers.hopper.HopperManager;
 import com.songoda.epichoppers.hopper.levels.Level;
 import com.songoda.epichoppers.hopper.levels.LevelManager;
+import com.songoda.epichoppers.hopper.levels.LevelManagerImpl;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSell;
@@ -33,12 +38,14 @@ import com.songoda.epichoppers.hopper.levels.modules.ModuleBlockBreak;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleMobHopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleSuction;
 import com.songoda.epichoppers.hopper.teleport.TeleportHandler;
+import com.songoda.epichoppers.hopper.teleport.TeleportHandlerImpl;
 import com.songoda.epichoppers.listeners.BlockListeners;
 import com.songoda.epichoppers.listeners.EntityListeners;
 import com.songoda.epichoppers.listeners.HopperListeners;
 import com.songoda.epichoppers.listeners.InteractListeners;
 import com.songoda.epichoppers.listeners.InventoryListeners;
 import com.songoda.epichoppers.player.PlayerDataManager;
+import com.songoda.epichoppers.player.PlayerDataManagerImpl;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.tasks.HopTask;
 import com.songoda.epichoppers.utils.Methods;
@@ -62,7 +69,7 @@ public class EpicHoppers extends SongodaPlugin {
     private HopperManager hopperManager;
     private CommandManager commandManager;
     private LevelManager levelManager;
-    private BoostManager boostManager;
+    private BoostManagerImpl boostManager;
     private PlayerDataManager playerDataManager;
     private ContainerManager containerManager;
 
@@ -110,9 +117,9 @@ public class EpicHoppers extends SongodaPlugin {
                 );
 
         this.hopperManager = new HopperManager(this);
-        this.playerDataManager = new PlayerDataManager();
-        this.containerManager = new ContainerManager();
-        this.boostManager = new BoostManager();
+        this.playerDataManager = new PlayerDataManagerImpl();
+        this.containerManager = new ContainerManagerImpl();
+        this.boostManager = new BoostManagerImpl();
 
         // Database stuff, go!
         try {
@@ -136,14 +143,16 @@ public class EpicHoppers extends SongodaPlugin {
             this.emergencyStop();
         }
 
-        this.dataManager = new DataManager(this.databaseConnector, this);
-        DataMigrationManager dataMigrationManager = new DataMigrationManager(this.databaseConnector, this.dataManager, new _1_InitialMigration(this));
+        this.dataManager = new DataManagerImpl(this.databaseConnector, this);
+        DataMigrationManager dataMigrationManager = new DataMigrationManager(this.databaseConnector, (DataManagerAbstract) this.dataManager, new _1_InitialMigration(this));
         dataMigrationManager.runMigrations();
+
+        EpicHoppersApi.initApi(this.levelManager, this.boostManager, this.containerManager, this.teleportHandler, this.playerDataManager, this.dataManager);
 
         this.loadLevelManager();
 
         new HopTask(this);
-        this.teleportHandler = new TeleportHandler(this);
+        this.teleportHandler = new TeleportHandlerImpl(this);
 
         // Register Listeners
         this.guiManager.init();
@@ -201,7 +210,7 @@ public class EpicHoppers extends SongodaPlugin {
         this.levelsConfig.load();
 
         // Load an instance of LevelManager
-        this.levelManager = new LevelManager();
+        this.levelManager = new LevelManagerImpl();
         /*
          * Register Levels into LevelManager from configuration.
          */
@@ -224,17 +233,17 @@ public class EpicHoppers extends SongodaPlugin {
 
             for (String key : levels.getKeys(false)) {
                 if (key.equals("Suction") && levels.getInt("Suction") != 0) {
-                    modules.add(new ModuleSuction(this, levels.getInt("Suction")));
+                    modules.add(new ModuleSuction(this, getGuiManager(), levels.getInt("Suction")));
                 } else if (key.equals("BlockBreak") && levels.getInt("BlockBreak") != 0) {
-                    modules.add(new ModuleBlockBreak(this, levels.getInt("BlockBreak")));
+                    modules.add(new ModuleBlockBreak(this, getGuiManager(), levels.getInt("BlockBreak")));
                 } else if (key.equals("AutoCrafting")) {
-                    modules.add(new ModuleAutoCrafting(this));
+                    modules.add(new ModuleAutoCrafting(this, getGuiManager()));
                 } else if (key.equals("AutoSell")) {
-                    modules.add(new ModuleAutoSell(this, autoSell));
+                    modules.add(new ModuleAutoSell(this, getGuiManager(), autoSell));
                 } else if (key.equals("MobHopper")) {
-                    modules.add(new ModuleMobHopper(this, levels.getInt("MobHopper")));
+                    modules.add(new ModuleMobHopper(this, getGuiManager(), levels.getInt("MobHopper")));
                 } else if (key.equals("AutoSmelting")) {
-                    modules.add(new ModuleAutoSmelter(this, levels.getInt("AutoSmelting")));
+                    modules.add(new ModuleAutoSmelter(this, getGuiManager(), levels.getInt("AutoSmelting")));
                 }
             }
             this.levelManager.addLevel(level, costExperience, costEconomy, radius, amount, filter, teleport, linkAmount, modules);

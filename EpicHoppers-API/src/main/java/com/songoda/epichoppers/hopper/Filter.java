@@ -15,64 +15,51 @@ public class Filter {
     private List<ItemStack> autoSellWhiteList = new ArrayList<>();
     private List<ItemStack> autoSellBlackList = new ArrayList<>();
 
-
     private Location endPoint;
-
 
     public List<ItemStack> getWhiteList() {
         return this.whiteList != null ? this.whiteList : Collections.emptyList();
     }
 
-
     public void setWhiteList(List<ItemStack> whiteList) {
         this.whiteList = whiteList;
     }
-
 
     public List<ItemStack> getBlackList() {
         return this.blackList != null ? this.blackList : Collections.emptyList();
     }
 
-
     public void setBlackList(List<ItemStack> blackList) {
         this.blackList = blackList;
     }
-
 
     public List<ItemStack> getVoidList() {
         return this.voidList != null ? this.voidList : Collections.emptyList();
     }
 
-
     public void setVoidList(List<ItemStack> voidList) {
         this.voidList = voidList;
     }
-
 
     public List<ItemStack> getAutoSellWhiteList() {
         return this.autoSellWhiteList != null ? this.autoSellWhiteList : Collections.emptyList();
     }
 
-
     public void setAutoSellWhiteList(List<ItemStack> autoSellWhiteList) {
         this.autoSellWhiteList = autoSellWhiteList;
     }
-
 
     public List<ItemStack> getAutoSellBlackList() {
         return this.autoSellBlackList != null ? this.autoSellBlackList : Collections.emptyList();
     }
 
-
     public void setAutoSellBlackList(List<ItemStack> autoSellBlackList) {
         this.autoSellBlackList = autoSellBlackList;
     }
 
-
     public Location getEndPoint() {
         return this.endPoint;
     }
-
 
     public void setEndPoint(Location endPoint) {
         this.endPoint = endPoint;

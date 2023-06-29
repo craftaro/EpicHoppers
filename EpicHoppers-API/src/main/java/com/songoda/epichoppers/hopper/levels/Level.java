@@ -1,7 +1,8 @@
 package com.songoda.epichoppers.hopper.levels;
 
-import com.songoda.epichoppers.EpicHoppers;
+import com.craftaro.core.SongodaPlugin;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
+import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,34 +25,31 @@ public class Level {
         this.registeredModules = registeredModules;
 
         buildDescription();
-
     }
 
     public void buildDescription() {
-        EpicHoppers instance = EpicHoppers.getPlugin(EpicHoppers.class);
-
         this.description.clear();
 
-        this.description.add(instance.getLocale().getMessage("interface.hopper.range")
+        this.description.add(getPlugin().getLocale().getMessage("interface.hopper.range")
                 .processPlaceholder("range", this.range).getMessage());
-        this.description.add(instance.getLocale().getMessage("interface.hopper.amount")
+        this.description.add(getPlugin().getLocale().getMessage("interface.hopper.amount")
                 .processPlaceholder("amount", this.amount).getMessage());
         if (this.linkAmount != 1) {
-            this.description.add(instance.getLocale().getMessage("interface.hopper.linkamount")
+            this.description.add(getPlugin().getLocale().getMessage("interface.hopper.linkamount")
                     .processPlaceholder("amount", this.linkAmount).getMessage());
         }
         if (this.filter) {
-            this.description.add(instance.getLocale().getMessage("interface.hopper.filter")
-                    .processPlaceholder("enabled", instance.getLocale()
+            this.description.add(getPlugin().getLocale().getMessage("interface.hopper.filter")
+                    .processPlaceholder("enabled", getPlugin().getLocale()
                             .getMessage("general.word.enabled").getMessage()).getMessage());
         }
         if (this.teleport) {
-            this.description.add(instance
+            this.description.add(getPlugin()
                     .getLocale()
                     .getMessage("interface.hopper.teleport")
                     .processPlaceholder(
                             "enabled",
-                            instance
+                            getPlugin()
                                     .getLocale()
                                     .getMessage("general.word.enabled")
                                     .getMessage())
@@ -131,5 +129,14 @@ public class Level {
             }
         }
         return null;
+    }
+
+    /**
+     * @deprecated The class needs refactoring to not even need the plugin.
+     * This is just a temporary workaround to get a Minecraft 1.20-beta build ready
+     */
+    @Deprecated
+    private SongodaPlugin getPlugin() {
+        return (SongodaPlugin) Bukkit.getPluginManager().getPlugin("EpicHoppers");
     }
 }

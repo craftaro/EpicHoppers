@@ -1,9 +1,10 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.compatibility.CompatibleMaterial;
+import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUISmeltable;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
@@ -22,8 +23,8 @@ public class ModuleAutoSmelter extends Module {
     private final int timeOut;
     private final int hopperTickRate;
 
-    public ModuleAutoSmelter(EpicHoppers plugin, int timeOut) {
-        super(plugin);
+    public ModuleAutoSmelter(SongodaPlugin plugin, GuiManager guiManager, int timeOut) {
+        super(plugin, guiManager);
         this.timeOut = timeOut * 20;
         this.hopperTickRate = Settings.HOP_TICKS.getInt();
     }
@@ -103,7 +104,7 @@ public class ModuleAutoSmelter extends Module {
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
         if (type == ClickType.LEFT) {
             hopper.setActivePlayer(player);
-            this.plugin.getGuiManager().showGUI(player, new GUISmeltable(this, this.plugin, hopper));
+            this.guiManager.showGUI(player, new GUISmeltable(this, this.plugin, hopper));
         } else if (type == ClickType.RIGHT) {
             toggleEnabled(hopper);
         }

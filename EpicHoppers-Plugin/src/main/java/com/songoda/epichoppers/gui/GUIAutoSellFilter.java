@@ -1,10 +1,11 @@
 package com.songoda.epichoppers.gui;
 
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.EpicHoppersApi;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.ItemType;
@@ -20,13 +21,13 @@ import java.util.List;
 public class GUIAutoSellFilter extends CustomizableGui {
     private static final List<GUIAutoSellFilter> OPEN_INVENTORIES = new ArrayList<>();
 
-    private final EpicHoppers plugin;
+    private final SongodaPlugin plugin;
     private final Hopper hopper;
 
     private final int[] whiteListSlots = {9, 10, 11, 18, 19, 20, 27, 28, 29, 36, 37, 38};
     private final int[] blackListSlots = {12, 13, 14, 21, 22, 23, 30, 31, 32, 39, 40, 41};
 
-    public GUIAutoSellFilter(EpicHoppers plugin, Hopper hopper) {
+    public GUIAutoSellFilter(SongodaPlugin plugin, Hopper hopper) {
         super(plugin, "autosell");
         this.plugin = plugin;
         this.hopper = hopper;
@@ -63,7 +64,9 @@ public class GUIAutoSellFilter extends CustomizableGui {
         setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    hopper.overview(this.guiManager, event.player);
+                    if (hopper.prepareForOpeningOverviewGui(event.player)) {
+                        this.guiManager.showGUI(event.player, new GUIOverview(plugin, hopper, event.player));
+                    }
                     compile();
                 });
 
@@ -179,8 +182,8 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         filter.setAutoSellWhiteList(whiteListItems);
         filter.setAutoSellBlackList(blackListItems);
-        this.plugin.getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
-        this.plugin.getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
+        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
+        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
     }
 
     public static void compileOpenAutoSellFilter(Hopper hopper) {

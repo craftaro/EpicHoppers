@@ -9,7 +9,7 @@ import com.songoda.skyblock.stackable.StackableManager;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class FabledSkyBlockImplementation implements IContainer {
+public class FabledSkyBlockImpl implements IContainer {
     @Override
     public CustomContainer getCustomContainer(Block block) {
         return new Container(block);
@@ -19,7 +19,7 @@ public class FabledSkyBlockImplementation implements IContainer {
         private final Stackable stackable;
 
         public Container(Block block) {
-            super(block);
+            super();
 
             StackableManager stackableManager = SkyBlock.getInstance().getStackableManager();
             CompatibleMaterial compatibleMaterial = CompatibleMaterial.getMaterial(block);

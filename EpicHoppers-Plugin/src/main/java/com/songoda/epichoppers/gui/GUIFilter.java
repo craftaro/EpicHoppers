@@ -1,10 +1,11 @@
 package com.songoda.epichoppers.gui;
 
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.EpicHoppersApi;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.ItemType;
@@ -24,10 +25,10 @@ import java.util.List;
 public class GUIFilter extends CustomizableGui {
     private static final List<GUIFilter> OPEN_INVENTORIES = new ArrayList<>();
 
-    private final EpicHoppers plugin;
+    private final SongodaPlugin plugin;
     private final Hopper hopper;
 
-    public GUIFilter(EpicHoppers plugin, Hopper hopper, Player player) {
+    public GUIFilter(SongodaPlugin plugin, Hopper hopper, Player player) {
         super(plugin, "filter");
         this.plugin = plugin;
         this.hopper = hopper;
@@ -67,7 +68,9 @@ public class GUIFilter extends CustomizableGui {
         setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    hopper.overview(this.guiManager, event.player);
+                    if (hopper.prepareForOpeningOverviewGui(event.player)) {
+                        this.guiManager.showGUI(event.player, new GUIOverview(plugin, hopper, event.player));
+                    }
                     compile();
                 });
 
@@ -159,7 +162,7 @@ public class GUIFilter extends CustomizableGui {
                         plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(player);
                         hopper.getFilter().setEndPoint(null);
                     } else {
-                        plugin.getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.FILTERED);
+                        EpicHoppersApi.getApi().getPlayerDataManager().getPlayerData(player).setSyncType(SyncType.FILTERED);
                         plugin.getLocale().getMessage("event.hopper.syncnext").sendPrefixedMessage(player);
                         hopper.timeout(player);
                     }
@@ -232,9 +235,9 @@ public class GUIFilter extends CustomizableGui {
         filter.setWhiteList(owhite);
         filter.setBlackList(oblack);
         filter.setVoidList(ovoid);
-        this.plugin.getDataManager().updateItems(this.hopper, ItemType.WHITELIST, owhite);
-        this.plugin.getDataManager().updateItems(this.hopper, ItemType.BLACKLIST, oblack);
-        this.plugin.getDataManager().updateItems(this.hopper, ItemType.VOID, ovoid);
+        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.WHITELIST, owhite);
+        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.BLACKLIST, oblack);
+        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.VOID, ovoid);
     }
 
     public static void compileOpenGuiFilter(Hopper hopper) {

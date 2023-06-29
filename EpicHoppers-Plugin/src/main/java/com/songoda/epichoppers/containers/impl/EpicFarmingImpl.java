@@ -8,7 +8,7 @@ import com.songoda.epichoppers.containers.IContainer;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
-public class EpicFarmingImplementation implements IContainer {
+public class EpicFarmingImpl implements IContainer {
     @Override
     public CustomContainer getCustomContainer(Block block) {
         return new Container(block);
@@ -18,7 +18,6 @@ public class EpicFarmingImplementation implements IContainer {
         private final Farm farm;
 
         public Container(Block block) {
-            super(block);
             this.farm = EpicFarming.getInstance().getFarmManager().getFarm(block);
         }
 

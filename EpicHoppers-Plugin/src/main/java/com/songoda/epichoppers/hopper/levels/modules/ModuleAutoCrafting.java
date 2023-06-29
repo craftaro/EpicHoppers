@@ -1,8 +1,9 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.craftaro.core.SongodaPlugin;
+import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUICrafting;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
@@ -37,8 +38,8 @@ public class ModuleAutoCrafting extends Module {
 
     private final boolean crafterEjection;
 
-    public ModuleAutoCrafting(EpicHoppers plugin) {
-        super(plugin);
+    public ModuleAutoCrafting(SongodaPlugin plugin, GuiManager guiManager) {
+        super(plugin, guiManager);
         this.crafterEjection = Settings.AUTOCRAFT_JAM_EJECT.getBoolean();
     }
 
@@ -205,7 +206,7 @@ public class ModuleAutoCrafting extends Module {
     @Override
     public void runButtonPress(Player player, Hopper hopper, ClickType type) {
         hopper.setActivePlayer(player);
-        this.plugin.getGuiManager().showGUI(player, new GUICrafting(this,this.plugin, hopper, player));
+        this.guiManager.showGUI(player, new GUICrafting(this, this.plugin, hopper, player));
     }
 
     @Override

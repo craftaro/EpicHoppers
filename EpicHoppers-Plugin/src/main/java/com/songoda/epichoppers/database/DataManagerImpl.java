@@ -33,11 +33,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public class DataManager extends DataManagerAbstract {
-    public DataManager(DatabaseConnector databaseConnector, Plugin plugin) {
+public class DataManagerImpl extends DataManagerAbstract implements DataManager {
+    public DataManagerImpl(DatabaseConnector databaseConnector, Plugin plugin) {
         super(databaseConnector, plugin);
     }
 
+    @Override
     public void createBoost(BoostData boostData) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -53,6 +54,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void getBoosts(Consumer<List<BoostData>> callback) {
         List<BoostData> boosts = new ArrayList<>();
         this.runAsync(() -> {
@@ -74,6 +76,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void deleteBoost(BoostData boostData) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -87,6 +90,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void createLink(Hopper hopper, Location location, LinkType type) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -107,6 +111,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void updateItems(Hopper hopper, ItemType type, List<ItemStack> items) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -140,6 +145,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void deleteLink(Hopper hopper, Location location) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -157,6 +163,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void deleteLinks(Hopper hopper) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -170,12 +177,14 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void createHoppers(List<Hopper> hoppers) {
         for (Hopper hopper : hoppers) {
             createHopper(hopper);
         }
     }
 
+    @Override
     public void createHopper(Hopper hopper) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -274,6 +283,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void updateHopper(Hopper hopper) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -291,6 +301,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void deleteHopper(Hopper hopper) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {
@@ -317,6 +328,7 @@ public class DataManager extends DataManagerAbstract {
         });
     }
 
+    @Override
     public void getHoppers(Consumer<Map<Integer, Hopper>> callback) {
         this.runAsync(() -> {
             try (Connection connection = this.databaseConnector.getConnection()) {

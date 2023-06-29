@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import us.lynuxcraft.deadsilenceiv.advancedchests.AdvancedChestsAPI;
 import us.lynuxcraft.deadsilenceiv.advancedchests.chest.AdvancedChest;
 
-public class AdvancedChestImplementation implements IContainer {
+public class AdvancedChestImpl implements IContainer {
     @Override
     public CustomContainer getCustomContainer(Block block) {
         return new Container(block);
@@ -17,7 +17,6 @@ public class AdvancedChestImplementation implements IContainer {
         private final AdvancedChest advancedChest;
 
         public Container(Block block) {
-            super(block);
             this.advancedChest = AdvancedChestsAPI.getChestManager().getAdvancedChest(block.getLocation());
         }
 
@@ -41,8 +40,9 @@ public class AdvancedChestImplementation implements IContainer {
                 if (itemToMove.getType() == item.getType()) {
                     item.setAmount(item.getAmount() - amountToMove);
 
-                    if (item.getAmount() <= 0)
+                    if (item.getAmount() <= 0) {
                         this.advancedChest.getAllItems().remove(item);
+                    }
                     return;
                 }
             }

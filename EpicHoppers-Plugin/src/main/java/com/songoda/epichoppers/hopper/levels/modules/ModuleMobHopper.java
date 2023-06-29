@@ -1,7 +1,8 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.craftaro.core.SongodaPlugin;
+import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Location;
@@ -23,9 +24,8 @@ public class ModuleMobHopper extends Module {
     private final int amount;
     private final Map<Block, Integer> blockTick = new HashMap<>();
 
-
-    public ModuleMobHopper(EpicHoppers plugin, int amount) {
-        super(plugin);
+    public ModuleMobHopper(SongodaPlugin plugin, GuiManager guiManager, int amount) {
+        super(plugin, guiManager);
         this.amount = amount;
     }
 

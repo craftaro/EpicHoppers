@@ -1,8 +1,10 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.EpicHoppersApi;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.StorageContainerCache;
@@ -30,8 +32,8 @@ public class ModuleBlockBreak extends Module {
     private final int ticksPerBreak;
     private final Map<Hopper, Integer> blockTick = new HashMap<>();
 
-    public ModuleBlockBreak(EpicHoppers plugin, int amount) {
-        super(plugin);
+    public ModuleBlockBreak(SongodaPlugin plugin, GuiManager guiManager, int amount) {
+        super(plugin, guiManager);
         this.ticksPerBreak = amount;
     }
 
@@ -66,7 +68,7 @@ public class ModuleBlockBreak extends Module {
         Block above = hopper.getLocation().getBlock().getRelative(0, 1, 0);
 
         // Don't break farm items from custom containers
-        if (this.plugin.getContainerManager().getCustomContainer(above) != null) {
+        if (EpicHoppersApi.getApi().getContainerManager().getCustomContainer(above) != null) {
             return;
         }
 

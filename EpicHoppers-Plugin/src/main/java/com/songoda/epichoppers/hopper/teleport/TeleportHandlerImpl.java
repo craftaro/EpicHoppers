@@ -20,16 +20,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class TeleportHandler {
+public class TeleportHandlerImpl implements TeleportHandler {
     private final Map<UUID, Long> lastTeleports = new HashMap<>();
 
     private final EpicHoppers plugin;
 
-    public TeleportHandler(EpicHoppers plugin) {
+    public TeleportHandlerImpl(EpicHoppers plugin) {
         this.plugin = plugin;
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::teleportRunner, 0, Settings.TELEPORT_TICKS.getLong());
     }
 
+    @Override
     public void tpEntity(Entity entity, Hopper hopper) {
         if (hopper == null || !this.plugin.getHopperManager().isHopper(hopper.getLocation())) {
             return;

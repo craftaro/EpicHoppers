@@ -24,5 +24,4 @@ public abstract class HopperEvent extends PlayerEvent {
     public Hopper getHopper() {
         return this.hopper;
     }
-
 }

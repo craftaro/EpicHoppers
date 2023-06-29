@@ -1,10 +1,10 @@
 package com.songoda.epichoppers.gui;
 
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.songoda.epichoppers.settings.Settings;
@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class GUICrafting extends CustomizableGui {
-    public GUICrafting(ModuleAutoCrafting module, EpicHoppers plugin, Hopper hopper, Player player) {
+    public GUICrafting(ModuleAutoCrafting module, SongodaPlugin plugin, Hopper hopper, Player player) {
         super(plugin, "crafting");
         setRows(3);
         setTitle(Methods.formatName(hopper.getLevel().getLevel()) + TextUtils.formatText(" &8-&f Crafting"));
@@ -38,7 +38,9 @@ public class GUICrafting extends CustomizableGui {
         setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    hopper.overview(this.guiManager, event.player);
+                    if (hopper.prepareForOpeningOverviewGui(event.player)) {
+                        this.guiManager.showGUI(event.player, new GUIOverview(plugin, hopper, event.player));
+                    }
                     setItem(module, hopper, player);
                 }
         );

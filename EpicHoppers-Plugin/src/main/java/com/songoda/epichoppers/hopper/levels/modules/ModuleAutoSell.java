@@ -1,10 +1,11 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
+import com.craftaro.core.SongodaPlugin;
+import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.hooks.EconomyManager;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.NumberUtils;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUIAutoSellFilter;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -31,8 +32,8 @@ public class ModuleAutoSell extends Module {
     private final int timeOut;
     private final int hopperTickRate;
 
-    public ModuleAutoSell(EpicHoppers plugin, int timeOut) {
-        super(plugin);
+    public ModuleAutoSell(SongodaPlugin plugin, GuiManager guiManager, int timeOut) {
+        super(plugin, guiManager);
 
         this.timeOut = timeOut * 20;
         this.hopperTickRate = Settings.HOP_TICKS.getInt();
@@ -176,7 +177,7 @@ public class ModuleAutoSell extends Module {
         } else if (type == ClickType.SHIFT_LEFT || type == ClickType.SHIFT_RIGHT) {
             // Any shift click opens AutoSell filter configuration GUI
             hopper.setActivePlayer(player);
-            this.plugin.getGuiManager().showGUI(player, new GUIAutoSellFilter(this.plugin, hopper));
+            this.guiManager.showGUI(player, new GUIAutoSellFilter(this.plugin, hopper));
         }
     }
 

@@ -1,11 +1,12 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
+import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.compatibility.CompatibleParticleHandler;
+import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.locale.Locale;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
@@ -38,8 +39,8 @@ public class ModuleSuction extends Module {
 
     private final int maxSearchRadius;
 
-    public ModuleSuction(EpicHoppers plugin, int amount) {
-        super(plugin);
+    public ModuleSuction(SongodaPlugin plugin, GuiManager guiManager, int amount) {
+        super(plugin, guiManager);
         this.maxSearchRadius = amount;
     }
 

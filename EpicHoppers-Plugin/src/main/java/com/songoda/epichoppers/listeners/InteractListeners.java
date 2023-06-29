@@ -3,6 +3,7 @@ package com.songoda.epichoppers.listeners;
 import com.craftaro.core.hooks.ProtectionManager;
 import com.craftaro.core.hooks.WorldGuardHook;
 import com.songoda.epichoppers.EpicHoppers;
+import com.songoda.epichoppers.gui.GUIOverview;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;
 import com.songoda.epichoppers.player.PlayerData;
@@ -90,7 +91,9 @@ public class InteractListeners implements Listener {
 
                 Hopper hopper = this.plugin.getHopperManager().getHopper(event.getClickedBlock());
                 if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
-                    hopper.overview(this.plugin.getGuiManager(), player);
+                    if (hopper.prepareForOpeningOverviewGui(player)) {
+                        this.plugin.getGuiManager().showGUI(player, new GUIOverview(this.plugin, hopper, player));
+                    }
                     event.setCancelled(true);
                     return;
                 }
