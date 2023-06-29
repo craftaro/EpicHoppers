@@ -1,9 +1,9 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.gui.CustomizableGui;
-import com.songoda.core.gui.GuiUtils;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.gui.CustomizableGui;
+import com.craftaro.core.gui.GuiUtils;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -59,12 +59,12 @@ public class GUIFilter extends CustomizableGui {
         mirrorFill("mirrorfill_7", 2, 7, true, false, glass1);
         mirrorFill("mirrorfill_8", 2, 8, true, false, glass2);
 
-        ItemStack it = CompatibleMaterial.WHITE_STAINED_GLASS_PANE.getItem();
+        ItemStack it = XMaterial.WHITE_STAINED_GLASS_PANE.parseItem();
         ItemMeta itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.whitelist").getMessage());
         it.setItemMeta(itm);
 
-        setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+        setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
                     hopper.overview(this.guiManager, event.player);
@@ -86,7 +86,7 @@ public class GUIFilter extends CustomizableGui {
             num++;
         }
 
-        it = CompatibleMaterial.BLACK_STAINED_GLASS_PANE.getItem();
+        it = XMaterial.BLACK_STAINED_GLASS_PANE.parseItem();
         itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.blacklist").getMessage());
         it.setItemMeta(itm);
@@ -107,7 +107,7 @@ public class GUIFilter extends CustomizableGui {
             num++;
         }
 
-        it = new ItemStack(CompatibleMaterial.BARRIER.getMaterial());
+        it = XMaterial.BARRIER.parseItem();
         itm = it.getItemMeta();
         itm.setDisplayName(plugin.getLocale().getMessage("interface.filter.void").getMessage());
         it.setItemMeta(itm);
@@ -127,7 +127,7 @@ public class GUIFilter extends CustomizableGui {
             num++;
         }
 
-        ItemStack itemInfo = new ItemStack(CompatibleMaterial.PAPER.getMaterial());
+        ItemStack itemInfo = XMaterial.PAPER.parseItem();
         ItemMeta itemMetaInfo = itemInfo.getItemMeta();
         itemMetaInfo.setDisplayName(plugin.getLocale().getMessage("interface.filter.infotitle").getMessage());
         ArrayList<String> loreInfo = new ArrayList<>();
@@ -141,7 +141,7 @@ public class GUIFilter extends CustomizableGui {
         setItem("info", 16, itemInfo);
 
 
-        ItemStack hook = new ItemStack(CompatibleMaterial.TRIPWIRE_HOOK.getMaterial());
+        ItemStack hook = XMaterial.TRIPWIRE_HOOK.parseItem();
         ItemMeta hookMeta = hook.getItemMeta();
         hookMeta.setDisplayName(plugin.getLocale().getMessage("interface.hopper.rejectsync").getMessage());
         ArrayList<String> loreHook = new ArrayList<>();

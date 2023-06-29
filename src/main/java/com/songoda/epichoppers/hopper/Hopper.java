@@ -1,10 +1,10 @@
 package com.songoda.epichoppers.hopper;
 
-import com.songoda.core.compatibility.CompatibleParticleHandler;
-import com.songoda.core.compatibility.CompatibleSound;
-import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.gui.GuiManager;
-import com.songoda.core.hooks.EconomyManager;
+import com.craftaro.core.compatibility.CompatibleParticleHandler;
+import com.craftaro.core.compatibility.CompatibleSound;
+import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.gui.GuiManager;
+import com.craftaro.core.hooks.EconomyManager;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.api.events.HopperAccessEvent;
 import com.songoda.epichoppers.gui.GUIOverview;

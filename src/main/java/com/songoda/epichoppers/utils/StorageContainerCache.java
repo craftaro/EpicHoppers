@@ -1,8 +1,9 @@
 package com.songoda.epichoppers.utils;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.nms.NmsManager;
+import com.craftaro.core.compatibility.CompatibleMaterial;
+import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.nms.Nms;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -109,7 +110,7 @@ public class StorageContainerCache {
                         }
                     }
 
-                    NmsManager.getWorld().updateAdjacentComparators(e.getKey());
+                    Nms.getImplementations().getWorld().updateAdjacentComparators(e.getKey());
                 });
         INVENTORY_CACHE.clear();
     }
@@ -260,9 +261,8 @@ public class StorageContainerCache {
             boolean[] check = null;
 
             // some destination containers have special conditions
-            switch (this.type.name()) {
-                case "BREWING_STAND": {
-
+            switch (CompatibleMaterial.getMaterial(this.type).orElse(XMaterial.AIR)) {
+                case BREWING_STAND: {
                     // first compile a list of what slots to check
                     check = new boolean[5];
                     String typeStr = item.getType().name().toUpperCase();
@@ -273,20 +273,19 @@ public class StorageContainerCache {
                     // fuel in 5th position, input in 4th
                     if (item.getType() == Material.BLAZE_POWDER) {
                         check[4] = true;
-                    } else if (CompatibleMaterial.getMaterial(item).isBrewingStandIngredient()) {
+                    } else if (CompatibleMaterial.isBrewingStandIngredient(CompatibleMaterial.getMaterial(item.getType()).get())) {
                         check[3] = true;
                     }
 
                     break;
                 }
-                case "SMOKER":
-                case "BLAST_FURNACE":
-                case "BURNING_FURNACE":
-                case "FURNACE": {
 
+                case SMOKER:
+                case BLAST_FURNACE:
+                case FURNACE: {
                     check = new boolean[3];
 
-                    boolean isFuel = !item.getType().name().contains("LOG") && CompatibleMaterial.getMaterial(item.getType()).isFuel();
+                    boolean isFuel = !item.getType().name().contains("LOG") && CompatibleMaterial.isFurnaceFuel(CompatibleMaterial.getMaterial(item.getType()).get());
                     // fuel is 2nd slot, input is first
                     if (isFuel) {
                         check[1] = true;
@@ -296,6 +295,7 @@ public class StorageContainerCache {
 
                     break;
                 }
+
                 default:
                     break;
             }

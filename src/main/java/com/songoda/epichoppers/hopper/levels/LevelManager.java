@@ -1,8 +1,8 @@
 package com.songoda.epichoppers.hopper.levels;
 
-import com.songoda.core.nms.NmsManager;
-import com.songoda.core.nms.nbt.NBTCore;
-import com.songoda.core.third_party.de.tr7zw.nbtapi.NBTItem;
+import com.craftaro.core.nms.NmsManager;
+import com.craftaro.core.nms.nbt.NBTCore;
+import com.craftaro.core.third_party.de.tr7zw.nbtapi.NBTItem;
 import com.songoda.epichoppers.hopper.levels.modules.Module;
 import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;

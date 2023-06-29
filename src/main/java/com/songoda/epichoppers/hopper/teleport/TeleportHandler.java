@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.hopper.teleport;
 
-import com.songoda.core.compatibility.CompatibleSound;
-import com.songoda.core.compatibility.ServerVersion;
+import com.craftaro.core.compatibility.CompatibleSound;
+import com.craftaro.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;

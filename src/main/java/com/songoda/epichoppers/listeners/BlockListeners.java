@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.core.compatibility.ServerVersion;
+import com.craftaro.core.compatibility.ServerVersion;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.api.events.HopperBreakEvent;
 import com.songoda.epichoppers.api.events.HopperPlaceEvent;

@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.core.hooks.ProtectionManager;
-import com.songoda.core.hooks.WorldGuardHook;
+import com.craftaro.core.hooks.ProtectionManager;
+import com.craftaro.core.hooks.WorldGuardHook;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.teleport.TeleportTrigger;

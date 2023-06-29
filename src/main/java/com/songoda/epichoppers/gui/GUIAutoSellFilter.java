@@ -1,9 +1,9 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.gui.CustomizableGui;
-import com.songoda.core.gui.GuiUtils;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.gui.CustomizableGui;
+import com.craftaro.core.gui.GuiUtils;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Filter;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -60,7 +60,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
         mirrorFill("mirrorfill_8", 2, 8, true, false, glass2);
         mirrorFill("mirrorfill_9", 4, 7, false, false, glass1);
 
-        setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+        setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
                     hopper.overview(this.guiManager, event.player);
@@ -68,7 +68,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
                 });
 
         // Whitelist
-        ItemStack indicatorItem = CompatibleMaterial.WHITE_STAINED_GLASS_PANE.getItem();
+        ItemStack indicatorItem = XMaterial.WHITE_STAINED_GLASS_PANE.parseItem();
         ItemMeta indicatorMeta = indicatorItem.getItemMeta();
         indicatorMeta.setDisplayName(plugin.getLocale().getMessage("interface.autosell-filter.whitelist").getMessage());
         indicatorItem.setItemMeta(indicatorMeta);
@@ -88,7 +88,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
         }
 
         // Blacklist
-        indicatorItem = CompatibleMaterial.BLACK_STAINED_GLASS_PANE.getItem();
+        indicatorItem = XMaterial.BLACK_STAINED_GLASS_PANE.parseItem();
         indicatorMeta = indicatorItem.getItemMeta();
         indicatorMeta.setDisplayName(plugin.getLocale().getMessage("interface.autosell-filter.blacklist").getMessage());
         indicatorItem.setItemMeta(indicatorMeta);
@@ -108,7 +108,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
         }
 
         // Info item
-        indicatorItem = new ItemStack(CompatibleMaterial.PAPER.getMaterial());
+        indicatorItem = XMaterial.PAPER.parseItem();
         indicatorMeta = indicatorItem.getItemMeta();
 
         indicatorMeta.setDisplayName(plugin.getLocale().getMessage("interface.autosell-filter.infotitle").getMessage());

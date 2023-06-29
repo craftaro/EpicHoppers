@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;

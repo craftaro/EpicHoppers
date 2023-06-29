@@ -1,9 +1,9 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.hooks.EconomyManager;
-import com.songoda.core.utils.NumberUtils;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.hooks.EconomyManager;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.NumberUtils;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUIAutoSellFilter;
 import com.songoda.epichoppers.hopper.Filter;
@@ -109,7 +109,7 @@ public class ModuleAutoSell extends Module {
                         ex.printStackTrace();
                     }
                 } else {
-                    value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> CompatibleMaterial.valueOf(line.split(",")[0]) == CompatibleMaterial.getMaterial(itemStack)).findFirst()
+                    value = Settings.AUTOSELL_PRICES.getStringList().stream().filter(line -> XMaterial.valueOf(line.split(",")[0]).isSimilar(itemStack)).findFirst()
                             .map(s -> Double.valueOf(s.split(",")[1])).orElse(0.0);
                 }
 
@@ -142,7 +142,7 @@ public class ModuleAutoSell extends Module {
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        ItemStack sellItem = CompatibleMaterial.SUNFLOWER.getItem();
+        ItemStack sellItem = XMaterial.SUNFLOWER.parseItem();
         ItemMeta sellMeta = sellItem.getItemMeta();
 
         sellMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.selltitle").getMessage());

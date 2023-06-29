@@ -1,12 +1,12 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.gui.CustomizableGui;
-import com.songoda.core.gui.GuiUtils;
-import com.songoda.core.utils.NumberUtils;
-import com.songoda.core.utils.TextUtils;
-import com.songoda.core.utils.TimeUtils;
+import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.gui.CustomizableGui;
+import com.craftaro.core.gui.GuiUtils;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.NumberUtils;
+import com.craftaro.core.utils.TextUtils;
+import com.craftaro.core.utils.TimeUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -250,7 +250,7 @@ public class GUIOverview extends CustomizableGui {
                     && level.getCostExperience() != -1
                     && this.player.hasPermission("EpicHoppers.Upgrade.XP")) {
                 setButton("upgrade_xp", 1, 2, GuiUtils.createButtonItem(
-                                Settings.XP_ICON.getMaterial(CompatibleMaterial.EXPERIENCE_BOTTLE),
+                                Settings.XP_ICON.getMaterial(XMaterial.EXPERIENCE_BOTTLE),
                                 this.plugin.getLocale().getMessage("interface.hopper.upgradewithxp").getMessage(),
                                 nextLevel != null
                                         ? this.plugin.getLocale().getMessage("interface.hopper.upgradewithxplore")
@@ -265,7 +265,7 @@ public class GUIOverview extends CustomizableGui {
                     && level.getCostEconomy() != -1
                     && this.player.hasPermission("EpicHoppers.Upgrade.ECO")) {
                 setButton("upgrade_economy", 1, 6, GuiUtils.createButtonItem(
-                                Settings.ECO_ICON.getMaterial(CompatibleMaterial.SUNFLOWER),
+                                Settings.ECO_ICON.getMaterial(XMaterial.SUNFLOWER),
                                 this.plugin.getLocale().getMessage("interface.hopper.upgradewitheconomy").getMessage(),
                                 nextLevel != null
                                         ? this.plugin.getLocale().getMessage("interface.hopper.upgradewitheconomylore")

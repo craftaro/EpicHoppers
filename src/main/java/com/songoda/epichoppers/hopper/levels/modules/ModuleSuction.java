@@ -1,10 +1,10 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
 import com.bgsoftware.wildstacker.api.WildStackerAPI;
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.compatibility.CompatibleParticleHandler;
-import com.songoda.core.locale.Locale;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.compatibility.CompatibleParticleHandler;
+import com.craftaro.core.locale.Locale;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
@@ -182,7 +182,7 @@ public class ModuleSuction extends Module {
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
         Locale locale = this.plugin.getLocale();
-        ItemStack item = CompatibleMaterial.CAULDRON.getItem();
+        ItemStack item = XMaterial.CAULDRON.parseItem();
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(locale.getMessage("interface.hopper.suctiontitle").getMessage());
         List<String> lore = new ArrayList<>();

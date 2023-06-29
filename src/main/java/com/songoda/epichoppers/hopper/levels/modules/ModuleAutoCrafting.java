@@ -1,7 +1,8 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.compatibility.CompatibleMaterial;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUICrafting;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -187,9 +188,9 @@ public class ModuleAutoCrafting extends Module {
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        ItemStack crafting = CompatibleMaterial.CRAFTING_TABLE.getItem();
-        ItemMeta craftingmeta = crafting.getItemMeta();
-        craftingmeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.craftingtitle")
+        ItemStack crafting = XMaterial.CRAFTING_TABLE.parseItem();
+        ItemMeta craftingMeta = crafting.getItemMeta();
+        craftingMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.craftingtitle")
                 .getMessage());
         ArrayList<String> lorecrafting = new ArrayList<>();
         String[] parts = this.plugin.getLocale().getMessage("interface.hopper.craftinglore")
@@ -197,8 +198,8 @@ public class ModuleAutoCrafting extends Module {
         for (String line : parts) {
             lorecrafting.add(TextUtils.formatText(line));
         }
-        craftingmeta.setLore(lorecrafting);
-        crafting.setItemMeta(craftingmeta);
+        craftingMeta.setLore(lorecrafting);
+        crafting.setItemMeta(craftingMeta);
         return crafting;
     }
 

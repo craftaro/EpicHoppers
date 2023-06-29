@@ -1,7 +1,8 @@
 package com.songoda.epichoppers.hopper.levels.modules;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.compatibility.CompatibleMaterial;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.gui.GUISmeltable;
 import com.songoda.epichoppers.hopper.Hopper;
@@ -52,13 +53,14 @@ public class ModuleAutoSmelter extends Module {
                 if (itemStack == null) {
                     continue;
                 }
-                CompatibleMaterial material = CompatibleMaterial.getMaterial(itemStack);
+                XMaterial material = CompatibleMaterial.getMaterial(itemStack.getType()).get();
                 if (!isSmeltable(hopper, material)) {
                     continue;
                 }
-                CompatibleMaterial result = CompatibleMaterial.getMaterial(itemStack).getBurnResult();
+                XMaterial input = CompatibleMaterial.getMaterial(itemStack.getType()).get();
+                ItemStack result = CompatibleMaterial.getFurnaceResult(input);
 
-                if (hopperCache.addItem(result.getItem())) {
+                if (hopperCache.addItem(result)) {
                     if (itemStack.getAmount() == 1) {
                         hopperCache.setItem(i, null);
                     } else {
@@ -78,9 +80,9 @@ public class ModuleAutoSmelter extends Module {
 
     @Override
     public ItemStack getGUIButton(Hopper hopper) {
-        ItemStack block = CompatibleMaterial.IRON_INGOT.getItem();
-        ItemMeta blockmeta = block.getItemMeta();
-        blockmeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.smelttitle").getMessage());
+        ItemStack block = XMaterial.IRON_INGOT.parseItem();
+        ItemMeta blockMeta = block.getItemMeta();
+        blockMeta.setDisplayName(this.plugin.getLocale().getMessage("interface.hopper.smelttitle").getMessage());
         ArrayList<String> loreBlock = new ArrayList<>();
         String[] parts = this.plugin.getLocale().getMessage("interface.hopper.smeltlore")
                 .processPlaceholder("timeleft", getTime(hopper) == -9999 ? "∞" : (int) Math.floor(getTime(hopper) / 20.0))
@@ -93,8 +95,8 @@ public class ModuleAutoSmelter extends Module {
         for (String line : parts) {
             loreBlock.add(TextUtils.formatText(line));
         }
-        blockmeta.setLore(loreBlock);
-        block.setItemMeta(blockmeta);
+        blockMeta.setLore(loreBlock);
+        block.setItemMeta(blockMeta);
         return block;
     }
 
@@ -114,9 +116,9 @@ public class ModuleAutoSmelter extends Module {
         }
 
         List<Material> blockedItems = new ArrayList<>();
-        for (CompatibleMaterial material : CompatibleMaterial.values()) {
-            if (material.getBurnResult() != null && isSmeltable(hopper, material)) {
-                blockedItems.add(material.getMaterial());
+        for (XMaterial material : XMaterial.values()) {
+            if (CompatibleMaterial.getFurnaceResult(material) != null && isSmeltable(hopper, material)) {
+                blockedItems.add(material.parseMaterial());
             }
         }
 
@@ -145,7 +147,7 @@ public class ModuleAutoSmelter extends Module {
         return ((int) obj) != -9999;
     }
 
-    public boolean isSmeltable(Hopper hopper, CompatibleMaterial material) {
+    public boolean isSmeltable(Hopper hopper, XMaterial material) {
         Object obj = getData(hopper, material.name());
         if (obj == null) {
             return false;
@@ -162,7 +164,7 @@ public class ModuleAutoSmelter extends Module {
         }
     }
 
-    public void toggleSmeltable(Hopper hopper, CompatibleMaterial material) {
+    public void toggleSmeltable(Hopper hopper, XMaterial material) {
         saveData(hopper, material.name(), !isSmeltable(hopper, material));
     }
 }

@@ -1,8 +1,8 @@
 package com.songoda.epichoppers.commands;
 
-import com.songoda.core.commands.AbstractCommand;
-import com.songoda.core.utils.NumberUtils;
-import com.songoda.core.utils.TimeUtils;
+import com.craftaro.core.commands.AbstractCommand;
+import com.craftaro.core.utils.NumberUtils;
+import com.craftaro.core.utils.TimeUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import org.bukkit.Bukkit;

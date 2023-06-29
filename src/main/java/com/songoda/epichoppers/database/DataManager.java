@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.database;
 
-import com.songoda.core.database.DataManagerAbstract;
-import com.songoda.core.database.DatabaseConnector;
+import com.craftaro.core.database.DataManagerAbstract;
+import com.craftaro.core.database.DatabaseConnector;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.boost.BoostData;
 import com.songoda.epichoppers.hopper.Filter;

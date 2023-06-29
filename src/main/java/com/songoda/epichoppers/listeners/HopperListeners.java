@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.listeners;
 
-import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.nms.NmsManager;
+import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.nms.NmsManager;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.Module;

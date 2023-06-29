@@ -1,6 +1,6 @@
 package com.songoda.epichoppers.commands;
 
-import com.songoda.core.commands.AbstractCommand;
+import com.craftaro.core.commands.AbstractCommand;
 import com.songoda.epichoppers.EpicHoppers;
 import org.bukkit.command.CommandSender;
 

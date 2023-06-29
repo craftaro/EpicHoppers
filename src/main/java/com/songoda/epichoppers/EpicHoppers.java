@@ -1,19 +1,19 @@
 package com.songoda.epichoppers;
 
-import com.songoda.core.SongodaCore;
-import com.songoda.core.SongodaPlugin;
-import com.songoda.core.commands.CommandManager;
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.configuration.Config;
-import com.songoda.core.database.DataMigrationManager;
-import com.songoda.core.database.DatabaseConnector;
-import com.songoda.core.database.MySQLConnector;
-import com.songoda.core.database.SQLiteConnector;
-import com.songoda.core.gui.GuiManager;
-import com.songoda.core.hooks.EconomyManager;
-import com.songoda.core.hooks.ProtectionManager;
-import com.songoda.core.third_party.de.tr7zw.nbtapi.NBTItem;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.SongodaCore;
+import com.craftaro.core.SongodaPlugin;
+import com.craftaro.core.commands.CommandManager;
+import com.craftaro.core.configuration.Config;
+import com.craftaro.core.database.DataMigrationManager;
+import com.craftaro.core.database.DatabaseConnector;
+import com.craftaro.core.database.MySQLConnector;
+import com.craftaro.core.database.SQLiteConnector;
+import com.craftaro.core.gui.GuiManager;
+import com.craftaro.core.hooks.EconomyManager;
+import com.craftaro.core.hooks.ProtectionManager;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.third_party.de.tr7zw.nbtapi.NBTItem;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.boost.BoostManager;
 import com.songoda.epichoppers.commands.CommandBoost;
 import com.songoda.epichoppers.commands.CommandGive;
@@ -84,7 +84,7 @@ public class EpicHoppers extends SongodaPlugin {
     @Override
     public void onPluginEnable() {
         // Run Songoda Updater
-        SongodaCore.registerPlugin(this, 15, CompatibleMaterial.HOPPER);
+        SongodaCore.registerPlugin(this, 15, XMaterial.HOPPER);
 
         // Load Economy
         EconomyManager.load();
@@ -252,7 +252,7 @@ public class EpicHoppers extends SongodaPlugin {
     }
 
     public ItemStack newHopperItem(Level level) {
-        ItemStack item = new ItemStack(CompatibleMaterial.HOPPER.getMaterial());
+        ItemStack item = XMaterial.HOPPER.parseItem();
         ItemMeta itemmeta = item.getItemMeta();
         itemmeta.setDisplayName(TextUtils.formatText(Methods.formatName(level.getLevel())));
         String line = getLocale().getMessage("general.nametag.lore").getMessage();

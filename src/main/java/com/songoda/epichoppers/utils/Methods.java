@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.utils;
 
-import com.songoda.core.compatibility.ServerVersion;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

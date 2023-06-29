@@ -1,9 +1,9 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.gui.CustomizableGui;
-import com.songoda.core.gui.GuiUtils;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.gui.CustomizableGui;
+import com.craftaro.core.gui.GuiUtils;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
@@ -35,7 +35,7 @@ public class GUICrafting extends CustomizableGui {
         mirrorFill("mirrorfill_4", 1, 0, false, true, glass2);
         mirrorFill("mirrorfill_5", 1, 1, false, true, glass3);
 
-        setButton("back", 8, GuiUtils.createButtonItem(CompatibleMaterial.ARROW.getItem(),
+        setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
                     hopper.overview(this.guiManager, event.player);

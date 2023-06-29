@@ -1,9 +1,10 @@
 package com.songoda.epichoppers.gui;
 
-import com.songoda.core.compatibility.CompatibleMaterial;
-import com.songoda.core.gui.CustomizableGui;
-import com.songoda.core.gui.GuiUtils;
-import com.songoda.core.utils.TextUtils;
+import com.craftaro.core.compatibility.CompatibleMaterial;
+import com.craftaro.core.gui.CustomizableGui;
+import com.craftaro.core.gui.GuiUtils;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.core.utils.TextUtils;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.hopper.levels.modules.ModuleAutoSmelter;
@@ -22,9 +23,9 @@ public class GUISmeltable extends CustomizableGui {
     private final int maxPages;
     private final ModuleAutoSmelter moduleAutoSmelter;
 
-    private static final List<CompatibleMaterial> BURNABLES = Arrays
-            .stream(CompatibleMaterial.values())
-            .filter(material -> material.getBurnResult() != null)
+    private static final List<XMaterial> BURNABLES = Arrays
+            .stream(XMaterial.values())
+            .filter(material -> CompatibleMaterial.getFurnaceResult(material) != null)
             .collect(Collectors.toList());
 
     public GUISmeltable(ModuleAutoSmelter moduleAutoSmelter, EpicHoppers plugin, Hopper hopper) {
@@ -61,11 +62,17 @@ public class GUISmeltable extends CustomizableGui {
         int smeltableIndex = this.page == 1 ? 0 : 32 * (this.page - 1);
 
         for (int i = 9; i < 45; i++) {
-            if (i == 9 || i == 17 || i == 44 || i == 36) continue;
+            if (i == 9 || i == 17 || i == 44 || i == 36) {
+                continue;
+            }
+
             setItem(i, null);
             clearActions(i);
-            if (smeltableIndex >= (BURNABLES.size() - 1)) continue;
-            CompatibleMaterial burnable = BURNABLES.get(smeltableIndex);
+            if (smeltableIndex >= (BURNABLES.size() - 1)) {
+                continue;
+            }
+
+            XMaterial burnable = BURNABLES.get(smeltableIndex);
             setButton(i, getItemStack(burnable, this.moduleAutoSmelter.isSmeltable(this.hopper, burnable)), (event) -> {
                 this.moduleAutoSmelter.toggleSmeltable(this.hopper, burnable);
                 setItem(event.slot, getItemStack(burnable, this.moduleAutoSmelter.isSmeltable(this.hopper, burnable)));
@@ -75,7 +82,7 @@ public class GUISmeltable extends CustomizableGui {
 
         clearActions(51);
         if (this.page < this.maxPages) {
-            setButton("next", 51, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
+            setButton("next", 51, GuiUtils.createButtonItem(XMaterial.ARROW,
                             this.plugin.getLocale().getMessage("general.nametag.next").getMessage()),
                     (event) -> {
                         this.page++;
@@ -85,7 +92,7 @@ public class GUISmeltable extends CustomizableGui {
 
         clearActions(47);
         if (this.page > 1) {
-            setButton("back", 47, GuiUtils.createButtonItem(CompatibleMaterial.ARROW,
+            setButton("back", 47, GuiUtils.createButtonItem(XMaterial.ARROW,
                             this.plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                     (event) -> {
                         this.page--;
@@ -93,16 +100,16 @@ public class GUISmeltable extends CustomizableGui {
                     });
         }
 
-        setButton("exit", 49, GuiUtils.createButtonItem(CompatibleMaterial.OAK_DOOR,
+        setButton("exit", 49, GuiUtils.createButtonItem(XMaterial.OAK_DOOR,
                         this.plugin.getLocale().getMessage("general.nametag.exit").getMessage()),
                 (event) -> this.hopper.overview(this.plugin.getGuiManager(), event.player));
     }
 
-    public ItemStack getItemStack(CompatibleMaterial material, boolean enabled) {
-        ItemStack item = material.getItem();
+    public ItemStack getItemStack(XMaterial material, boolean enabled) {
+        ItemStack item = material.parseItem();
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(TextUtils.formatText("&e" + material.name()));
-        meta.setLore(Arrays.asList(TextUtils.formatText("   &7-> &e" + material.getBurnResult().name()),
+        meta.setLore(Arrays.asList(TextUtils.formatText("   &7-> &e" + CompatibleMaterial.getFurnaceResult(material).getType().name()),
                 TextUtils.formatText("&7Enabled: &6" + String.valueOf(enabled).toLowerCase() + "&7."),
                 "",
                 this.plugin.getLocale().getMessage("interface.hopper.toggle").getMessage()));
