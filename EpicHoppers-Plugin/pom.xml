@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.craftaro</groupId>
         <artifactId>EpicHoppers-Parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>EpicHoppers-Plugin</artifactId>
@@ -89,14 +89,14 @@
         <dependency>
             <groupId>com.craftaro</groupId>
             <artifactId>EpicHoppers-API</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>5.0.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.craftaro</groupId>
             <artifactId>CraftaroCore</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${craftaro.coreVersion}</version>
             <scope>compile</scope>
         </dependency>
 
