@@ -3,7 +3,7 @@ description: ${project.parent.description}
 version: ${project.version}
 api-version: 1.13
 
-main: com.songoda.epichoppers.EpicHoppers
+main: com.craftaro.epichoppers.EpicHoppers
 softdepend:
   - AdvancedChests
   - ASkyBlock
