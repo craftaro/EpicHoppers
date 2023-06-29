@@ -2,9 +2,9 @@ package com.songoda.epichoppers.hopper;
 
 import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.compatibility.CompatibleParticleHandler;
-import com.craftaro.core.compatibility.CompatibleSound;
 import com.craftaro.core.compatibility.ServerVersion;
 import com.craftaro.core.hooks.EconomyManager;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XSound;
 import com.songoda.epichoppers.EpicHoppersApi;
 import com.songoda.epichoppers.api.events.HopperAccessEvent;
 import com.songoda.epichoppers.database.DataManager;
@@ -156,12 +156,12 @@ public class Hopper {
         }
 
         if (getLevelManager().getHighestLevel() != level) {
-            player.playSound(player.getLocation(), CompatibleSound.ENTITY_PLAYER_LEVELUP.getSound(), 0.6F, 15.0F);
+            XSound.ENTITY_PLAYER_LEVELUP.play(player, .6f, 15);
         } else {
-            player.playSound(player.getLocation(), CompatibleSound.ENTITY_PLAYER_LEVELUP.getSound(), 2F, 25.0F);
-            player.playSound(player.getLocation(), CompatibleSound.BLOCK_NOTE_BLOCK_CHIME.getSound(), 2F, 25.0F);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(getPlugin(), () -> player.playSound(player.getLocation(), CompatibleSound.BLOCK_NOTE_BLOCK_CHIME.getSound(), 1.2F, 35.0F), 5L);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(getPlugin(), () -> player.playSound(player.getLocation(), CompatibleSound.BLOCK_NOTE_BLOCK_CHIME.getSound(), 1.8F, 35.0F), 10L);
+            XSound.ENTITY_PLAYER_LEVELUP.play(player, 2, 25);
+            XSound.BLOCK_NOTE_BLOCK_CHIME.play(player, 2, 25);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(getPlugin(), () -> XSound.BLOCK_NOTE_BLOCK_CHIME.play(player, 1.2f, 35), 5);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(getPlugin(), () -> XSound.BLOCK_NOTE_BLOCK_CHIME.play(player, 1.8f, 35), 10);
         }
     }
 

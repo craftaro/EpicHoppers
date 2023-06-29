@@ -1,7 +1,7 @@
 package com.songoda.epichoppers.hopper.teleport;
 
-import com.craftaro.core.compatibility.CompatibleSound;
 import com.craftaro.core.compatibility.ServerVersion;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XSound;
 import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
 import com.songoda.epichoppers.settings.Settings;
@@ -119,6 +119,6 @@ public class TeleportHandlerImpl implements TeleportHandler {
 
         entity.teleport(location);
 
-        CompatibleSound.ENTITY_ENDERMAN_TELEPORT.play(entity.getWorld(), entity.getLocation(), 10, 10);
+        XSound.ENTITY_ENDERMAN_TELEPORT.play(entity.getLocation(), 10, 10);
     }
 }
