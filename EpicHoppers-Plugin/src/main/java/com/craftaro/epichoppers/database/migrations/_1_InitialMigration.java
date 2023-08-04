@@ -18,10 +18,10 @@ public class _1_InitialMigration extends DataMigration {
     }
 
     @Override
-    public void migrate(DatabaseConnector databaseConnector, String tablePrefix) throws SQLException {
+    public void migrate(Connection connection, String tablePrefix) throws SQLException {
 
         // Create hoppers table
-        try (Statement statement = databaseConnector.getConnection().createStatement()) {
+        try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE " + tablePrefix + "placed_hoppers (" +
                     "id INTEGER PRIMARY KEY AUTO_INCREMENT" + ", " +
                     "level INTEGER NOT NULL, " +
@@ -36,7 +36,7 @@ public class _1_InitialMigration extends DataMigration {
         }
 
         // Create hopper links
-        try (Statement statement = databaseConnector.getConnection().createStatement()) {
+        try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE " + tablePrefix + "links (" +
                     "hopper_id INTEGER NOT NULL, " +
                     "link_type TEXT NOT NULL," +
@@ -49,7 +49,7 @@ public class _1_InitialMigration extends DataMigration {
 
         // Create items
         // Items are base64.
-        try (Statement statement = databaseConnector.getConnection().createStatement()) {
+        try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE " + tablePrefix + "items (" +
                     "hopper_id INTEGER NOT NULL, " +
                     "item_type BIT NOT NULL," +
@@ -58,7 +58,7 @@ public class _1_InitialMigration extends DataMigration {
         }
 
         // Create player boosts
-        try (Statement statement = databaseConnector.getConnection().createStatement()) {
+        try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE " + tablePrefix + "boosted_players (" +
                     "player VARCHAR(36) NOT NULL, " +
                     "multiplier INTEGER NOT NULL," +
