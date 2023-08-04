@@ -4,10 +4,11 @@ import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
+import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.Methods;
 import com.craftaro.epichoppers.gui.GUICrafting;
-import com.craftaro.epichoppers.hopper.Hopper;
 import com.craftaro.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -122,7 +123,7 @@ public class ModuleAutoCrafting extends Module {
                     for (int i = 0; i < items.length; i++) {
                         if (!slotsToAlter.containsKey(i)) {
                             // and yeet into space!
-                            hopper.getWorld().dropItemNaturally(hopper.getLocation(), items[i]);
+                            hopper.getLocation().getWorld().dropItemNaturally(hopper.getLocation(), items[i]);
                             items[i] = null;
 
                             freeSlotAfterRemovingIngredients = true;

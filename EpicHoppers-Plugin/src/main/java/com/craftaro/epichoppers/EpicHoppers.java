@@ -4,17 +4,14 @@ import com.craftaro.core.SongodaCore;
 import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.commands.CommandManager;
 import com.craftaro.core.configuration.Config;
-import com.craftaro.core.database.DataManagerAbstract;
-import com.craftaro.core.database.DataMigrationManager;
 import com.craftaro.core.database.DatabaseConnector;
-import com.craftaro.core.database.MySQLConnector;
-import com.craftaro.core.database.SQLiteConnector;
 import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.hooks.EconomyManager;
 import com.craftaro.core.hooks.ProtectionManager;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.third_party.de.tr7zw.nbtapi.NBTItem;
 import com.craftaro.core.utils.TextUtils;
+import com.craftaro.epichoppers.boost.BoostDataImpl;
 import com.craftaro.epichoppers.boost.BoostManager;
 import com.craftaro.epichoppers.boost.BoostManagerImpl;
 import com.craftaro.epichoppers.commands.CommandBoost;
@@ -23,9 +20,8 @@ import com.craftaro.epichoppers.commands.CommandReload;
 import com.craftaro.epichoppers.commands.CommandSettings;
 import com.craftaro.epichoppers.containers.ContainerManager;
 import com.craftaro.epichoppers.containers.ContainerManagerImpl;
-import com.craftaro.epichoppers.database.DataManager;
-import com.craftaro.epichoppers.database.DataManagerImpl;
 import com.craftaro.epichoppers.database.migrations._1_InitialMigration;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.HopperManager;
 import com.craftaro.epichoppers.hopper.levels.Level;
 import com.craftaro.epichoppers.hopper.levels.LevelManager;
@@ -76,8 +72,6 @@ public class EpicHoppers extends SongodaPlugin {
     private TeleportHandler teleportHandler;
 
     private DatabaseConnector databaseConnector;
-    private DataManager dataManager;
-
     @Override
     public void onPluginLoad() {
     }
@@ -120,33 +114,8 @@ public class EpicHoppers extends SongodaPlugin {
         this.containerManager = new ContainerManagerImpl();
         this.boostManager = new BoostManagerImpl();
 
-        // Database stuff, go!
-        try {
-            if (Settings.MYSQL_ENABLED.getBoolean()) {
-                String hostname = Settings.MYSQL_HOSTNAME.getString();
-                int port = Settings.MYSQL_PORT.getInt();
-                String database = Settings.MYSQL_DATABASE.getString();
-                String username = Settings.MYSQL_USERNAME.getString();
-                String password = Settings.MYSQL_PASSWORD.getString();
-                boolean useSSL = Settings.MYSQL_USE_SSL.getBoolean();
-                int poolSize = Settings.MYSQL_POOL_SIZE.getInt();
 
-                this.databaseConnector = new MySQLConnector(this, hostname, port, database, username, password, useSSL, poolSize);
-                this.getLogger().info("Data handler connected using MySQL.");
-            } else {
-                this.databaseConnector = new SQLiteConnector(this);
-                this.getLogger().info("Data handler connected using SQLite.");
-            }
-        } catch (Exception ex) {
-            this.getLogger().severe("Fatal error trying to connect to database. Please make sure all your connection settings are correct and try again. Plugin has been disabled.");
-            this.emergencyStop();
-        }
-
-        this.dataManager = new DataManagerImpl(this.databaseConnector, this);
-        DataMigrationManager dataMigrationManager = new DataMigrationManager(this.databaseConnector, (DataManagerAbstract) this.dataManager, new _1_InitialMigration(this));
-        dataMigrationManager.runMigrations();
-
-        EpicHoppersApi.initApi(this.levelManager, this.boostManager, this.containerManager, this.teleportHandler, this.playerDataManager, this.dataManager);
+        initDatabase(Collections.singletonList(new _1_InitialMigration(this)));
 
         this.loadLevelManager();
 
@@ -161,6 +130,8 @@ public class EpicHoppers extends SongodaPlugin {
         pluginManager.registerEvents(new BlockListeners(this), this);
         pluginManager.registerEvents(new InteractListeners(this), this);
         pluginManager.registerEvents(new InventoryListeners(), this);
+
+        EpicHoppersApi.initApi(this.levelManager, this.boostManager, this.containerManager, this.teleportHandler, this.playerDataManager);
 
         // Start auto save
         int saveInterval = Settings.AUTOSAVE.getInt() * 60 * 20;
@@ -182,10 +153,9 @@ public class EpicHoppers extends SongodaPlugin {
     @Override
     public void onDataLoad() {
         // Load data from DB
-        this.dataManager.getHoppers((hoppers) -> {
-            this.hopperManager.addHoppers(hoppers.values());
-            this.dataManager.getBoosts((boosts) -> this.boostManager.addBoosts(boosts));
-
+        this.dataManager.getAsyncPool().execute(() -> {
+            this.hopperManager.addHoppers(this.dataManager.loadBatch(HopperImpl.class, "placed_hoppers"));
+            this.boostManager.loadBoosts(this.dataManager.loadBatch(BoostDataImpl.class, "boosted_players"));
             this.hopperManager.setReady();
         });
     }
@@ -300,10 +270,6 @@ public class EpicHoppers extends SongodaPlugin {
 
     public GuiManager getGuiManager() {
         return this.guiManager;
-    }
-
-    public DataManager getDataManager() {
-        return this.dataManager;
     }
 
     public DatabaseConnector getDatabaseConnector() {

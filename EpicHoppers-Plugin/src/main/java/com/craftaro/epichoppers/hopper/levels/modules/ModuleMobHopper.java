@@ -4,6 +4,7 @@ import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.utils.TextUtils;
 import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.utils.StorageContainerCache;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,7 +50,7 @@ public class ModuleMobHopper extends Module {
             return;
         }
 
-        hopper.getWorld().getNearbyEntities(hopper.getLocation(), 5, 5, 5).stream()
+        hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation(), 5, 5, 5).stream()
                 .filter(entity -> entity instanceof LivingEntity && !(entity instanceof Player) &&
                         !(entity instanceof ArmorStand)).limit(1).forEach(entity -> {
                     Location location = hopper.getLocation().add(.5, 1, .5);

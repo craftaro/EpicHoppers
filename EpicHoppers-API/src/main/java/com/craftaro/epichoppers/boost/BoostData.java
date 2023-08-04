@@ -3,52 +3,23 @@ package com.craftaro.epichoppers.boost;
 import java.util.Objects;
 import java.util.UUID;
 
-public class BoostData {
-    private final int multiplier;
-    private final long endTime;
-    private final UUID player;
+public interface BoostData {
 
-    public BoostData(int multiplier, long endTime, UUID player) {
-        this.multiplier = multiplier;
-        this.endTime = endTime;
-        this.player = player;
-    }
+    /**
+     * Gets the multiplier of the boost
+     * @return The multiplier
+     */
+    int getMultiplier();
 
-    public int getMultiplier() {
-        return this.multiplier;
-    }
+    /**
+     * Gets the player's uuid who has the boost
+     * @return The player's uuid
+     */
+    public UUID getPlayer();
 
-    public UUID getPlayer() {
-        return this.player;
-    }
-
-    public long getEndTime() {
-        return this.endTime;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 31 * this.multiplier;
-
-        result = 31 * result + (this.player == null ? 0 : this.player.hashCode());
-        result = 31 * result + (int) (this.endTime ^ (this.endTime >>> 32));
-
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof BoostData)) {
-            return false;
-        }
-
-        BoostData other = (BoostData) obj;
-        return this.multiplier == other.multiplier &&
-                this.endTime == other.endTime &&
-                Objects.equals(this.player, other.player);
-    }
-
+    /**
+     * Gets the end time of the boost
+     * @return The end time
+     */
+    public long getEndTime();
 }

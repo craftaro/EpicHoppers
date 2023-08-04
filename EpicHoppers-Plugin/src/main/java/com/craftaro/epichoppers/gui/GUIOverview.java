@@ -8,15 +8,19 @@ import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.NumberUtils;
 import com.craftaro.core.utils.TextUtils;
 import com.craftaro.core.utils.TimeUtils;
+import com.craftaro.epichoppers.EpicHoppers;
 import com.craftaro.epichoppers.EpicHoppersApi;
 import com.craftaro.epichoppers.boost.BoostData;
+import com.craftaro.epichoppers.boost.BoostDataImpl;
 import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.levels.Level;
 import com.craftaro.epichoppers.hopper.levels.modules.Module;
 import com.craftaro.epichoppers.hopper.teleport.TeleportTrigger;
 import com.craftaro.epichoppers.player.SyncType;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.CostType;
+import com.craftaro.epichoppers.utils.DataHelper;
 import com.craftaro.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -33,7 +37,7 @@ import java.util.stream.Collectors;
 
 public class GUIOverview extends CustomizableGui {
     private final SongodaPlugin plugin;
-    private final Hopper hopper;
+    private final HopperImpl hopper;
     private final Player player;
 
     private int task;
@@ -41,7 +45,7 @@ public class GUIOverview extends CustomizableGui {
     public GUIOverview(SongodaPlugin plugin, Hopper hopper, Player player) {
         super(plugin, "overview");
         this.plugin = plugin;
-        this.hopper = hopper;
+        this.hopper = (HopperImpl) hopper;
         this.player = player;
 
         setRows(3);
@@ -189,7 +193,7 @@ public class GUIOverview extends CustomizableGui {
                                 return;
                             }
                             this.hopper.clearLinkedBlocks();
-                            EpicHoppersApi.getApi().getDataManager().deleteLinks(this.hopper);
+                            DataHelper.deleteLinks(this.hopper);
                             if (event.clickType == ClickType.RIGHT) {
                                 this.plugin.getLocale().getMessage("event.hopper.desync").sendPrefixedMessage(this.player);
                                 constructGUI();
@@ -224,7 +228,7 @@ public class GUIOverview extends CustomizableGui {
                                 } else if (this.hopper.getTeleportTrigger() == TeleportTrigger.WALK_ON) {
                                     this.hopper.setTeleportTrigger(TeleportTrigger.DISABLED);
                                 }
-                                EpicHoppersApi.getApi().getDataManager().updateHopper(this.hopper);
+                                EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().save(this.hopper);
                                 constructGUI();
                             }
                         });

@@ -6,7 +6,7 @@ import com.craftaro.epichoppers.api.events.HopperBreakEvent;
 import com.craftaro.epichoppers.api.events.HopperPlaceEvent;
 import com.craftaro.epichoppers.gui.GUIAutoSellFilter;
 import com.craftaro.epichoppers.gui.GUIFilter;
-import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.HopperBuilder;
 import com.craftaro.epichoppers.hopper.levels.Level;
 import com.craftaro.epichoppers.settings.Settings;
@@ -68,7 +68,7 @@ public class BlockListeners implements Listener {
             return;
         }
 
-        Hopper hopper = this.plugin.getHopperManager().addHopper(
+        HopperImpl hopper = this.plugin.getHopperManager().addHopper(
                 new HopperBuilder(e.getBlock())
                         .setLevel(this.plugin.getLevelManager().getLevel(item))
                         .setPlacedBy(player)
@@ -77,7 +77,7 @@ public class BlockListeners implements Listener {
         HopperPlaceEvent hopperPlaceEvent = new HopperPlaceEvent(player, hopper);
         Bukkit.getPluginManager().callEvent(hopperPlaceEvent);
 
-        this.plugin.getDataManager().createHopper(hopper);
+        this.plugin.getDataManager().save(hopper);
     }
 
     private int maxHoppers(Player player) {
@@ -130,7 +130,7 @@ public class BlockListeners implements Listener {
             return;
         }
 
-        Hopper hopper = this.plugin.getHopperManager().getHopper(block);
+        HopperImpl hopper = this.plugin.getHopperManager().getHopper(block);
 
         GUIFilter.compileOpenGuiFilter(hopper);
         GUIAutoSellFilter.compileOpenAutoSellFilter(hopper);
@@ -175,7 +175,7 @@ public class BlockListeners implements Listener {
                 .forEach(item -> event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), item));
 
         this.plugin.getHopperManager().removeHopper(block.getLocation());
-        this.plugin.getDataManager().deleteHopper(hopper);
+        this.plugin.getDataManager().delete(hopper);
 
         this.plugin.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }

@@ -5,11 +5,12 @@ import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
-import com.craftaro.epichoppers.EpicHoppersApi;
 import com.craftaro.epichoppers.hopper.Filter;
 import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.ItemType;
 import com.craftaro.epichoppers.settings.Settings;
+import com.craftaro.epichoppers.utils.DataHelper;
 import com.craftaro.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -21,14 +22,14 @@ import java.util.List;
 public class GUIAutoSellFilter extends CustomizableGui {
     private static final List<GUIAutoSellFilter> OPEN_INVENTORIES = new ArrayList<>();
 
-    private final Hopper hopper;
+    private final HopperImpl hopper;
 
     private final int[] whiteListSlots = {9, 10, 11, 18, 19, 20, 27, 28, 29, 36, 37, 38};
     private final int[] blackListSlots = {12, 13, 14, 21, 22, 23, 30, 31, 32, 39, 40, 41};
 
     public GUIAutoSellFilter(SongodaPlugin plugin, Hopper hopper) {
         super(plugin, "autosell");
-        this.hopper = hopper;
+        this.hopper = (HopperImpl) hopper;
 
         setRows(6);
         setTitle(TextUtils.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f AutoSell Filter"));
@@ -62,7 +63,7 @@ public class GUIAutoSellFilter extends CustomizableGui {
         setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    if (hopper.prepareForOpeningOverviewGui(event.player)) {
+                    if (this.hopper.prepareForOpeningOverviewGui(event.player)) {
                         this.guiManager.showGUI(event.player, new GUIOverview(plugin, hopper, event.player));
                     }
                     compile();
@@ -180,11 +181,11 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         filter.setAutoSellWhiteList(whiteListItems);
         filter.setAutoSellBlackList(blackListItems);
-        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
-        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
+        DataHelper.updateItems(this.hopper, ItemType.AUTO_SELL_WHITELIST, whiteListItems);
+        DataHelper.updateItems(this.hopper, ItemType.AUTO_SELL_BLACKLIST, blackListItems);
     }
 
-    public static void compileOpenAutoSellFilter(Hopper hopper) {
+    public static void compileOpenAutoSellFilter(HopperImpl hopper) {
         for (GUIAutoSellFilter autoSellFilter : OPEN_INVENTORIES) {
             if (autoSellFilter.hopper == hopper) {
                 autoSellFilter.compile();

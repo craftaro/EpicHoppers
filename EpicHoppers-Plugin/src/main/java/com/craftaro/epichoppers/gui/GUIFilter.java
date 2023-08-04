@@ -6,12 +6,14 @@ import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
 import com.craftaro.epichoppers.EpicHoppersApi;
+import com.craftaro.epichoppers.hopper.Hopper;
 import com.craftaro.epichoppers.hopper.ItemType;
 import com.craftaro.epichoppers.player.SyncType;
 import com.craftaro.epichoppers.settings.Settings;
+import com.craftaro.epichoppers.utils.DataHelper;
 import com.craftaro.epichoppers.utils.Methods;
 import com.craftaro.epichoppers.hopper.Filter;
-import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -26,12 +28,12 @@ public class GUIFilter extends CustomizableGui {
     private static final List<GUIFilter> OPEN_INVENTORIES = new ArrayList<>();
 
     private final SongodaPlugin plugin;
-    private final Hopper hopper;
+    private final HopperImpl hopper;
 
     public GUIFilter(SongodaPlugin plugin, Hopper hopper, Player player) {
         super(plugin, "filter");
         this.plugin = plugin;
-        this.hopper = hopper;
+        this.hopper = (HopperImpl) hopper;
 
         setRows(6);
         setTitle(TextUtils.formatText(Methods.formatName(hopper.getLevel().getLevel()) + " &8-&f Filter"));
@@ -68,7 +70,7 @@ public class GUIFilter extends CustomizableGui {
         setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    if (hopper.prepareForOpeningOverviewGui(event.player)) {
+                    if (this.hopper.prepareForOpeningOverviewGui(event.player)) {
                         this.guiManager.showGUI(event.player, new GUIOverview(plugin, hopper, event.player));
                     }
                     compile();
@@ -235,12 +237,12 @@ public class GUIFilter extends CustomizableGui {
         filter.setWhiteList(owhite);
         filter.setBlackList(oblack);
         filter.setVoidList(ovoid);
-        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.WHITELIST, owhite);
-        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.BLACKLIST, oblack);
-        EpicHoppersApi.getApi().getDataManager().updateItems(this.hopper, ItemType.VOID, ovoid);
+        DataHelper.updateItems(this.hopper, ItemType.WHITELIST, owhite);
+        DataHelper.updateItems(this.hopper, ItemType.BLACKLIST, oblack);
+        DataHelper.updateItems(this.hopper, ItemType.VOID, ovoid);
     }
 
-    public static void compileOpenGuiFilter(Hopper hopper) {
+    public static void compileOpenGuiFilter(HopperImpl hopper) {
         for (GUIFilter guiFilter : OPEN_INVENTORIES) {
             if (guiFilter.hopper == hopper) {
                 guiFilter.compile();

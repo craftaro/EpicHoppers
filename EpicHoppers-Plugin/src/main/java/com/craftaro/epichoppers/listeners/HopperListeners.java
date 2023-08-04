@@ -2,9 +2,9 @@ package com.craftaro.epichoppers.listeners;
 
 import com.craftaro.core.compatibility.ServerVersion;
 import com.craftaro.core.nms.NmsManager;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.EpicHoppers;
-import com.craftaro.epichoppers.hopper.Hopper;
 import com.craftaro.epichoppers.hopper.levels.modules.Module;
 import com.craftaro.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.craftaro.epichoppers.utils.HopperDirection;
@@ -40,7 +40,7 @@ public class HopperListeners implements Listener {
             return;
         }
 
-        // Hopper minecarts should be able to take care of themselves
+        // HopperImpl minecarts should be able to take care of themselves
         // Let EpicHoppers take over if the hopper is pointing down though
         if (destination.getHolder() instanceof HopperMinecart
                 && source.getHolder() instanceof org.bukkit.block.Hopper
@@ -56,7 +56,7 @@ public class HopperListeners implements Listener {
             return;
         }
 
-        // Hopper going into minecarts
+        // HopperImpl going into minecarts
         if (destination.getHolder() instanceof Minecart && source.getHolder() instanceof org.bukkit.block.Hopper) {
             event.setCancelled(true);
             return;
@@ -68,12 +68,12 @@ public class HopperListeners implements Listener {
                 return;
             }
 
-            // Calling HopperManager#getHopper() automatically creates a new Hopper and we don't need to iterate over default-valued hoppers
+            // Calling HopperManager#getHopper() automatically creates a new HopperImpl and we don't need to iterate over default-valued hoppers
             if (!this.plugin.getHopperManager().isHopper(destinationLocation)) {
                 return;
             }
 
-            Hopper toHopper = this.plugin.getHopperManager().getHopper(destinationLocation);
+            HopperImpl toHopper = this.plugin.getHopperManager().getHopper(destinationLocation);
             // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
             final ItemStack toMove = event.getItem();
 

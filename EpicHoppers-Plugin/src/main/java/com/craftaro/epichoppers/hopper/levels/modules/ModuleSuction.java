@@ -7,11 +7,12 @@ import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.locale.Locale;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
+import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.Methods;
-import com.craftaro.epichoppers.hopper.Hopper;
 import com.craftaro.epichoppers.utils.StorageContainerCache;
-import com.songoda.ultimatestacker.UltimateStacker;
+import com.craftaro.ultimatestacker.api.UltimateStackerApi;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -157,7 +158,7 @@ public class ModuleSuction extends Module {
 
     private int getActualItemAmount(Item item) {
         if (ULTIMATE_STACKER) {
-            return UltimateStacker.getActualItemAmount(item);
+            return UltimateStackerApi.getStackedItemManager().getActualItemAmount(item);
         } else if (WILD_STACKER) {
             return WildStackerAPI.getItemAmount(item);
         } else {
@@ -168,7 +169,7 @@ public class ModuleSuction extends Module {
 
     private void updateAmount(Item item, int amount) {
         if (ULTIMATE_STACKER) {
-            UltimateStacker.updateItemAmount(item, item.getItemStack(), amount);
+            UltimateStackerApi.getStackedItemManager().updateStack(item, amount);
         } else if (WILD_STACKER) {
             WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
         } else {

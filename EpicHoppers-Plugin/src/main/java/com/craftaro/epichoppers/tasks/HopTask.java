@@ -1,7 +1,9 @@
 package com.craftaro.epichoppers.tasks;
 
 import com.craftaro.epichoppers.boost.BoostData;
+import com.craftaro.epichoppers.boost.BoostDataImpl;
 import com.craftaro.epichoppers.containers.CustomContainer;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.HopperDirection;
@@ -45,7 +47,7 @@ public class HopTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        for (final com.craftaro.epichoppers.hopper.Hopper hopper : this.plugin.getHopperManager().getHoppers().values()) {
+        for (final HopperImpl hopper : this.plugin.getHopperManager().getHoppers().values()) {
 
             try {
                 // Get this hopper's location.
@@ -56,7 +58,7 @@ public class HopTask extends BukkitRunnable {
                     continue;
                 }
 
-                // Get Hopper Block.
+                // Get HopperImpl Block.
                 Block block = location.getBlock();
 
                 // If block is not a hopper continue.
@@ -173,7 +175,7 @@ public class HopTask extends BukkitRunnable {
         }
     }
 
-    private StorageContainerCache.Cache getFilterEndpoint(com.craftaro.epichoppers.hopper.Hopper hopper) {
+    private StorageContainerCache.Cache getFilterEndpoint(HopperImpl hopper) {
         // Get endpoint location.
         Location endPoint = hopper.getFilter().getEndPoint();
 
@@ -199,7 +201,7 @@ public class HopTask extends BukkitRunnable {
         return cache;
     }
 
-    private void pullItemsFromContainers(com.craftaro.epichoppers.hopper.Hopper toHopper, StorageContainerCache.Cache hopperCache, int maxToMove) {
+    private void pullItemsFromContainers(HopperImpl toHopper, StorageContainerCache.Cache hopperCache, int maxToMove) {
         // Grab items from the container above (includes storage/hopper minecarts, EpicFarming farm items and AdvancedChests chest)
         // If the container above is a hopper, ignore it if it's pointing down
         Block above = toHopper.getBlock().getRelative(BlockFace.UP);
@@ -305,7 +307,7 @@ public class HopTask extends BukkitRunnable {
         }
     }
 
-    private void pushItemsIntoContainers(com.craftaro.epichoppers.hopper.Hopper hopper, StorageContainerCache.Cache hopperCache, int maxToMove, Collection<Material> blockedMaterials, HopperDirection hopperDirection) {
+    private void pushItemsIntoContainers(HopperImpl hopper, StorageContainerCache.Cache hopperCache, int maxToMove, Collection<Material> blockedMaterials, HopperDirection hopperDirection) {
 
         // Filter target, if any
         StorageContainerCache.Cache filterCache = getFilterEndpoint(hopper);
@@ -395,7 +397,7 @@ public class HopTask extends BukkitRunnable {
         }
     }
 
-    private boolean tryPushCustomContainer(com.craftaro.epichoppers.hopper.Hopper hopper,
+    private boolean tryPushCustomContainer(HopperImpl hopper,
                                            StorageContainerCache.Cache hopperCache,
                                            CustomContainer container,
                                            StorageContainerCache.Cache filterCache,
@@ -442,7 +444,7 @@ public class HopTask extends BukkitRunnable {
         return false;
     }
 
-    private boolean tryPush(com.craftaro.epichoppers.hopper.Hopper hopper,
+    private boolean tryPush(HopperImpl hopper,
                             StorageContainerCache.Cache hopperCache,
                             StorageContainerCache.Cache targetCache,
                             StorageContainerCache.Cache filterCache,
@@ -491,7 +493,7 @@ public class HopTask extends BukkitRunnable {
         return false;
     }
 
-    private void processVoidFilter(com.craftaro.epichoppers.hopper.Hopper hopper, StorageContainerCache.Cache hopperCache, int maxToMove) {
+    private void processVoidFilter(HopperImpl hopper, StorageContainerCache.Cache hopperCache, int maxToMove) {
         // Loop over hopper inventory to process void filtering.
         if (!hopper.getFilter().getVoidList().isEmpty()) {
             ItemStack[] hopperContents = hopperCache.cachedInventory;

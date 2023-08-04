@@ -4,6 +4,7 @@ import com.craftaro.core.compatibility.ServerVersion;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XSound;
 import com.craftaro.epichoppers.EpicHoppers;
 import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.Methods;
 import org.bukkit.Bukkit;
@@ -64,7 +65,7 @@ public class TeleportHandlerImpl implements TeleportHandler {
                     continue;
                 }
 
-                Hopper hopper = this.plugin.getHopperManager().getHopper(location);
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(location);
 
                 if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON) {
                     continue;

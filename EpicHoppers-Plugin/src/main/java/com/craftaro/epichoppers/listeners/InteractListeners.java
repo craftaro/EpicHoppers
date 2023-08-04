@@ -2,10 +2,11 @@ package com.craftaro.epichoppers.listeners;
 
 import com.craftaro.core.hooks.ProtectionManager;
 import com.craftaro.core.hooks.WorldGuardHook;
+import com.craftaro.epichoppers.hopper.Hopper;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.EpicHoppers;
 import com.craftaro.epichoppers.gui.GUIOverview;
-import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.teleport.TeleportTrigger;
 import com.craftaro.epichoppers.player.PlayerData;
 import com.craftaro.epichoppers.player.SyncType;
@@ -37,12 +38,12 @@ public class InteractListeners implements Listener {
             Location location = player.getLocation().getBlock().getRelative(BlockFace.SELF).getLocation();
             Location down = location.getBlock().getRelative(BlockFace.DOWN).getLocation();
             if (this.plugin.getHopperManager().isHopper(down)) {
-                Hopper hopper = this.plugin.getHopperManager().getHopper(down);
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(down);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK) {
                     this.plugin.getTeleportHandler().tpEntity(player, hopper);
                 }
             } else if (this.plugin.getHopperManager().isHopper(location)) {
-                Hopper hopper = this.plugin.getHopperManager().getHopper(location);
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(location);
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK) {
                     this.plugin.getTeleportHandler().tpEntity(player, hopper);
                 }
@@ -89,7 +90,7 @@ public class InteractListeners implements Listener {
                     return;
                 }
 
-                Hopper hopper = this.plugin.getHopperManager().getHopper(event.getClickedBlock());
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(event.getClickedBlock());
                 if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
                     if (hopper.prepareForOpeningOverviewGui(player)) {
                         this.plugin.getGuiManager().showGUI(player, new GUIOverview(this.plugin, hopper, player));
@@ -103,7 +104,7 @@ public class InteractListeners implements Listener {
 
         if (event.getClickedBlock().getState() instanceof InventoryHolder ||
                 (event.getClickedBlock().getType() == Material.ENDER_CHEST && Settings.ENDERCHESTS.getBoolean())) {
-            Hopper hopper = playerData.getLastHopper();
+            HopperImpl hopper = (HopperImpl) playerData.getLastHopper();
             if (event.getClickedBlock().getLocation().equals(playerData.getLastHopper().getLocation())) {
                 if (!hopper.getLinkedBlocks().isEmpty()) {
                     this.plugin.getLocale().getMessage("event.hopper.syncfinish").sendPrefixedMessage(player);

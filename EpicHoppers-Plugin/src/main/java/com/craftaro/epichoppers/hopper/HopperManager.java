@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HopperManager {
-    private final Map<Location, Hopper> registeredHoppers = new HashMap<>();
+    private final Map<Location, HopperImpl> registeredHoppers = new HashMap<>();
     private final EpicHoppers plugin;
 
     protected boolean ready;
@@ -37,18 +37,18 @@ public class HopperManager {
         return this.ready;
     }
 
-    public Hopper addHopper(Hopper hopper) {
+    public HopperImpl addHopper(HopperImpl hopper) {
         this.registeredHoppers.put(roundLocation(hopper.getLocation()), hopper);
         return hopper;
     }
 
     @Deprecated
-    public void addHopper(Location location, Hopper hopper) {
+    public void addHopper(Location location, HopperImpl hopper) {
         this.registeredHoppers.put(roundLocation(location), hopper);
     }
 
-    public void addHoppers(Collection<Hopper> hoppers) {
-        for (Hopper hopper : hoppers) {
+    public void addHoppers(Collection<HopperImpl> hoppers) {
+        for (HopperImpl hopper : hoppers) {
             this.registeredHoppers.put(hopper.getLocation(), hopper);
         }
     }
@@ -59,10 +59,10 @@ public class HopperManager {
      * @param location The location of the hopper to remove
      * @return The removed hopper, or null if none was removed
      */
-    public Hopper removeHopper(Location location) {
-        Hopper removed = this.registeredHoppers.remove(location);
+    public HopperImpl removeHopper(Location location) {
+        HopperImpl removed = this.registeredHoppers.remove(location);
 
-        for (Hopper hopper : this.registeredHoppers.values()) {
+        for (HopperImpl hopper : this.registeredHoppers.values()) {
             hopper.removeLinkedBlock(location);
         }
 
@@ -75,19 +75,19 @@ public class HopperManager {
         return removed;
     }
 
-    public Hopper getHopper(Location location) {
+    public HopperImpl getHopper(Location location) {
         if (!this.registeredHoppers.containsKey(location = roundLocation(location))) {
             if (!this.ready) {
                 throw new IllegalStateException("Hoppers are still being loaded");
             }
 
-            Hopper hopper = addHopper(new Hopper(location));
-            this.plugin.getDataManager().createHopper(hopper);
+            HopperImpl hopper = addHopper(new HopperImpl(location));
+            this.plugin.getDataManager().delete(hopper);
         }
         return this.registeredHoppers.get(location);
     }
 
-    public Hopper getHopper(Block block) {
+    public HopperImpl getHopper(Block block) {
         return getHopper(block.getLocation());
     }
 
@@ -98,16 +98,16 @@ public class HopperManager {
         return this.registeredHoppers.containsKey(roundLocation(location));
     }
 
-    public Map<Location, Hopper> getHoppers() {
+    public Map<Location, HopperImpl> getHoppers() {
         return Collections.unmodifiableMap(this.registeredHoppers);
     }
 
-    public Hopper getHopperFromPlayer(Player player) {
+    public HopperImpl getHopperFromPlayer(Player player) {
         if (!this.ready) {
             throw new IllegalStateException("Hoppers are still being loaded");
         }
 
-        for (Hopper hopper : this.registeredHoppers.values()) {
+        for (HopperImpl hopper : this.registeredHoppers.values()) {
             if (hopper.getLastPlayerOpened() == player.getUniqueId()) {
                 return hopper;
             }

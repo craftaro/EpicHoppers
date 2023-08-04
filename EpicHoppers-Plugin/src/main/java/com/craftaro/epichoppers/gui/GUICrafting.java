@@ -5,10 +5,11 @@ import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
+import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.Methods;
-import com.craftaro.epichoppers.hopper.Hopper;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,7 +39,7 @@ public class GUICrafting extends CustomizableGui {
         setButton("back", 8, GuiUtils.createButtonItem(XMaterial.ARROW.parseItem(),
                         plugin.getLocale().getMessage("general.nametag.back").getMessage()),
                 (event) -> {
-                    if (hopper.prepareForOpeningOverviewGui(event.player)) {
+                    if (((HopperImpl)hopper).prepareForOpeningOverviewGui(event.player)) {
                         this.guiManager.showGUI(event.player, new GUIOverview(plugin, hopper, event.player));
                     }
                     setItem(module, hopper, player);

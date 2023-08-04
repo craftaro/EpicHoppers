@@ -9,10 +9,10 @@ import org.bukkit.block.Block;
 import java.util.UUID;
 
 public class HopperBuilder {
-    private final Hopper hopper;
+    private final HopperImpl hopper;
 
     public HopperBuilder(Location location) {
-        this.hopper = new Hopper(location);
+        this.hopper = new HopperImpl(location);
     }
 
     public HopperBuilder(Block block) {
@@ -65,7 +65,7 @@ public class HopperBuilder {
         return this;
     }
 
-    public Hopper build() {
+    public HopperImpl build() {
         return this.hopper;
     }
 }

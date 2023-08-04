@@ -7,10 +7,11 @@
     <parent>
         <groupId>com.craftaro</groupId>
         <artifactId>EpicHoppers-Parent</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT-b5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>EpicHoppers-API</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
     <build>
         <plugins>

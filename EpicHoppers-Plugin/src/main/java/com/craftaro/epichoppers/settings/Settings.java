@@ -27,7 +27,7 @@ public class Settings {
     public static final ConfigSetting DISABLED_WORLDS = new ConfigSetting(CONFIG, "Main.Disabled Worlds",
             Arrays.asList("example1", "example2"),
             "Worlds where epic hoppers cannot be placed.",
-            "Any placed Epic Hopper will just be converted to a normal one.");
+            "Any placed Epic HopperImpl will just be converted to a normal one.");
 
     public static final ConfigSetting TELEPORT = new ConfigSetting(CONFIG, "Main.Allow Players To Teleport Through Hoppers", true,
             "Should players be able to teleport through hoppers?");

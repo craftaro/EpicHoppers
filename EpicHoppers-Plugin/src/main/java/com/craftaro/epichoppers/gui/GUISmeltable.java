@@ -6,10 +6,11 @@ import com.craftaro.core.gui.CustomizableGui;
 import com.craftaro.core.gui.GuiUtils;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
+import com.craftaro.epichoppers.hopper.Hopper;
+import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.levels.modules.ModuleAutoSmelter;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.Methods;
-import com.craftaro.epichoppers.hopper.Hopper;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class GUISmeltable extends CustomizableGui {
     private final SongodaPlugin plugin;
-    private final Hopper hopper;
+    private final HopperImpl hopper;
     private final int maxPages;
     private final ModuleAutoSmelter moduleAutoSmelter;
 
@@ -31,7 +32,7 @@ public class GUISmeltable extends CustomizableGui {
     public GUISmeltable(ModuleAutoSmelter moduleAutoSmelter, SongodaPlugin plugin, Hopper hopper) {
         super(plugin, "smeltable");
         this.plugin = plugin;
-        this.hopper = hopper;
+        this.hopper = (HopperImpl) hopper;
         this.moduleAutoSmelter = moduleAutoSmelter;
 
         int smeltables = BURNABLES.size();

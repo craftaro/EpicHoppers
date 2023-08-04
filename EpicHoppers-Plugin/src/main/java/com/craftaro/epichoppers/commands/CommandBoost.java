@@ -3,7 +3,7 @@ package com.craftaro.epichoppers.commands;
 import com.craftaro.core.commands.AbstractCommand;
 import com.craftaro.core.utils.NumberUtils;
 import com.craftaro.core.utils.TimeUtils;
-import com.craftaro.epichoppers.boost.BoostData;
+import com.craftaro.epichoppers.boost.BoostDataImpl;
 import com.craftaro.epichoppers.EpicHoppers;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -49,7 +49,7 @@ public class CommandBoost extends AbstractCommand {
             return ReturnType.FAILURE;
         }
 
-        BoostData boostData = new BoostData(Integer.parseInt(args[1]), duration == 0L ? Long.MAX_VALUE : System.currentTimeMillis() + duration, player.getUniqueId());
+        BoostDataImpl boostData = new BoostDataImpl(Integer.parseInt(args[1]), duration == 0L ? Long.MAX_VALUE : System.currentTimeMillis() + duration, player.getUniqueId());
         this.plugin.getBoostManager().addBoostToPlayer(boostData);
         this.plugin.getLocale().newMessage("&7Successfully boosted &6" + Bukkit.getPlayer(args[0]).getName()
                 + "'s &7hopper transfer rates by &6" + args[1] + "x" + (duration == 0L ? "" : (" for " + TimeUtils.makeReadable(duration))) + "&7.").sendPrefixedMessage(sender);

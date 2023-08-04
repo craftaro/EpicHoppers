@@ -1,5 +1,6 @@
 package com.craftaro.epichoppers.player;
 
+
 import com.craftaro.epichoppers.hopper.Hopper;
 
 public class PlayerData {
