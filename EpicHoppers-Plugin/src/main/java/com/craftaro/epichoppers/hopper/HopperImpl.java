@@ -70,6 +70,7 @@ public class HopperImpl implements Hopper {
 
     public HopperImpl(Location location) {
         this.location = location;
+        this.id = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getNextId("hoppers");
     }
 
     /**
