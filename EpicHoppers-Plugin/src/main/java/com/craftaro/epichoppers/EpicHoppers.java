@@ -71,14 +71,13 @@ public class EpicHoppers extends SongodaPlugin {
 
     private TeleportHandler teleportHandler;
 
-    private DatabaseConnector databaseConnector;
     @Override
     public void onPluginLoad() {
     }
 
     @Override
     public void onPluginDisable() {
-        this.databaseConnector.closeConnection();
+        getDataManager().shutdown();
         saveModules();
     }
 
@@ -270,10 +269,6 @@ public class EpicHoppers extends SongodaPlugin {
 
     public GuiManager getGuiManager() {
         return this.guiManager;
-    }
-
-    public DatabaseConnector getDatabaseConnector() {
-        return this.databaseConnector;
     }
 
     public ContainerManager getContainerManager() {
