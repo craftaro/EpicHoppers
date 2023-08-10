@@ -52,7 +52,7 @@ public class _1_InitialMigration extends DataMigration {
         try (Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE " + tablePrefix + "items (" +
                     "hopper_id INTEGER NOT NULL, " +
-                    "item_type BIT NOT NULL," +
+                    "item_type VARCHAR(20) NOT NULL," +
                     "item TEXT NOT NULL " +
                     ")");
         }
