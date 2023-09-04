@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.craftaro</groupId>
         <artifactId>EpicHoppers-Parent</artifactId>
-        <version>5.0.0-b7-SNAPSHOT</version>
+        <version>5.0.0-b8-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>EpicHoppers-Plugin</artifactId>
@@ -116,9 +116,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.songoda</groupId>
+            <groupId>com.craftaro</groupId>
             <artifactId>EpicFarming</artifactId>
-            <version>3.0.24</version>
+            <version>4.0.0-b1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
