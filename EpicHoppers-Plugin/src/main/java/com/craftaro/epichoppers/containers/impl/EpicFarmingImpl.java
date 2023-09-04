@@ -1,8 +1,9 @@
 package com.craftaro.epichoppers.containers.impl;
 
-import com.songoda.epicfarming.EpicFarming;
-import com.songoda.epicfarming.core.compatibility.CompatibleMaterial;
-import com.songoda.epicfarming.farming.Farm;
+import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.epicfarming.EpicFarming;
+import com.craftaro.epicfarming.core.compatibility.CompatibleMaterial;
+import com.craftaro.epicfarming.farming.Farm;
 import com.craftaro.epichoppers.containers.CustomContainer;
 import com.craftaro.epichoppers.containers.IContainer;
 import org.bukkit.block.Block;
@@ -33,7 +34,7 @@ public class EpicFarmingImpl implements IContainer {
         @Override
         public ItemStack[] getItems() {
             return this.farm.getItems()
-                    .stream().filter(item -> CompatibleMaterial.getMaterial(item) != CompatibleMaterial.BONE_MEAL)
+                    .stream().filter(item -> XMaterial.matchXMaterial(item) != XMaterial.BONE_MEAL)
                     .toArray(ItemStack[]::new);
         }
 
