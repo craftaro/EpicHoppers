@@ -82,7 +82,9 @@ public class HopperManager {
             }
 
             HopperImpl hopper = addHopper(new HopperImpl(location));
-            this.plugin.getDataManager().delete(hopper);
+            this.plugin.getDataManager().save(hopper);
+            this.registeredHoppers.put(location, hopper);
+            return hopper;
         }
         return this.registeredHoppers.get(location);
     }
