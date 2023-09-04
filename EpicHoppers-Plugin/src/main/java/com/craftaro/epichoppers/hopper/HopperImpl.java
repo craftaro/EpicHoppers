@@ -9,6 +9,7 @@ import com.craftaro.core.database.SerializedLocation;
 import com.craftaro.core.hooks.EconomyManager;
 import com.craftaro.core.third_party.com.cryptomorin.xseries.XSound;
 import com.craftaro.core.third_party.org.jooq.impl.DSL;
+import com.craftaro.core.utils.ItemUtils;
 import com.craftaro.epichoppers.EpicHoppers;
 import com.craftaro.epichoppers.EpicHoppersApi;
 import com.craftaro.epichoppers.api.events.HopperAccessEvent;
@@ -20,7 +21,6 @@ import com.craftaro.epichoppers.utils.CostType;
 import com.craftaro.epichoppers.utils.DataHelper;
 import com.craftaro.epichoppers.utils.Methods;
 import com.craftaro.epichoppers.hopper.teleport.TeleportTrigger;
-import com.songoda.skyblock.core.utils.ItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -31,12 +31,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.io.BukkitObjectInputStream;
 import org.jetbrains.annotations.ApiStatus;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -70,7 +76,7 @@ public class HopperImpl implements Hopper {
 
     public HopperImpl(Location location) {
         this.location = location;
-        this.id = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getNextId("hoppers");
+        this.id = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getNextId("placed_hoppers");
     }
 
     /**
@@ -95,8 +101,16 @@ public class HopperImpl implements Hopper {
 
 
             //Load filtered items
-            dslContext.select().from(DSL.table(dataManager.getTablePrefix() + "items")).where(DSL.field("hopper_id").eq(id)).fetch().forEach(record -> {
-                ItemStack itemStack = ItemUtils.itemStackArrayFromBase64(record.get("item", String.class))[0];
+            dslContext.select().from(DSL.table(dataManager.getTablePrefix() + "items")).where(DSL.field("hopper_id").eq(id)).fetch().stream().filter(Objects::nonNull).filter(record -> record.get("item", String.class) != null).forEach(record -> {
+                ItemStack itemStack = null;
+                try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(record.get("item", String.class)));
+                     BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+                     ) {
+                    itemStack = (ItemStack) dataInput.readObject();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
                 ItemType type = ItemType.valueOf(record.get("item_type", String.class));
                 filter.addItem(itemStack, type);
 
@@ -120,6 +134,9 @@ public class HopperImpl implements Hopper {
 
         if (this.placedBy == null) {
             this.placedBy = player.getUniqueId();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(EpicHoppers.getPlugin(EpicHoppers.class), () -> {
+                EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().save(this);
+            }, 2);
         }
 
         if (!player.hasPermission("epichoppers.overview")) {
@@ -406,11 +423,11 @@ public class HopperImpl implements Hopper {
 
     @Override
     public Map<String, Object> serialize() {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", this.id);
         map.put("level", this.level.getLevel());
         map.put("placed_by", this.placedBy.toString());
-        map.put("last_opened_by", this.lastPlayerOpened.toString());
+        map.put("last_opened_by", this.lastPlayerOpened == null ? null : this.lastPlayerOpened.toString());
         map.put("teleport_trigger", this.teleportTrigger.name());
         map.putAll(SerializedLocation.of(this.location));
         return map;
