@@ -18,11 +18,9 @@ public class _1_InitialMigration extends DataMigration {
     }
 
     @Override
-    public void migrate(Connection connection, String tablePrefix) throws SQLException {
-
-        // Create hoppers table
+    public void migrate(Connection connection, String tablePrefix) throws SQLException {// Create hoppers table
         try (Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE " + tablePrefix + "placed_hoppers (" +
+            statement.execute("CREATE TABLE IF NOT EXISTS " + tablePrefix + "placed_hoppers (" +
                     "id INTEGER PRIMARY KEY AUTO_INCREMENT" + ", " +
                     "level INTEGER NOT NULL, " +
                     "placed_by VARCHAR(36), " +
@@ -37,7 +35,7 @@ public class _1_InitialMigration extends DataMigration {
 
         // Create hopper links
         try (Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE " + tablePrefix + "links (" +
+            statement.execute("CREATE TABLE IF NOT EXISTS " + tablePrefix + "links (" +
                     "hopper_id INTEGER NOT NULL, " +
                     "link_type TEXT NOT NULL," +
                     "world TEXT NOT NULL, " +
@@ -50,7 +48,7 @@ public class _1_InitialMigration extends DataMigration {
         // Create items
         // Items are base64.
         try (Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE " + tablePrefix + "items (" +
+            statement.execute("CREATE TABLE IF NOT EXISTS " + tablePrefix + "items (" +
                     "hopper_id INTEGER NOT NULL, " +
                     "item_type VARCHAR(20) NOT NULL," +
                     "item TEXT NOT NULL " +
@@ -59,7 +57,7 @@ public class _1_InitialMigration extends DataMigration {
 
         // Create player boosts
         try (Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE " + tablePrefix + "boosted_players (" +
+            statement.execute("CREATE TABLE IF NOT EXISTS " + tablePrefix + "boosted_players (" +
                     "player VARCHAR(36) NOT NULL, " +
                     "multiplier INTEGER NOT NULL," +
                     "end_time BIGINT NOT NULL " +
