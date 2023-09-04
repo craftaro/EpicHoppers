@@ -126,7 +126,7 @@ public class BlockListeners implements Listener {
             return;
         }
 
-        if (Settings.ALLOW_NORMAL_HOPPERS.getBoolean() && !this.plugin.getHopperManager().isHopper(block.getLocation())) {
+        if (!this.plugin.getHopperManager().isHopper(block.getLocation())) {
             return;
         }
 
