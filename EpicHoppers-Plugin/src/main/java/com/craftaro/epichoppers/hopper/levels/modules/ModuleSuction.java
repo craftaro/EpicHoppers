@@ -13,6 +13,8 @@ import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.Methods;
 import com.craftaro.epichoppers.utils.StorageContainerCache;
 import com.craftaro.ultimatestacker.api.UltimateStackerApi;
+import dev.rosewood.rosestacker.api.RoseStackerAPI;
+import dev.rosewood.rosestacker.stack.StackedItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -37,6 +39,7 @@ public class ModuleSuction extends Module {
 
     private static final boolean WILD_STACKER = Bukkit.getPluginManager().isPluginEnabled("WildStacker");
     private static final boolean ULTIMATE_STACKER = Bukkit.getPluginManager().isPluginEnabled("UltimateStacker");
+    private static final boolean ROSE_STACKER = Bukkit.getPluginManager().isPluginEnabled("RoseStacker");
 
     private final int maxSearchRadius;
 
@@ -161,10 +164,13 @@ public class ModuleSuction extends Module {
             return UltimateStackerApi.getStackedItemManager().getActualItemAmount(item);
         } else if (WILD_STACKER) {
             return WildStackerAPI.getItemAmount(item);
-        } else {
-            return item.getItemStack().getAmount();
+        } else if(ROSE_STACKER) {
+            StackedItem stackedItem = RoseStackerAPI.getInstance().getStackedItem(item);
+            if (stackedItem != null) {
+                return stackedItem.getStackSize();
+            }
         }
-
+        return item.getItemStack().getAmount();
     }
 
     private void updateAmount(Item item, int amount) {

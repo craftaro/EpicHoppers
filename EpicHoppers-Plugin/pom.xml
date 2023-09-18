@@ -76,6 +76,11 @@
 
     <repositories>
         <repository>
+            <id>rosewood-repo</id>
+            <url>https://repo.rosewooddev.io/repository/public/</url>
+        </repository>
+
+        <repository>
             <id>public</id>
             <url>https://repo.songoda.com/repository/public/</url>
         </repository>
@@ -147,6 +152,13 @@
             <groupId>com.bgsoftware</groupId>
             <artifactId>wildstacker</artifactId>
             <version>3.5.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.rosewood</groupId>
+            <artifactId>rosestacker</artifactId>
+            <version>1.5.11</version>
             <scope>provided</scope>
         </dependency>
 
