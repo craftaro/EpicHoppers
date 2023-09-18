@@ -10,24 +10,35 @@ import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.gui.GUISmeltable;
 import com.craftaro.epichoppers.utils.StorageContainerCache;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ModuleAutoSmelter extends Module {
     private final int timeOut;
     private final int hopperTickRate;
+    private final Map<XMaterial, ItemStack> RECIPE_CACHE;
 
     public ModuleAutoSmelter(SongodaPlugin plugin, GuiManager guiManager, int timeOut) {
         super(plugin, guiManager);
         this.timeOut = timeOut * 20;
         this.hopperTickRate = Settings.HOP_TICKS.getInt();
+        this.RECIPE_CACHE = new HashMap<>();
     }
 
     @Override
@@ -60,7 +71,7 @@ public class ModuleAutoSmelter extends Module {
                     continue;
                 }
                 XMaterial input = CompatibleMaterial.getMaterial(itemStack.getType()).get();
-                ItemStack result = CompatibleMaterial.getFurnaceResult(input);
+                ItemStack result = getFurnaceResult(input);
 
                 if (hopperCache.addItem(result)) {
                     if (itemStack.getAmount() == 1) {
@@ -78,6 +89,29 @@ public class ModuleAutoSmelter extends Module {
         }
 
         modifyDataCache(hopper, "time", subtract);
+    }
+
+
+
+    private @Nullable ItemStack getFurnaceResult(XMaterial material) {
+        if (RECIPE_CACHE.containsKey(material)) {
+            return RECIPE_CACHE.get(material);
+        }
+
+        Iterator<Recipe> recipes = Bukkit.recipeIterator();
+
+        while(recipes.hasNext()) {
+            Recipe recipe = (Recipe)recipes.next();
+            if (recipe instanceof FurnaceRecipe) {
+                FurnaceRecipe furnaceRecipe = (FurnaceRecipe)recipe;
+                if (material.isSimilar(furnaceRecipe.getInput())) {
+                    RECIPE_CACHE.put(material, furnaceRecipe.getInput());
+                    return furnaceRecipe.getResult();
+                }
+            }
+        }
+
+        return null;
     }
 
     @Override
