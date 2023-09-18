@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.craftaro</groupId>
         <artifactId>EpicHoppers-Parent</artifactId>
-        <version>5.0.0-b9-SNAPSHOT</version>
+        <version>5.0.0-b10-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>EpicHoppers-API</artifactId>
