@@ -65,7 +65,11 @@ public class TeleportHandlerImpl implements TeleportHandler {
                     continue;
                 }
 
-                HopperImpl hopper = this.plugin.getHopperManager().getHopper(location);
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(location, null);
+
+                if (hopper == null) {
+                    continue;
+                }
 
                 if (hopper.getTeleportTrigger() != TeleportTrigger.WALK_ON) {
                     continue;
@@ -98,7 +102,7 @@ public class TeleportHandlerImpl implements TeleportHandler {
 
         for (Location nextHopperLocation : lastHopper.getLinkedBlocks()) {
             if (nextHopperLocation.getBlock().getState() instanceof org.bukkit.block.Hopper) {
-                Hopper hopper = this.plugin.getHopperManager().getHopper(nextHopperLocation);
+                Hopper hopper = this.plugin.getHopperManager().getHopper(nextHopperLocation, null);
                 if (hopper != null) {
                     return this.getChain(hopper, currentChainLength + 1);
                 }

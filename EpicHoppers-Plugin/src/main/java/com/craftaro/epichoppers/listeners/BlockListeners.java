@@ -69,9 +69,8 @@ public class BlockListeners implements Listener {
         }
 
         HopperImpl hopper = this.plugin.getHopperManager().addHopper(
-                new HopperBuilder(e.getBlock())
+                new HopperBuilder(e.getBlock(), player.getUniqueId())
                         .setLevel(this.plugin.getLevelManager().getLevel(item))
-                        .setPlacedBy(player)
                         .setLastPlayerOpened(player).build());
 
         HopperPlaceEvent hopperPlaceEvent = new HopperPlaceEvent(player, hopper);
@@ -130,7 +129,7 @@ public class BlockListeners implements Listener {
             return;
         }
 
-        HopperImpl hopper = this.plugin.getHopperManager().getHopper(block);
+        HopperImpl hopper = this.plugin.getHopperManager().getHopper(block, player.getUniqueId());
 
         GUIFilter.compileOpenGuiFilter(hopper);
         GUIAutoSellFilter.compileOpenAutoSellFilter(hopper);

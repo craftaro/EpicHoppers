@@ -6,6 +6,7 @@ import com.craftaro.epichoppers.hopper.teleport.TeleportTrigger;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public interface Hopper extends Data {
 
     @Nullable UUID getLastPlayerOpened();
 
-    @Nullable UUID getPlacedBy();
+    @NotNull UUID getPlacedBy();
 
     void setPlacedBy(UUID placedBy);
 

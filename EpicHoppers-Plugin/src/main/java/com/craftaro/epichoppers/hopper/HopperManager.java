@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class HopperManager {
     private final Map<Location, HopperImpl> registeredHoppers = new HashMap<>();
@@ -75,13 +76,17 @@ public class HopperManager {
         return removed;
     }
 
-    public HopperImpl getHopper(Location location) {
+    public HopperImpl getHopper(Location location, UUID createForIfNotExists) {
         if (!this.registeredHoppers.containsKey(location = roundLocation(location))) {
             if (!this.ready) {
                 throw new IllegalStateException("Hoppers are still being loaded");
             }
 
-            HopperImpl hopper = addHopper(new HopperImpl(location));
+            if (createForIfNotExists == null) {
+                return null;
+            }
+
+            HopperImpl hopper = addHopper(new HopperImpl(location, createForIfNotExists));
             this.plugin.getDataManager().save(hopper);
             this.registeredHoppers.put(location, hopper);
             return hopper;
@@ -89,8 +94,8 @@ public class HopperManager {
         return this.registeredHoppers.get(location);
     }
 
-    public HopperImpl getHopper(Block block) {
-        return getHopper(block.getLocation());
+    public HopperImpl getHopper(Block block, UUID createForIfNotExists) {
+        return getHopper(block.getLocation(), createForIfNotExists);
     }
 
     /**

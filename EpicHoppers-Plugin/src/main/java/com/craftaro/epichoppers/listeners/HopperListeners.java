@@ -73,7 +73,7 @@ public class HopperListeners implements Listener {
                 return;
             }
 
-            HopperImpl toHopper = this.plugin.getHopperManager().getHopper(destinationLocation);
+            HopperImpl toHopper = this.plugin.getHopperManager().getHopper(destinationLocation, null);
             // minecraft 1.8 doesn't have a method to get the hopper's location from the inventory, so we use the holder instead
             final ItemStack toMove = event.getItem();
 

@@ -38,12 +38,12 @@ public class InteractListeners implements Listener {
             Location location = player.getLocation().getBlock().getRelative(BlockFace.SELF).getLocation();
             Location down = location.getBlock().getRelative(BlockFace.DOWN).getLocation();
             if (this.plugin.getHopperManager().isHopper(down)) {
-                HopperImpl hopper = this.plugin.getHopperManager().getHopper(down);
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(down, player.getUniqueId());
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK) {
                     this.plugin.getTeleportHandler().tpEntity(player, hopper);
                 }
             } else if (this.plugin.getHopperManager().isHopper(location)) {
-                HopperImpl hopper = this.plugin.getHopperManager().getHopper(location);
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(location, player.getUniqueId());
                 if (hopper.getTeleportTrigger() == TeleportTrigger.SNEAK) {
                     this.plugin.getTeleportHandler().tpEntity(player, hopper);
                 }
@@ -90,7 +90,7 @@ public class InteractListeners implements Listener {
                     return;
                 }
 
-                HopperImpl hopper = this.plugin.getHopperManager().getHopper(event.getClickedBlock());
+                HopperImpl hopper = this.plugin.getHopperManager().getHopper(event.getClickedBlock(), player.getUniqueId());
                 if (!player.getInventory().getItemInHand().getType().name().contains("PICKAXE")) {
                     if (hopper.prepareForOpeningOverviewGui(player)) {
                         this.plugin.getGuiManager().showGUI(player, new GUIOverview(this.plugin, hopper, player));

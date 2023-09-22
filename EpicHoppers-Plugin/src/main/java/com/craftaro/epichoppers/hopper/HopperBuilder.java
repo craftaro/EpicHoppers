@@ -11,12 +11,12 @@ import java.util.UUID;
 public class HopperBuilder {
     private final HopperImpl hopper;
 
-    public HopperBuilder(Location location) {
-        this.hopper = new HopperImpl(location);
+    public HopperBuilder(Location location, UUID owner) {
+        this.hopper = new HopperImpl(location, owner);
     }
 
-    public HopperBuilder(Block block) {
-        this(block.getLocation());
+    public HopperBuilder(Block block, UUID owner) {
+        this(block.getLocation(), owner);
     }
 
     public HopperBuilder setId(int id) {

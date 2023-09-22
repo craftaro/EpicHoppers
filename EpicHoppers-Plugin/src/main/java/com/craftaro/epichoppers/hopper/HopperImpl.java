@@ -33,6 +33,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
@@ -55,7 +56,7 @@ public class HopperImpl implements Hopper {
     private final Location location;
     private Level level = getLevelManager().getLowestLevel();
     private UUID lastPlayerOpened = null;
-    private UUID placedBy = null;
+    private UUID placedBy;
     private final List<Location> linkedBlocks = new ArrayList<>();
     private Filter filter = new Filter();
     private TeleportTrigger teleportTrigger = TeleportTrigger.DISABLED;
@@ -74,7 +75,8 @@ public class HopperImpl implements Hopper {
         this.location = null;
     }
 
-    public HopperImpl(Location location) {
+    public HopperImpl(Location location, UUID placedBy) {
+        this.placedBy = placedBy;
         this.location = location;
         this.id = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getNextId("placed_hoppers");
     }
@@ -340,7 +342,7 @@ public class HopperImpl implements Hopper {
         this.level = level;
     }
 
-    public UUID getPlacedBy() {
+    public @NotNull UUID getPlacedBy() {
         return this.placedBy;
     }
 
