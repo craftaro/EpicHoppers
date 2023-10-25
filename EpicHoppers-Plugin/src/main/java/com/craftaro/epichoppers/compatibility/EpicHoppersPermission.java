@@ -1,11 +1,11 @@
 package com.craftaro.epichoppers.compatibility;
 
-import com.songoda.skyblock.core.compatibility.CompatibleMaterial;
-import com.songoda.skyblock.permission.BasicPermission;
-import com.songoda.skyblock.permission.PermissionType;
+import com.craftaro.skyblock.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.skyblock.permission.BasicPermission;
+import com.craftaro.skyblock.permission.PermissionType;
 
 public class EpicHoppersPermission extends BasicPermission {
     public EpicHoppersPermission() {
-        super("EpicHoppers", CompatibleMaterial.HOPPER, PermissionType.GENERIC);
+        super("EpicHoppers", XMaterial.HOPPER, PermissionType.GENERIC);
     }
 }

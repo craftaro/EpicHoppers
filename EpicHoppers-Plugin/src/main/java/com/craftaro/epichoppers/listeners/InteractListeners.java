@@ -10,7 +10,7 @@ import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.teleport.TeleportTrigger;
 import com.craftaro.epichoppers.player.PlayerData;
 import com.craftaro.epichoppers.player.SyncType;
-import com.songoda.skyblock.SkyBlock;
+import com.craftaro.skyblock.SkyBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;

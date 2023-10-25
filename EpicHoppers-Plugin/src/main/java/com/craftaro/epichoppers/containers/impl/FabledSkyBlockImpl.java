@@ -2,10 +2,11 @@ package com.craftaro.epichoppers.containers.impl;
 
 import com.craftaro.epichoppers.containers.CustomContainer;
 import com.craftaro.epichoppers.containers.IContainer;
-import com.songoda.skyblock.SkyBlock;
-import com.songoda.skyblock.core.compatibility.CompatibleMaterial;
-import com.songoda.skyblock.stackable.Stackable;
-import com.songoda.skyblock.stackable.StackableManager;
+import com.craftaro.skyblock.SkyBlock;
+import com.craftaro.skyblock.core.compatibility.CompatibleMaterial;
+import com.craftaro.skyblock.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.skyblock.stackable.Stackable;
+import com.craftaro.skyblock.stackable.StackableManager;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,14 +23,14 @@ public class FabledSkyBlockImpl implements IContainer {
             super();
 
             StackableManager stackableManager = SkyBlock.getInstance().getStackableManager();
-            CompatibleMaterial compatibleMaterial = CompatibleMaterial.getMaterial(block);
+            XMaterial xMaterial = XMaterial.matchXMaterial(block.getType());
 
-            this.stackable = stackableManager.getStack(block.getLocation(), compatibleMaterial);
+            this.stackable = stackableManager.getStack(block.getLocation(), xMaterial);
         }
 
         @Override
         public boolean addToContainer(ItemStack itemToMove) {
-            if (CompatibleMaterial.getMaterial(itemToMove) != this.stackable.getMaterial()) {
+            if (XMaterial.matchXMaterial(itemToMove) != this.stackable.getMaterial()) {
                 return false;
             }
 
@@ -44,12 +45,12 @@ public class FabledSkyBlockImpl implements IContainer {
 
         @Override
         public ItemStack[] getItems() {
-            return new ItemStack[]{new ItemStack(this.stackable.getMaterial().getMaterial(), this.stackable.getSize())};
+            return new ItemStack[]{new ItemStack(this.stackable.getMaterial().parseMaterial(), this.stackable.getSize())};
         }
 
         @Override
         public void removeFromContainer(ItemStack itemToMove, int amountToMove) {
-            if (CompatibleMaterial.getMaterial(itemToMove) != this.stackable.getMaterial()) {
+            if (XMaterial.matchXMaterial(itemToMove) != this.stackable.getMaterial()) {
                 return;
             }
 
