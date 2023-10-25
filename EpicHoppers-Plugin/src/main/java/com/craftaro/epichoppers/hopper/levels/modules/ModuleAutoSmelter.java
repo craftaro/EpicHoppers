@@ -32,13 +32,10 @@ import java.util.Set;
 public class ModuleAutoSmelter extends Module {
     private final int timeOut;
     private final int hopperTickRate;
-    private final Map<XMaterial, ItemStack> RECIPE_CACHE;
-
     public ModuleAutoSmelter(SongodaPlugin plugin, GuiManager guiManager, int timeOut) {
         super(plugin, guiManager);
         this.timeOut = timeOut * 20;
         this.hopperTickRate = Settings.HOP_TICKS.getInt();
-        this.RECIPE_CACHE = new HashMap<>();
     }
 
     @Override
@@ -71,7 +68,7 @@ public class ModuleAutoSmelter extends Module {
                     continue;
                 }
                 XMaterial input = CompatibleMaterial.getMaterial(itemStack.getType()).get();
-                ItemStack result = getFurnaceResult(input);
+                ItemStack result = CompatibleMaterial.getFurnaceResult(input);
 
                 if (hopperCache.addItem(result)) {
                     if (itemStack.getAmount() == 1) {
@@ -89,29 +86,6 @@ public class ModuleAutoSmelter extends Module {
         }
 
         modifyDataCache(hopper, "time", subtract);
-    }
-
-
-
-    private @Nullable ItemStack getFurnaceResult(XMaterial material) {
-        if (RECIPE_CACHE.containsKey(material)) {
-            return RECIPE_CACHE.get(material);
-        }
-
-        Iterator<Recipe> recipes = Bukkit.recipeIterator();
-
-        while(recipes.hasNext()) {
-            Recipe recipe = (Recipe)recipes.next();
-            if (recipe instanceof FurnaceRecipe) {
-                FurnaceRecipe furnaceRecipe = (FurnaceRecipe)recipe;
-                if (material.isSimilar(furnaceRecipe.getInput())) {
-                    RECIPE_CACHE.put(material, furnaceRecipe.getInput());
-                    return furnaceRecipe.getResult();
-                }
-            }
-        }
-
-        return null;
     }
 
     @Override
