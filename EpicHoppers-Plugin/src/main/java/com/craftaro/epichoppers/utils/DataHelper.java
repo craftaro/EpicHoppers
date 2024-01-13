@@ -1,8 +1,8 @@
 package com.craftaro.epichoppers.utils;
 
 import com.craftaro.core.database.DatabaseConnector;
-import com.craftaro.core.third_party.org.jooq.Query;
-import com.craftaro.core.third_party.org.jooq.impl.DSL;
+import com.craftaro.third_party.org.jooq.Query;
+import com.craftaro.third_party.org.jooq.impl.DSL;
 import com.craftaro.core.utils.ItemSerializer;
 import com.craftaro.epichoppers.EpicHoppers;
 import com.craftaro.epichoppers.hopper.Hopper;

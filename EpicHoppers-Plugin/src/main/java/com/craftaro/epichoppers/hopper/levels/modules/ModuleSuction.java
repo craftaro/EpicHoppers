@@ -5,7 +5,7 @@ import com.craftaro.core.SongodaPlugin;
 import com.craftaro.core.compatibility.CompatibleParticleHandler;
 import com.craftaro.core.gui.GuiManager;
 import com.craftaro.core.locale.Locale;
-import com.craftaro.core.third_party.com.cryptomorin.xseries.XMaterial;
+import com.craftaro.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
 import com.craftaro.epichoppers.hopper.Hopper;
 import com.craftaro.epichoppers.hopper.HopperImpl;

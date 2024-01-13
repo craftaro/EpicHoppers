@@ -1,7 +1,7 @@
 package com.craftaro.epichoppers.hopper.teleport;
 
 import com.craftaro.core.compatibility.ServerVersion;
-import com.craftaro.core.third_party.com.cryptomorin.xseries.XSound;
+import com.craftaro.third_party.com.cryptomorin.xseries.XSound;
 import com.craftaro.epichoppers.EpicHoppers;
 import com.craftaro.epichoppers.hopper.Hopper;
 import com.craftaro.epichoppers.hopper.HopperImpl;
