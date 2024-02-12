@@ -4,9 +4,9 @@ import com.craftaro.epichoppers.containers.CustomContainer;
 import com.craftaro.epichoppers.containers.IContainer;
 import com.craftaro.skyblock.SkyBlock;
 import com.craftaro.skyblock.core.compatibility.CompatibleMaterial;
-import com.craftaro.skyblock.core.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.skyblock.stackable.Stackable;
 import com.craftaro.skyblock.stackable.StackableManager;
+import com.craftaro.third_party.com.cryptomorin.xseries.XMaterial;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
