@@ -75,6 +75,9 @@ public class HopperImpl implements Hopper {
         this.location = null;
     }
 
+    /**
+     * Constructor for creating a new hopper.
+     */
     public HopperImpl(Location location, UUID placedBy) {
         this.placedBy = placedBy;
         this.location = location;
@@ -96,10 +99,19 @@ public class HopperImpl implements Hopper {
 
             //Load links
             dslContext.select().from(DSL.table(dataManager.getTablePrefix() + "links")).where(DSL.field("hopper_id").eq(id)).fetch().forEach(record -> {
-                this.linkedBlocks.add(new Location(Bukkit.getWorld(record.get("world", String.class)),
-                        record.get("x", Double.class),
-                        record.get("y", Double.class),
-                        record.get("z", Double.class)));
+                LinkType type = LinkType.valueOf(record.get("link_type", String.class));
+                if (type == LinkType.REJECT) {
+                    this.filter.setEndPoint(new Location(Bukkit.getWorld(record.get("world", String.class)),
+                            record.get("x", Double.class),
+                            record.get("y", Double.class),
+                            record.get("z", Double.class)));
+                    return;
+                } else {
+                    this.linkedBlocks.add(new Location(Bukkit.getWorld(record.get("world", String.class)),
+                            record.get("x", Double.class),
+                            record.get("y", Double.class),
+                            record.get("z", Double.class)));
+                }
             });
 
 
@@ -116,7 +128,6 @@ public class HopperImpl implements Hopper {
                 }
                 ItemType type = ItemType.valueOf(record.get("item_type", String.class));
                 filter.addItem(itemStack, type);
-
             });
         });
     }
