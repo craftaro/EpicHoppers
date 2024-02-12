@@ -104,4 +104,12 @@ public class DataHelper {
                     .execute();
         });
     }
+
+    public static void deleteItems(HopperImpl hopper) {
+        EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getDatabaseConnector().connectDSL(dslContext -> {
+            dslContext.deleteFrom(DSL.table(EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getTablePrefix() + "items"))
+                    .where(DSL.field("hopper_id").eq(hopper.getId()))
+                    .execute();
+        });
+    }
 }

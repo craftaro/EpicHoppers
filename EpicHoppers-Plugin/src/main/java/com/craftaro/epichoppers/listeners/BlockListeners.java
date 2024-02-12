@@ -10,6 +10,7 @@ import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.HopperBuilder;
 import com.craftaro.epichoppers.hopper.levels.Level;
 import com.craftaro.epichoppers.settings.Settings;
+import com.craftaro.epichoppers.utils.DataHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
@@ -175,6 +176,8 @@ public class BlockListeners implements Listener {
 
         this.plugin.getHopperManager().removeHopper(block.getLocation());
         this.plugin.getDataManager().delete(hopper);
+        DataHelper.deleteLinks(hopper);
+        DataHelper.deleteItems(hopper);
 
         this.plugin.getPlayerDataManager().getPlayerData(player).setSyncType(null);
     }
