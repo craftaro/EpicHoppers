@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.craftaro</groupId>
         <artifactId>EpicHoppers-Parent</artifactId>
-        <version>5.0.1</version>
+        <version>5.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>EpicHoppers-Plugin</artifactId>
@@ -17,7 +17,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.5.2</version>
 
                 <executions>
                     <execution>
@@ -140,14 +140,14 @@
         <dependency>
             <groupId>com.github.brcdev-minecraft</groupId>
             <artifactId>shopgui-api</artifactId>
-            <version>2.2.0</version>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.Gypopo</groupId>
             <artifactId>EconomyShopGUI-API</artifactId>
-            <version>1.4.0</version>
+            <version>1.7.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -168,14 +168,14 @@
         <dependency>
             <groupId>dev.rosewood</groupId>
             <artifactId>rosestacker</artifactId>
-            <version>1.5.11</version>
+            <version>1.5.17</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.DeadSilenceIV</groupId>
             <artifactId>AdvancedChestsAPI</artifactId>
-            <version>2.2</version>
+            <version>2.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
