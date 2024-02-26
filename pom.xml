@@ -1,181 +1,65 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0">
-    <groupId>com.songoda</groupId>
-    <artifactId>EpicHoppers</artifactId>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <version>4.7.9</version>
-    <build>
-        <defaultGoal>clean install</defaultGoal>
-        <finalName>EpicHoppers-${project.version}</finalName>
 
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+    <groupId>com.craftaro</groupId>
+    <artifactId>EpicHoppers-Parent</artifactId>
+    <packaging>pom</packaging>
+    <version>5.0.1</version>
+    <!-- Run 'mvn versions:set -DgenerateBackupPoms=false -DnewVersion=X.Y.Z-DEV' to update version recursively -->
 
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
+    <modules>
+        <module>EpicHoppers-API</module>
+        <module>EpicHoppers-Plugin</module>
+    </modules>
 
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
+    <name>EpicHoppers</name>
+    <description>Connect hoppers over long distances, filter out unwanted items, auto break blocks, auto sell items and much more.</description>
+    <url>https://craftaro.com/marketplace/product/15</url>
 
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
+    <properties>
+        <craftaro.coreVersion>3.0.0-SNAPSHOT</craftaro.coreVersion>
 
-                <configuration>
-                    <file>${project.build.directory}/classes/plugin.yml</file>
-                    <replacements>
-                        <replacement>
-                            <token>maven-version-number</token>
-                            <value>${project.version}</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
-            </plugin>
+        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-                <executions>
-                    <execution>
-                        <id>shaded</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+    </properties>
 
-                        <configuration>
-                            <shadedArtifactAttached>false</shadedArtifactAttached>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+    <issueManagement>
+        <url>https://discord.gg/craftaro</url>
+        <system>Discord server</system>
+    </issueManagement>
 
-                            <artifactSet>
-                                <includes>
-                                    <include>com.songoda:SongodaCore</include>
-                                </includes>
-                            </artifactSet>
-
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.songoda.core</pattern>
-                                    <shadedPattern>${project.groupId}.epichoppers.core</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>apache.snapshots</id>
-            <url>https://repository.apache.org/snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <scm>
+        <url>https://github.com/craftaro/EpicHoppers</url>
+        <connection>scm:git:git://github.com/craftaro/EpicHoppers.git</connection>
+    </scm>
 
     <repositories>
         <repository>
-            <id>public</id>
-            <url>https://repo.songoda.com/repository/public/</url>
+            <id>craftaro-minecraft-plugins</id>
+            <url>https://repo.craftaro.com/repository/minecraft-plugins/</url>
         </repository>
 
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-
-        <repository>
-            <id>spigotmc-repo</id>
+            <id>SpigotMC</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 
     <dependencies>
+        <!-- Dev dependencies -->
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.19.4-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.songoda</groupId>
-            <artifactId>skyblock</artifactId>
-            <version>2.3.30</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.songoda</groupId>
-            <artifactId>SongodaCore</artifactId>
-            <version>2.6.20</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.songoda</groupId>
-            <artifactId>EpicFarming</artifactId>
-            <version>3.0.24</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.brcdev-minecraft</groupId>
-            <artifactId>shopgui-api</artifactId>
-            <version>2.2.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.Gypopo</groupId>
-            <artifactId>EconomyShopGUI-API</artifactId>
-            <version>1.4.0</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.songoda</groupId>
-            <artifactId>UltimateStacker</artifactId>
-            <version>2.1.6</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.bgsoftware</groupId>
-            <artifactId>wildstacker</artifactId>
-            <version>3.5.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.DeadSilenceIV</groupId>
-            <artifactId>AdvancedChestsAPI</artifactId>
-            <version>2.2</version>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>24.0.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

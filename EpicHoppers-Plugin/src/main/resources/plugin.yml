@@ -1,0 +1,36 @@
+name: ${project.parent.name}
+description: ${project.parent.description}
+version: ${project.version}
+api-version: 1.13
+
+main: com.craftaro.epichoppers.EpicHoppers
+softdepend:
+  - AdvancedChests
+  - ASkyBlock
+  - EconomyShopGUI
+  - EconomyShopGUI-Premium
+  - EpicFarming
+  - FabledSkyBlock
+  - Factions
+  - GriefPrevention
+  - Kingdoms
+  - LiquidTanks
+  - PlotsSquared
+  - RedProtect
+  - Reserve
+  - Towny
+  - UltimateStacker
+  - USkyBlock
+  - Vault
+  - WildStacker
+  - WorldGuard
+
+author: Craftaro
+website: ${project.parent.url}
+
+commands:
+  eh:
+    description: View information on this plugin.
+    default: true
+    aliases: [ EpicHoppers ]
+    usage: /eh
