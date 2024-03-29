@@ -58,7 +58,7 @@ interface:
 
   filter:
     infotitle: '&aFilter Guide'
-    infolore: '&7Items placed in the leftmost column|&7space will be whitelisted.||&7Items placed in the rightmost column|&7will be void.||&7Items placed in the middle column|&7will be blacklisted.'
+    infolore: '&7Items placed in the leftmost column|&7space will be whitelisted.||&7Items placed in the middle column|&7will be blacklisted.||&7Items placed in the rightmost column|&7will be void.|||&cThe whitelist and blacklist|&ccannot be used at the same time.'
     whitelist: '&f&lWhite List'
     blacklist: '&8&lBlack List'
     void: '&c&lVoid'
