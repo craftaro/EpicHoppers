@@ -93,6 +93,7 @@ public class HopperImpl implements Hopper {
         this.level = getLevelManager().getLevel((int) map.get("level"));
         this.placedBy = UUID.fromString((String) map.get("placed_by"));
         this.lastPlayerOpened = map.get("last_opened_by") != null ? UUID.fromString((String) map.get("last_opened_by")) : null;
+        this.teleportTrigger = TeleportTrigger.valueOf((String) map.get("teleport_trigger"));
 
         DataManager dataManager = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager();
         dataManager.getDatabaseConnector().connectDSL(dslContext -> {
