@@ -8,7 +8,6 @@ import com.craftaro.core.locale.Locale;
 import com.craftaro.third_party.com.cryptomorin.xseries.XMaterial;
 import com.craftaro.core.utils.TextUtils;
 import com.craftaro.epichoppers.hopper.Hopper;
-import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.utils.Methods;
 import com.craftaro.epichoppers.utils.StorageContainerCache;

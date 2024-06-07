@@ -1,7 +1,7 @@
 package com.craftaro.epichoppers.listeners;
 
 import com.craftaro.core.compatibility.ServerVersion;
-import com.craftaro.core.nms.NmsManager;
+import com.craftaro.core.nms.Nms;
 import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.settings.Settings;
 import com.craftaro.epichoppers.EpicHoppers;
@@ -140,12 +140,12 @@ public class HopperListeners implements Listener {
                         // we need to instead cancel and manually remove the item to move
                         source.removeItem(moveInstead);
                         if (sourceLocation != null) {
-                            NmsManager.getWorld().updateAdjacentComparators(sourceLocation.getBlock());
+                            Nms.getImplementations().getWorld().updateAdjacentComparators(sourceLocation.getBlock());
                         }
                         // now add it to the hopper
                         destination.addItem(moveInstead);
                         if (destinationLocation != null) {
-                            NmsManager.getWorld().updateAdjacentComparators(destinationLocation.getBlock());
+                            Nms.getImplementations().getWorld().updateAdjacentComparators(destinationLocation.getBlock());
                         }
                     }
                     return;
