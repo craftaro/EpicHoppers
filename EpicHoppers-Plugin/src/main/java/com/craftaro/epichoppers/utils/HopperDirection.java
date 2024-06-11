@@ -39,7 +39,7 @@ public enum HopperDirection {
         return location.clone().add(getX(), getY(), getZ());
     }
 
-    public BlockFace getDirection() {
+    public BlockFace getDirectionFacing() {
         switch (this) {
             case NORTH:
                 return BlockFace.NORTH;

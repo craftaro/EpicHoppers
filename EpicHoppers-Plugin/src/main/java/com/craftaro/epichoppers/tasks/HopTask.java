@@ -1,7 +1,7 @@
 package com.craftaro.epichoppers.tasks;
 
+import com.craftaro.core.compatibility.ServerVersion;
 import com.craftaro.epichoppers.boost.BoostData;
-import com.craftaro.epichoppers.boost.BoostDataImpl;
 import com.craftaro.epichoppers.containers.CustomContainer;
 import com.craftaro.epichoppers.hopper.HopperImpl;
 import com.craftaro.epichoppers.hopper.levels.modules.ModuleAutoCrafting;
@@ -18,6 +18,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Hopper;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Minecart;
@@ -81,11 +82,19 @@ public class HopTask extends BukkitRunnable {
                 int maxToMove = hopper.getLevel().getAmount() * (boostData == null ? 1 : boostData.getMultiplier());
 
                 // Get hopper state data.
-                Hopper hopperState = (Hopper) block.getState();
-                HopperDirection hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
-                Location pointingLocation = hopperDirection.getLocation(location);
+                HopperDirection hopperDirection;
+                Location pointingLocation;
+                if (ServerVersion.isServerVersionBelow(ServerVersion.V1_20)){
+                    Hopper hopperState = (Hopper) block.getState();
+                    hopperDirection = HopperDirection.getDirection(hopperState.getRawData());
+                    pointingLocation = hopperDirection.getLocation(location);
+                }
+                else{
+                    hopperDirection = HopperDirection.valueOf(((Directional) block.getBlockData()).getFacing().name());
+                    BlockFace blockFace = hopperDirection.getDirectionFacing();
+                    pointingLocation = block.getLocation().getBlock().getRelative(blockFace).getLocation();
+                }
                 final StorageContainerCache.Cache hopperCache = StorageContainerCache.getCachedInventory(block);
-
                 // Create list to hold blocked materials.
                 List<Material> blockedMaterials = new ArrayList<>();
 
