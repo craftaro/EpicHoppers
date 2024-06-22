@@ -1,7 +1,6 @@
 package com.craftaro.epichoppers.hopper.levels;
 
-import com.craftaro.core.nms.Nms;
-import com.craftaro.core.nms.nbt.NBTCore;
+import com.craftaro.core.third_party.de.tr7zw.nbtapi.NBT;
 import com.craftaro.core.third_party.de.tr7zw.nbtapi.NBTItem;
 import com.craftaro.epichoppers.hopper.levels.modules.Module;
 import org.bukkit.ChatColor;
@@ -45,9 +44,7 @@ public class LevelManagerImpl implements LevelManager {
 
     @Override
     public boolean isEpicHopper(ItemStack item) {
-        NBTCore nbt = Nms.getImplementations().getNbt();
-
-        if (nbt.of(item).has("level")) {
+        if (NBT.readNbt(item).hasTag("level")) {
             return true;
         }
 
