@@ -75,11 +75,9 @@ public class ModuleSuction extends Module {
 
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
-        Inventory hopperInventory = null;
-        if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
-            InventoryHolder inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
-            hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
-        }
+        // Always create inventory for the suction module to allow plugins to cancel the pickup event
+        InventoryHolder inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
+        Inventory hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
 
         for (Item item : itemsToSuck) {
             ItemStack itemStack = item.getItemStack();
@@ -122,13 +120,13 @@ public class ModuleSuction extends Module {
                 }
             }
 
-            if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
-                hopperInventory.setContents(hopperCache.cachedInventory);
-                InventoryPickupItemEvent pickupEvent = new InventoryPickupItemEvent(hopperInventory, item);
-                Bukkit.getPluginManager().callEvent(pickupEvent);
-                if (pickupEvent.isCancelled()) {
-                    continue;
-                }
+            // Always emit the event for suction module to allow any plugin to prevent item pickup
+            // This is important because suction is an aggressive collection mechanism
+            hopperInventory.setContents(hopperCache.cachedInventory);
+            InventoryPickupItemEvent pickupEvent = new InventoryPickupItemEvent(hopperInventory, item);
+            Bukkit.getPluginManager().callEvent(pickupEvent);
+            if (pickupEvent.isCancelled()) {
+                continue;
             }
 
             // try to add the items to the hopper
