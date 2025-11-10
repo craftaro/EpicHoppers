@@ -97,11 +97,9 @@ public class ModuleSuction extends Module {
 
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
-        Inventory hopperInventory = null;
-        if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
-            InventoryHolder inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
-            hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
-        }
+        // Always create inventory for the suction module to allow plugins to cancel the pickup event
+        InventoryHolder inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
+        Inventory hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
 
         for (Item item : itemsToSuck) {
             ItemStack itemStack = item.getItemStack();
