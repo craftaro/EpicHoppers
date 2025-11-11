@@ -175,7 +175,21 @@ public class ModuleSuction extends Module {
         if (ULTIMATE_STACKER) {
             UltimateStackerApi.getStackedItemManager().updateStack(item, amount);
         } else if (WILD_STACKER) {
-            WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
+            com.bgsoftware.wildstacker.api.objects.StackedItem stackedItem = WildStackerAPI.getStackedItem(item);
+            if (stackedItem != null) {
+                stackedItem.setStackAmount(amount, true);
+            } else {
+                // Fallback if item is not tracked by WildStacker
+                item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
+            }
+        } else if (ROSE_STACKER) {
+            StackedItem stackedItem = RoseStackerAPI.getInstance().getStackedItem(item);
+            if (stackedItem != null) {
+                stackedItem.setStackSize(amount);
+            } else {
+                // Fallback if item is not tracked by RoseStacker
+                item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
+            }
         } else {
             item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
         }
