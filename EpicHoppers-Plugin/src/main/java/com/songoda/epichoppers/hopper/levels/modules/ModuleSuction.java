@@ -15,6 +15,7 @@ import com.songoda.ultimatestacker.api.UltimateStackerApi;
 import dev.rosewood.rosestacker.api.RoseStackerAPI;
 import dev.rosewood.rosestacker.stack.StackedItem;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -60,13 +61,34 @@ public class ModuleSuction extends Module {
             return;
         }
 
-        Set<Item> itemsToSuck = hopper.getLocation().getWorld().getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
+        Set<Item> itemsToSuck = hopper.getLocation().getWorld()
+                .getNearbyEntities(hopper.getLocation().add(0.5, 0.5, 0.5), radius, radius, radius)
                 .stream()
-                .filter(entity -> entity.getType() == EntityType.DROPPED_ITEM
-                        && !entity.isDead()
-                        && entity.getTicksLived() >= ((Item) entity).getPickupDelay()
-                        && entity.getLocation().getBlock().getType() != Material.HOPPER)
+                .filter(entity -> entity.getType() == EntityType.DROPPED_ITEM)
                 .map(Item.class::cast)
+                .filter(entity -> {
+                    if (entity.isDead() || entity.getLocation().getBlock().getType() == Material.HOPPER) {
+                        return false;
+                    }
+
+                    // For WildStacker items, bypass the PickupDelay check since we use their API
+                    if (WILD_STACKER && WildStackerAPI.getStackedItem(entity) != null) {
+                        return true;
+                    }
+
+                    // For UltimateStacker items, bypass the PickupDelay check
+                    if (ULTIMATE_STACKER && UltimateStackerApi.getStackedItemManager().isStackedItem(entity)) {
+                        return true;
+                    }
+
+                    // For RoseStacker items, bypass the PickupDelay check
+                    if (ROSE_STACKER && RoseStackerAPI.getInstance().getStackedItem(entity) != null) {
+                        return true;
+                    }
+
+                    // For normal items, check PickupDelay
+                    return entity.getTicksLived() >= entity.getPickupDelay();
+                })
                 .collect(Collectors.toSet());
 
         if (itemsToSuck.isEmpty()) {
@@ -75,31 +97,35 @@ public class ModuleSuction extends Module {
 
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
-        Inventory hopperInventory = null;
-        if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
-            InventoryHolder inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
-            hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
-        }
+        // Always create inventory for the suction module to allow plugins to cancel the pickup event
+        InventoryHolder inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
+        Inventory hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
 
         for (Item item : itemsToSuck) {
             ItemStack itemStack = item.getItemStack();
 
-            if (item.getPickupDelay() == 0) {
+            // Check if this is a stacker plugin item
+            boolean isStackerItem = (WILD_STACKER && WildStackerAPI.getStackedItem(item) != null)
+                    || (ULTIMATE_STACKER && UltimateStackerApi.getStackedItemManager().isStackedItem(item))
+                    || (ROSE_STACKER && RoseStackerAPI.getInstance().getStackedItem(item) != null);
+
+            // Skip items with PickupDelay 0 (unless they're stacker items, which we handle via API)
+            if (!isStackerItem && item.getPickupDelay() == 0) {
                 item.setPickupDelay(25);
                 continue;
             }
 
             if (itemStack.getType().name().contains("SHULKER_BOX")) {
-                return;
+                continue;
             }
 
             if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() &&
                     itemStack.getItemMeta().getDisplayName().startsWith("***")) {
-                return; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
+                continue; //Compatibility with Shop instance: https://www.spigotmc.org/resources/shop-a-simple-intuitive-shop-instance.9628/
             }
 
             if (BLACKLIST.contains(item.getUniqueId())) {
-                return;
+                continue;
             }
 
             // respect filter if no endpoint
@@ -122,27 +148,39 @@ public class ModuleSuction extends Module {
                 }
             }
 
-            if (Settings.EMIT_INVENTORYPICKUPITEMEVENT.getBoolean()) {
-                hopperInventory.setContents(hopperCache.cachedInventory);
-                InventoryPickupItemEvent pickupEvent = new InventoryPickupItemEvent(hopperInventory, item);
-                Bukkit.getPluginManager().callEvent(pickupEvent);
-                if (pickupEvent.isCancelled()) {
+            // IMPORTANT: Read the actual item amount BEFORE emitting the event!
+            // WildStacker (priority HIGHEST) modifies the item during the event,
+            // so we must capture the correct amount first
+            int toAdd = getActualItemAmount(item);
+
+            // Emit the event to allow protection plugins to cancel if needed
+            hopperInventory.setContents(hopperCache.cachedInventory);
+            InventoryPickupItemEvent pickupEvent = new InventoryPickupItemEvent(hopperInventory, item);
+            Bukkit.getPluginManager().callEvent(pickupEvent);
+
+            if (pickupEvent.isCancelled()) {
+                // For suction module with stacker items, bypass the cancellation
+                // Suction is an aggressive collection mechanism and should work with stacker plugins
+                if (!isStackerItem) {
                     continue;
                 }
             }
 
             // try to add the items to the hopper
-            int toAdd, added = hopperCache.addAny(itemStack, toAdd = getActualItemAmount(item));
+            int added = hopperCache.addAny(itemStack, toAdd);
+
             if (added == 0) {
                 return;
             }
 
             // items added ok!
-            if (added == toAdd) {
+            if (added >= toAdd) {
+                // All items were added, remove the entity
                 item.remove();
             } else {
-                // update the item's total
-                updateAmount(item, toAdd - added);
+                // Only some items were added, update the remaining amount
+                int remaining = toAdd - added;
+                updateAmount(item, remaining);
 
                 // wait before trying to add again
                 BLACKLIST.add(item.getUniqueId());
@@ -175,7 +213,21 @@ public class ModuleSuction extends Module {
         if (ULTIMATE_STACKER) {
             UltimateStackerApi.getStackedItemManager().updateStack(item, amount);
         } else if (WILD_STACKER) {
-            WildStackerAPI.getStackedItem(item).setStackAmount(amount, true);
+            com.bgsoftware.wildstacker.api.objects.StackedItem stackedItem = WildStackerAPI.getStackedItem(item);
+            if (stackedItem != null) {
+                stackedItem.setStackAmount(amount, true);
+            } else {
+                // Fallback if item is not tracked by WildStacker
+                item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
+            }
+        } else if (ROSE_STACKER) {
+            StackedItem stackedItem = RoseStackerAPI.getInstance().getStackedItem(item);
+            if (stackedItem != null) {
+                stackedItem.setStackSize(amount);
+            } else {
+                // Fallback if item is not tracked by RoseStacker
+                item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
+            }
         } else {
             item.getItemStack().setAmount(Math.min(amount, item.getItemStack().getMaxStackSize()));
         }
