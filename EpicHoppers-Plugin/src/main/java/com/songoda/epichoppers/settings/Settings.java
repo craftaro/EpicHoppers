@@ -101,6 +101,11 @@ public class Settings {
             "However it is a high frequency event and may have an impact on your server performance which is why it is disabled by default.",
             "If you absolutely need this enable it but be aware of the potential performance impact.");
 
+    public static final ConfigSetting DATABASE_TABLE_PREFIX = new ConfigSetting(CONFIG, "Main.Database Table Prefix", "",
+            "Prefix for database tables. Useful when running multiple servers sharing the same database.",
+            "Example: 'survival_' would create tables like 'survival_placed_hoppers' instead of 'placed_hoppers'.",
+            "Leave empty for no prefix.");
+
     public static final ConfigSetting ECO_ICON = new ConfigSetting(CONFIG, "Interfaces.Economy Icon", "SUNFLOWER");
     public static final ConfigSetting XP_ICON = new ConfigSetting(CONFIG, "Interfaces.XP Icon", "EXPERIENCE_BOTTLE");
 
