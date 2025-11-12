@@ -17,7 +17,7 @@
     <url>https://songoda.com/product/epichoppers-8</url>
 
     <properties>
-        <songoda.coreVersion>3.9.8</songoda.coreVersion>
+        <songoda.coreVersion>3.9.8-SNAPSHOT</songoda.coreVersion>
 
         <maven.compiler.release>8</maven.compiler.release>
         <maven.compiler.target>1.8</maven.compiler.target>
