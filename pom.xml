@@ -17,7 +17,7 @@
     <url>https://songoda.com/product/epichoppers-8</url>
 
     <properties>
-        <songoda.coreVersion>3.9.8-SNAPSHOT</songoda.coreVersion>
+        <songoda.coreVersion>3.9.8</songoda.coreVersion>
 
         <maven.compiler.release>8</maven.compiler.release>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -43,6 +43,11 @@
         <repository>
             <id>songoda-minecraft-plugins</id>
             <url>https://repo.songoda.com/repository/minecraft-plugins/</url>
+        </repository>
+
+        <repository>
+            <id>songoda-minecraft-plugins-release</id>
+            <url>https://repo.songoda.com/repository/minecraft-plugins-release/</url>
         </repository>
 
         <repository>
