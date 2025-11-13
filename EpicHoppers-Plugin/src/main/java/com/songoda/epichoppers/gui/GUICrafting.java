@@ -18,8 +18,8 @@ public class GUICrafting extends CustomizableGui {
         super(plugin, "crafting");
         setRows(3);
         setTitle(Methods.formatName(hopper.getLevel().getLevel()) + TextUtils.formatText(" &8-&f Crafting"));
-        setOnClose((event) -> {
-            hopper.setActivePlayer(null);
+        setOnClose(event -> {
+            ((HopperImpl) hopper).removeActivePlayer(event.player);
             setItem(module, hopper, player);
         });
         setAcceptsItems(true);

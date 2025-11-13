@@ -204,6 +204,18 @@ public class StorageContainerCache {
          * @return how many items were added
          */
         public int addAny(ItemStack item, int amountToAdd) {
+            return addAny(item, amountToAdd, false);
+        }
+
+        /**
+         * Add a number of items to this container's inventory later.
+         *
+         * @param item          item to add
+         * @param amountToAdd   how many of this item to attempt to add
+         * @param reserveOneSlot if true, always keep at least one slot empty (for autocrafter)
+         * @return how many items were added
+         */
+        public int addAny(ItemStack item, int amountToAdd, boolean reserveOneSlot) {
             // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
             if (this.type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX")) {
                 return 0;
@@ -212,9 +224,34 @@ public class StorageContainerCache {
             int totalAdded = 0;
             if (this.cachedInventory != null && item != null) {
                 final int maxStack = item.getMaxStackSize();
+
+                // Count free slots to determine if we need to reserve one
+                int freeSlots = 0;
+                for (ItemStack stack : this.cachedInventory) {
+                    if (stack == null || stack.getAmount() == 0) {
+                        freeSlots++;
+                    }
+                }
+
+                // If autocrafter is active and 1 or fewer free slots, don't add ANYTHING
+                // Autocrafter needs at least 1 empty slot to craft, and that slot will be filled
+                // by the output. So we need to keep 2 slots free: one for current craft, one for next
+                if (reserveOneSlot && freeSlots <= 1) {
+                    return 0;
+                }
+
+                // If we have exactly 2 free slots, stop adding to NEW slots but can fill partial stacks
+                boolean shouldStopAdding = reserveOneSlot && freeSlots <= 2;
+
                 for (int i = 0; amountToAdd > 0 && i < this.cachedInventory.length; i++) {
                     final ItemStack cacheItem = this.cachedInventory[i];
                     if (cacheItem == null || cacheItem.getAmount() == 0) {
+                        // Check if we should reserve this slot for autocrafter
+                        if (shouldStopAdding) {
+                            // Don't fill this free slot - reserve it for autocrafter
+                            break;
+                        }
+
                         // free slot!
                         int toAdd = Math.min(maxStack, amountToAdd);
                         this.cachedInventory[i] = item.clone();
@@ -224,6 +261,11 @@ public class StorageContainerCache {
                         totalAdded += toAdd;
                         amountToAdd -= toAdd;
                     } else if (maxStack > cacheItem.getAmount() && item.isSimilar(cacheItem)) {
+                        // Check if we should stop adding to preserve empty slot for autocrafter
+                        if (shouldStopAdding) {
+                            continue;  // Skip this partial stack, keep the empty slot free
+                        }
+
                         // free space!
                         int toAdd = Math.min(maxStack - cacheItem.getAmount(), amountToAdd);
                         this.cachedInventory[i].setAmount(toAdd + cacheItem.getAmount());

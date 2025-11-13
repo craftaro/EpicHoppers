@@ -51,8 +51,8 @@ public class GUIOverview extends CustomizableGui {
         setTitle(Methods.formatName(hopper.getLevel().getLevel()));
         runTask();
         constructGUI();
-        this.setOnClose(action -> {
-            hopper.setActivePlayer(null);
+        this.setOnClose(event -> {
+            ((HopperImpl) hopper).removeActivePlayer(event.player);
             Bukkit.getScheduler().cancelTask(this.task);
         });
     }

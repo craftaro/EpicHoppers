@@ -115,10 +115,11 @@ public class ModuleAutoCrafting extends Module {
                                                 recipe.result.isSimilar(item)));
 
                 // jam check: is this hopper gummed up?
-                if (this.crafterEjection && !freeSlotAfterRemovingIngredients) {
+                if (!freeSlotAfterRemovingIngredients) {
                     // Crafter can't function if there's nowhere to put the output
                     // ¯\_(ツ)_/¯
 
+                    // First try to find a slot that's NOT part of the ingredients
                     for (int i = 0; i < items.length; i++) {
                         if (!slotsToAlter.containsKey(i)) {
                             // and yeet into space!
@@ -130,30 +131,36 @@ public class ModuleAutoCrafting extends Module {
                         }
                     }
 
-                    // FIXME: In theory the code below should work. But if the last item is of the same type as the
-                    //        resulting item, the inventory won't update correctly
-                    //        (item is set correctly but reset to MaxStackSize)
-                    //        (CachedInventory doesn't like it's array to be edited?)
-                        /*
-                        // None of the slots can safely be freed. So we drop some leftover ingredients
-                        if (!freeSlotAfterRemovingIngredients) {
+                    // If all slots are ingredients, eject the last slot forcefully to free up space
+                    // This is necessary when the hopper is completely full of crafting ingredients
+                    if (!freeSlotAfterRemovingIngredients) {
+                        int slot = items.length - 1;   // Last slot
 
-                            int slot = items.length - 1;   // Last slot
+                        // Drop only what won't be consumed by crafting
+                        Integer amountAfterCraft = slotsToAlter.get(slot);
+                        if (amountAfterCraft != null && amountAfterCraft > 0) {
+                            // Some items will remain after crafting, drop those
+                            ItemStack toDrop = items[slot].clone();
+                            toDrop.setAmount(amountAfterCraft);
+                            hopper.getLocation().getWorld().dropItemNaturally(hopper.getLocation(), toDrop);
 
-                            slotsToAlter.computeIfPresent(slot, (key, value) -> {
-                                items[slot].setAmount(value);
+                            // Set the slot to exactly what will be consumed
+                            items[slot].setAmount(items[slot].getAmount() - amountAfterCraft);
+                            slotsToAlter.put(slot, 0);
+                        } else {
+                            // All items in this slot will be consumed, but we still drop one to make space
+                            ItemStack toDrop = items[slot].clone();
+                            toDrop.setAmount(1);
+                            hopper.getLocation().getWorld().dropItemNaturally(hopper.getLocation(), toDrop);
+                            items[slot].setAmount(items[slot].getAmount() - 1);
 
-                                return null;
-                            });
-
-                            // and yeet into space!
-                            items[slot].setAmount(slotsToAlter.getOrDefault(slot, items[slot].getAmount()));
-                            hopper.getWorld().dropItemNaturally(hopper.getLocation(), items[slot]);
-                            items[slot] = null;
-
-                            freeSlotAfterRemovingIngredients = true;
+                            if (items[slot].getAmount() == 0) {
+                                items[slot] = null;
+                            }
                         }
-                        */
+
+                        freeSlotAfterRemovingIngredients = true;
+                    }
                 }
 
                 if (freeSlotAfterRemovingIngredients) {

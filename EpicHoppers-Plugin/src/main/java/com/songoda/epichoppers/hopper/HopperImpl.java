@@ -53,7 +53,7 @@ public class HopperImpl implements Hopper {
 
     private int syncId = -1;
 
-    private Player activePlayer;
+    private final Set<Player> activePlayers = new HashSet<>();
 
     private final Map<String, Object> moduleCache = new HashMap<>();
 
@@ -124,12 +124,6 @@ public class HopperImpl implements Hopper {
 
     @ApiStatus.Internal
     public boolean prepareForOpeningOverviewGui(Player player) {
-        if (this.lastPlayerOpened != null &&
-                this.lastPlayerOpened != player.getUniqueId() &&
-                Bukkit.getPlayer(this.lastPlayerOpened) != null) {
-            Bukkit.getPlayer(this.lastPlayerOpened).closeInventory();
-        }
-
         HopperAccessEvent accessEvent = new HopperAccessEvent(player, this);
         Bukkit.getPluginManager().callEvent(accessEvent);
         if (accessEvent.isCancelled()) {
@@ -153,9 +147,10 @@ public class HopperImpl implements Hopper {
 
     @ApiStatus.Internal
     public void forceClose() {
-        if (this.activePlayer != null) {
-            this.activePlayer.closeInventory();
+        for (Player player : this.activePlayers) {
+            player.closeInventory();
         }
+        this.activePlayers.clear();
     }
 
     public void dropItems() {
@@ -460,11 +455,19 @@ public class HopperImpl implements Hopper {
     }
 
     public Player getActivePlayer() {
-        return this.activePlayer;
+        return this.activePlayers.isEmpty() ? null : this.activePlayers.iterator().next();
     }
 
     public void setActivePlayer(Player activePlayer) {
-        this.activePlayer = activePlayer;
+        if (activePlayer == null) {
+            this.activePlayers.clear();
+        } else {
+            this.activePlayers.add(activePlayer);
+        }
+    }
+
+    public void removeActivePlayer(Player player) {
+        this.activePlayers.remove(player);
     }
 
     private LevelManager getLevelManager() {
