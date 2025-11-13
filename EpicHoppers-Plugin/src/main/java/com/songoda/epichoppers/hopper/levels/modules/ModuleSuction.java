@@ -185,8 +185,12 @@ public class ModuleSuction extends Module {
                 // This allows suction to work properly with stacker plugins
             }
 
+            // Check if autocrafter is active on this hopper
+            // If yes, reserve one slot for crafting output
+            boolean hasAutoCrafter = hopper.getLevel().getModule("AutoCrafting") != null;
+
             // try to add the items to the hopper
-            int added = hopperCache.addAny(itemStack, toAdd);
+            int added = hopperCache.addAny(itemStack, toAdd, hasAutoCrafter);
 
             if (added == 0) {
                 return;
