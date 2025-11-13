@@ -101,6 +101,13 @@ public class StorageContainerCache {
                 .forEach(e -> {
                     final ItemStack[] cachedInventory = e.getValue().cachedInventory;
                     final boolean[] cacheChanged = e.getValue().cacheChanged;
+
+                    // Check if the block is still a valid InventoryHolder before casting
+                    if (!(e.getKey().getState() instanceof InventoryHolder)) {
+                        // Block is no longer an inventory holder (chunk unloaded, block removed, etc.)
+                        return;
+                    }
+
                     Inventory inventory = ((InventoryHolder) e.getKey().getState()).getInventory();
                     for (int i = 0; i < cachedInventory.length; i++) {
                         if (cacheChanged[i]) {

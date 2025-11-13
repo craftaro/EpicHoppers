@@ -98,6 +98,12 @@ public class ModuleSuction extends Module {
         boolean filterEndpoint = hopper.getFilter().getEndPoint() != null;
 
         // Always create inventory for the suction module to allow plugins to cancel the pickup event
+        // Check if the hopper block is still valid before creating the inventory
+        if (!(hopper.getBlock().getState() instanceof InventoryHolder)) {
+            // Hopper block is no longer valid (chunk unloaded, block removed, etc.)
+            return;
+        }
+
         InventoryHolder inventoryHolder = (InventoryHolder) hopper.getBlock().getState();
         Inventory hopperInventory = Bukkit.createInventory(inventoryHolder, InventoryType.HOPPER);
 
