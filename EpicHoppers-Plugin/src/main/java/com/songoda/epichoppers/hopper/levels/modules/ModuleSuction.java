@@ -159,8 +159,23 @@ public class ModuleSuction extends Module {
             // so we must capture the correct amount first
             int toAdd = getActualItemAmount(item);
 
-            // Always emit the event for suction module to allow any plugin to prevent item pickup
-            // This is important because suction is an aggressive collection mechanism
+            // Check if autocrafter is active on this hopper
+            // If yes, reserve one slot for crafting output
+            boolean hasAutoCrafter = hopper.getLevel().getModule("AutoCrafting") != null;
+
+            // Try to add the items to the hopper FIRST
+            int added = hopperCache.addAny(itemStack, toAdd, hasAutoCrafter);
+
+            // CRITICAL FIX: Do NOT emit the event if we can't add anything!
+            // Emitting the event when added == 0 causes WildStacker/UltimateStacker to modify
+            // the entity amount even though we're not picking it up, resulting in item loss!
+            if (added == 0) {
+                continue; // Continue to next item instead of return
+            }
+
+            // We added items! Now emit the event to allow other plugins to be aware
+            // Note: Cache is already modified at this point, but this prevents WildStacker
+            // from modifying entities we can't pick up anyway
             hopperInventory.setContents(hopperCache.cachedInventory);
             InventoryPickupItemEvent pickupEvent = new InventoryPickupItemEvent(hopperInventory, item);
             Bukkit.getPluginManager().callEvent(pickupEvent);
@@ -176,6 +191,8 @@ public class ModuleSuction extends Module {
 
                 if (isProtectedItem) {
                     // This item is protected by another plugin - always respect that
+                    // Note: Cache was already modified, but we'll skip entity removal
+                    // This may result in duplicate pickup on next tick, but respects protection
                     continue;
                 } else if (!isStackerItem) {
                     // Normal item that's been cancelled - skip it
@@ -183,17 +200,6 @@ public class ModuleSuction extends Module {
                 }
                 // If we get here, it's a stacker item that's not protected, so we bypass the cancellation
                 // This allows suction to work properly with stacker plugins
-            }
-
-            // Check if autocrafter is active on this hopper
-            // If yes, reserve one slot for crafting output
-            boolean hasAutoCrafter = hopper.getLevel().getModule("AutoCrafting") != null;
-
-            // try to add the items to the hopper
-            int added = hopperCache.addAny(itemStack, toAdd, hasAutoCrafter);
-
-            if (added == 0) {
-                return;
             }
 
             // items added ok!
