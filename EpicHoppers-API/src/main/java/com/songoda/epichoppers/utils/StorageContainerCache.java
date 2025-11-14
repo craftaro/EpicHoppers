@@ -101,7 +101,15 @@ public class StorageContainerCache {
                 .forEach(e -> {
                     final ItemStack[] cachedInventory = e.getValue().cachedInventory;
                     final boolean[] cacheChanged = e.getValue().cacheChanged;
+
+                    // Check if the block is still a valid InventoryHolder before casting
+                    if (!(e.getKey().getState() instanceof InventoryHolder)) {
+                        // Block is no longer an inventory holder (chunk unloaded, block removed, etc.)
+                        return;
+                    }
+
                     Inventory inventory = ((InventoryHolder) e.getKey().getState()).getInventory();
+
                     for (int i = 0; i < cachedInventory.length; i++) {
                         if (cacheChanged[i]) {
                             inventory.setItem(i, cachedInventory[i]);
@@ -234,21 +242,22 @@ public class StorageContainerCache {
                 }
 
                 // If autocrafter is active and 1 or fewer free slots, don't add ANYTHING
-                // Autocrafter needs at least 1 empty slot to craft, and that slot will be filled
-                // by the output. So we need to keep 2 slots free: one for current craft, one for next
+                // Autocrafter needs at least 1 empty slot to craft
                 if (reserveOneSlot && freeSlots <= 1) {
                     return 0;
                 }
 
-                // If we have exactly 2 free slots, stop adding to NEW slots but can fill partial stacks
-                boolean shouldStopAdding = reserveOneSlot && freeSlots <= 2;
+                // Calculate how many free slots we can actually use
+                // If reserving one slot, we can use (freeSlots - 1) new slots
+                int usableFreeSlots = reserveOneSlot ? (freeSlots - 1) : freeSlots;
+                int freeSlotsUsed = 0;
 
                 for (int i = 0; amountToAdd > 0 && i < this.cachedInventory.length; i++) {
                     final ItemStack cacheItem = this.cachedInventory[i];
                     if (cacheItem == null || cacheItem.getAmount() == 0) {
-                        // Check if we should reserve this slot for autocrafter
-                        if (shouldStopAdding) {
-                            // Don't fill this free slot - reserve it for autocrafter
+                        // Check if we've already used all available free slots
+                        if (reserveOneSlot && freeSlotsUsed >= usableFreeSlots) {
+                            // We've used all available free slots, reserve the rest for autocrafter
                             break;
                         }
 
@@ -260,11 +269,10 @@ public class StorageContainerCache {
                         this.cacheAdded[i] = toAdd;
                         totalAdded += toAdd;
                         amountToAdd -= toAdd;
+                        freeSlotsUsed++;  // Count this free slot as used
                     } else if (maxStack > cacheItem.getAmount() && item.isSimilar(cacheItem)) {
-                        // Check if we should stop adding to preserve empty slot for autocrafter
-                        if (shouldStopAdding) {
-                            continue;  // Skip this partial stack, keep the empty slot free
-                        }
+                        // Filling partial stacks does NOT consume free slots!
+                        // So we can ALWAYS do this, even when reserving slots for autocrafter
 
                         // free space!
                         int toAdd = Math.min(maxStack - cacheItem.getAmount(), amountToAdd);
