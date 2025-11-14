@@ -233,7 +233,9 @@ public class StorageContainerCache {
             if (this.cachedInventory != null && item != null) {
                 final int maxStack = item.getMaxStackSize();
 
-                // Count free slots to determine if we need to reserve one
+                // Calculate how many free slots we can actually use
+                // If reserving one slot, we can use (freeSlots - 1) new slots
+                // The loop below will handle partial stacks separately (they don't consume free slots)
                 int freeSlots = 0;
                 for (ItemStack stack : this.cachedInventory) {
                     if (stack == null || stack.getAmount() == 0) {
@@ -241,14 +243,6 @@ public class StorageContainerCache {
                     }
                 }
 
-                // If autocrafter is active and 1 or fewer free slots, don't add ANYTHING
-                // Autocrafter needs at least 1 empty slot to craft
-                if (reserveOneSlot && freeSlots <= 1) {
-                    return 0;
-                }
-
-                // Calculate how many free slots we can actually use
-                // If reserving one slot, we can use (freeSlots - 1) new slots
                 int usableFreeSlots = reserveOneSlot ? (freeSlots - 1) : freeSlots;
                 int freeSlotsUsed = 0;
 
@@ -287,7 +281,47 @@ public class StorageContainerCache {
                     this.dirty = true;
                 }
             }
+
             return totalAdded;
+        }
+
+        /**
+         * Rollback items that were just added via addAny().
+         * This is used when an event is cancelled and we need to undo the cache changes.
+         *
+         * @param item        item to remove
+         * @param amountToRemove how many of this item to remove (should match what addAny() returned)
+         */
+        public void rollbackAdd(ItemStack item, int amountToRemove) {
+            if (this.cachedInventory == null || item == null || amountToRemove <= 0) {
+                return;
+            }
+
+            int remaining = amountToRemove;
+
+            // Reverse order: undo what we added last
+            for (int i = this.cachedInventory.length - 1; remaining > 0 && i >= 0; i--) {
+                // Only rollback slots that we actually added to in the last addAny() call
+                if (this.cacheAdded[i] > 0) {
+                    final ItemStack cacheItem = this.cachedInventory[i];
+                    if (cacheItem != null && item.isSimilar(cacheItem)) {
+                        int toRemove = Math.min(this.cacheAdded[i], remaining);
+                        int newAmount = cacheItem.getAmount() - toRemove;
+
+                        if (newAmount <= 0) {
+                            // Remove the entire stack
+                            this.cachedInventory[i] = null;
+                        } else {
+                            // Just reduce the amount
+                            this.cachedInventory[i].setAmount(newAmount);
+                        }
+
+                        this.cacheChanged[i] = true;
+                        this.cacheAdded[i] -= toRemove;
+                        remaining -= toRemove;
+                    }
+                }
+            }
         }
 
         /**

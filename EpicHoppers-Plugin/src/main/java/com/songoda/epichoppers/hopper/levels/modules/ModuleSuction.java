@@ -159,9 +159,14 @@ public class ModuleSuction extends Module {
             // so we must capture the correct amount first
             int toAdd = getActualItemAmount(item);
 
-            // Check if autocrafter is active on this hopper
-            // If yes, reserve one slot for crafting output
-            boolean hasAutoCrafter = hopper.getLevel().getModule("AutoCrafting") != null;
+            // Check if autocrafter is active AND has a configured recipe
+            // Only reserve slot if there's actually a recipe configured
+            boolean hasAutoCrafter = false;
+            ModuleAutoCrafting autoCrafter = (ModuleAutoCrafting) hopper.getLevel().getModule("AutoCrafting");
+            if (autoCrafter != null) {
+                ItemStack autoCrafting = autoCrafter.getAutoCrafting(hopper);
+                hasAutoCrafter = autoCrafting != null && autoCrafting.getType() != Material.AIR;
+            }
 
             // Try to add the items to the hopper FIRST
             int added = hopperCache.addAny(itemStack, toAdd, hasAutoCrafter);
@@ -190,14 +195,15 @@ public class ModuleSuction extends Module {
                 );
 
                 if (isProtectedItem) {
-                    // This item is protected by another plugin - always respect that
-                    // Note: Cache was already modified, but we'll skip entity removal
-                    // This may result in duplicate pickup on next tick, but respects protection
+                    // This item is protected by another plugin - ROLLBACK the cache to prevent duplication!
+                    hopperCache.rollbackAdd(itemStack, added);
                     continue;
                 } else if (!isStackerItem) {
-                    // Normal item that's been cancelled - skip it
+                    // Normal item that's been cancelled - ROLLBACK the cache
+                    hopperCache.rollbackAdd(itemStack, added);
                     continue;
                 }
+
                 // If we get here, it's a stacker item that's not protected, so we bypass the cancellation
                 // This allows suction to work properly with stacker plugins
             }
