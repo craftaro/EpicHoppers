@@ -4,7 +4,10 @@ import com.songoda.core.SongodaPlugin;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.third_party.com.cryptomorin.xseries.XMaterial;
 import com.songoda.core.utils.TextUtils;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.HopperImpl;
+import com.songoda.epichoppers.hopper.ItemType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.gui.GUICrafting;
@@ -19,9 +22,18 @@ import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +48,31 @@ public class ModuleAutoCrafting extends Module {
     private static final Map<Hopper, ItemStack> CACHED_CRAFTING = new ConcurrentHashMap<>();
     private static final ItemStack NO_CRAFT = new ItemStack(Material.AIR);
 
+    // Cache for last output slot to optimize stacking (lag-free with timestamp)
+    // Key: Hopper, Value: {slot index, material type, timestamp}
+    private static final Map<Hopper, LastOutputSlot> LAST_OUTPUT_SLOT = new ConcurrentHashMap<>();
+    private static final long OUTPUT_SLOT_CACHE_TTL = 60000; // 60 seconds timeout
+
     private final boolean crafterEjection;
+
+    // Helper class to cache last output slot with timestamp
+    private static class LastOutputSlot {
+        final int slot;
+        final Material material;
+        final long timestamp;
+
+        LastOutputSlot(int slot, Material material) {
+            this.slot = slot;
+            this.material = material;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        boolean isValid(Material currentMaterial) {
+            // Cache is valid if material matches and not too old
+            return this.material == currentMaterial &&
+                   (System.currentTimeMillis() - this.timestamp) < OUTPUT_SLOT_CACHE_TTL;
+        }
+    }
 
     public ModuleAutoCrafting(SongodaPlugin plugin, GuiManager guiManager) {
         super(plugin, guiManager);
@@ -115,10 +151,11 @@ public class ModuleAutoCrafting extends Module {
                                                 recipe.result.isSimilar(item)));
 
                 // jam check: is this hopper gummed up?
-                if (this.crafterEjection && !freeSlotAfterRemovingIngredients) {
+                if (!freeSlotAfterRemovingIngredients) {
                     // Crafter can't function if there's nowhere to put the output
                     // ¯\_(ツ)_/¯
 
+                    // First try to find a slot that's NOT part of the ingredients
                     for (int i = 0; i < items.length; i++) {
                         if (!slotsToAlter.containsKey(i)) {
                             // and yeet into space!
@@ -130,33 +167,40 @@ public class ModuleAutoCrafting extends Module {
                         }
                     }
 
-                    // FIXME: In theory the code below should work. But if the last item is of the same type as the
-                    //        resulting item, the inventory won't update correctly
-                    //        (item is set correctly but reset to MaxStackSize)
-                    //        (CachedInventory doesn't like it's array to be edited?)
-                        /*
-                        // None of the slots can safely be freed. So we drop some leftover ingredients
-                        if (!freeSlotAfterRemovingIngredients) {
+                    // If all slots are ingredients, eject the last slot forcefully to free up space
+                    // This is necessary when the hopper is completely full of crafting ingredients
+                    if (!freeSlotAfterRemovingIngredients) {
+                        int slot = items.length - 1;   // Last slot
 
-                            int slot = items.length - 1;   // Last slot
+                        // Drop only what won't be consumed by crafting
+                        Integer amountAfterCraft = slotsToAlter.get(slot);
+                        if (amountAfterCraft != null && amountAfterCraft > 0) {
+                            // Some items will remain after crafting, drop those
+                            ItemStack toDrop = items[slot].clone();
+                            toDrop.setAmount(amountAfterCraft);
+                            hopper.getLocation().getWorld().dropItemNaturally(hopper.getLocation(), toDrop);
 
-                            slotsToAlter.computeIfPresent(slot, (key, value) -> {
-                                items[slot].setAmount(value);
+                            // Set the slot to exactly what will be consumed
+                            items[slot].setAmount(items[slot].getAmount() - amountAfterCraft);
+                            slotsToAlter.put(slot, 0);
+                        } else {
+                            // All items in this slot will be consumed, but we still drop one to make space
+                            ItemStack toDrop = items[slot].clone();
+                            toDrop.setAmount(1);
+                            hopper.getLocation().getWorld().dropItemNaturally(hopper.getLocation(), toDrop);
+                            items[slot].setAmount(items[slot].getAmount() - 1);
 
-                                return null;
-                            });
-
-                            // and yeet into space!
-                            items[slot].setAmount(slotsToAlter.getOrDefault(slot, items[slot].getAmount()));
-                            hopper.getWorld().dropItemNaturally(hopper.getLocation(), items[slot]);
-                            items[slot] = null;
-
-                            freeSlotAfterRemovingIngredients = true;
+                            if (items[slot].getAmount() == 0) {
+                                items[slot] = null;
+                            }
                         }
-                        */
+
+                        freeSlotAfterRemovingIngredients = true;
+                    }
                 }
 
                 if (freeSlotAfterRemovingIngredients) {
+                    // Remove ingredients
                     for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
                         if (entry.getValue() <= 0) {
                             items[entry.getKey()] = null;
@@ -166,18 +210,53 @@ public class ModuleAutoCrafting extends Module {
                     }
 
                     // Add the resulting item into the inventory - Just making sure there actually is enough space
-                    for (int i = 0; i < items.length; i++) {
-                        if (items[i] == null ||
-                                (items[i].isSimilar(recipe.result)
-                                        && items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize())) {
-                            if (items[i] == null) {
-                                items[i] = recipe.result.clone();
-                            } else {
-                                items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
-                            }
+                    boolean outputAdded = false;
+                    int outputSlot = -1;
 
-                            break;
+                    // OPTIMIZATION: Check cached slot first (lag-free with timestamp)
+                    LastOutputSlot cachedSlot = LAST_OUTPUT_SLOT.get(hopper);
+                    if (cachedSlot != null && cachedSlot.isValid(recipe.result.getType())) {
+                        int i = cachedSlot.slot;
+                        if (i < items.length && items[i] != null &&
+                            items[i].isSimilar(recipe.result) &&
+                            items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize()) {
+                            // Cached slot is still valid! Use it directly (no iteration needed)
+                            items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
+                            outputAdded = true;
+                            outputSlot = i;
                         }
+                    }
+
+                    // If cached slot didn't work, do normal search
+                    if (!outputAdded) {
+                        // First pass: Look for existing stacks of the same item
+                        for (int i = 0; i < items.length; i++) {
+                            if (items[i] != null &&
+                                items[i].isSimilar(recipe.result) &&
+                                items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize()) {
+                                items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
+                                outputAdded = true;
+                                outputSlot = i;
+                                break;
+                            }
+                        }
+
+                        // Second pass: Look for empty slots
+                        if (!outputAdded) {
+                            for (int i = 0; i < items.length; i++) {
+                                if (items[i] == null) {
+                                    items[i] = recipe.result.clone();
+                                    outputAdded = true;
+                                    outputSlot = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // Update cache with the slot we used
+                    if (outputAdded && outputSlot >= 0) {
+                        LAST_OUTPUT_SLOT.put(hopper, new LastOutputSlot(outputSlot, recipe.result.getType()));
                     }
 
                     hopperCache.setContents(items);
@@ -268,23 +347,139 @@ public class ModuleAutoCrafting extends Module {
         return recipes;
     }
 
+    /**
+     * Load autocrafter item from database
+     * Uses complete ItemStack serialization to preserve custom items (name, lore, enchants, NBT)
+     */
+    private ItemStack loadAutoCraftingFromDB(HopperImpl hopper) {
+        try (Connection connection = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getDatabaseConnector().getConnection()) {
+            String tablePrefix = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getTablePrefix();
+            String selectItem = "SELECT item FROM " + tablePrefix + "items WHERE hopper_id = ? AND item_type = ? LIMIT 1";
+
+            try (PreparedStatement statement = connection.prepareStatement(selectItem)) {
+                statement.setInt(1, hopper.getId());
+                statement.setString(2, ItemType.AUTOCRAFTER.name());
+
+                try (ResultSet result = statement.executeQuery()) {
+                    if (result.next()) {
+                        String itemData = result.getString("item");
+                        if (itemData != null) {
+                            // Deserialize complete ItemStack from Base64
+                            try (BukkitObjectInputStream stream = new BukkitObjectInputStream(
+                                    new ByteArrayInputStream(Base64.getDecoder().decode(itemData)))) {
+                                return (ItemStack) stream.readObject();
+                            } catch (ClassNotFoundException | IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Save autocrafter item to database
+     * Uses complete ItemStack serialization to preserve custom items (name, lore, enchants, NBT)
+     */
+    private void saveAutoCraftingToDB(HopperImpl hopper, ItemStack item) {
+        try (Connection connection = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getDatabaseConnector().getConnection()) {
+            String tablePrefix = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getTablePrefix();
+
+            // Delete existing autocrafter item
+            String deleteItem = "DELETE FROM " + tablePrefix + "items WHERE hopper_id = ? AND item_type = ?";
+            try (PreparedStatement statement = connection.prepareStatement(deleteItem)) {
+                statement.setInt(1, hopper.getId());
+                statement.setString(2, ItemType.AUTOCRAFTER.name());
+                statement.executeUpdate();
+            }
+
+            // Insert new autocrafter item (if not null)
+            if (item != null && item.getType() != Material.AIR) {
+                String insertItem = "INSERT INTO " + tablePrefix + "items (hopper_id, item_type, item) VALUES (?, ?, ?)";
+                try (PreparedStatement statement = connection.prepareStatement(insertItem)) {
+                    statement.setInt(1, hopper.getId());
+                    statement.setString(2, ItemType.AUTOCRAFTER.name());
+
+                    // Serialize complete ItemStack to Base64
+                    try (ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                         BukkitObjectOutputStream bukkitStream = new BukkitObjectOutputStream(stream)) {
+                        bukkitStream.writeObject(item);
+                        statement.setString(3, Base64.getEncoder().encodeToString(stream.toByteArray()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+
+                    statement.executeUpdate();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public ItemStack getAutoCrafting(Hopper hopper) {
+        // Check cache first
         if (CACHED_CRAFTING.containsKey(hopper)) {
             return CACHED_CRAFTING.get(hopper);
         }
 
+        if (!(hopper instanceof HopperImpl)) {
+            return null;
+        }
+
+        HopperImpl hopperImpl = (HopperImpl) hopper;
+
+        // Try loading from database (new format with full ItemStack serialization)
+        ItemStack fromDB = loadAutoCraftingFromDB(hopperImpl);
+        if (fromDB != null) {
+            CACHED_CRAFTING.put(hopper, fromDB);
+            return fromDB;
+        }
+
+        // Fallback: load from config file (old format - migration path)
         Object autocrafting = getData(hopper, "autocrafting");
-        ItemStack toCraft = autocrafting instanceof ItemStack ? (ItemStack) autocrafting : decode((String) autocrafting);
-        CACHED_CRAFTING.put(hopper, toCraft == null ? NO_CRAFT : toCraft);
-        return toCraft;
+        if (autocrafting != null) {
+            ItemStack toCraft = autocrafting instanceof ItemStack ? (ItemStack) autocrafting : decode((String) autocrafting);
+            if (toCraft != null && toCraft.getType() != Material.AIR) {
+                // MIGRATION: Found old format data, migrate it to database
+                saveAutoCraftingToDB(hopperImpl, toCraft);
+                // Clear from config to avoid confusion
+                saveData(hopper, "autocrafting", null, null);
+                CACHED_CRAFTING.put(hopper, toCraft);
+                return toCraft;
+            }
+        }
+
+        // No data found
+        CACHED_CRAFTING.put(hopper, NO_CRAFT);
+        return null;
     }
 
     public void setAutoCrafting(Hopper hopper, Player player, ItemStack autoCrafting) {
-        saveData(hopper, "autocrafting", autoCrafting == null ? null : encode(autoCrafting), autoCrafting);
+        if (!(hopper instanceof HopperImpl)) {
+            return;
+        }
+
+        HopperImpl hopperImpl = (HopperImpl) hopper;
+
+        // CRITICAL FIX: Save immediately to database to prevent data loss on server crash
+        // Uses complete ItemStack serialization to preserve custom items (name, lore, enchants, NBT)
+        saveAutoCraftingToDB(hopperImpl, autoCrafting);
+
+        // Update cache
         CACHED_CRAFTING.put(hopper, autoCrafting == null ? NO_CRAFT : autoCrafting);
+
         if (autoCrafting == null) {
             return;
         }
+
+        // Return excess items to player
         int excess = autoCrafting.getAmount() - 1;
         autoCrafting.setAmount(1);
         if (excess > 0 && player != null) {
