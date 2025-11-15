@@ -4,7 +4,10 @@ import com.songoda.core.SongodaPlugin;
 import com.songoda.core.gui.GuiManager;
 import com.songoda.third_party.com.cryptomorin.xseries.XMaterial;
 import com.songoda.core.utils.TextUtils;
+import com.songoda.epichoppers.EpicHoppers;
 import com.songoda.epichoppers.hopper.Hopper;
+import com.songoda.epichoppers.hopper.HopperImpl;
+import com.songoda.epichoppers.hopper.ItemType;
 import com.songoda.epichoppers.settings.Settings;
 import com.songoda.epichoppers.utils.Methods;
 import com.songoda.epichoppers.gui.GUICrafting;
@@ -19,9 +22,18 @@ import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -275,23 +287,139 @@ public class ModuleAutoCrafting extends Module {
         return recipes;
     }
 
+    /**
+     * Load autocrafter item from database
+     * Uses complete ItemStack serialization to preserve custom items (name, lore, enchants, NBT)
+     */
+    private ItemStack loadAutoCraftingFromDB(HopperImpl hopper) {
+        try (Connection connection = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getDatabaseConnector().getConnection()) {
+            String tablePrefix = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getTablePrefix();
+            String selectItem = "SELECT item FROM " + tablePrefix + "items WHERE hopper_id = ? AND item_type = ? LIMIT 1";
+
+            try (PreparedStatement statement = connection.prepareStatement(selectItem)) {
+                statement.setInt(1, hopper.getId());
+                statement.setString(2, ItemType.AUTOCRAFTER.name());
+
+                try (ResultSet result = statement.executeQuery()) {
+                    if (result.next()) {
+                        String itemData = result.getString("item");
+                        if (itemData != null) {
+                            // Deserialize complete ItemStack from Base64
+                            try (BukkitObjectInputStream stream = new BukkitObjectInputStream(
+                                    new ByteArrayInputStream(Base64.getDecoder().decode(itemData)))) {
+                                return (ItemStack) stream.readObject();
+                            } catch (ClassNotFoundException | IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Save autocrafter item to database
+     * Uses complete ItemStack serialization to preserve custom items (name, lore, enchants, NBT)
+     */
+    private void saveAutoCraftingToDB(HopperImpl hopper, ItemStack item) {
+        try (Connection connection = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getDatabaseConnector().getConnection()) {
+            String tablePrefix = EpicHoppers.getPlugin(EpicHoppers.class).getDataManager().getTablePrefix();
+
+            // Delete existing autocrafter item
+            String deleteItem = "DELETE FROM " + tablePrefix + "items WHERE hopper_id = ? AND item_type = ?";
+            try (PreparedStatement statement = connection.prepareStatement(deleteItem)) {
+                statement.setInt(1, hopper.getId());
+                statement.setString(2, ItemType.AUTOCRAFTER.name());
+                statement.executeUpdate();
+            }
+
+            // Insert new autocrafter item (if not null)
+            if (item != null && item.getType() != Material.AIR) {
+                String insertItem = "INSERT INTO " + tablePrefix + "items (hopper_id, item_type, item) VALUES (?, ?, ?)";
+                try (PreparedStatement statement = connection.prepareStatement(insertItem)) {
+                    statement.setInt(1, hopper.getId());
+                    statement.setString(2, ItemType.AUTOCRAFTER.name());
+
+                    // Serialize complete ItemStack to Base64
+                    try (ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                         BukkitObjectOutputStream bukkitStream = new BukkitObjectOutputStream(stream)) {
+                        bukkitStream.writeObject(item);
+                        statement.setString(3, Base64.getEncoder().encodeToString(stream.toByteArray()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+
+                    statement.executeUpdate();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public ItemStack getAutoCrafting(Hopper hopper) {
+        // Check cache first
         if (CACHED_CRAFTING.containsKey(hopper)) {
             return CACHED_CRAFTING.get(hopper);
         }
 
+        if (!(hopper instanceof HopperImpl)) {
+            return null;
+        }
+
+        HopperImpl hopperImpl = (HopperImpl) hopper;
+
+        // Try loading from database (new format with full ItemStack serialization)
+        ItemStack fromDB = loadAutoCraftingFromDB(hopperImpl);
+        if (fromDB != null) {
+            CACHED_CRAFTING.put(hopper, fromDB);
+            return fromDB;
+        }
+
+        // Fallback: load from config file (old format - migration path)
         Object autocrafting = getData(hopper, "autocrafting");
-        ItemStack toCraft = autocrafting instanceof ItemStack ? (ItemStack) autocrafting : decode((String) autocrafting);
-        CACHED_CRAFTING.put(hopper, toCraft == null ? NO_CRAFT : toCraft);
-        return toCraft;
+        if (autocrafting != null) {
+            ItemStack toCraft = autocrafting instanceof ItemStack ? (ItemStack) autocrafting : decode((String) autocrafting);
+            if (toCraft != null && toCraft.getType() != Material.AIR) {
+                // MIGRATION: Found old format data, migrate it to database
+                saveAutoCraftingToDB(hopperImpl, toCraft);
+                // Clear from config to avoid confusion
+                saveData(hopper, "autocrafting", null, null);
+                CACHED_CRAFTING.put(hopper, toCraft);
+                return toCraft;
+            }
+        }
+
+        // No data found
+        CACHED_CRAFTING.put(hopper, NO_CRAFT);
+        return null;
     }
 
     public void setAutoCrafting(Hopper hopper, Player player, ItemStack autoCrafting) {
-        saveData(hopper, "autocrafting", autoCrafting == null ? null : encode(autoCrafting), autoCrafting);
+        if (!(hopper instanceof HopperImpl)) {
+            return;
+        }
+
+        HopperImpl hopperImpl = (HopperImpl) hopper;
+
+        // CRITICAL FIX: Save immediately to database to prevent data loss on server crash
+        // Uses complete ItemStack serialization to preserve custom items (name, lore, enchants, NBT)
+        saveAutoCraftingToDB(hopperImpl, autoCrafting);
+
+        // Update cache
         CACHED_CRAFTING.put(hopper, autoCrafting == null ? NO_CRAFT : autoCrafting);
+
         if (autoCrafting == null) {
             return;
         }
+
+        // Return excess items to player
         int excess = autoCrafting.getAmount() - 1;
         autoCrafting.setAmount(1);
         if (excess > 0 && player != null) {
