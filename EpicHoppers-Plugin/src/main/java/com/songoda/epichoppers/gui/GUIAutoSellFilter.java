@@ -40,9 +40,9 @@ public class GUIAutoSellFilter extends CustomizableGui {
 
         setOnOpen((event) -> GUIAutoSellFilter.OPEN_INVENTORIES.add(this));
 
-        setOnClose((event) -> {
+        setOnClose(event -> {
             GUIAutoSellFilter.OPEN_INVENTORIES.remove(this);
-            hopper.setActivePlayer(null);
+            ((HopperImpl) hopper).removeActivePlayer(event.player);
             compile();
         });
 

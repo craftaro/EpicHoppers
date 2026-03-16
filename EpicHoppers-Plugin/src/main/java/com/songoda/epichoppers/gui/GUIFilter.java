@@ -44,9 +44,9 @@ public class GUIFilter extends CustomizableGui {
 
         setOnOpen((event) -> GUIFilter.OPEN_INVENTORIES.add(this));
 
-        setOnClose((event) -> {
+        setOnClose(event -> {
             GUIFilter.OPEN_INVENTORIES.remove(this);
-            hopper.setActivePlayer(null);
+            ((HopperImpl) hopper).removeActivePlayer(event.player);
             compile();
         });
 

@@ -101,7 +101,15 @@ public class StorageContainerCache {
                 .forEach(e -> {
                     final ItemStack[] cachedInventory = e.getValue().cachedInventory;
                     final boolean[] cacheChanged = e.getValue().cacheChanged;
+
+                    // Check if the block is still a valid InventoryHolder before casting
+                    if (!(e.getKey().getState() instanceof InventoryHolder)) {
+                        // Block is no longer an inventory holder (chunk unloaded, block removed, etc.)
+                        return;
+                    }
+
                     Inventory inventory = ((InventoryHolder) e.getKey().getState()).getInventory();
+
                     for (int i = 0; i < cachedInventory.length; i++) {
                         if (cacheChanged[i]) {
                             inventory.setItem(i, cachedInventory[i]);
@@ -204,6 +212,18 @@ public class StorageContainerCache {
          * @return how many items were added
          */
         public int addAny(ItemStack item, int amountToAdd) {
+            return addAny(item, amountToAdd, false);
+        }
+
+        /**
+         * Add a number of items to this container's inventory later.
+         *
+         * @param item          item to add
+         * @param amountToAdd   how many of this item to attempt to add
+         * @param reserveOneSlot if true, always keep at least one slot empty (for autocrafter)
+         * @return how many items were added
+         */
+        public int addAny(ItemStack item, int amountToAdd, boolean reserveOneSlot) {
             // Don't transfer shulker boxes into other shulker boxes, that's a bad idea.
             if (this.type.name().contains("SHULKER_BOX") && item.getType().name().contains("SHULKER_BOX")) {
                 return 0;
@@ -212,9 +232,29 @@ public class StorageContainerCache {
             int totalAdded = 0;
             if (this.cachedInventory != null && item != null) {
                 final int maxStack = item.getMaxStackSize();
+
+                // Calculate how many free slots we can actually use
+                // If reserving one slot, we can use (freeSlots - 1) new slots
+                // The loop below will handle partial stacks separately (they don't consume free slots)
+                int freeSlots = 0;
+                for (ItemStack stack : this.cachedInventory) {
+                    if (stack == null || stack.getAmount() == 0) {
+                        freeSlots++;
+                    }
+                }
+
+                int usableFreeSlots = reserveOneSlot ? (freeSlots - 1) : freeSlots;
+                int freeSlotsUsed = 0;
+
                 for (int i = 0; amountToAdd > 0 && i < this.cachedInventory.length; i++) {
                     final ItemStack cacheItem = this.cachedInventory[i];
                     if (cacheItem == null || cacheItem.getAmount() == 0) {
+                        // Check if we've already used all available free slots
+                        if (reserveOneSlot && freeSlotsUsed >= usableFreeSlots) {
+                            // We've used all available free slots, reserve the rest for autocrafter
+                            break;
+                        }
+
                         // free slot!
                         int toAdd = Math.min(maxStack, amountToAdd);
                         this.cachedInventory[i] = item.clone();
@@ -223,7 +263,11 @@ public class StorageContainerCache {
                         this.cacheAdded[i] = toAdd;
                         totalAdded += toAdd;
                         amountToAdd -= toAdd;
+                        freeSlotsUsed++;  // Count this free slot as used
                     } else if (maxStack > cacheItem.getAmount() && item.isSimilar(cacheItem)) {
+                        // Filling partial stacks does NOT consume free slots!
+                        // So we can ALWAYS do this, even when reserving slots for autocrafter
+
                         // free space!
                         int toAdd = Math.min(maxStack - cacheItem.getAmount(), amountToAdd);
                         this.cachedInventory[i].setAmount(toAdd + cacheItem.getAmount());
@@ -237,7 +281,47 @@ public class StorageContainerCache {
                     this.dirty = true;
                 }
             }
+
             return totalAdded;
+        }
+
+        /**
+         * Rollback items that were just added via addAny().
+         * This is used when an event is cancelled and we need to undo the cache changes.
+         *
+         * @param item        item to remove
+         * @param amountToRemove how many of this item to remove (should match what addAny() returned)
+         */
+        public void rollbackAdd(ItemStack item, int amountToRemove) {
+            if (this.cachedInventory == null || item == null || amountToRemove <= 0) {
+                return;
+            }
+
+            int remaining = amountToRemove;
+
+            // Reverse order: undo what we added last
+            for (int i = this.cachedInventory.length - 1; remaining > 0 && i >= 0; i--) {
+                // Only rollback slots that we actually added to in the last addAny() call
+                if (this.cacheAdded[i] > 0) {
+                    final ItemStack cacheItem = this.cachedInventory[i];
+                    if (cacheItem != null && item.isSimilar(cacheItem)) {
+                        int toRemove = Math.min(this.cacheAdded[i], remaining);
+                        int newAmount = cacheItem.getAmount() - toRemove;
+
+                        if (newAmount <= 0) {
+                            // Remove the entire stack
+                            this.cachedInventory[i] = null;
+                        } else {
+                            // Just reduce the amount
+                            this.cachedInventory[i].setAmount(newAmount);
+                        }
+
+                        this.cacheChanged[i] = true;
+                        this.cacheAdded[i] -= toRemove;
+                        remaining -= toRemove;
+                    }
+                }
+            }
         }
 
         /**
