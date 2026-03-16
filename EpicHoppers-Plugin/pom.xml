@@ -28,7 +28,7 @@
 
                             <shadedArtifactAttached>false</shadedArtifactAttached>
                             <useDependencyReducedPomInJar>true</useDependencyReducedPomInJar>
-                            <minimizeJar>true</minimizeJar>
+                            <minimizeJar>false</minimizeJar>
 
                             <relocations>
                                 <relocation>
@@ -119,6 +119,13 @@
         <dependency>
             <groupId>com.songoda</groupId>
             <artifactId>SongodaCore</artifactId>
+            <version>${songoda.coreVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.songoda</groupId>
+            <artifactId>SongodaCore-NMS-v1_21_R5</artifactId>
             <version>${songoda.coreVersion}</version>
             <scope>compile</scope>
         </dependency>
