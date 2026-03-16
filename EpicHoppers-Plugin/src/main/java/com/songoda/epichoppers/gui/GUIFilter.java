@@ -44,9 +44,9 @@ public class GUIFilter extends CustomizableGui {
 
         setOnOpen((event) -> GUIFilter.OPEN_INVENTORIES.add(this));
 
-        setOnClose((event) -> {
+        setOnClose(event -> {
             GUIFilter.OPEN_INVENTORIES.remove(this);
-            hopper.setActivePlayer(null);
+            ((HopperImpl) hopper).removeActivePlayer(event.player);
             compile();
         });
 
@@ -54,20 +54,42 @@ public class GUIFilter extends CustomizableGui {
             InventoryClickEvent originalEvent = event.event;
             originalEvent.setCancelled(true);
 
+            // CRITICAL FIX: Block ALL SHIFT clicks to prevent item deletion/movement
+            // This prevents shift-clicking items from player inventory into filter
+            // and shift-clicking items within the filter itself
+            if (originalEvent.isShiftClick()) {
+                return;
+            }
+
             int slot = originalEvent.getSlot();
+            // Whitelist slots: 9-10, 18-19, 27-28, 36-37
+            // Blacklist slots: 11-12, 20-21, 29-30, 38-39
+            // Void slots: 13-14, 22-23, 31-32, 40-41
             boolean isUnlockedSlot = (slot >= 9 && slot <= 14) ||
                     (slot >= 18 && slot <= 23) ||
                     (slot >= 27 && slot <= 32) ||
                     (slot >= 36 && slot <= 41);
 
             if (isUnlockedSlot) {
+
                 if (originalEvent.getCursor() != null && originalEvent.getCursor().getType() != Material.AIR) {
-                    // Place item logic
-                    ItemStack clonedItem = originalEvent.getCursor().clone();
+                    // Place item logic - player has item in cursor, place it in filter
+                    ItemStack cursorItem = originalEvent.getCursor();
+                    ItemStack clonedItem = cursorItem.clone();
                     clonedItem.setAmount(1);
                     inventory.setItem(slot, clonedItem);
+
+                    // CRITICAL FIX: Only take 1 item from stack, leave rest in cursor
+                    if (cursorItem.getAmount() > 1) {
+                        cursorItem.setAmount(cursorItem.getAmount() - 1);
+                        originalEvent.setCursor(cursorItem);
+                    } else {
+                        originalEvent.setCursor(null);
+                    }
                 } else if (inventory.getItem(slot) != null && inventory.getItem(slot).getType() != Material.AIR) {
-                    // Remove item logic - clear the slot when clicking with empty cursor
+                    // Remove item logic - player clicks with empty cursor, give them the item
+                    ItemStack itemToReturn = inventory.getItem(slot).clone();
+                    originalEvent.setCursor(itemToReturn);
                     inventory.setItem(slot, null);
                 }
             }
