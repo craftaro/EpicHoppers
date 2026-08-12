@@ -509,7 +509,7 @@ public class HopTask extends BukkitRunnable {
                 continue;
             }
 
-            // Remove items from cache immediately—this “locks” the transfer.
+            // Remove items from cache immediately - this “locks” the transfer.
             hopperCache.removeItems(itemToMove);
             // Now pass the (full) itemToMove to the container.
             if (container.addToContainer(itemToMove)) {
