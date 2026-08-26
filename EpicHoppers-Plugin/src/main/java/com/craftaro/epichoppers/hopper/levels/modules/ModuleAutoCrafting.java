@@ -37,7 +37,31 @@ public class ModuleAutoCrafting extends Module {
     private static final Map<Hopper, ItemStack> CACHED_CRAFTING = new ConcurrentHashMap<>();
     private static final ItemStack NO_CRAFT = new ItemStack(Material.AIR);
 
+    // Cache for last output slot to optimize stacking (lag-free with timestamp)
+    // Key: Hopper, Value: {slot index, material type, timestamp}
+    private static final Map<Hopper, LastOutputSlot> LAST_OUTPUT_SLOT = new ConcurrentHashMap<>();
+    private static final long OUTPUT_SLOT_CACHE_TTL = 60000; // 60 seconds timeout
+
     private final boolean crafterEjection;
+
+    // Helper class to cache last output slot with timestamp
+    private static class LastOutputSlot {
+        final int slot;
+        final Material material;
+        final long timestamp;
+
+        LastOutputSlot(int slot, Material material) {
+            this.slot = slot;
+            this.material = material;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        boolean isValid(Material currentMaterial) {
+            // Cache is valid if material matches and not too old
+            return this.material == currentMaterial &&
+                   (System.currentTimeMillis() - this.timestamp) < OUTPUT_SLOT_CACHE_TTL;
+        }
+    }
 
     public ModuleAutoCrafting(SongodaPlugin plugin, GuiManager guiManager) {
         super(plugin, guiManager);
@@ -158,6 +182,7 @@ public class ModuleAutoCrafting extends Module {
                 }
 
                 if (freeSlotAfterRemovingIngredients) {
+                    // Remove ingredients
                     for (Map.Entry<Integer, Integer> entry : slotsToAlter.entrySet()) {
                         if (entry.getValue() <= 0) {
                             items[entry.getKey()] = null;
@@ -167,18 +192,53 @@ public class ModuleAutoCrafting extends Module {
                     }
 
                     // Add the resulting item into the inventory - Just making sure there actually is enough space
-                    for (int i = 0; i < items.length; i++) {
-                        if (items[i] == null ||
-                                (items[i].isSimilar(recipe.result)
-                                        && items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize())) {
-                            if (items[i] == null) {
-                                items[i] = recipe.result.clone();
-                            } else {
-                                items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
-                            }
+                    boolean outputAdded = false;
+                    int outputSlot = -1;
 
-                            break;
+                    // OPTIMIZATION: Check cached slot first (lag-free with timestamp)
+                    LastOutputSlot cachedSlot = LAST_OUTPUT_SLOT.get(hopper);
+                    if (cachedSlot != null && cachedSlot.isValid(recipe.result.getType())) {
+                        int i = cachedSlot.slot;
+                        if (i < items.length && items[i] != null &&
+                            items[i].isSimilar(recipe.result) &&
+                            items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize()) {
+                            // Cached slot is still valid! Use it directly (no iteration needed)
+                            items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
+                            outputAdded = true;
+                            outputSlot = i;
                         }
+                    }
+
+                    // If cached slot didn't work, do normal search
+                    if (!outputAdded) {
+                        // First pass: Look for existing stacks of the same item
+                        for (int i = 0; i < items.length; i++) {
+                            if (items[i] != null &&
+                                items[i].isSimilar(recipe.result) &&
+                                items[i].getAmount() + recipe.result.getAmount() <= items[i].getMaxStackSize()) {
+                                items[i].setAmount(items[i].getAmount() + recipe.result.getAmount());
+                                outputAdded = true;
+                                outputSlot = i;
+                                break;
+                            }
+                        }
+
+                        // Second pass: Look for empty slots
+                        if (!outputAdded) {
+                            for (int i = 0; i < items.length; i++) {
+                                if (items[i] == null) {
+                                    items[i] = recipe.result.clone();
+                                    outputAdded = true;
+                                    outputSlot = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // Update cache with the slot we used
+                    if (outputAdded && outputSlot >= 0) {
+                        LAST_OUTPUT_SLOT.put(hopper, new LastOutputSlot(outputSlot, recipe.result.getType()));
                     }
 
                     hopperCache.setContents(items);
